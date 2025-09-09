@@ -55,19 +55,16 @@ They say though that one level of indirection can solve all problems and this is
 
 ```
  import sys
- 
- 
+
  from wrapt import register_post_import_hook
- 
- 
+
  def load_and_execute(name):  
      def _load_and_execute(target_module):  
          __import__(name)  
          patch_module = sys.modules[name]  
          getattr(patch_module, 'apply_patch')(target_module)  
      return _load_and_execute
- 
- 
+
  register_post_import_hook(load_and_execute('patch_tempfile'), 'tempfile')
 ```
 
@@ -75,13 +72,11 @@ In the module file 'patch\_tempfile.py' we would now have:
 
 ```
  from wrapt import wrap_function_wrapper
- 
- 
+
  def _mkdtemp_wrapper(wrapped, instance, args, kwargs):  
      print 'calling', wrapped.__name__  
      return wrapped(*args, **kwargs)
- 
- 
+
  def apply_patch(module):  
      print 'patching', module.__name__  
      wrap_function_wrapper(module, 'mkdtemp', _mkdtemp_wrapper)
@@ -120,21 +115,17 @@ The 'setup.py' file for this package will be:
 
 ```
  from setuptools import setup
- 
- 
+
  NAME = 'wrapt_patches.tempfile_debugging'
- 
- 
+
  def patch_module(module, function=None):  
      function = function or 'patch_%s' % module.replace('.', '_')  
      return '%s = %s:%s' % (module, NAME, function)
- 
- 
+
  ENTRY_POINTS = [  
      patch_module('tempfile'),  
  ]
- 
- 
+
  setup_kwargs = dict(  
      name = NAME,  
      version = '0.1',  
@@ -142,8 +133,7 @@ The 'setup.py' file for this package will be:
      package_dir = {'wrapt_patches': 'src'},  
      entry_points = { NAME: ENTRY_POINTS },  
  )
- 
- 
+
  setup(**setup_kwargs)
 ```
 
@@ -166,13 +156,11 @@ Finally, the monkey patches will actually be contained in 'src/tempfile\_debuggi
 
 ```
  from wrapt import wrap_function_wrapper
- 
- 
+
  def _mkdtemp_wrapper(wrapped, instance, args, kwargs):  
      print 'calling', wrapped.__name__  
      return wrapped(*args, **kwargs)
- 
- 
+
  def patch_tempfile(module):  
      print 'patching', module.__name__  
      wrap_function_wrapper(module, 'mkdtemp', _mkdtemp_wrapper)
@@ -184,14 +172,11 @@ In place now of the explicit registrations which we previously added at the very
 
 ```
  import os
- 
- 
+
  from wrapt import discover_post_import_hooks
- 
- 
+
  patches = os.environ.get('WRAPT_PATCHES')
- 
- 
+
  if patches:  
      for name in patches.split(','):  
          name = name.strip()  

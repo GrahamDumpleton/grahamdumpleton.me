@@ -32,34 +32,28 @@ The WSGI application being used in this case is:
 
 ```
  from timer1 import timed_wsgi_application1
- 
- 
+
  @timed_wsgi_application1  
  def application(environ, start_response):  
      status = '200 OK'
- 
- 
+
     response_headers = [('Content-type', 'text/plain')]  
      start_response(status, response_headers)
- 
- 
+
     def file_wrapper(filelike, block_size=8192):  
         try:  
            data = filelike.read(block_size)
- 
- 
+
           while data:  
               yield data  
               data = filelike.read(block_size)
- 
- 
+
        finally:  
            try:  
               data.close()  
            except Exception:  
               pass
- 
- 
+
     return file_wrapper(open('/usr/share/dict/words'), 128)
 ```
 
@@ -172,16 +166,13 @@ As we can't readily time in Apache how long a static file request takes to suffi
 
 ```
  $ time curl -s -o /dev/null http://localhost:8000/
- 
- 
+
  real 0m0.161s  
  user 0m0.018s  
  sys 0m0.062s
- 
- 
+
  $ time curl -s -o /dev/null http://localhost:8000/words
- 
- 
+
  real 0m0.013s  
  user 0m0.005s  
  sys 0m0.005s
@@ -199,16 +190,13 @@ Comparing the two methods using uWSGI we get:
 
 ```
  $ time curl -s -o /dev/null http://localhost:8000/
- 
- 
+
  real 0m0.381s  
  user 0m0.029s  
  sys 0m0.092s
- 
- 
+
  $ time curl -s -o /dev/null http://localhost:8000/words
- 
- 
+
  real 0m0.025s  
  user 0m0.006s  
  sys 0m0.009s

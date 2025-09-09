@@ -58,14 +58,11 @@ In the previous post where I talked about the post import hook mechanism, the co
 
 ```
  import os
- 
- 
+
  from wrapt import discover_post_import_hooks
- 
- 
+
  patches = os.environ.get('WRAPT_PATCHES')
- 
- 
+
  if patches:  
      for name in patches.split(','):  
          name = name.strip()  
@@ -101,8 +98,7 @@ The actual final parts of Python interpreter initialisation is performed from th
 ```
  def main():  
      global ENABLE_USER_SITE
- 
- 
+
      abs__file__()  
      known_paths = removeduppaths()  
      if ENABLE_USER_SITE is None:  
@@ -141,8 +137,7 @@ We have to monkey patch both because the ‘usercustomize.py’ processing is op
              if not site.ENABLE_USER_SITE:  
                  _register_bootstrap_functions()  
      return _execsitecustomize
- 
- 
+
  def _execusercustomize_wrapper(wrapped):  
      def _execusercustomize(*args, **kwargs):  
          try:  
@@ -152,8 +147,7 @@ We have to monkey patch both because the ‘usercustomize.py’ processing is op
      return _execusercustomize  
    
  def bootstrap():
- 
- 
+
      site.execsitecustomize = _execsitecustomize_wrapper(site.execsitecustomize)  
      site.execusercustomize = _execusercustomize_wrapper(site.execusercustomize)
 ```
@@ -169,17 +163,14 @@ Finally we now have our '\_register\_bootstrap\_functions\(\)’ defined as:
    
  def _register_bootstrap_functions():  
      global _registered
- 
- 
+
      if _registered:  
          return
- 
- 
+
      _registered = True  
    
      from wrapt import discover_post_import_hooks
- 
- 
+
      for name in os.environ.get('AUTOWRAPT_BOOTSTRAP', '').split(','):  
          discover_post_import_hooks(name)
 ```
@@ -191,12 +182,10 @@ We have worked out the various bits we require, but how do we get this installed
 ```
  import sys  
  import os
- 
- 
+
  from setuptools import setup  
  from distutils.sysconfig import get_python_lib
- 
- 
+
  setup_kwargs = dict(  
      name = 'autowrapt',  
      packages = ['autowrapt'],  
@@ -205,8 +194,7 @@ We have worked out the various bits we require, but how do we get this installed
      entry_points = {'autowrapt.examples’: ['this = autowrapt.examples:autowrapt_this']},  
      install_requires = ['wrapt>=1.10.4'],  
  )
- 
- 
+
  setup(**setup_kwargs)
 ```
 
@@ -268,8 +256,7 @@ The actual code for the ‘autowrapt\_this\(\)’ function was:
 
 ```
  from __future__ import print_function
- 
- 
+
  def autowrapt_this(module):  
      print('The wrapt package is absolutely amazing and you should use it.')
 ```

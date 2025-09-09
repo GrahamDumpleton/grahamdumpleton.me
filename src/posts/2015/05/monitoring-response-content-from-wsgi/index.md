@@ -24,42 +24,34 @@ The code for the decorator was:
 
 ```
  from __future__ import print_function
- 
- 
+
  from wrapt import decorator, ObjectProxy  
  from timeit import default_timer  
    
  class WSGIApplicationIterable1(ObjectProxy):
- 
- 
+
      def __init__(self, wrapped, name, start):  
          super(WSGIApplicationIterable1, self).__init__(wrapped)  
          self._self_name = name  
          self._self_start = start
- 
- 
+
      def close(self):  
          if hasattr(self.__wrapped__, 'close'):  
              self.__wrapped__.close()
- 
- 
+
          duration = default_timer() - self._self_start  
          print('finish %s %.3fms' % (self._self_name, duration*1000.0))
- 
- 
+
  @decorator  
  def timed_wsgi_application1(wrapped, instance, args, kwargs):  
      name = wrapped.__name__
- 
- 
+
      start = default_timer()  
      print('start', name)
- 
- 
+
      try:  
          return WSGIApplicationIterable1(wrapped(*args, **kwargs), name, start)
- 
- 
+
      except:  
          duration = default_timer() - start  
          print('finish %s %.3fms' % (name, duration*1000.0))  
@@ -78,16 +70,14 @@ The key part of the sample code presented in the WSGI specification is as follow
 
 ```
      result = application(environ, start_response)
- 
- 
+
      try:  
          for data in result:  
              if data:  
                  write(data)  
              if not headers_sent:  
                  write('')
- 
- 
+
      finally:  
          if hasattr(result, 'close'):  
              result.close()
@@ -156,19 +146,16 @@ That all said, let's try and continue by calculating a baseline to gauge how muc
 
 ```
  from timer1 import timed_wsgi_application1
- 
- 
+
  @timed_wsgi_application1  
  def application(environ, start_response):  
      status = '200 OK'  
      output = 100000 * b'Hello World!'
- 
- 
+
     response_headers = [('Content-type', 'text/plain'),  
         ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
     return output
 ```
 
@@ -216,16 +203,14 @@ The initial change we were therefore after was tracking how much data is actuall
 
 ```
  class WSGIApplicationIterable2(ObjectProxy):
- 
- 
+
      def __init__(self, wrapped, name, start):  
          super(WSGIApplicationIterable2, self).__init__(wrapped)  
          self._self_name = name  
          self._self_start = start  
          self._self_count = 0  
          self._self_bytes = 0
- 
- 
+
      def __iter__(self):  
          count = 0  
          bytes = 0  
@@ -237,13 +222,11 @@ The initial change we were therefore after was tracking how much data is actuall
          finally:  
              self._self_count = count  
              self._self_bytes = bytes
- 
- 
+
      def close(self):  
          if hasattr(self.__wrapped__, 'close'):  
              self.__wrapped__.close()
- 
- 
+
          duration = default_timer() - self._self_start  
          print('write %s blocks %s bytes' % (self._self_count, self._self_bytes))  
          print('finish %s %.3fms' % (self._self_name, duration*1000.0))
@@ -273,8 +256,7 @@ Tracking the number of bytes written and the number of blocks can highlight pote
 
 ```
  class WSGIApplicationIterable3(ObjectProxy):
- 
- 
+
      def __init__(self, wrapped, name, start):  
          super(WSGIApplicationIterable3, self).__init__(wrapped)  
          self._self_name = name  
@@ -282,8 +264,7 @@ Tracking the number of bytes written and the number of blocks can highlight pote
          self._self_time = 0.0  
          self._self_count = 0  
          self._self_bytes = 0
- 
- 
+
      def __iter__(self):  
          time = 0.0  
          start = 0.0  
@@ -304,18 +285,15 @@ Tracking the number of bytes written and the number of blocks can highlight pote
                  finish = default_timer()  
                  if finish > start:  
                      time += (finish - start)
- 
- 
+
          self._self_time = time  
          self._self_count = count  
          self._self_bytes = bytes
- 
- 
+
      def close(self):  
          if hasattr(self.__wrapped__, 'close'):  
                self.__wrapped__.close()
- 
- 
+
          duration = default_timer() - self._self_start  
          print('write %s blocks %s bytes %.3fms' % (self._self_count,  
                  self._self_bytes, self._self_time*1000.0))  

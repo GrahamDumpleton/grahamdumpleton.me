@@ -59,27 +59,21 @@ First lets check again what we would get for a decorator implemented as a functi
      def _my_function_wrapper(*args, **kwargs):
          return wrapped(*args, **kwargs)
      return _my_function_wrapper 
- 
- 
+
  class Class(object):
      @my_function_wrapper
      def method(self):
          pass
- 
- 
+
  instance = Class()
- 
- 
+
  import sys
- 
- 
+
  def tracer(frame, event, arg):
      print(frame.f_code.co_name, event)
- 
- 
+
  sys.setprofile(tracer)
- 
- 
+
  instance.method()
 ```
 
@@ -104,17 +98,14 @@ Now for when using our decorator factory. To provide context this time we need t
              self.__name__ = wrapped.__name__
          except AttributeError:
              pass
- 
- 
+
      @property
      def __class__(self):
          return self.wrapped.__class__
- 
- 
+
      def __getattr__(self, name):
          return getattr(self.wrapped, name)
- 
- 
+
  class bound_function_wrapper(object_proxy):
      def __init__(self, wrapped, instance, wrapper, binding, parent):
          super(bound_function_wrapper, self).__init__(wrapped)
@@ -122,8 +113,7 @@ Now for when using our decorator factory. To provide context this time we need t
          self.wrapper = wrapper
          self.binding = binding
          self.parent = parent
- 
- 
+
      def __call__(self, *args, **kwargs):
          if self.binding == 'function':
              if self.instance is None:
@@ -135,19 +125,16 @@ Now for when using our decorator factory. To provide context this time we need t
          else:
              instance = getattr(self.wrapped, '__self__', None)
              return self.wrapper(self.wrapped, instance, args, kwargs)
- 
- 
+
      def __get__(self, instance, owner):
          if self.instance is None and self.binding == 'function':
              descriptor = self.parent.wrapped.__get__(instance, owner)
              return bound_function_wrapper(descriptor, instance, self.wrapper,
                      self.binding, self.parent)
          return self 
- 
- 
+
  class function_wrapper(object_proxy):
- 
- 
+
      def __init__(self, wrapped, wrapper):
          super(function_wrapper, self).__init__(wrapped)
          self.wrapper = wrapper
@@ -157,18 +144,15 @@ Now for when using our decorator factory. To provide context this time we need t
              self.binding = 'staticmethod'
          else:
              self.binding = 'function' 
- 
- 
+
      def __get__(self, instance, owner):
          wrapped = self.wrapped.__get__(instance, owner)
          return bound_function_wrapper(wrapped, instance, self.wrapper,
                  self.binding, self) 
- 
- 
+
      def __call__(self, *args, **kwargs):
          return self.wrapper(self.wrapped, None, args, kwargs) 
- 
- 
+
  def decorator(wrapper):
      def _wrapper(wrapped, instance, args, kwargs):
          def _execute(wrapped):

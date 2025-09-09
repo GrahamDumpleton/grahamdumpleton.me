@@ -75,8 +75,7 @@ Remember now that this Docker image is intended to be used as a base image and u
  $ pip install Jinja2  
  Requirement already satisfied (use --upgrade to upgrade): Jinja2 in /opt/rh/python27/root/usr/lib/python2.7/site-packages  
  Cleaning up...
- 
- 
+
  $ pip freeze  
  Babel==0.9.6  
  Jinja2==2.6  
@@ -110,12 +109,10 @@ One possible solution to this problem is to always ensure that you supply the â€
  Downloading/unpacking MarkupSafe from https://pypi.python.org/packages/source/M/MarkupSafe/MarkupSafe-0.23.tar.gz#md5=f5ab3deee4c37cd6a922fb81e730da6e (from Jinja2)  
   Downloading MarkupSafe-0.23.tar.gz  
   Running setup.py (path:/tmp/pip-build-Sd86kU/MarkupSafe/setup.py) egg_info for package MarkupSafe
- 
- 
+
  Installing collected packages: Jinja2, MarkupSafe  
   Running setup.py install for MarkupSafe
- 
- 
+
  building 'markupsafe._speedups' extension  
  ...  
  Successfully installed Jinja2 MarkupSafe  
@@ -183,27 +180,22 @@ Although the intent with Docker is that it would only hold and run the one appli
  Also creating executable in venv/bin/python  
  Installing Setuptools...done.  
  Installing Pip...done.
- 
- 
+
  $ source venv/bin/activate
- 
- 
+
  (venv)$ pip install Jinja2  
  Downloading/unpacking Jinja2  
   Downloading Jinja2-2.8.tar.gz (357kB): 357kB downloaded  
   Running setup.py egg_info for package Jinja2
- 
- 
+
  Downloading/unpacking MarkupSafe (from Jinja2)  
   Downloading MarkupSafe-0.23.tar.gz  
   Running setup.py egg_info for package MarkupSafe
- 
- 
+
  Installing collected packages: Jinja2, MarkupSafe  
   Running setup.py install for Jinja2  
   Running setup.py install for MarkupSafe
- 
- 
+
  building 'markupsafe._speedups' extension  
   ...  
  Successfully installed Jinja2 MarkupSafe  

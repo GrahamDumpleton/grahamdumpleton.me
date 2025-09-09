@@ -33,8 +33,7 @@ Before we jump into monkey patching of arbitrary code we first need to recap how
 ```
  import wrapt  
  import inspect 
- 
- 
+
  @wrapt.decorator  
  def universal(wrapped, instance, args, kwargs):  
      if instance is None:  
@@ -89,8 +88,7 @@ In effect you are doing:
  class Example(object):  
      def name(self):  
          return 'name'
- 
- 
+
  Example.name = universal(Example.name)
 ```
 
@@ -103,8 +101,7 @@ This is because it isn't actually equivalent to doing the same thing within the 
      def name(self):  
          return 'name'  
      print type(name)
- 
- 
+
  print type(Example.name)
 ```
 
@@ -134,8 +131,7 @@ To add the wrapper function to a target function we now use the 'wrapt.wrap\_fun
  class Example(object):  
      def name(self):  
          return 'name'
- 
- 
+
  import wrapt  
    
  wrapt.wrap_function_wrapper(Example, 'name', wrapper)
@@ -147,8 +143,7 @@ In this case we had the class in the same code file, but we could also have done
  import example  
    
  import wrapt
- 
- 
+
  wrapt.wrap_function_wrapper(example, 'Example.name', wrapper)
 ```
 
@@ -158,8 +153,7 @@ We could also skip importing the module altogether and just used the name of the
 
 ```
  import wrapt
- 
- 
+
  wrapt.wrap_function_wrapper('example', 'Example.name', wrapper)
 ```
 
@@ -191,8 +185,7 @@ If you come along later and have:
 
 ```
  import wrapt
- 
- 
+
  @wrapt.patch_function_wrapper('example', 'function')  
  def wrapper(wrapped, instance, args, kwargs):  
      return wrapped(*args, **kwargs)

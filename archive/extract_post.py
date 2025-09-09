@@ -355,8 +355,8 @@ def convert_quoted_to_code(quoted_lines):
     consecutive_blanks = 0
     
     for line in quoted_lines:
-        # Handle blank lines
-        if not line.strip():
+        # Collapse internal blank lines (before fixing indentation)
+        if line == ">     ":
             consecutive_blanks += 1
             if consecutive_blanks <= 1:  # Allow only one blank line
                 code_lines.append("")

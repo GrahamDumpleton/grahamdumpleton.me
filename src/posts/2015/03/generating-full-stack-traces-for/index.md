@@ -23,24 +23,19 @@ To get started, lets consider the following Python script:
 ```
  def function1():  
      raise RuntimeError('xxx')
- 
- 
+
  def function2():  
      function1()
- 
- 
+
  def function3():  
      function2()
- 
- 
+
  def function4():  
      function3()
- 
- 
+
  def function5():  
      function4()
- 
- 
+
  function5()
 ```
 
@@ -71,31 +66,25 @@ Now consider the Python script:
 
 ```
  import traceback
- 
- 
+
  def function1():  
      raise RuntimeError('xxx')
- 
- 
+
  def function2():  
      function1()
- 
- 
+
  def function3():  
      try:  
        function2()  
      except Exception:  
        traceback.print_exc()
- 
- 
+
  def function4():  
      function3()
- 
- 
+
  def function5():  
      function4()
- 
- 
+
  function5()
 ```
 
@@ -126,16 +115,13 @@ There are a number of ways of obtaining information about the current stack. If 
 
 ```
  import traceback
- 
- 
+
  def function1():  
      raise RuntimeError('xxx')
- 
- 
+
  def function2():  
      function1()
- 
- 
+
  def function3():  
      try:  
          function2()  
@@ -143,16 +129,13 @@ There are a number of ways of obtaining information about the current stack. If 
          traceback.print_stack()  
          print '--------------'  
          traceback.print_exc()
- 
- 
+
  def function4():  
      function3()
- 
- 
+
  def function5():  
      function4()
- 
- 
+
  function5()
 ```
 
@@ -198,16 +181,13 @@ When needing to perform introspection or otherwise derive information about Pyth
 
 ```
  import inspect
- 
- 
+
  def function1():  
      raise RuntimeError('xxx')
- 
- 
+
  def function2():  
      function1()
- 
- 
+
  def function3():  
      try:  
          function2()  
@@ -217,16 +197,13 @@ When needing to perform introspection or otherwise derive information about Pyth
          print '--------------'  
          for item in inspect.trace():  
              print item[1:]
- 
- 
+
  def function4():  
      function3()
- 
- 
+
  def function5():  
      function4()
- 
- 
+
  function5()
 ```
 
@@ -248,8 +225,7 @@ Because though we might want to generate such a combined stack trace in multiple
 
 ```
  import inspect
- 
- 
+
  def print_full_stack():  
      print 'Traceback (most recent call last):'  
      for item in reversed(inspect.stack()[2:]):  
@@ -260,31 +236,25 @@ Because though we might want to generate such a combined stack trace in multiple
          print ' File "{1}", line {2}, in {3}\n'.format(*item),  
      for line in item[4]:  
          print ' ' + line.lstrip(),
- 
- 
+
  def function1():  
      raise RuntimeError('xxx')
- 
- 
+
  def function2():  
      function1()
- 
- 
+
  def function3():  
      try:  
          function2()  
      except Exception:  
          print_full_stack()
- 
- 
+
  def function4():  
      function3()
- 
- 
+
  def function5():  
      function4()
- 
- 
+
  function5()
 ```
 
@@ -321,31 +291,25 @@ That we are assuming we should skip two stack frames for the current stack is a 
 ```
  def function1():  
      raise RuntimeError('xxx')
- 
- 
+
  def function2():  
      function1()
- 
- 
+
  def function3a():  
      print_full_stack()
- 
- 
+
  def function3():  
      try:  
          function2()  
      except Exception:  
          function3a()
- 
- 
+
  def function4():  
      function3()
- 
- 
+
  def function5():  
      function4()
- 
- 
+
  function5()
 ```
 
@@ -377,8 +341,7 @@ To ensure we do the right thing here we need to look at what 'inspect.stack\(\)'
  def stack(context=1):  
      """Return a list of records for the stack above the caller's frame."""  
      return getouterframes(sys._getframe(1), context)
- 
- 
+
  def trace(context=1):  
      """Return a list of records for the stack below the current exception."""  
      return getinnerframes(sys.exc_info()[2], context)
@@ -391,13 +354,11 @@ As it turns out this is available as an attribute on the traceback object for th
 ```
  import sys  
  import inspect
- 
- 
+
  def print_full_stack(tb=None):  
      if tb is None:  
          tb = sys.exc_info()[2]
- 
- 
+
      print 'Traceback (most recent call last):'  
      for item in reversed(inspect.getouterframes(tb.tb_frame)[1:]):  
          print ' File "{1}", line {2}, in {3}\n'.format(*item),  
@@ -407,35 +368,28 @@ As it turns out this is available as an attribute on the traceback object for th
              print ' File "{1}", line {2}, in {3}\n'.format(*item),  
          for line in item[4]:  
              print ' ' + line.lstrip(),
- 
- 
+
  def function1():  
      raise RuntimeError('xxx')
- 
- 
+
  def function2():  
      function1()
- 
- 
+
  def function3a():  
      print_full_stack()
- 
- 
+
  def function3():  
      try:  
          function2()  
      except Exception:  
          function3a()
- 
- 
+
  def function4():  
      function3()
- 
- 
+
  def function5():  
      function4()
- 
- 
+
  function5()
 ```
 
@@ -468,28 +422,23 @@ Be aware though that doing this can generate some surprising results.
 ```
  def function1():  
      raise RuntimeError('xxx')
- 
- 
+
  def function2():  
      function1()
- 
- 
+
  def function3():  
      try:  
          function2()  
      except Exception:  
          return sys.exc_info()[2]
- 
- 
+
  def function4():  
       tb = function3()  
       print_full_stack(tb)
- 
- 
+
  def function5():  
       function4()
- 
- 
+
  function5()
 ```
 

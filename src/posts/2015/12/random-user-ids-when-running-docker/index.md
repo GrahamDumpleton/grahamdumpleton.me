@@ -284,26 +284,20 @@ Making this change we now end up with the ‘Dockerfile’ being:
 
 ```
  RUN adduser --disabled-password --uid 1001 --gid 0 --gecos "IPython" ipython
- 
- 
+
  RUN mkdir -m 0775 /notebooks && chown ipython:root /notebooks
- 
- 
+
  VOLUME /notebooks  
  WORKDIR /notebooks
- 
- 
+
  USER 1001
- 
- 
+
  # Add a notebook profile.  
  RUN mkdir -p -m 0775 ~ipython/.jupyter/ && \  
   echo "c.NotebookApp.ip = '*'" >> ~ipython/.jupyter/jupyter_notebook_config.py
- 
- 
+
  RUN chmod -R u+w,g+w /home/ipython
- 
- 
+
  ENV HOME=/home/ipython
 ```
 

@@ -62,63 +62,51 @@ This is managed in Apache by setting up multiple ‘VirtualHost’ definitions. 
  <VirtualHost _default_:80>  
  Require all denied  
  </VirtualHost>
- 
- 
+
  # www.example.com  
    
  <VirtualHost *:80>  
  ServerName www.example.com
- 
- 
+
  WSGIDaemonProcess www.example.com
- 
- 
+
  WSGIScriptAlias / /some/path/www.example.com/site.wsgi \  
      process-group=www.example.com application-group=%{GLOBAL}
- 
- 
+
  <Directory /some/path/www.example.com>  
  <Files site.wsgi>  
  Require all granted  
  </Files>  
  </Directory>  
  </VirtualHost>
- 
- 
+
  # blog.example.com  
    
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  WSGIDaemonProcess blog.example.com
- 
- 
+
  WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
      process-group=blog.example.com application-group=%{GLOBAL}
- 
- 
+
  <Directory /some/path/blog.example.com>  
  <Files site.wsgi>  
  Require all granted  
  </Files>  
  </Directory>  
  </VirtualHost>
- 
- 
+
  # wiki.example.com  
    
  <VirtualHost *:80>  
  ServerName wiki.example.com
- 
- 
+
  WSGIDaemonProcess wiki.example.com
- 
- 
+
  WSGIScriptAlias / /some/path/wiki.example.com/site.wsgi \  
      process-group=wiki.example.com application-group=%{GLOBAL}
- 
- 
+
  <Directory /some/path/wiki.example.com>  
  <Files site.wsgi>  
  Require all granted  
@@ -183,15 +171,12 @@ Previously the Apache configuration was:
    
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  WSGIDaemonProcess blog.example.com
- 
- 
+
  WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
      process-group=blog.example.com application-group=%{GLOBAL}
- 
- 
+
  <Directory /some/path/blog.example.com>  
  <Files site.wsgi>  
  Require all granted  
@@ -204,12 +189,10 @@ This now needs to be changed to:
 
 ```
  # blog.example.com
- 
- 
+
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  ProxyPass / http://docker.example.com:8002/  
  </VirtualHost>
 ```
@@ -234,49 +217,39 @@ We can see the affects of the problem by creating a test WSGI application which 
 
 ```
  from urllib import quote
- 
- 
+
  def reconstruct_url(environ):  
      url = environ['wsgi.url_scheme']+'://'
- 
- 
+
      if environ.get('HTTP_HOST'):  
          url += environ['HTTP_HOST']  
      else:  
          url += environ['SERVER_NAME']
- 
- 
+
      if environ['wsgi.url_scheme'] == 'https':  
          if environ['SERVER_PORT'] != '443':  
              url += ':' + environ['SERVER_PORT']  
      else:  
          if environ['SERVER_PORT'] != '80':  
              url += ':' + environ['SERVER_PORT']
- 
- 
+
      url += quote(environ.get('SCRIPT_NAME', ''))  
      url += quote(environ.get('PATH_INFO', ''))
- 
- 
+
      if environ.get('QUERY_STRING'):  
          url += '?' + environ['QUERY_STRING']
- 
- 
+
      return url
- 
- 
+
  def application(environ, start_response):  
      status = '200 OK'
- 
- 
+
      output = reconstruct_url(environ)
- 
- 
+
      response_headers = [('Content-type', 'text/plain'),  
                          ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
      return [output]
 ```
 
@@ -318,12 +291,10 @@ The first way is to use the Apache ‘mod\_headers’ module to set the request 
 
 ```
  # blog.example.com
- 
- 
+
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  ProxyPass / http://docker.example.com:8002/  
    
  RequestHeader set X-Forwarded-Port 80  
@@ -334,12 +305,10 @@ The second also uses ‘mod\_headers’, but with the port number being calculat
 
 ```
  # blog.example.com
- 
- 
+
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  ProxyPass / http://docker.example.com:8002/  
    
  RewriteEngine On  
@@ -424,8 +393,7 @@ The original Apache configuration in this case for each site would have been som
 
 ```
  # blog.example.com
- 
- 
+
  <VirtualHost *:80>  
  ServerName blog.example.com  
    
@@ -450,8 +418,7 @@ The original Apache configuration in this case for each site would have been som
    
  WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
      process-group=blog.example.com application-group=%{GLOBAL}
- 
- 
+
  <Directory /some/path/blog.example.com>  
  <Files site.wsgi>  
  Require all granted  
@@ -466,12 +433,10 @@ The updated Apache configuration when it is changed to proxy the site through to
 
 ```
  # blog.example.com
- 
- 
+
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  ProxyPass / http://docker.example.com:8002/  
    
  RequestHeader set X-Forwarded-Port 80  
@@ -498,12 +463,10 @@ For passing information about whether a secure connection was used, there is no 
 
 ```
  # blog.example.com
- 
- 
+
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  ProxyPass / http://docker.example.com:8002/  
    
  RequestHeader set X-Forwarded-Port 80  

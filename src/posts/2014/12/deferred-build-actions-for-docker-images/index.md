@@ -50,15 +50,12 @@ Looking at the Dockerfile used to build that 'onbuild' image we find:
 
 ```
  FROM grahamdumpleton/mod-wsgi-docker:python-2.7
- 
- 
+
  WORKDIR /app
- 
- 
+
  ONBUILD COPY . /app  
  ONBUILD RUN mod_wsgi-docker-build
- 
- 
+
  EXPOSE 80  
  ENTRYPOINT [ "mod_wsgi-docker-start" ]
 ```
@@ -247,12 +244,10 @@ Interestingly, this ability to use a 'setup.py' file and installing the applicat
 ```
  RUN mkdir -p /usr/src/app  
  WORKDIR /usr/src/app
- 
- 
+
  ONBUILD COPY requirements.txt /usr/src/app/  
  ONBUILD RUN pip install -r requirements.txt
- 
- 
+
  ONBUILD COPY . /usr/src/app
 ```
 

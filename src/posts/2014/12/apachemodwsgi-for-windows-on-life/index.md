@@ -102,11 +102,9 @@ The source code has a 'win32' subdirectory. You need to create a Visual Studio 2
 
 ```
  nmake -f ap24py33.mk clean
- 
- 
+
  nmake -f ap24py33.mk
- 
- 
+
  nmake -f ap24py33.mk install
 ```
 

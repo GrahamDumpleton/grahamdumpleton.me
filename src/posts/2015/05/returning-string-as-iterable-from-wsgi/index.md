@@ -20,13 +20,11 @@ In this post I want to investigate an even more severe case of this problem that
  def application(environ, start_response):  
      status = '200 OK'  
      output = 1024*1024*b'X'
- 
- 
+
      response_headers = [('Content-type', 'text/plain'),  
              ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
      return [output]
 ```
 
@@ -36,8 +34,7 @@ If we run this under mod\_wsgi-express and use 'curl' then we get an adequately 
 
 ```
  $ time curl -s -o /dev/null http://localhost:8000/
- 
- 
+
  real 0m0.017s  
  user 0m0.006s  
  sys 0m0.005s
@@ -53,13 +50,11 @@ That the WSGI server will accept any iterable does mean that people new to writi
  def application(environ, start_response):  
      status = '200 OK'  
      output = 1024*1024*b'X'
- 
- 
+
      response_headers = [('Content-type', 'text/plain'),  
              ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
      return output
 ```
 
@@ -69,8 +64,7 @@ Running this test with mod\_wsgi-express again, we can see the time taken balloo
 
 ```
  $ time curl -s -o /dev/null http://localhost:8000/
- 
- 
+
  real 0m3.659s  
  user 0m0.294s  
  sys 0m1.544s
@@ -80,8 +74,7 @@ Use gunicorn, and as we saw in the previous post the results are much worse agai
 
 ```
  $ time curl -s -o /dev/null http://localhost:8000/
- 
- 
+
  real 0m23.762s  
  user 0m1.446s  
  sys 0m7.085s
@@ -95,8 +88,7 @@ Acknowledging that this would be a problem with a users code, lets now though se
 
 ```
  $ time curl -s -o /dev/null http://localhost:8000/
- 
- 
+
  real 0m0.019s  
  user 0m0.006s  
  sys 0m0.007s
@@ -116,21 +108,17 @@ This can be illustrated by now going back and adding the WSGI application timing
 
 ```
  from timer1 import timed_wsgi_application1
- 
- 
+
  @timed_wsgi_application1  
  def application(environ, start_response):
- 
- 
+
      status = '200 OK'  
      output = 1024*1024*b'X'
- 
- 
+
      response_headers = [('Content-type', 'text/plain'),  
              ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
      return output
 ```
 
@@ -138,8 +126,7 @@ With the decorator, running with uWSGI again we now get:
 
 ```
  $ time curl -s -o /dev/null http://localhost:8000/
- 
- 
+
  real 0m13.876s  
  user 0m0.925s  
  sys 0m3.407s
@@ -163,13 +150,11 @@ If you are developing Python web applications at the WSGI level rather than usin
  def application(environ, start_response):  
      status = '200 OK'  
      output = 1024*1024*b'X'
- 
- 
+
      response_headers = [('Content-type', 'text/plain'),  
              ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
      return output  
    
  import wsgiref.validate  

@@ -59,8 +59,7 @@ The next step is to create a 'Dockerfile' to build up our Docker image. As we ar
 
 ```
  FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
- 
- 
+
  CMD [ "wsgi.py" ]
 ```
 
@@ -128,8 +127,7 @@ With all that said, we now actually create the 'Dockerfile' and in it we place:
 
 ```
  FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
- 
- 
+
  CMD [ "--working-directory", "example", \  
        "--url-alias", "/static", "example/htdocs", \  
        "--application-type", "module", "example.wsgi" ]

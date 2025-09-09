@@ -35,14 +35,14 @@ If we were to now look at the resulting process tree using something like htop t
  20214 www-data 20 0 147M 76408 5680 S 14.0 0.9  4:53.99 │ │ ├─ mod-wsgi -k start
  20213 www-data 20 0 147M 76408 5680 S  0.0 0.9  0:00.63 │ │ ├─ mod-wsgi -k start
  20212 www-data 20 0 147M 76408 5680 S  0.0 0.9  0:00.00 │ │ └─ mod-wsgi -k start
- 
+
  20178 www-data 20 0 138M 67680 5212 S 52.0 0.8 11:01.62 │ ├─ mod-wsgi -k start
  20241 www-data 20 0 138M 67680 5212 S  0.0 0.8  0:15.45 │ │ ├─ mod-wsgi -k start
  20230 www-data 20 0 138M 67680 5212 S 15.0 0.8  5:17.81 │ │ ├─ mod-wsgi -k start
  20229 www-data 20 0 138M 67680 5212 S 35.0 0.8  5:24.63 │ │ ├─ mod-wsgi -k start
  20228 www-data 20 0 138M 67680 5212 S  0.0 0.8  0:00.71 │ │ ├─ mod-wsgi -k start
  20227 www-data 20 0 138M 67680 5212 S  0.0 0.8  0:00.00 │ │ └─ mod-wsgi -k start
- 
+
  20177 www-data 20 0 137M 67764 5428 S  7.0 0.8 10:47.27 │ ├─ mod-wsgi -k start
  20207 www-data 20 0 137M 67764 5428 S  0.0 0.8  0:15.18 │ │ ├─ mod-wsgi -k start
  20206 www-data 20 0 137M 67764 5428 S  7.0 0.8  5:16.82 │ │ ├─ mod-wsgi -k start

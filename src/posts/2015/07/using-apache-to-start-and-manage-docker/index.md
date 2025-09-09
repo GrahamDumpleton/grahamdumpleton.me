@@ -48,12 +48,10 @@ In the prior posts, the basic configuration we ended up with for proxying the re
 
 ```
  # blog.example.com
- 
- 
+
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  ProxyPass / http://docker.example.com:8002/  
  ProxyPassReverse / http://docker.example.com:8002/  
    
@@ -82,8 +80,7 @@ In the ‘docker-admin.py’ file we now add:
 
 ```
  import os
- 
- 
+
  os.execl('/usr/local/bin/docker', '(docker:blog.example.com)', 'run',  
      '--rm', '-p', '8002:80', ‘blog.example.com')
 ```

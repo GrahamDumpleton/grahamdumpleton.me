@@ -44,30 +44,22 @@ As an example, imagine that we had installed 'mod\_wsgi-express' by using the pi
 
 ```
  import os
- 
- 
+
  OPENSHIFT_REPO_DIR = os.environ['OPENSHIFT_REPO_DIR']
- 
- 
+
  os.chdir(OPENSHIFT_REPO_DIR)
- 
- 
+
  OPENSHIFT_PYTHON_IP = os.environ['OPENSHIFT_PYTHON_IP']  
  OPENSHIFT_PYTHON_PORT = os.environ['OPENSHIFT_PYTHON_PORT']
- 
- 
+
  OPENSHIFT_PYTHON_DIR = os.environ['OPENSHIFT_PYTHON_DIR']
- 
- 
+
  SERVER_ROOT = os.path.join(OPENSHIFT_PYTHON_DIR, 'run', 'mod_wsgi')
- 
- 
+
  VIRTUAL_ENV = os.environ['VIRTUAL_ENV']
- 
- 
+
  program = os.path.join(VIRTUAL_ENV, 'bin', 'mod_wsgi-express')
- 
- 
+
  os.execl(program, program, 'start-server', 'wsgi.py',  
          '--server-root', SERVER_ROOT, '--log-to-terminal',  
          '--host', OPENSHIFT_PYTHON_IP, '--port', OPENSHIFT_PYTHON_PORT)
@@ -87,8 +79,7 @@ The answer is pretty obscure and is tied to how the OpenShift Python cartridge m
 
 ```
  nohup python -u app.py &> $LOGPIPE &
- 
- 
+
  retries=3  
  while [ $retries -gt 0 ]; do  
    app_pid=$(appserver_pid)  
@@ -96,11 +87,9 @@ The answer is pretty obscure and is tied to how the OpenShift Python cartridge m
    sleep 1  
    let retries=${retries}-1  
  done
- 
- 
+
  sleep 2
- 
- 
+
  if [ -n "${app_pid}" ]; then  
    echo "$app_pid" > $OPENSHIFT_PYTHON_DIR/run/appserver.pid  
  else  
@@ -175,11 +164,9 @@ Stepping back, what is simple to use for such a task is a shell script. A shell 
 
 ```
  import os
- 
- 
+
  SCRIPT = os.path.join(os.path.dirname(__file__), 'app.sh')
- 
- 
+
  os.execl('/bin/bash', 'bash (python -u app.py)', SCRIPT)
 ```
 
@@ -191,24 +178,20 @@ Moving on then, our final 'app.sh' shell script file is:
 
 ```
  #!/usr/bin/env bash
- 
- 
+
  trap 'kill -TERM $PID' TERM INT
- 
- 
+
  mod_wsgi-express start-server \  
          --server-root $OPENSHIFT_PYTHON_DIR/run/mod_wsgi \  
          --log-to-terminal --host $OPENSHIFT_PYTHON_IP \  
          --port $OPENSHIFT_PYTHON_PORT wsgi.py &
- 
- 
+
  PID=$!  
  wait $PID  
  trap - TERM INT  
  wait $PID  
  STATUS=$?
- 
- 
+
  exit $STATUS
 ```
 

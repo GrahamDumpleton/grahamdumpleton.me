@@ -109,14 +109,11 @@ Looking at the ‘Dockerfile' for this Docker image we find:
 
 ```
  # DEPRECATED: You probably want jupyter/notebook
- 
- 
+
  FROM jupyter/notebook
- 
- 
+
  MAINTAINER IPython Project <ipython-dev@scipy.org>
- 
- 
+
  ONBUILD RUN echo "ipython/ipython is deprecated, use jupyter/notebook" >&2
 ```
 
@@ -178,8 +175,7 @@ The ‘CrashLoopBackOff’ status indicates that the application failed in some 
   " using a temp directory.".format(parent))  
  Traceback (most recent call last):  
    ...
- 
- 
+
  File "/usr/lib/python3.4/os.py", line 237, in makedirs  
   mkdir(name, mode)  
  PermissionError: [Errno 13] Permission denied: '/.jupyter'

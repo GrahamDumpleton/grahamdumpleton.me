@@ -18,8 +18,7 @@ As shown in the previous blog posts I gave an example of the Dockerfile you woul
 
 ```
  FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
- 
- 
+
  CMD [ "wsgi.py" ]
 ```
 
@@ -27,8 +26,7 @@ I also presented a more complicated example for a Django site. The Dockerfile fo
 
 ```
  FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
- 
- 
+
  CMD [ "--working-directory", "example", \  
   "--url-alias", "/static", "example/htdocs", \  
   "--application-type", "module", "example.wsgi" ]
@@ -104,8 +102,7 @@ Although we changed to the ‘ENTRYPOINT’ instruction, it and the ‘CMD’ in
 
 ```
  ENTRYPOINT [ “python”, “example/manage.py”, “runserver” ]
- 
- 
+
  CMD [ “80” ]
 ```
 
@@ -201,8 +198,7 @@ One use therefore of the ‘deploy’ hook if running a Django web application i
 
 ```
  #!/usr/bin/env bash
- 
- 
+
  python example/manage.py migrate
 ```
 
@@ -224,8 +220,7 @@ Having run any ‘deploy’ hooks we are now ready to start up the actual Python
 
 ```
  SERVER_ARGS="--log-to-terminal --startup-log --port 80"
- 
- 
+
  exec mod_wsgi-express start-server ${SERVER_ARGS} "$@"
 ```
 

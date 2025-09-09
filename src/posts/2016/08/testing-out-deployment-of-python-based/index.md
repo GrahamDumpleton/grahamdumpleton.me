@@ -68,8 +68,7 @@ Rather than run ‘pip’ directly, we are therefore going to run ‘warpdrive b
  Obtaining opal from git+git://github.com/openhealthcare/opal.git@master#egg=opal (from -r requirements.txt (line 18))  
    Cloning git://github.com/openhealthcare/opal.git (to master) to /tmp/warpdrive-build.12067/opal  
  ...
- 
- 
+
  Installing collected packages: pycparser, cffi, pyasn1, six, idna, ipaddress, enum34, cryptography, Django, coverage, dj-database-url, gunicorn, psycopg2, static3, dj-static, django-reversion, django-axes, ffs, MarkupSafe, jinja2, letter, requests, djangorestframework, django-appconf, django-compressor, meld3, supervisor, python-dateutil, pytz, billiard, anyjson, amqp, kombu, celery, django-celery, opal  
    Running setup.py develop for opal  
  Successfully installed Django-1.8.3 MarkupSafe-0.23 amqp-1.4.9 anyjson-0.3.3 billiard-3.3.0.23 celery-3.1.19 cffi-1.7.0 coverage-3.6 cryptography-1.3.2 dj-database-url-0.2.1 dj-static-0.0.6 django-appconf-1.0.2 django-axes-1.4.0 django-celery-3.1.17 django-compressor-1.5 django-reversion-1.8.7 djangorestframework-3.2.2 enum34-1.1.6 ffs-0.0.8.1 gunicorn-0.17.4 idna-2.1 ipaddress-1.0.16 jinja2-2.8 kombu-3.0.35 letter-0.4.1 meld3-1.0.2 opal psycopg2-2.5 pyasn1-0.1.9 pycparser-2.14 python-dateutil-2.4.2 pytz-2016.6.1 requests-2.7.0 six-1.10.0 static3-0.7.0 supervisor-3.0  
@@ -146,8 +145,7 @@ That said, having prepared our application for warpdrive, to actually run it up 
  [GCC 4.2.1 Compatible Apple LLVM 7.0.0 (clang-700.0.59.5)] on darwin  
  Type "help", "copyright", "credits" or "license" for more information.  
  (InteractiveConsole)
- 
- 
+
    -----> Running server script start-mod_wsgi  
    -----> Executing server command 'mod_wsgi-express start-server --log-to-terminal --startup-log --port 8080 --application-type module --entry-point mynewapp.wsgi --callable-object application --url-alias /assets/ /Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/assets/'  
  Server URL : http://localhost:8080/  
@@ -179,8 +177,7 @@ Using a different WSGI server such as uWSGI is not any harder. In the case of uW
  [GCC 4.2.1 Compatible Apple LLVM 7.0.0 (clang-700.0.59.5)] on darwin  
  Type "help", "copyright", "credits" or "license" for more information.  
  (InteractiveConsole)
- 
- 
+
    -----> Running server script start-uwsgi  
    -----> Executing server command 'uwsgi --master --http-socket :8080 --enable-threads --threads=5 --thunder-lock --single-interpreter --die-on-term --module mynewapp.wsgi --callable application --static-map /assets/=/Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/assets/'  
  [uwsgi-static] added mapping for /assets/ => /Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/assets/  
@@ -213,14 +210,11 @@ As an example, lets create our first action hook. This we will save away in the 
 
 ```
  #!/bin/bash
- 
- 
+
  echo " -----> Running Django database migration"
- 
- 
+
  python manage.py migrate
- 
- 
+
  if [ x"$DJANGO_ADMIN_USERNAME" != x"" ]; then  
      echo " -----> Creating predefined Django super user"  
      (cat - | python manage.py shell) << !  
@@ -270,11 +264,9 @@ The contents of the ‘setup’ script is typical here of what is required for d
 
 ```
  #!/bin/bash
- 
- 
+
  echo " -----> Running Django database migration"
- 
- 
+
  python manage.py migrate
 ```
 
@@ -333,8 +325,7 @@ The final result of that ‘warpdrive image’ command is that you now have a Do
  [GCC 4.9.2] on linux2  
  Type "help", "copyright", "credits" or "license" for more information.  
  (InteractiveConsole)
- 
- 
+
    -----> Running server script start-mod_wsgi  
    -----> Executing server command 'mod_wsgi-express start-server --log-to-terminal --startup-log --port 8080 --application-type module --entry-point mynewapp.wsgi --callable-object application --url-alias /assets/ /opt/app-root/src/mynewapp/assets/'  
  Server URL : http://localhost:8080/  

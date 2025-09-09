@@ -39,12 +39,10 @@ The configuration for the front end Apache which proxied requests through to our
 
 ```
  # blog.example.com
- 
- 
+
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  ProxyPass / http://docker.example.com:8002/  
    
  RequestHeader set X-Forwarded-Port 80  
@@ -150,12 +148,10 @@ For response headers in this case where what mod\_wsgi was doing doesn’t apply
 
 ```
  # blog.example.com
- 
- 
+
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  ProxyPass / http://docker.example.com:8002/  
  ProxyPassReverse / http://docker.example.com:8002/  
    
@@ -203,12 +199,10 @@ Fixing up any incidences of the incorrect URL in the response content is a bit m
 
 ```
  # blog.example.com
- 
- 
+
  <VirtualHost *:80>  
  ServerName blog.example.com
- 
- 
+
  ProxyPass / http://docker.example.com:8002/  
  ProxyPassReverse / http://docker.example.com:8002/  
    

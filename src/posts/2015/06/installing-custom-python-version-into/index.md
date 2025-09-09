@@ -272,8 +272,7 @@ On a Linux system you can verify whether the Python installation you use is usin
 ```
  # ls -las /usr/bin/python2.7  
  3700 -rwxr-xr-x 1 root root 3785928 Mar 1 13:58 /usr/bin/python2.7
- 
- 
+
  # ldd /usr/bin/python2.7  
   linux-vdso.so.1 (0x00007fff84fe5000)  
   libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f309388d000)  

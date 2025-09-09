@@ -90,12 +90,10 @@ Using my ‘warpdrive’ script from the previous blog post I referenced, it can
  Copying '/opt/warpdrive/demo/static/js/demo.js'  
  ...  
  Copying '/usr/local/python/lib/python2.7/site-packages/django/contrib/admin/static/admin/img/gis/move_vertex_off.svg'
- 
- 
+
  179 static files copied to '/home/warpdrive/django_static_root'.  
  ---> Fix permissions on application source
- 
- 
+
  real 5m40.780s  
  user 0m0.850s  
  sys 0m0.115s
@@ -158,12 +156,10 @@ Once we have our wheelhouse, when building the Docker image for our application,
  Copying '/opt/warpdrive/demo/static/js/demo.js'  
  ...  
  Copying '/usr/local/python/lib/python2.7/site-packages/django/contrib/admin/static/admin/img/gis/move_vertex_off.svg'
- 
- 
+
  179 static files copied to '/home/warpdrive/django_static_root'.  
  ---> Fix permissions on application source
- 
- 
+
  real 0m45.859s  
  user 0m3.555s  
  sys 0m2.575s
@@ -192,8 +188,7 @@ Reuse therefore allows us to speed up the building of Docker images considerably
  Using cached psycopg2-2.6.1.tar.gz  
  ...  
  ---> Fix permissions on application source
- 
- 
+
  real 1m17.180s  
  user 0m3.653s  
  sys 0m2.316s

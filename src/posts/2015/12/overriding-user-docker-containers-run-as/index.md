@@ -20,8 +20,7 @@ In the [first post](/posts/2015/12/running-ipython-as-docker-container/) of this
   " using a temp directory.".format(parent))  
  Traceback (most recent call last):  
    ...
- 
- 
+
  File "/usr/lib/python3.4/os.py", line 237, in makedirs  
   mkdir(name, mode)  
  PermissionError: [Errno 13] Permission denied: '/.jupyter'
@@ -76,8 +75,7 @@ For example, on ‘busybox’ the home directory of ‘/var/www’ does exist, b
  /var/www  
  / # touch ~www-data/magic  
  / # exit
- 
- 
+
  $ docker run --rm -it debian:jessie sh  
  # echo ~www-data  
  /var/www  
@@ -123,15 +121,12 @@ Looking through it the bulk of the commands in the ‘Dockerfile’ relate to in
  # Add a notebook profile.  
  RUN mkdir -p -m 700 /root/.jupyter/ && \  
   echo "c.NotebookApp.ip = '*'" >> /root/.jupyter/jupyter_notebook_config.py
- 
- 
+
  VOLUME /notebooks  
  WORKDIR /notebooks
- 
- 
+
  EXPOSE 8888
- 
- 
+
  ENTRYPOINT ["tini", "--"]  
  CMD ["jupyter", "notebook"]
 ```
@@ -166,21 +161,16 @@ Finally, we can use the ‘USER’ statement to mark that the Docker container w
  RUN mkdir -p -m 700 ~ipython/.jupyter/ && \  
   echo "c.NotebookApp.ip = '*'" >> ~ipython/.jupyter/jupyter_notebook_config.py && \  
   chown -R ipython:ipython ~ipython/.jupyter
- 
- 
+
  RUN mkdir /notebooks && chown ipython:ipython /notebooks
- 
- 
+
  VOLUME /notebooks  
  WORKDIR /notebooks
- 
- 
+
  EXPOSE 8888
- 
- 
+
  USER ipython
- 
- 
+
  ENTRYPOINT ["tini", "--"]  
  CMD ["jupyter", "notebook"]
 ```

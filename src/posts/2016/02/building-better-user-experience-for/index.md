@@ -22,22 +22,17 @@ To illustrate what it is all about a simple demonstration is in order. For that 
 
 ```
  $ django-admin startproject mydjangosite
- 
- 
+
  $ cd mydjangosite/
- 
- 
+
  $ python manage.py runserver  
  Performing system checks...
- 
- 
+
  System check identified no issues (0 silenced).
- 
- 
+
  You have unapplied migrations; your app may not work properly until they are applied.  
  Run 'python manage.py migrate' to apply them.
- 
- 
+
  February 18, 2016 - 01:22:25  
  Django version 1.9.2, using settings 'mydjangosite.settings'  
  Starting development server at http://127.0.0.1:8000/  
@@ -80,8 +75,7 @@ What I am now going to do is build a separate Python virtual environment for thi
 
 ```
  (warpdrive) $ eval "$(warpdrive activate mydjangosite)" 
- 
- 
+
  (warpdrive+mydjangosite) $ warpdrive build  
   -----> Installing dependencies with pip  
  Collecting Django (from -r requirements.txt (line 1))  
@@ -164,8 +158,7 @@ Having already shown that my Django web application runs, all I now need to do t
 
 ```
  (warpdrive+mydjangosite) $ warpdrive s2i
- 
- 
+
  ---> Installing application source  
  ---> Building application from source  
  -----> Installing dependencies with pip  
@@ -179,8 +172,7 @@ Having already shown that my Django web application runs, all I now need to do t
    
  56 static files copied to '/home/warpdrive/django_static_root'.  
  ---> Fix permissions on application source
- 
- 
+
  (warpdrive+mydjangosite) $ docker images | grep mydjangosite  
  warpdrive-mydjangosite latest 8d7fd16f7ab8 20 seconds ago 819.6 MB
 ```
@@ -210,16 +202,13 @@ To deploy this same application to OpenShift, all I would need to do is commit m
 ```
  (warpdrive+mydjangosite) $ oc new-app grahamdumpleton/warp0-debian8-python27~https://github.com/GrahamDumpleton/django-hello-world-v1.git  
  --> Found Docker image d148eec (8 hours old) from Docker Hub for "grahamdumpleton/warp0-debian8-python27"
- 
- 
+
  Python 2.7 (Warp Drive)  
   -----------------------  
   S2I builder for Python web applications.
- 
- 
+
  Tags: builder, python, python27, warpdrive, warpdrive-python27
- 
- 
+
  * An image stream will be created as "warp0-debian8-python27:latest" that will track the source image  
   * A source build using source code from https://github.com/GrahamDumpleton/django-hello-world-v1.git will be created  
   * The resulting image will be pushed to image stream "django-hello-world-v1:latest"  
@@ -227,15 +216,13 @@ To deploy this same application to OpenShift, all I would need to do is commit m
   * This image will be deployed in deployment config "django-hello-world-v1"  
   * Port 8080/tcp will be load balanced by service "django-hello-world-v1"  
   * Other containers can access this service through the hostname "django-hello-world-v1"
- 
- 
+
  --> Creating resources with label app=django-hello-world-v1 ...  
   imagestream "django-hello-world-v1" created  
   buildconfig "django-hello-world-v1" created  
   deploymentconfig "django-hello-world-v1" created  
   service "django-hello-world-v1" created
- 
- 
+
  (warpdrive+mydjangosite) $ oc expose service django-hello-world-v1  
  route "django-hello-world-v1" exposed
 ```

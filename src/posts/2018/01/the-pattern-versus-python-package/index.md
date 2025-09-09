@@ -24,21 +24,17 @@ Jumping to the example of the dynamic wrapper that Brandon gave, the equivalent 
 
 ```
  import wrapt
- 
- 
+
  class WriteLoggingFile(wrapt.ObjectProxy):
- 
- 
+
      def __init__(self, wrapped, logger):  
          super(WriteLoggingFile, self).__init__(wrapped)  
          self._self_logger = logger
- 
- 
+
      def write(self, s):  
          self.__wrapped__.write(s)  
          self._self_logger.debug('wrote %s bytes to %s', len(s), self.__wrapped__)
- 
- 
+
      def writelines(self, strings):  
          if self.closed:  
              raise ValueError('this file is closed')  
@@ -97,8 +93,7 @@ The next example which has an equivalent when using wrapt is monkey patching an 
          wrapped(*args, **kwargs)  
          logger.debug('wrote %s bytes to %s', len(args[0]), instance)  
      return write_and_log
- 
- 
+
  f = open('/dev/null', 'w')  
  f.write = bind_write_method(logging)(f.write)
 ```
@@ -110,8 +105,7 @@ Using wrapt to do this in this way, introspection even still works correctly on 
 ```
  >>> f.write.__name__  
  write
- 
- 
+
  >>> inspect.getargspec(f.write)  
  ArgSpec(args=['self', 'text'], varargs=None, keywords=None, defaults=None)
 ```

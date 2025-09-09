@@ -26,13 +26,11 @@ If one is using Mock and you want to temporarily override the value returned by 
 
 ```
  from mock import Mock, patch
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          print a, b, c, key
- 
- 
+
  @patch(__name__+'.ProductionClass.method', return_value=3)  
  def test_method(mock_method):  
      real = ProductionClass()  
@@ -45,19 +43,16 @@ With what I have presented so far of the wrapt package, an equivalent way of doi
 
 ```
  from wrapt import patch_function_wrapper
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          print a, b, c, key
- 
- 
+
  @patch_function_wrapper(__name__, 'ProductionClass.method')  
  def wrapper(wrapped, instance, args, kwargs):  
      assert args == (3, 4, 5) and kwargs.get('key') == 'value'  
      return 3
- 
- 
+
  def test_method():  
      real = ProductionClass()  
      result = real.method(3, 4, 5, key='value')  
@@ -70,19 +65,16 @@ For that scenario, the wrapt package provides an alternate decorator '@wrapt.tra
 
 ```
  from wrapt import transient_function_wrapper
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          print a, b, c, key
- 
- 
+
  @transient_function_wrapper(__name__, 'ProductionClass.method')  
  def apply_ProductionClass_method_wrapper(wrapped, instance, args, kwargs):  
      assert args == (3, 4, 5) and kwargs.get('key') == 'value'  
      return 3
- 
- 
+
  @apply_ProductionClass_method_wrapper  
  def test_method():  
      real = ProductionClass()  
@@ -96,20 +88,17 @@ For this blog post when I tried to work out how to do that with Mock the general
 
 ```
  from mock import Mock, patch
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          print a, b, c, key
- 
- 
+
  def wrapper(wrapped):  
      def _wrapper(self, *args, **kwargs):  
          assert args == (3, 4, 5) and kwargs.get('key') == 'value'  
          return wrapped(self, *args, **kwargs)  
      return _wrapper
- 
- 
+
  @patch(__name__+'.ProductionClass.method', autospec=True,  
          side_effect=wrapper(ProductionClass.method))  
  def test_method(mock_method):  
@@ -125,19 +114,16 @@ When using wrapt to do the same thing, what is used is little different to what 
 
 ```
  from wrapt import transient_function_wrapper
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          print a, b, c, key
- 
- 
+
  @transient_function_wrapper(__name__, 'ProductionClass.method')  
  def apply_ProductionClass_method_wrapper(wrapped, instance, args, kwargs):  
      assert args == (3, 4, 5) and kwargs.get('key') == 'value'  
      return wrapped(*args, **kwargs)
- 
- 
+
  @apply_ProductionClass_method_wrapper  
  def test_method():  
      real = ProductionClass()  
@@ -156,30 +142,25 @@ In the case of using Mock I would do something like:
 
 ```
  from mock import Mock, patch
- 
- 
+
  def function():  
      pass
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          return function
- 
- 
+
  def wrapper2(wrapped):  
      def _wrapper2(*args, **kwargs):  
          return wrapped(*args, **kwargs)  
      return _wrapper2
- 
- 
+
  def wrapper1(wrapped):  
      def _wrapper1(self, *args, **kwargs):  
          func = wrapped(self, *args, **kwargs)  
          return Mock(side_effect=wrapper2(func))  
      return _wrapper1
- 
- 
+
  @patch(__name__+'.ProductionClass.method', autospec=True,  
          side_effect=wrapper1(ProductionClass.method))  
  def test_method(mock_method):  
@@ -192,27 +173,22 @@ And with wrapt I would instead do:
 
 ```
  from wrapt import transient_function_wrapper, function_wrapper
- 
- 
+
  def function():  
      pass
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          return function
- 
- 
+
  @function_wrapper  
  def result_function_wrapper(wrapped, instance, args, kwargs):  
      return wrapped(*args, **kwargs)
- 
- 
+
  @transient_function_wrapper(__name__, 'ProductionClass.method')  
  def apply_ProductionClass_method_wrapper(wrapped, instance, args, kwargs):  
      return result_function_wrapper(wrapped(*args, **kwargs))
- 
- 
+
  @apply_ProductionClass_method_wrapper  
  def test_method():  
      real = ProductionClass()  
@@ -234,33 +210,27 @@ The first approach is to replace the method on the instance directly with a wrap
 
 ```
  from wrapt import transient_function_wrapper, function_wrapper
- 
- 
+
  class StorageClass(object):  
      def run(self):  
          pass
- 
- 
+
  storage = StorageClass()
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          return storage
- 
- 
+
  @function_wrapper  
  def run_method_wrapper(wrapped, instance, args, kwargs):  
      return wrapped(*args, **kwargs)
- 
- 
+
  @transient_function_wrapper(__name__, 'ProductionClass.method')  
  def apply_ProductionClass_method_wrapper(wrapped, instance, args, kwargs):  
      storage = wrapped(*args, **kwargs)  
      storage.run = run_method_wrapper(storage.run)  
      return storage
- 
- 
+
  @apply_ProductionClass_method_wrapper  
  def test_method():  
      real = ProductionClass()  
@@ -284,32 +254,26 @@ For this example what we can therefore do is:
 
 ```
  from wrapt import transient_function_wrapper, ObjectProxy
- 
- 
+
  class StorageClass(object):  
      def run(self):  
          pass
- 
- 
+
  storage = StorageClass()
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          return storage
- 
- 
+
  class StorageClassProxy(ObjectProxy):  
      def run(self):  
          return self.__wrapped__.run()
- 
- 
+
  @transient_function_wrapper(__name__, 'ProductionClass.method')  
  def apply_ProductionClass_method_wrapper(wrapped, instance, args, kwargs):  
      storage = wrapped(*args, **kwargs)  
      return StorageClassProxy(storage)
- 
- 
+
  @apply_ProductionClass_method_wrapper  
  def test_method():  
      real = ProductionClass()  
@@ -323,33 +287,27 @@ With the proxy we can even intercept access to an attribute of the original obje
 
 ```
  from wrapt import transient_function_wrapper, ObjectProxy
- 
- 
+
  class StorageClass(object):  
      def __init__(self):  
          self.name = 'name'
- 
- 
+
  storage = StorageClass()
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          return storage
- 
- 
+
  class StorageClassProxy(ObjectProxy):  
      @property  
      def name(self):  
          return self.__wrapped__.name
- 
- 
+
  @transient_function_wrapper(__name__, 'ProductionClass.method')  
  def apply_ProductionClass_method_wrapper(wrapped, instance, args, kwargs):  
      storage = wrapped(*args, **kwargs)  
      return StorageClassProxy(storage)
- 
- 
+
  @apply_ProductionClass_method_wrapper  
  def test_method():  
      real = ProductionClass()  
@@ -369,13 +327,11 @@ I therefore leave you with one final example to get you thinking about the ways 
 
 ```
  from wrapt import transient_function_wrapper
- 
- 
+
  class ProductionClass(object):  
      def method(self, a, b, c, key):  
          pass
- 
- 
+
  def patch(module, name):  
      def _decorator(wrapped):  
          class Wrapper(object):  
@@ -384,22 +340,17 @@ I therefore leave you with one final example to get you thinking about the ways 
                  self.args = args  
                  self.kwargs = kwargs  
                  return wrapped(*args, **kwargs)
- 
- 
+
          wrapper = Wrapper()
- 
- 
+
          @wrapper  
          def _wrapper():  
              return wrapped(wrapper)
- 
- 
+
          return _wrapper
- 
- 
+
      return _decorator
- 
- 
+
  @patch(__name__, 'ProductionClass.method')  
  def test_method(mock_method):  
      real = ProductionClass()  

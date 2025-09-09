@@ -28,22 +28,18 @@ Using the [wrapt](http://wrapt.readthedocs.org) package to create the decorator 
 
 ```
  from __future__ import print_function
- 
- 
+
  from wrapt import decorator  
  from timeit import default_timer
- 
- 
+
  @decorator  
  def timed_function(wrapped, instance, args, kwargs):  
      start = default_timer()  
      print('start', wrapped.__name__)
- 
- 
+
      try:  
          return wrapped(*args, **kwargs)
- 
- 
+
      finally:  
          duration = default_timer() - start  
          print('finish %s %.3fms' % (wrapped.__name__, duration*1000.0))
@@ -55,19 +51,16 @@ In the case of a WSGI application we could then apply this to the callable entry
 
 ```
  from timer1 import timed_function
- 
- 
+
  @timed_function  
  def application(environ, start_response):  
      status = '200 OK'  
      output = b'Hello World!'
- 
- 
+
      response_headers = [('Content-type', 'text/plain'),  
              ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
      return [output]
 ```
 
@@ -85,22 +78,18 @@ First up lets just add a 'sleep\(\)' call into the WSGI application. With the re
 ```
  from timer1 import timed_function  
  from time import sleep
- 
- 
+
  @timed_function  
  def application(environ, start_response):  
      status = '200 OK'  
      output = b'Hello World!'
- 
- 
+
      response_headers = [('Content-type', 'text/plain'),  
          ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
      sleep(1.0)
- 
- 
+
      return [output]
 ```
 
@@ -122,22 +111,18 @@ Another way of writing a WSGI application is as a generator. That is, rather tha
 ```
  from timer1 import timed_function  
  from time import sleep
- 
- 
+
  @timed_function  
  def application(environ, start_response):  
      status = '200 OK'  
      output = b'Hello World!'
- 
- 
+
      response_headers = [('Content-type', 'text/plain'),  
              ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
      sleep(1.0)
- 
- 
+
      yield output
 ```
 
@@ -174,42 +159,34 @@ We can therefore use this as the place for ending the timing of the request wher
 
 ```
  from __future__ import print_function
- 
- 
+
  from wrapt import decorator, ObjectProxy  
  from timeit import default_timer  
    
  class WSGIApplicationIterable1(ObjectProxy):
- 
- 
+
      def __init__(self, wrapped, name, start):  
          super(WSGIApplicationIterable1, self).__init__(wrapped)  
          self._self_name = name  
          self._self_start = start
- 
- 
+
      def close(self):  
          if hasattr(self.__wrapped__, 'close'):  
              self.__wrapped__.close()
- 
- 
+
          duration = default_timer() - self._self_start  
          print('finish %s %.3fms' % (self._self_name, duration*1000.0))
- 
- 
+
  @decorator  
  def timed_wsgi_application1(wrapped, instance, args, kwargs):  
      name = wrapped.__name__
- 
- 
+
      start = default_timer()  
      print('start', name)
- 
- 
+
      try:  
          return WSGIApplicationIterable1(wrapped(*args, **kwargs), name, start)
- 
- 
+
      except:  
          duration = default_timer() - start  
          print('finish %s %.3fms' % (name, duration*1000.0))  
@@ -225,22 +202,18 @@ Using this new decorator our test example is:
 ```
  from timer1 import timed_wsgi_application1  
  from time import sleep
- 
- 
+
  @timed_wsgi_application1  
  def application(environ, start_response):  
      status = '200 OK'  
      output = b'Hello World!'
- 
- 
+
      response_headers = [('Content-type', 'text/plain'),  
              ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
      sleep(1.0)
- 
- 
+
      yield output
 ```
 
@@ -257,47 +230,38 @@ Just to make sure that we are preserving properly the semantics for 'close\(\)' 
 
 ```
  from __future__ import print_function
- 
- 
+
  from timer1 import timed_wsgi_application1  
  from time import sleep
- 
- 
+
  class Iterable(object):  
    
      def __init__(self, output):  
          self.output = output
- 
- 
+
      def __iter__(self):  
          return self
- 
- 
+
      def next(self):  
          try:  
              return self.output.pop(0)  
          except IndexError:  
              raise StopIteration
- 
- 
+
      def close(self):  
          print('close')
- 
- 
+
  @timed_wsgi_application1  
  def application(environ, start_response):  
      status = '200 OK'  
      output = b'Hello World!'
- 
- 
+
      response_headers = [('Content-type', 'text/plain'),  
              ('Content-Length', str(len(output)))]  
      start_response(status, response_headers)
- 
- 
+
      sleep(1.0)
- 
- 
+
      return Iterable([output])
 ```
 

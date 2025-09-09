@@ -33,16 +33,13 @@ Lets create a setuid version of the executable which is owned by ‘root' and bu
 
 ```
  FROM centos:centos7
- 
- 
+
  RUN groupadd --gid 1001 app  
  RUN useradd --uid 1001 --gid app --home /app app
- 
- 
+
  RUN cp /usr/bin/id /usr/bin/id-setuid-root  
  RUN chmod 4711 /usr/bin/id-setuid-root
- 
- 
+
  WORKDIR /app  
  USER 1001
 ```
@@ -52,8 +49,7 @@ Running the original version of ‘id’ and the setuid version, we get:
 ```
  $ id  
  uid=1001(app) gid=1001(app) groups=1001(app)
- 
- 
+
  $ id-setuid-root  
  uid=1001(app) gid=1001(app) euid=0(root) groups=1001(app)
 ```
@@ -70,16 +66,13 @@ So this time to create the image we use:
 
 ```
  FROM centos:centos7
- 
- 
+
  RUN groupadd --gid 1001 app  
  RUN useradd --uid 1001 --gid app --home /app app
- 
- 
+
  RUN cp /bin/bash /bin/bash-setuid-root  
  RUN chmod 4711 /bin/bash-setuid-root
- 
- 
+
  WORKDIR /app  
  USER 1001
 ```
@@ -89,11 +82,9 @@ Running our setuid version of bash though, we don’t get what we expected.
 ```
  bash-4.2$ id  
  uid=1001(app) gid=1001(app) groups=1001(app)
- 
- 
+
  bash-4.2$ bash-setuid-root
- 
- 
+
  bash-setuid-root-4.2$ id  
  uid=1001(app) gid=1001(app) groups=1001(app)
 ```
@@ -108,23 +99,18 @@ Because in a Docker image we can install and configure anything we want, there i
 
 ```
  FROM centos:centos7
- 
- 
+
  RUN yum install -y sudo
- 
- 
+
  RUN groupadd --gid 1001 app  
  RUN useradd --uid 1001 --gid app --home /app app
- 
- 
+
  # Allow anyone in group 'app' to use 'sudo' without a password.  
  RUN echo '%app ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
- 
- 
+
  # Set the password for the 'root' user to be an empty string.  
  RUN echo 'root:' | chpasswd
- 
- 
+
  WORKDIR /app  
  USER 1001
 ```
@@ -134,11 +120,9 @@ With this we can very easily get an interactive shell as the ‘root’ user usi
 ```
  $ id  
  uid=1001(app) gid=1001(app) groups=1001(app)
- 
- 
+
  $ sudo -s
- 
- 
+
  # id  
  uid=0(root) gid=0(root) groups=0(root)
 ```
@@ -148,12 +132,10 @@ We can also just login as the ‘root’ user, supplying our empty password.
 ```
  $ id  
  uid=1001(app) gid=1001(app) groups=1001(app)
- 
- 
+
  $ su root  
  Password:
- 
- 
+
  # id  
  uid=0(root) gid=0(root) groups=0(root)
 ```

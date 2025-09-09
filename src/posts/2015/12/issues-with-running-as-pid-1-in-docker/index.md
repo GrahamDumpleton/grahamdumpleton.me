@@ -62,16 +62,13 @@ In order to delve more into this issue and in particular its relevance to when r
 
 ```
  from __future__ import print_function
- 
- 
+
  import os
- 
- 
+
  def orphan():  
      print('orphan: %d' % os.getpid())  
      os._exit(0)
- 
- 
+
  def child():  
      print('child: %d' % os.getpid())  
      newpid = os.fork()  
@@ -82,8 +79,7 @@ In order to delve more into this issue and in particular its relevance to when r
          pids = (os.getpid(), newpid)  
          print("child: %d, orphan: %d" % pids)  
          os._exit(0)
- 
- 
+
  def parent():  
       newpid = os.fork()  
       if newpid == 0:  
@@ -98,19 +94,15 @@ In order to delve more into this issue and in particular its relevance to when r
      output = b'Hello World!'  
      response_headers = [('Content-type', 'text/plain'),  
                          ('Content-Length', str(len(output)))]
- 
- 
+
      start_response(status, response_headers)
- 
- 
+
      parent()
- 
- 
+
      return [output]  
    
  from wsgiref.simple_server import make_server
- 
- 
+
  httpd = make_server('', 8000, application)  
  httpd.serve_forever()
 ```
@@ -258,8 +250,7 @@ The contents of the ’start.sh’ script might then be:
 
 ```
  #!/bin/sh
- 
- 
+
  python server_wsgiref.py
 ```
 
@@ -275,8 +266,7 @@ Whenever using a shell script as a ‘CMD’ like this, you should always ensure
 
 ```
  #!/bin/sh
- 
- 
+
  exec python server_wsgiref.py
 ```
 
@@ -298,21 +288,17 @@ One can attempt to catch signals in the shell script and forward them on, but th
 
 ```
  #!/bin/sh
- 
- 
+
  trap 'kill -TERM $PID' TERM INT
- 
- 
+
  python server_wsgiref.py &
- 
- 
+
  PID=$!  
  wait $PID  
  trap - TERM INT  
  wait $PID  
  STATUS=$?
- 
- 
+
  exit $STATUS
 ```
 

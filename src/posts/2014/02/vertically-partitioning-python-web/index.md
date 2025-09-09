@@ -64,15 +64,12 @@ Take for example admin URLs in Django. If these are indeed infrequently used but
  WSGIDaemonProcess main processes=5 threads=5  
  WSGIDaemonProcess admin processes=1 threads=3 \  
      inactivity-timeout=30 maximum-requests=20
- 
- 
+
  WSGIApplicationGroup %{GLOBAL}  
  WSGIProcessGroup main
- 
- 
+
  WSGIScriptAlias / /some/path/wsgi.py
- 
- 
+
  <Location /admin>  
  WSGIProcessGroup admin  
  </Location>
@@ -99,25 +96,20 @@ You might therefore have the following:
  WSGIDaemonProcess volume processes=3 threads=5  
  WSGIDaemonProcess admin processes=1 threads=3 \  
      inactivity-timeout=30 maximum-requests=20
- 
- 
+
  WSGIApplicationGroup %{GLOBAL}  
  WSGIProcessGroup main
- 
- 
+
  WSGIScriptAlias / /some/path/wsgi.py
- 
- 
+
  <Location ~ "^/$">  
  WSGIProcessGroup volume  
  </Location>
- 
- 
+
  <Location /publications/article/>  
  WSGIProcessGroup volume  
  </Location>
- 
- 
+
  <Location /admin>  
  WSGIProcessGroup admin  
  </Location>
@@ -167,30 +159,24 @@ In the case of Apache/mod\_wsgi, WSGI environ key/value pairs can be set using t
  WSGIDaemonProcess volume processes=3 threads=5  
  WSGIDaemonProcess admin processes=1 threads=3 \  
      inactivity-timeout=30 maximum-requests=20
- 
- 
+
  WSGIApplicationGroup %{GLOBAL}  
  WSGIProcessGroup main
- 
- 
+
  SetEnv newrelic.app_name 'My Site (main);My Site'
- 
- 
+
  WSGIScriptAlias / /some/path/wsgi.py
- 
- 
+
  <Location ~ "^/$">  
  WSGIProcessGroup volume  
  SetEnv newrelic.app_name 'MySite (volume);My Site'  
  </Location>
- 
- 
+
  <Location /publications/article/>  
  WSGIProcessGroup volume  
  SetEnv newrelic.app_name 'MySite (volume);My Site'  
  </Location>
- 
- 
+
  <Location /admin>  
  WSGIProcessGroup admin  
  SetEnv newrelic.app_name 'MySite (admin);My Site'  

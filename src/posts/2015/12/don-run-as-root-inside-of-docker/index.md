@@ -41,8 +41,7 @@ For this demonstration I am going to use Docker Toolbox on MacOS X. The ‘docke
   Git commit: a34a1d5  
   Built: Fri Nov 20 17:56:04 UTC 2015  
   OS/Arch: darwin/amd64
- 
- 
+
  Server:  
   Version: 1.9.1  
   API version: 1.21  

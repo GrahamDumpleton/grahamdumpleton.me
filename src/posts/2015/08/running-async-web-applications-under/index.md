@@ -42,8 +42,7 @@ The contents of the ‘hello.wsgi’ file might then be:
      output = 'Hello World!'  
    
      response_headers = [('Content-type', 'text/plain'),
- 
- 
+
              ('Content-Length', str(len(output)))]  
    
      start_response(status, response_headers)  
@@ -66,8 +65,7 @@ The alternative is to embed the WSGI server in the Python web application code f
      start_response(status, response_headers)  
    
      return [output]
- 
- 
+
  if __name__ == '__main__':  
      from wsgiref.simple_server import make_server  
      httpd = make_server('', 8000, application)  
@@ -105,18 +103,15 @@ A simple ASYNC Tornado web application would be written as:
 ```
  import tornado.ioloop  
  import tornado.web
- 
- 
+
  class MainHandler(tornado.web.RequestHandler):  
      def get(self):  
          self.write("Hello World!")
- 
- 
+
  application = tornado.web.Application([  
      (r"/", MainHandler),  
  ])
- 
- 
+
  if __name__ == "__main__":  
      application.listen(8000)  
      tornado.ioloop.IOLoop.current().start()
@@ -151,26 +146,21 @@ The modified Tornado web application which you add to the ‘app.py’ file you 
 
 ```
  import os
- 
- 
+
  import tornado.ioloop  
  import tornado.web
- 
- 
+
  class MainHandler(tornado.web.RequestHandler):  
      def get(self):  
          self.write("Hello World!")
- 
- 
+
  application = tornado.web.Application([  
      (r"/", MainHandler),  
  ])
- 
- 
+
  port = int(os.environ.get('OPENSHIFT_PYTHON_PORT', '8000'))  
  ip = os.environ.get('OPENSHIFT_PYTHON_IP', 'localhost')
- 
- 
+
  if __name__ == "__main__":  
      application.listen(port, ip)  
      tornado.ioloop.IOLoop.current().start()

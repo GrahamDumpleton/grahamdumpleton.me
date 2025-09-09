@@ -44,16 +44,14 @@ If we use this from an IPython notebook when a random user ID has been assigned 
  <ipython-input-3-3a0a5fbe1d4e> in <module>()  
        1 import getpass  
  ----> 2 name = getpass.getuser()
- 
- 
+
  /usr/lib/python2.7/getpass.pyc in getuser()  
      156 # If this fails, the exception will "explain" why  
      157 import pwd  
  --> 158 return pwd.getpwuid(os.getuid())[0]  
      159   
      160 # Bind the name getpass to the appropriate function
- 
- 
+
  KeyError: 'getpwuid(): uid not found: 10000'
 ```
 
@@ -82,24 +80,19 @@ You may be thinking, why bother with the ‘getuser\(\)’ function if one could
 ```
  def getuser():  
      """Get the username from the environment or password database.
- 
- 
+
      First try various environment variables, then the password  
      database. This works on Windows as long as USERNAME is set.
- 
- 
+
      """
- 
- 
+
      import os
- 
- 
+
      for name in ('LOGNAME', 'USER', 'LNAME', 'USERNAME'):  
          user = os.environ.get(name)  
          if user:  
              return user
- 
- 
+
      # If this fails, the exception will "explain" why  
      import pwd  
      return pwd.getpwuid(os.getuid())[0]
@@ -139,19 +132,15 @@ The general steps therefore are something like:
 ```
  ipython@3d0c5ea773a3:/tmp$ whoami  
  ipython
- 
- 
+
  ipython@3d0c5ea773a3:/tmp$ id  
  uid=1001(ipython) gid=0(root) groups=0(root)
- 
- 
+
  ipython@3d0c5ea773a3:/tmp$ echo "magic:x:1001:0:magic gecos:/home/ipython:/bin/bash" > passwd
- 
- 
+
  ipython@3d0c5ea773a3:/tmp$ LD_PRELOAD=/usr/local/lib64/libnss_wrapper.so NSS_WRAPPER_PASSWD=passwd NSS_WRAPPER_GROUP=/etc/group id  
  uid=1001(magic) gid=0(root) groups=0(root)
- 
- 
+
  ipython@3d0c5ea773a3:/tmp$ LD_PRELOAD=/usr/local/lib64/libnss_wrapper.so NSS_WRAPPER_PASSWD=passwd NSS_WRAPPER_GROUP=/etc/group whoami  
  magic
 ```
@@ -232,35 +221,27 @@ The actual ‘entrypoint.sh’ we will specify as:
 
 ```
  #!/bin/sh
- 
- 
+
  # Override user ID lookup to cope with being randomly assigned IDs using  
  # the -u option to 'docker run'.
- 
- 
+
  USER_ID=$(id -u)
- 
- 
+
  if [ x"$USER_ID" != x"0" -a x"$USER_ID" != x"1001" ]; then  
      NSS_WRAPPER_PASSWD=/tmp/passwd.nss_wrapper  
      NSS_WRAPPER_GROUP=/etc/group
- 
- 
+
      cat /etc/passwd | sed -e ’s/^ipython:/builder:/' > $NSS_WRAPPER_PASSWD
- 
- 
+
      echo "ipython:x:$USER_ID:0:IPython,,,:/home/ipython:/bin/bash" >> $NSS_WRAPPER_PASSWD
- 
- 
+
      export NSS_WRAPPER_PASSWD  
      export NSS_WRAPPER_GROUP
- 
- 
+
      LD_PRELOAD=/usr/local/lib64/libnss_wrapper.so  
      export LD_PRELOAD  
  fi
- 
- 
+
  exec tini -- "$@"
 ```
 

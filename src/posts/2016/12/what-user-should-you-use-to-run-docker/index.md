@@ -34,20 +34,15 @@ Following the above guidelines, the skeleton for the Dockerfile would look like:
 
 ```
  FROM centos:centos7
- 
- 
+
  RUN groupadd --gid 1001 app
- 
- 
+
  RUN useradd --uid 1001 --gid app --home /app app
- 
- 
+
  COPY . /app
- 
- 
+
  WORKDIR /app
- 
- 
+
  USER app
 ```
 
@@ -95,23 +90,17 @@ To illustrate the problem, consider the changed Dockerfile as follows:
 
 ```
  FROM centos:centos7
- 
- 
+
  RUN groupadd --gid 1001 app
- 
- 
+
  RUN useradd --uid 1001 --gid app --home /app app
- 
- 
+
  RUN sed -i -e 's/1001/0/g' /etc/passwd
- 
- 
+
  COPY . /app
- 
- 
+
  WORKDIR /app
- 
- 
+
  USER app
 ```
 
@@ -147,23 +136,17 @@ The solution is not to use a name, but the actual UNIX user ID with the â€˜USERâ
 
 ```
  FROM centos:centos7
- 
- 
+
  RUN groupadd --gid 1001 app
- 
- 
+
  RUN useradd --uid 1001 --gid app --home /app app
- 
- 
+
  RUN sed -i -e 's/1001/0/g' /etc/passwd
- 
- 
+
  COPY . /app
- 
- 
+
  WORKDIR /app
- 
- 
+
  USER 1001
 ```
 

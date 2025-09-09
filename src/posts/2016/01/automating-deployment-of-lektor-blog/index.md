@@ -103,8 +103,7 @@ The ‘s2i’ program is now run, supplying it the location of the source files,
  Cleaning up...  
    
  
- 
- 
+
  $ docker images  
  REPOSITORY TAG IMAGE ID CREATED VIRTUAL SIZE  
  my-python-app latest beda88ceb3ad 14 minutes ago 444.1 MB
@@ -174,8 +173,7 @@ If we were running on our normal machine at this point and not using Docker, the
  Started prune  
  Finished prune in 0.00 sec  
   
- 
- 
+
  $ mod_wsgi-express start-server --application-type static --document-root /tmp/data  
  Server URL : http://localhost:8000/  
  Server Root : /tmp/mod_wsgi-localhost:8000:502  
@@ -204,14 +202,11 @@ The existing Docker base image for Python web applications is on the Docker Hub 
  # grahamdumpleton/mod-wsgi-docker-s2i:python-2.7  
    
  FROM grahamdumpleton/mod-wsgi-docker:python-2.7
- 
- 
+
  USER 1001
- 
- 
+
  EXPOSE 80
- 
- 
+
  CMD [ "/usr/local/s2i/bin/usage" ]
 ```
 
@@ -221,11 +216,9 @@ For our Lektor S2I builder image, what we are now going to use is the following 
  # grahamdumpleton/s2i-lektor:1.1  
    
  FROM grahamdumpleton/mod-wsgi-docker-s2i:python-2.7
- 
- 
+
  RUN pip install Lektor==1.1
- 
- 
+
  COPY .whiskey /app/.whiskey/
 ```
 
@@ -285,8 +278,7 @@ A Docker image corresponding to Lektor 1.1 is also already up on the Docker Hub 
  Finished build in 0.08 sec  
  Started prune  
  Finished prune in 0.00 sec
- 
- 
+
  $ docker run --rm -p 8080:80 my-lektor-site  
  ---> Executing the start up script  
  [Sun Jan 17 12:28:03.698888 2016] [mpm_event:notice] [pid 17:tid 140541365122816] AH00489: Apache/2.4.18 (Unix) mod_wsgi/4.4.21 Python/2.7.11 configured -- resuming normal operations  
@@ -307,28 +299,22 @@ Testing our site with ‘curl’ we get:
   <nav>  
   <ul class="nav navbar-nav">  
   <li class="active"><a href="./">Welcome</a></li>
- 
- 
+
  <li><a href="./blog/">Blog</a></li>
- 
- 
+
  <li><a href="./projects/">Projects</a></li>
- 
- 
+
  <li><a href="./about/">About</a></li>
- 
- 
+
  </ul>  
   </nav>  
   </header>  
   <div class="page">
- 
- 
+
  <h2>Welcome to Empty Site!</h2>  
   <p>This is a basic demo website that shows how to use Lektor for a basic  
  website with some pages and a blog.</p>
- 
- 
+
    
   </div>  
   <footer>  
@@ -369,8 +355,7 @@ Under OpenShift, all I need to do to deploy my Lektor based blog site is:
   Run 'oc status' to view your app.  
    
  
- 
- 
+
  $ oc expose service blog  
  route "blog" exposed
 ```
