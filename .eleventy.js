@@ -11,12 +11,6 @@ module.exports = function(eleventyConfig) {
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   });
   
-  // Add comments collection
-  eleventyConfig.addCollection("comments", function(collectionApi) {
-    return collectionApi.getFilteredByGlob("src/posts/*/comments/*.md")
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
-  });
-  
   // Add filters
   eleventyConfig.addFilter("date", function(date, format) {
     const dateObj = new Date(date);
@@ -81,12 +75,6 @@ module.exports = function(eleventyConfig) {
     };
     
     return md.render(content);
-  });
-
-  // Add global data for comments configuration
-  eleventyConfig.addGlobalData("commentsEnabled", function() {
-    // Check if comments should be disabled via environment variable or config
-    return process.env.DISABLE_COMMENTS !== 'true';
   });
 
   return {
