@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.ht
 post_id: "3084268953823503186"
 blog_id: "2363643920942057324"
 tags: ['docker', 'gunicorn', 'ipython', 'mod_wsgi', 'openshift', 'python', 'uWSGI', 'wsgi']
-images: ['image_38807.png', 'image_44769.png', 'image_73364.png', 'image_70627.png', 'image_44769.png', 'image_44002.png', 'image_82063.png']
+images: ['image_8114d81e.png', 'image_5c0571c4.png', 'image_e57c8e21.png', 'image_a451f783.png', 'image_5c0571c4.png', 'image_4bba7342.png', 'image_5da57afe.png']
 comments: 0
 published_timestamp: "2015-12-29T12:44:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -36,7 +36,7 @@ Now you may be thinking, what does this have to do with Docker, after all, aren�
 
 This is true, and if you were to run a Docker container which executed a simple single process Python web server, if you look at the process tree on the Docker host using ‘top’ you will see:
 
-![Docker host top wsgiref idle](image_38807.png)
+![Docker host top wsgiref idle](image_8114d81e.png)
 
 Process ID ‘26196’ here actually corresponds to the process created from the command that we used as the ‘CMD’ in the ‘Dockerfile’ for the Docker image.
 
@@ -46,7 +46,7 @@ The reason is that if we were to instead look at what processes are running insi
 
 Further, rather than those processes using the same process ID as they are really running as when viewed from outside of the container, the process IDs have been remapped. In particular, processes created inside of the container, when viewed from within the container, have process IDs starting at 1.
 
-![Docker container top wsgiref idle](image_44769.png)
+![Docker container top wsgiref idle](image_5c0571c4.png)
 
 Thus the very first process created due to the execution of what is given by ‘CMD’ will be identified as having process ID 1. This process is still though the same as identified by process ID ‘26196’ when viewed from the Docker host.
 
@@ -116,13 +116,13 @@ The way the test runs is that each time a web request is received, the web appli
 
 Building this test application into a Docker image, with no ‘ENTRYPOINT’ defined and only a ‘CMD’ which runs the Python test file application, when we hit it with half a dozen requests, what we then see from inside of the Docker container is:
 
-![Docker container top wsgiref multi](image_73364.png)
+![Docker container top wsgiref multi](image_e57c8e21.png)
 
 For a WSGI server implemented using the ‘wsgiref’ module from the Python standard library, this indicates that no reaping of the zombie process is occurring. Specifically, you can see how our web application process running as process ID ‘1’ now has various child processes associated with it where the status of each process is ‘Z’ indicating it is a zombie process waiting to be reaped. Even if we wait some time, these zombie processes never go away.
 
 If we look at the processes from the Docker host we see the same thing.
 
-![Docker host top wsgiref multi](image_70627.png)
+![Docker host top wsgiref multi](image_a451f783.png)
 
 This therefore confirms what was described, which is that the orphaned processes will be reparented against what is process ID ‘1’ within the container, rather than what is process ID ‘1’ outside of the container.
 
@@ -211,7 +211,7 @@ The recommended way of using ‘CMD’ in a ‘Dockerfile’ would be to write:
 
 This is what was used above where we saw within the Docker container.
 
-![Docker container top wsgiref idle](image_44769.png)
+![Docker container top wsgiref idle](image_5c0571c4.png)
 
 As has already been explained, this results in our application running as process ID ‘1’.
 
@@ -224,7 +224,7 @@ Our application still runs, but this isn’t doing the same thing as when we sup
 
 The result in this case is:
 
-![Docker container top wsgiref shell](image_44002.png)
+![Docker container top wsgiref shell](image_4bba7342.png)
 
 With this way of specifying the ‘CMD’ our application is no longer running as process ID ‘1’. Instead process ID ‘1’ is occupied by an instance of ‘/bin/sh’.
 
@@ -256,7 +256,7 @@ The contents of the ’start.sh’ script might then be:
 
 Using this approach, what we end up with is:
 
-![Docker container top wsgiref entrypoint](image_82063.png)
+![Docker container top wsgiref entrypoint](image_5da57afe.png)
 
 Our script is listed as process ID ‘1’, although it is in reality still an instance of ‘/bin/sh’.
 

@@ -20,6 +20,7 @@ import re
 import html2text
 import requests
 from urllib.parse import urlparse
+import hashlib
 
 
 def download_image(image_url, output_dir, overwrite=False):
@@ -39,9 +40,10 @@ def download_image(image_url, output_dir, overwrite=False):
         parsed_url = urlparse(image_url)
         filename = Path(parsed_url.path).name
         
-        # If no filename in URL, generate one
+        # If no filename in URL, generate one using MD5 hash for consistency
         if not filename or '.' not in filename:
-            filename = f"image_{hash(image_url) % 100000}.png"
+            url_hash = hashlib.md5(image_url.encode('utf-8')).hexdigest()[:8]
+            filename = f"image_{url_hash}.png"
         
         # Ensure the filename is safe
         filename = re.sub(r'[^\w\-_\.]', '_', filename)

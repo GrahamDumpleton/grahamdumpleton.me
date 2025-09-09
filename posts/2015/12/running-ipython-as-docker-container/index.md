@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2015/12/running-ipython-as-docker-container.html"
 post_id: "3822250118475879041"
 blog_id: "2363643920942057324"
 tags: ['docker', 'ipython', 'openshift', 'python']
-images: ['image_42528.png', 'image_49913.png', 'image_91729.png']
+images: ['image_6cd80761.png', 'image_2a075c99.png', 'image_07346264.png']
 comments: 2
 published_timestamp: "2015-12-18T15:37:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -20,7 +20,7 @@ Having worked through the various issues I thought it would be interesting to go
 
 The first place that everyone goes if they are looking for a Docker image for a specific purpose is the [Docker Hub Registry](https://hub.docker.com). If we lookup up IPython what we find is five different images being provided by the IPython project itself. Some of these are more popular that others, so what is the difference.
 
-![DockerHubIPython](image_42528.png)
+![DockerHubIPython](image_6cd80761.png)
 
 The first one listed is '[ipython/nbviewer](https://hub.docker.com/r/ipython/nbviewer/)’. This is described as being the 'Jupyter Notebook Viewer’, the web application behind 'The Jupyter Notebook Viewer’ hosted by Rackspace.
 
@@ -35,7 +35,7 @@ The instructions for running ‘ipython/nbviewer’ with Docker are:
 
 When run it will present you with what you would see when you use the ‘[nbviewer.ipython.org](http://nbviewer.ipython.org)’ site. You can then enter in a URL, GitHub user name, GitHub repository or a Gist ID.
 
-![JupyterNotebookViewer](image_49913.png)
+![JupyterNotebookViewer](image_2a075c99.png)
 
 It will then either display the static IPython notebook or a browser which allows you to then navigate to the location of the IPython notebook and select it.
 
@@ -137,7 +137,7 @@ If your files aren’t on the Docker host or otherwise can’t be mounted, you w
 
 That all said, when we finally run the Docker image it starts up fine and we see the familiar browser for the workspace and can create a new IPython notebook and start working.
 
-![IPythonNotebookHome](image_91729.png)
+![IPythonNotebookHome](image_07346264.png)
 
 Lets now try the 'jupyter/notebook’ image on OpenShift. This time we use the command:
 

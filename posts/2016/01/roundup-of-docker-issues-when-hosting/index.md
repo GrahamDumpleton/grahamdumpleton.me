@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2016/01/roundup-of-docker-issues-when-hosting.htm
 post_id: "5905550283187646322"
 blog_id: "2363643920942057324"
 tags: ['docker', 'ipython', 'openshift', 'python']
-images: ['image_38682.png']
+images: ['image_dbad230a.png']
 comments: 0
 published_timestamp: "2016-01-04T15:04:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -91,6 +91,6 @@ To test whether whatever process is running inside of the Docker container as pr
 
 If after waiting the 10 seconds for the ‘sleep’ to finish, you find a zombie process as child to process ID ‘1’, then whatever you are running as process ID ‘1’ is not reaping child processes correctly.
 
-![Docker container top wsgiref sleep](image_38682.png)
+![Docker container top wsgiref sleep](image_dbad230a.png)
 
 These therefore are two simple tests you can do to make sure your own Docker images can run as a non privileged user and that you will not have issues due to zombie processes. Have issues and you perhaps should look through the prior blog posts as to what changes you need to look at making.
