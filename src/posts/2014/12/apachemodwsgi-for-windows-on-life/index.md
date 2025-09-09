@@ -101,11 +101,13 @@ If you are, then the latest mod\_wsgi source code can be found on github at:
 The source code has a 'win32' subdirectory. You need to create a Visual Studio 2008 Command Prompt window and get yourself into that directory. You can then build specific Apache/Python versions by running:
 
 ```
-    nmake -f ap24py33.mk clean
-
-    nmake -f ap24py33.mk
-
-    nmake -f ap24py33.mk install
+ nmake -f ap24py33.mk clean
+ 
+ 
+ nmake -f ap24py33.mk
+ 
+ 
+ nmake -f ap24py33.mk install
 ```
 
 Just point at the appropriate makefile.

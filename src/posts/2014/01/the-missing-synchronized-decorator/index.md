@@ -31,9 +31,9 @@ The equivalent synchronization primitive from Java comes in two forms. These are
 In Java, to make a method synchronized, you simply add the synchronized keyword to its declaration:  
 
 
-```python
-public class SynchronizedCounter \{  
- private int c = 0; 
+```
+> public class SynchronizedCounter \{  
+>  private int c = 0; 
 ```
 
 > public synchronized void increment\(\) \{  
@@ -67,12 +67,12 @@ The second way to create synchronized code in Java is with synchronized statemen
 Of note is that in Java one can use any object as the source of the lock, it is not necessary to create an instance of a specific lock type to synchronize on. If more fined grained locking is required within a class one can simply create or use an existing arbitrary object to synchronize on.  
 
 
-```python
-public class MsLunch \{  
- private long c1 = 0;  
- private long c2 = 0;  
- private Object lock1 = new Object\(\);  
- private Object lock2 = new Object\(\); 
+```
+> public class MsLunch \{  
+>  private long c1 = 0;  
+>  private long c2 = 0;  
+>  private Object lock1 = new Object\(\);  
+>  private Object lock2 = new Object\(\); 
 ```
 
 > public void inc1\(\) \{  
@@ -100,23 +100,23 @@ In Python it isn't possible to synchronize off an arbitrary object. Instead it i
 Since context managers were introduced to Python however, locks also support being used in conjunction with the 'with' statement. Using this specific feature, the typical recipe given for implementing a @synchronized decorator for Python is:  
 
 
-```python
-def synchronized\(lock=None\):  
- def \_decorator\(wrapped\):  
- @functools.wraps\(wrapped\)  
- def \_wrapper\(\*args, \*\*kwargs\):  
- with lock:  
- return wrapped\(\*args, \*\*kwargs\)  
- return \_wrapper  
- return \_decorator 
+```
+> def synchronized\(lock=None\):  
+>  def \_decorator\(wrapped\):  
+>  @functools.wraps\(wrapped\)  
+>  def \_wrapper\(\*args, \*\*kwargs\):  
+>  with lock:  
+>  return wrapped\(\*args, \*\*kwargs\)  
+>  return \_wrapper  
+>  return \_decorator 
 ```
 
 > lock = threading.RLock\(\) 
 
-```python
-@synchronized\(lock\)  
- def function\(\):  
- pass
+```
+> @synchronized\(lock\)  
+>  def function\(\):  
+>  pass
 ```
 
 Using this approach becomes annoying after a while because for every distinct function that needs to be synchronized, you have to first create a companion thread lock to go with it.  
@@ -124,81 +124,81 @@ Using this approach becomes annoying after a while because for every distinct fu
 The alternative to needing to pass in the lock object each time, is to create one automatically for each use of the decorator.  
 
 
-```python
-def synchronized\(wrapped\):  
- lock = threading.RLock\(\) 
+```
+> def synchronized\(wrapped\):  
+>  lock = threading.RLock\(\) 
 ```
 
-```python
-@functools.wraps\(wrapped\)  
- def \_wrapper\(\*args, \*\*kwargs\):  
- with lock:  
- return wrapped\(\*args, \*\*kwargs\)  
- return \_wrapper 
+```
+> @functools.wraps\(wrapped\)  
+>  def \_wrapper\(\*args, \*\*kwargs\):  
+>  with lock:  
+>  return wrapped\(\*args, \*\*kwargs\)  
+>  return \_wrapper 
 ```
 
-```python
-@synchronized  
- def function\(\):  
- pass
+```
+> @synchronized  
+>  def function\(\):  
+>  pass
 ```
 
 We can even use the pattern described previously for allowing optional decorator arguments to permit either approach.  
 
 
-```python
-def synchronized\(wrapped=None, lock=None\):  
- if wrapped is None:  
- return functools.partial\(synchronized, lock=lock\) 
+```
+> def synchronized\(wrapped=None, lock=None\):  
+>  if wrapped is None:  
+>  return functools.partial\(synchronized, lock=lock\) 
 ```
 
-```python
-if lock is None:  
- lock = threading.RLock\(\) 
+```
+> if lock is None:  
+>  lock = threading.RLock\(\) 
 ```
 
-```python
-@functools.wraps\(wrapped\)  
- def \_wrapper\(\*args, \*\*kwargs\):  
- with lock:  
- return wrapped\(\*args, \*\*kwargs\)  
- return \_wrapper 
+```
+> @functools.wraps\(wrapped\)  
+>  def \_wrapper\(\*args, \*\*kwargs\):  
+>  with lock:  
+>  return wrapped\(\*args, \*\*kwargs\)  
+>  return \_wrapper 
 ```
 
-```python
-@synchronized  
- def function1\(\):  
- pass 
+```
+> @synchronized  
+>  def function1\(\):  
+>  pass 
 ```
 
 > lock = threading.Lock\(\) 
 
-```python
-@synchronized\(lock=lock\)  
- def function2\(\):  
- pass
+```
+> @synchronized\(lock=lock\)  
+>  def function2\(\):  
+>  pass
 ```
 
 Whatever the approach, the decorator being based on a function closure suffers all the problems we have already outlined. The first step we can therefore take is to update it to use our new decorator factory instead.  
 
 
-```python
-def synchronized\(wrapped=None, lock=None\):  
- if wrapped is None:  
- return functools.partial\(synchronized, lock=lock\) 
+```
+> def synchronized\(wrapped=None, lock=None\):  
+>  if wrapped is None:  
+>  return functools.partial\(synchronized, lock=lock\) 
 ```
 
-```python
-if lock is None:  
- lock = threading.RLock\(\) 
+```
+> if lock is None:  
+>  lock = threading.RLock\(\) 
 ```
 
-```python
-@decorator  
- def \_wrapper\(wrapped, instance, args, kwargs\):  
- with lock:  
- return wrapped\(\*args, \*\*kwargs\)  
- return \_wrapper\(wrapped\)
+```
+> @decorator  
+>  def \_wrapper\(wrapped, instance, args, kwargs\):  
+>  with lock:  
+>  return wrapped\(\*args, \*\*kwargs\)  
+>  return \_wrapper\(wrapped\)
 ```
 
 Because this is using our decorator factory, it also means that the same code is safe to use on instance, class or static methods as well.  
@@ -223,35 +223,35 @@ In doing this the issue is where can we store the thread lock. The only options 
 Lets first consider the case of a normal function. In that case what we can do is store the required thread lock on the wrapped function object itself.  
 
 
-```python
-@decorator  
- def synchronized\(wrapped, instance, args, kwargs\):  
- lock = vars\(wrapped\).get\('\_synchronized\_lock', None\) 
+```
+> @decorator  
+>  def synchronized\(wrapped, instance, args, kwargs\):  
+>  lock = vars\(wrapped\).get\('\_synchronized\_lock', None\) 
 ```
 
-```python
-if lock is None:  
- lock = vars\(wrapped\).setdefault\('\_synchronized\_lock', threading.RLock\(\)\) 
+```
+> if lock is None:  
+>  lock = vars\(wrapped\).setdefault\('\_synchronized\_lock', threading.RLock\(\)\) 
 ```
 
-```python
-with lock:  
- return wrapped\(\*args, \*\*kwargs\) 
+```
+> with lock:  
+>  return wrapped\(\*args, \*\*kwargs\) 
 ```
 
-```python
-@synchronized  
- def function\(\):  
- pass 
+```
+> @synchronized  
+>  def function\(\):  
+>  pass 
 ```
 
-```bash
->>> function\(\) 
+```
+> >>> function\(\) 
 ```
 
-```bash
->>> function.\_synchronized\_lock  
- <\_RLock owner=None count=0>
+```
+> >>> function.\_synchronized\_lock  
+>  <\_RLock owner=None count=0>
 ```
 
 A key issue we have to deal with in doing this is how to create the thread lock the first time it is required. To do that the first thing we need do is to see if we already have created a thread lock.  
@@ -277,58 +277,58 @@ The simple solution is that we use the fact that this is what we are calling a u
 Specifically, what we want to do is detect when we are being used on an instance method or class method, and store the lock on the object passed as the 'instance' argument instead.  
 
 
-```python
-@decorator  
- def synchronized\(wrapped, instance, args, kwargs\):  
- if instance is None:  
- context = vars\(wrapped\)  
- else:  
- context = vars\(instance\) 
+```
+> @decorator  
+>  def synchronized\(wrapped, instance, args, kwargs\):  
+>  if instance is None:  
+>  context = vars\(wrapped\)  
+>  else:  
+>  context = vars\(instance\) 
 ```
 
 > lock = context.get\('\_synchronized\_lock', None\) 
 
-```python
-if lock is None:  
- lock = context.setdefault\('\_synchronized\_lock', threading.RLock\(\)\) 
+```
+> if lock is None:  
+>  lock = context.setdefault\('\_synchronized\_lock', threading.RLock\(\)\) 
 ```
 
-```python
-with lock:  
- return wrapped\(\*args, \*\*kwargs\)
+```
+> with lock:  
+>  return wrapped\(\*args, \*\*kwargs\)
 ```
 
-```python
-class Object\(object\):  
- @synchronized  
- def method\_im\(self\):  
- pass 
+```
+> class Object\(object\):  
+>  @synchronized  
+>  def method\_im\(self\):  
+>  pass 
 ```
 
-```python
-@synchronized  
- @classmethod  
- def method\_cm\(cls\):  
- pass
+```
+> @synchronized  
+>  @classmethod  
+>  def method\_cm\(cls\):  
+>  pass
 ```
 
 > o1 = Object\(\)  
 >  o2 = Object\(\) 
 
-```bash
->>> o1.method\_im\(\)  
- >>> o1.\_synchronized\_lock  
- <\_RLock owner=None count=0>  
- >>> id\(o1.\_synchronized\_lock\)  
- 4386605392 
+```
+> >>> o1.method\_im\(\)  
+>  >>> o1.\_synchronized\_lock  
+>  <\_RLock owner=None count=0>  
+>  >>> id\(o1.\_synchronized\_lock\)  
+>  4386605392 
 ```
 
-```bash
->>> o2.method\_im\(\)  
- >>> o2.\_synchronized\_lock  
- <\_RLock owner=None count=0>  
- >>> id\(o2.\_synchronized\_lock\)  
- 4386605456
+```
+> >>> o2.method\_im\(\)  
+>  >>> o2.\_synchronized\_lock  
+>  <\_RLock owner=None count=0>  
+>  >>> id\(o2.\_synchronized\_lock\)  
+>  4386605456
 ```
 
 This simple change has actually achieved the result we desired. If the synchronized decorator is used on a normal function then the thread lock will be stored on the function itself and it will stand alone and only be synchronized with calls to the same function.  
@@ -340,15 +340,15 @@ Now what about that class method. In this case the instance argument is actually
 Does the code work though for a class method?  
 
 
-```bash
->>> Object.method\_cm\(\)  
- Traceback \(most recent call last\):  
- File "<stdin>", line 1, in <module>  
- File "test.py", line 38, in \_\_call\_\_  
- return self.wrapper\(self.wrapped, instance, args, kwargs\)  
- File "synctest.py", line 176, in synchronized  
- lock = context.setdefault\('\_synchronized\_lock',  
- AttributeError: 'dictproxy' object has no attribute 'setdefault'
+```
+> >>> Object.method\_cm\(\)  
+>  Traceback \(most recent call last\):  
+>  File "<stdin>", line 1, in <module>  
+>  File "test.py", line 38, in \_\_call\_\_  
+>  return self.wrapper\(self.wrapped, instance, args, kwargs\)  
+>  File "synctest.py", line 176, in synchronized  
+>  lock = context.setdefault\('\_synchronized\_lock',  
+>  AttributeError: 'dictproxy' object has no attribute 'setdefault'
 ```
 
 Unfortunately not.  
@@ -360,20 +360,20 @@ We therefore need a different way of synchronizing the creation of the thread lo
 We also have another issue due to a dictproxy being used. That is that dictproxy doesn't support item assignment.  
 
 
-```bash
->>> vars\(Object\)\['\_synchronized\_lock'\] = threading.RLock\(\)  
- Traceback \(most recent call last\):  
- File "<stdin>", line 1, in <module>  
- TypeError: 'dictproxy' object does not support item assignment
+```
+> >>> vars\(Object\)\['\_synchronized\_lock'\] = threading.RLock\(\)  
+>  Traceback \(most recent call last\):  
+>  File "<stdin>", line 1, in <module>  
+>  TypeError: 'dictproxy' object does not support item assignment
 ```
 
 What it does still support though is attribute assignment.  
 
 
-```bash
->>> setattr\(Object, '\_synchronized\_lock', threading.RLock\(\)\)  
- >>> Object.\_synchronized\_lock  
- <\_RLock owner=None count=0>
+```
+> >>> setattr\(Object, '\_synchronized\_lock', threading.RLock\(\)\)  
+>  >>> Object.\_synchronized\_lock  
+>  <\_RLock owner=None count=0>
 ```
 
 and since both function objects and class instances do as well, we will need to switch to that method of updating attributes.  
@@ -386,37 +386,37 @@ and since both function objects and class instances do as well, we will need to 
 As to an alternative for using dict.setdefault\(\) as an atomic way of setting the lock the first time, what we can do instead is use a meta thread lock stored on the @synchronized decorator itself. With this we still have the issue though of ensuring that only one thread can get to set it. We therefore use dict.setdefault\(\) to control creation of the meta lock at least.  
 
 
-```python
-@decorator  
- def synchronized\(wrapped, instance, args, kwargs\):  
- if instance is None:  
- owner = wrapped  
- else:  
- owner = instance 
+```
+> @decorator  
+>  def synchronized\(wrapped, instance, args, kwargs\):  
+>  if instance is None:  
+>  owner = wrapped  
+>  else:  
+>  owner = instance 
 ```
 
 > lock = vars\(owner\).get\('\_synchronized\_lock', None\) 
 
-```python
-if lock is None:  
- meta\_lock = vars\(synchronized\).setdefault\(  
- '\_synchronized\_meta\_lock', threading.Lock\(\)\) 
+```
+> if lock is None:  
+>  meta\_lock = vars\(synchronized\).setdefault\(  
+>  '\_synchronized\_meta\_lock', threading.Lock\(\)\) 
 ```
 
-```python
-with meta\_lock:  
- lock = vars\(owner\).get\('\_synchronized\_lock', None\) 
+```
+> with meta\_lock:  
+>  lock = vars\(owner\).get\('\_synchronized\_lock', None\) 
 ```
 
-```python
-if lock is None:  
- lock = threading.RLock\(\)  
- setattr\(owner, '\_synchronized\_lock', lock\) 
+```
+> if lock is None:  
+>  lock = threading.RLock\(\)  
+>  setattr\(owner, '\_synchronized\_lock', lock\) 
 ```
 
-```python
-with lock:  
- return wrapped\(\*args, \*\*kwargs\)
+```
+> with lock:  
+>  return wrapped\(\*args, \*\*kwargs\)
 ```
 
 Note that because of the gap between checking for the existence of the lock for the wrapped function and creating the meta lock, after we have acquired the meta lock we need to once again check to see if the lock exists. This is to handle the case where two threads came into the code at the same time and are racing to be the first to create the lock.  
@@ -430,84 +430,84 @@ This would cause problems if a synchronized class method was the first to be cal
 With these changes we are now all done and all lock creation is now completely automatic, with an appropriate lock created for the different contexts the decorator is used in.  
 
 
-```python
-@synchronized  
- def function\(\):  
- pass 
+```
+> @synchronized  
+>  def function\(\):  
+>  pass 
 ```
 
-```python
-class Object\(object\):  
- @synchronized  
- def method\_im\(self\):  
- pass 
+```
+> class Object\(object\):  
+>  @synchronized  
+>  def method\_im\(self\):  
+>  pass 
 ```
 
-```python
-@synchronized  
- @classmethod  
- def method\_cm\(cls\):  
- pass 
+```
+> @synchronized  
+>  @classmethod  
+>  def method\_cm\(cls\):  
+>  pass 
 ```
 
 > o = Object\(\) 
 
-```bash
->>> function\(\)  
- >>> id\(function.\_synchronized\_lock\)  
- 4338158480 
+```
+> >>> function\(\)  
+>  >>> id\(function.\_synchronized\_lock\)  
+>  4338158480 
 ```
 
-```bash
->>> Object.method\_cm\(\)  
- >>> id\(Object.\_synchronized\_lock\)  
- 4338904656 
+```
+> >>> Object.method\_cm\(\)  
+>  >>> id\(Object.\_synchronized\_lock\)  
+>  4338904656 
 ```
 
-```bash
->>> o.method\_im\(\)  
- >>> id\(o.\_synchronized\_lock\)  
- 4338904592
+```
+> >>> o.method\_im\(\)  
+>  >>> id\(o.\_synchronized\_lock\)  
+>  4338904592
 ```
 
 The code also works for where @synchronized is used on a static method or class type. In summary, the result for the different places @synchronized can be placed is:  
 
 
-```python
-@synchronized \# lock bound to function1  
- def function1\(\):  
- pass 
+```
+> @synchronized \# lock bound to function1  
+>  def function1\(\):  
+>  pass 
 ```
 
-```python
-@synchronized \# lock bound to function2  
- def function2\(\):  
- pass 
+```
+> @synchronized \# lock bound to function2  
+>  def function2\(\):  
+>  pass 
 ```
 
-```python
-@synchronized \# lock bound to Class  
- class Class\(object\): 
+```
+> @synchronized \# lock bound to Class  
+>  class Class\(object\): 
 ```
 
-```python
-@synchronized \# lock bound to instance of Class  
- def function\_im\(self\):  
- pass 
+```
+> @synchronized \# lock bound to instance of Class  
+>  def function\_im\(self\):  
+>  pass 
 ```
 
-```python
-@synchronized \# lock bound to Class  
- @classmethod  
- def function\_cm\(cls\):  
- pass 
+```
+> @synchronized \# lock bound to Class  
+>  @classmethod  
+>  def function\_cm\(cls\):  
+>  pass 
 ```
 
-```python
-@synchronized \# lock bound to function\_sm  
- @staticmethod  
- def function\_sm\(\):  
- pass
+```
+> @synchronized \# lock bound to function\_sm  
+>  @staticmethod  
+>  def function\_sm\(\):  
+>  pass
 ```
 
   
@@ -519,20 +519,20 @@ The code also works for where @synchronized is used on a static method or class 
 So we are all done with implementing support for synchronized methods, but what about those synchronized statements. The goal here is that we want to be able to write:  
 
 
-```python
-class Object\(object\): 
+```
+> class Object\(object\): 
 ```
 
-```python
-@synchronized  
- def function\_im\_1\(self\):  
- pass 
+```
+> @synchronized  
+>  def function\_im\_1\(self\):  
+>  pass 
 ```
 
-```python
-def function\_im\_2\(self\):  
- with synchronized\(self\):  
- pass
+```
+> def function\_im\_2\(self\):  
+>  with synchronized\(self\):  
+>  pass
 ```
 
 That is, we need for 'synchronized' to not only be usable as a decorator, but for it also be able to be used as a context manager.  

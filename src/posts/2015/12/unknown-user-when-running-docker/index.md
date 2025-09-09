@@ -16,9 +16,9 @@ In the [last post](/posts/2015/12/random-user-ids-when-running-docker/) we cover
 
 A remaining issue of concern was the fact that when a random user ID is used which doesn’t correspond to an actual user account, that UNIX tools such as ‘whoami’ will not return valid results.
 
-```python
-    I have no name!@5a72c002aefb:/notebooks$ whoami  
-    whoami: cannot find name for user ID 10000
+```
+ I have no name!@5a72c002aefb:/notebooks$ whoami  
+ whoami: cannot find name for user ID 10000
 ```
 
 Up to this point this didn’t actually appear to prevent our IPython Notebook application working, but it does leave the prospect that subtle problems could arise when we start actually using IPython to do more serious work.
@@ -31,44 +31,46 @@ If we are writing Python code, there are a couple of ways using the Python stand
 
 The first way is to use the ‘getuser\(\)’ function found in the ‘getpass’ module.
 
-```python
-    import getpass  
-    name = getpass.getuser()
+```
+ import getpass  
+ name = getpass.getuser()
 ```
 
 If we use this from an IPython notebook when a random user ID has been assigned to the Docker container, like how ‘whoami’ fails, this will also fail.
 
-```python
-    ---------------------------------------------------------------------------  
-    KeyError                                  Traceback (most recent call last)  
-    <ipython-input-3-3a0a5fbe1d4e> in <module>()  
-    1 import getpass  
-    ----> 2 name = getpass.getuser()
-
-    /usr/lib/python2.7/getpass.pyc in getuser()  
-    156 # If this fails, the exception will "explain" why  
-    157 import pwd  
-    --> 158 return pwd.getpwuid(os.getuid())[0]  
-    159   
-    160 # Bind the name getpass to the appropriate function
-
-    KeyError: 'getpwuid(): uid not found: 10000'
+```
+ ---------------------------------------------------------------------------  
+ KeyError                                  Traceback (most recent call last)  
+ <ipython-input-3-3a0a5fbe1d4e> in <module>()  
+       1 import getpass  
+ ----> 2 name = getpass.getuser()
+ 
+ 
+ /usr/lib/python2.7/getpass.pyc in getuser()  
+     156 # If this fails, the exception will "explain" why  
+     157 import pwd  
+ --> 158 return pwd.getpwuid(os.getuid())[0]  
+     159   
+     160 # Bind the name getpass to the appropriate function
+ 
+ 
+ KeyError: 'getpwuid(): uid not found: 10000'
 ```
 
 The error details and traceback displayed here actually indicate the second way of getting access to the login name. In fact the ‘getuser\(\)’ function is just a high level wrapper around a lower level function for accessing user information from the system user database.
 
 We could therefore also have written:
 
-```python
-    import pwd, os  
-    name = pwd.getpwuid(os.getuid())[0]
+```
+ import pwd, os  
+ name = pwd.getpwuid(os.getuid())[0]
 ```
 
 Or being more verbose to make it more obvious what is going on:
 
-```python
-    import pwd, os  
-    name = pwd.getpwuid(os.getuid()).pw_name
+```
+ import pwd, os  
+ name = pwd.getpwuid(os.getuid()).pw_name
 ```
 
 Either way, this is still going to fail where the current user ID doesn’t match a valid user in the system user database.
@@ -77,34 +79,39 @@ Either way, this is still going to fail where the current user ID doesn’t matc
 
 You may be thinking, why bother with the ‘getuser\(\)’ function if one could use ‘pwd.getpwuid\(\)’ directly. Well it turns out that ‘getuser\(\)’ does a bit more than just act as a proxy for calling ‘pwd.getpwuid\(\)’. What it actually does is first consult various environment variables which identify the login name for the current user.
 
-```python
-    def getuser():  
-    """Get the username from the environment or password database.
-
-        First try various environment variables, then the password  
-    database. This works on Windows as long as USERNAME is set.
-
-        """
-
-        import os
-
-        for name in ('LOGNAME', 'USER', 'LNAME', 'USERNAME'):  
-    user = os.environ.get(name)  
-    if user:  
-    return user
-
-        # If this fails, the exception will "explain" why  
-    import pwd  
-    return pwd.getpwuid(os.getuid())[0]
+```
+ def getuser():  
+     """Get the username from the environment or password database.
+ 
+ 
+     First try various environment variables, then the password  
+     database. This works on Windows as long as USERNAME is set.
+ 
+ 
+     """
+ 
+ 
+     import os
+ 
+ 
+     for name in ('LOGNAME', 'USER', 'LNAME', 'USERNAME'):  
+         user = os.environ.get(name)  
+         if user:  
+             return user
+ 
+ 
+     # If this fails, the exception will "explain" why  
+     import pwd  
+     return pwd.getpwuid(os.getuid())[0]
 ```
 
 These environment variables such as ‘LOGNAME’ and ‘USER’ would normally be set by the login shell for a user. When using Docker though, a login shell isn’t used and so they are not set.
 
 For the ‘getuser\(\)’ function at least, we can therefore get it working by ensuring that as part of the Docker image build, we set one or more of these environment variables. Typically both the ‘LOGNAME’ and ‘USER’ environment variables are set, so lets do that.
 
-```dockerfile
-    ENV LOGNAME=ipython  
-    ENV USER=ipython 
+```
+ ENV LOGNAME=ipython  
+ ENV USER=ipython 
 ```
 
 Rebuilding our Docker image with this addition to the ‘Dockerfile’ and trying ‘getuser\(\)’ again from within a IPython Notebook and it does indeed now work.
@@ -129,20 +136,24 @@ The idea behind the library is that prior to starting up your application you wo
 
 The general steps therefore are something like:
 
-```bash
-    ipython@3d0c5ea773a3:/tmp$ whoami  
-    ipython
-
-    ipython@3d0c5ea773a3:/tmp$ id  
-    uid=1001(ipython) gid=0(root) groups=0(root)
-
-    ipython@3d0c5ea773a3:/tmp$ echo "magic:x:1001:0:magic gecos:/home/ipython:/bin/bash" > passwd
-
-    ipython@3d0c5ea773a3:/tmp$ LD_PRELOAD=/usr/local/lib64/libnss_wrapper.so NSS_WRAPPER_PASSWD=passwd NSS_WRAPPER_GROUP=/etc/group id  
-    uid=1001(magic) gid=0(root) groups=0(root)
-
-    ipython@3d0c5ea773a3:/tmp$ LD_PRELOAD=/usr/local/lib64/libnss_wrapper.so NSS_WRAPPER_PASSWD=passwd NSS_WRAPPER_GROUP=/etc/group whoami  
-    magic
+```
+ ipython@3d0c5ea773a3:/tmp$ whoami  
+ ipython
+ 
+ 
+ ipython@3d0c5ea773a3:/tmp$ id  
+ uid=1001(ipython) gid=0(root) groups=0(root)
+ 
+ 
+ ipython@3d0c5ea773a3:/tmp$ echo "magic:x:1001:0:magic gecos:/home/ipython:/bin/bash" > passwd
+ 
+ 
+ ipython@3d0c5ea773a3:/tmp$ LD_PRELOAD=/usr/local/lib64/libnss_wrapper.so NSS_WRAPPER_PASSWD=passwd NSS_WRAPPER_GROUP=/etc/group id  
+ uid=1001(magic) gid=0(root) groups=0(root)
+ 
+ 
+ ipython@3d0c5ea773a3:/tmp$ LD_PRELOAD=/usr/local/lib64/libnss_wrapper.so NSS_WRAPPER_PASSWD=passwd NSS_WRAPPER_GROUP=/etc/group whoami  
+ magic
 ```
 
 To integrate the use of the ‘nss\_wrapper’ package we need to do two things. The first is install the package and the second is to add a Docker entrypoint script which can generate a modified password database file and then ensure that the ‘libnss\_wrapper.so’ shared library is forcibly preloaded for all processes subsequently run.
@@ -153,58 +164,58 @@ At this point in time the ‘nss\_wrapper’ library is not available in the sta
 
 To be able to do this, we need to ensure that the system packages for ‘make’ and ‘cmake’ are available. We therefore need to add these to the list of system packages being installed.
 
-```dockerfile
-    # Python binary and source dependencies  
-    RUN apt-get update -qq && \  
-    DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \  
-    build-essential \  
-    ca-certificates \  
-    cmake \  
-    curl \  
-    git \  
-    make \  
-    language-pack-en \  
-    libcurl4-openssl-dev \  
-    libffi-dev \  
-    libsqlite3-dev \  
-    libzmq3-dev \  
-    pandoc \  
-    python \  
-    python3 \  
-    python-dev \  
-    python3-dev \  
-    sqlite3 \  
-    texlive-fonts-recommended \  
-    texlive-latex-base \  
-    texlive-latex-extra \  
-    zlib1g-dev && \  
-    apt-get clean && \  
-    rm -rf /var/lib/apt/lists/*
+```
+ # Python binary and source dependencies  
+ RUN apt-get update -qq && \  
+  DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \  
+  build-essential \  
+  ca-certificates \  
+  cmake \  
+  curl \  
+  git \  
+  make \  
+  language-pack-en \  
+  libcurl4-openssl-dev \  
+  libffi-dev \  
+  libsqlite3-dev \  
+  libzmq3-dev \  
+  pandoc \  
+  python \  
+  python3 \  
+  python-dev \  
+  python3-dev \  
+  sqlite3 \  
+  texlive-fonts-recommended \  
+  texlive-latex-base \  
+  texlive-latex-extra \  
+  zlib1g-dev && \  
+  apt-get clean && \  
+  rm -rf /var/lib/apt/lists/*
 ```
 
 We can then later on download the source package for ‘nss\_wrapper’ and install it.
 
-```dockerfile
-    # Install nss_wrapper.  
-    RUN curl -SL -o nss_wrapper.tar.gz https://ftp.samba.org/pub/cwrap/nss_wrapper-1.1.2.tar.gz && \  
-    mkdir nss_wrapper && \  
-    tar -xC nss_wrapper --strip-components=1 -f nss_wrapper.tar.gz && \  
-    rm nss_wrapper.tar.gz && \  
-    mkdir nss_wrapper/obj && \  
-    (cd nss_wrapper/obj && \  
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DLIB_SUFFIX=64 .. && \  
-    make && \  
-    make install) && \  
-    rm -rf nss_wrapper
+```
+ # Install nss_wrapper.  
+ RUN curl -SL -o nss_wrapper.tar.gz https://ftp.samba.org/pub/cwrap/nss_wrapper-1.1.2.tar.gz && \  
+  mkdir nss_wrapper && \  
+  tar -xC nss_wrapper --strip-components=1 -f nss_wrapper.tar.gz && \  
+  rm nss_wrapper.tar.gz && \  
+  mkdir nss_wrapper/obj && \  
+  (cd nss_wrapper/obj && \  
+  cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DLIB_SUFFIX=64 .. && \  
+  make && \  
+  make install) && \  
+  rm -rf nss_wrapper
 ```
 
 # Updating the Docker entrypoint
 
 At present the Docker ‘ENTRYPOINT’ and ‘CMD’ are specified in the ‘Dockerfile’ as:
 
-```dockerfile
-    ENTRYPOINT [“tini”, “--"]  
-    CMD ["jupyter", "notebook"]
+```
+ ENTRYPOINT [“tini”, “--"]  
+ CMD ["jupyter", "notebook"]
 ```
 
 The ‘CMD’ statement in this case is the actual command we want to run to start the Jupyter Notebook application.
@@ -213,36 +224,44 @@ We haven’t said anything about what the ‘tini’ program specified by the �
 
 Now because we do require ‘tini’, but we now also want to do some other work prior to actually running the ‘jupyter notebook’ command, we are going to substitute an entrypoint script in place of ‘tini’. We will call this ‘entrypoint.sh’, make it executable, and place it in the top level directory of the repository. After its copied into place, the ‘ENTRYPOINT’ specified in the ‘Dockerfile’ will then need to be:
 
-```dockerfile
-    ENTRYPOINT ["/usr/src/jupyter-notebook/entrypoint.sh"]
+```
+ ENTRYPOINT ["/usr/src/jupyter-notebook/entrypoint.sh"]
 ```
 
 The actual ‘entrypoint.sh’ we will specify as:
 
-```python
-    #!/bin/sh
-
-    # Override user ID lookup to cope with being randomly assigned IDs using  
-    # the -u option to 'docker run'.
-
-    USER_ID=$(id -u)
-
-    if [ x"$USER_ID" != x"0" -a x"$USER_ID" != x"1001" ]; then  
-    NSS_WRAPPER_PASSWD=/tmp/passwd.nss_wrapper  
-    NSS_WRAPPER_GROUP=/etc/group
-
-        cat /etc/passwd | sed -e ’s/^ipython:/builder:/' > $NSS_WRAPPER_PASSWD
-
-        echo "ipython:x:$USER_ID:0:IPython,,,:/home/ipython:/bin/bash" >> $NSS_WRAPPER_PASSWD
-
-        export NSS_WRAPPER_PASSWD  
-    export NSS_WRAPPER_GROUP
-
-        LD_PRELOAD=/usr/local/lib64/libnss_wrapper.so  
-    export LD_PRELOAD  
-    fi
-
-    exec tini -- "$@"
+```
+ #!/bin/sh
+ 
+ 
+ # Override user ID lookup to cope with being randomly assigned IDs using  
+ # the -u option to 'docker run'.
+ 
+ 
+ USER_ID=$(id -u)
+ 
+ 
+ if [ x"$USER_ID" != x"0" -a x"$USER_ID" != x"1001" ]; then  
+     NSS_WRAPPER_PASSWD=/tmp/passwd.nss_wrapper  
+     NSS_WRAPPER_GROUP=/etc/group
+ 
+ 
+     cat /etc/passwd | sed -e ’s/^ipython:/builder:/' > $NSS_WRAPPER_PASSWD
+ 
+ 
+     echo "ipython:x:$USER_ID:0:IPython,,,:/home/ipython:/bin/bash" >> $NSS_WRAPPER_PASSWD
+ 
+ 
+     export NSS_WRAPPER_PASSWD  
+     export NSS_WRAPPER_GROUP
+ 
+ 
+     LD_PRELOAD=/usr/local/lib64/libnss_wrapper.so  
+     export LD_PRELOAD  
+ fi
+ 
+ 
+ exec tini -- "$@"
 ```
 
 Note that we still execute ‘tini’ as the last step. We do this using ‘exec’ so that its process will replace the entrypoint script and take over as process ID 1, ensuring that signals get propagated properly, as well as to ensure some details related to process management are handled correctly. We will also pass on all command line arguments given to the entrypoint script to ‘tini’. The double quotes around the arguments reference ensure that argument quoting is handled properly when passing through arguments.
@@ -257,33 +276,33 @@ The second is that we add a new password database file entry corresponding to th
 
 The reason for swapping the login names so the current user ID uses ‘ipython’ rather than the original user ID of ‘1001’, is so that the application when run will still think it is the ‘ipython’ user. What we therefore end up with in our copy of the password database file is:
 
-```bash
-    docker run -it --rm -u 10000 -p 8888:8888 jupyter-notebook bash  
-    ipython@0ff73693d433:/notebooks$ tail -2 /tmp/passwd.nss_wrapper  
-    builder:x:1001:0:IPython,,,:/home/ipython:/bin/bash  
-    ipython:x:10000:0:IPython,,,:/home/ipython:/bin/bash
+```
+ docker run -it --rm -u 10000 -p 8888:8888 jupyter-notebook bash  
+ ipython@0ff73693d433:/notebooks$ tail -2 /tmp/passwd.nss_wrapper  
+ builder:x:1001:0:IPython,,,:/home/ipython:/bin/bash  
+ ipython:x:10000:0:IPython,,,:/home/ipython:/bin/bash
 ```
 
 Immediately you can already see that the shell prompt now looks correct. Going back and running our checks from before, we now see:
 
-```bash
-    ipython@0ff73693d433:/notebooks$ whoami  
-    ipython  
-    ipython@0ff73693d433:/notebooks$ id  
-    uid=10000(ipython) gid=0(root) groups=0(root)  
-    ipython@0ff73693d433:/notebooks$ env | grep HOME  
-    HOME=/home/ipython  
-    ipython@0ff73693d433:/notebooks$ touch $HOME/magic  
-    ipython@0ff73693d433:/notebooks$ touch /notebooks/magic  
-    ipython@0ff73693d433:/notebooks$ ls -las $HOME  
-    total 24  
-    4 drwxrwxr-x 4 builder root 4096 Dec 24 10:22 .  
-    4 drwxr-xr-x 6 root root 4096 Dec 24 10:22 ..  
-    4 -rw-rw-r-- 1 builder root 220 Dec 24 10:08 .bash_logout  
-    4 -rw-rw-r-- 1 builder root 3637 Dec 24 10:08 .bashrc  
-    4 drwxrwxr-x 2 builder root 4096 Dec 24 10:08 .jupyter  
-    0 -rw-r--r-- 1 ipython root 0 Dec 24 10:22 magic  
-    4 -rw-rw-r-- 1 builder root 675 Dec 24 10:08 .profile
+```
+ ipython@0ff73693d433:/notebooks$ whoami  
+ ipython  
+ ipython@0ff73693d433:/notebooks$ id  
+ uid=10000(ipython) gid=0(root) groups=0(root)  
+ ipython@0ff73693d433:/notebooks$ env | grep HOME  
+ HOME=/home/ipython  
+ ipython@0ff73693d433:/notebooks$ touch $HOME/magic  
+ ipython@0ff73693d433:/notebooks$ touch /notebooks/magic  
+ ipython@0ff73693d433:/notebooks$ ls -las $HOME  
+ total 24  
+ 4 drwxrwxr-x 4 builder root 4096 Dec 24 10:22 .  
+ 4 drwxr-xr-x 6 root root 4096 Dec 24 10:22 ..  
+ 4 -rw-rw-r-- 1 builder root 220 Dec 24 10:08 .bash_logout  
+ 4 -rw-rw-r-- 1 builder root 3637 Dec 24 10:08 .bashrc  
+ 4 drwxrwxr-x 2 builder root 4096 Dec 24 10:08 .jupyter  
+ 0 -rw-r--r-- 1 ipython root 0 Dec 24 10:22 magic  
+ 4 -rw-rw-r-- 1 builder root 675 Dec 24 10:08 .profile
 ```
 
 So even though the random user ID didn’t have an entry in the original system password database file, by using ‘nss\_wrapper’ we can trick any applications to use our modified password database file for user information. This means we can dynamically generate a valid password database file entry for the random user ID which was used.
@@ -292,48 +311,48 @@ With the way we swapped the login name for the default user ID of ‘1001’, wi
 
 So we can distinguish, any files that were created during the image build as the original ‘ipython’ user will now instead show as being owned by ‘builder’, which if we look it up maps to user ID of ‘1001’.
 
-```bash
-    ipython@0ff73693d433:/notebooks$ id builder  
-    uid=1001(builder) gid=0(root) groups=0(root)  
-    ipython@0ff73693d433:/notebooks$ getent passwd builder  
-    builder:x:1001:0:IPython,,,:/home/ipython:/bin/bash
+```
+ ipython@0ff73693d433:/notebooks$ id builder  
+ uid=1001(builder) gid=0(root) groups=0(root)  
+ ipython@0ff73693d433:/notebooks$ getent passwd builder  
+ builder:x:1001:0:IPython,,,:/home/ipython:/bin/bash
 ```
 
 # Running as another name user
 
 Not that there strictly should be a reason for doing so, but it is possible to also force the Docker container to run as some other user ID with an entry in the password database file, but because they have their own distinct primary group assignments, you do have to override the group to be ‘0’ so that it can update any required directories.
 
-```bash
-    $ docker run -it --rm -u 5 -p 8888:8888 jupyter-notebook bash  
-    games@36ec17b1d9c1:/notebooks$ whoami  
-    games  
-    games@36ec17b1d9c1:/notebooks$ id  
-    uid=5(games) gid=60(games) groups=60(games)  
-    games@36ec17b1d9c1:/notebooks$ env | grep HOME  
-    HOME=/home/ipython  
-    games@36ec17b1d9c1:/notebooks$ touch $HOME/magic  
-    touch: cannot touch ‘/home/ipython/magic’: Permission denied  
-    games@36ec17b1d9c1:/notebooks$ touch /notebooks/magic  
-    touch: cannot touch ‘/notebooks/magic’: Permission denied  
-    
-    $ docker run -it --rm -u 5:0 -p 8888:8888 jupyter-notebook bash  
-    games@e2ecabedab47:/notebooks$ whoami  
-    games  
-    games@e2ecabedab47:/notebooks$ id  
-    uid=5(games) gid=0(root) groups=60(games)  
-    games@e2ecabedab47:/notebooks$ env | grep HOME  
-    HOME=/home/ipython  
-    games@e2ecabedab47:/notebooks$ touch $HOME/magic  
-    games@e2ecabedab47:/notebooks$ touch /notebooks/magic  
-    games@e2ecabedab47:/notebooks$ ls -las $HOME  
-    total 24  
-    4 drwxrwxr-x 4 builder root 4096 Dec 24 10:41 .  
-    4 drwxr-xr-x 6 root root 4096 Dec 24 10:41 ..  
-    4 -rw-rw-r-- 1 builder root 220 Dec 24 10:39 .bash_logout  
-    4 -rw-rw-r-- 1 builder root 3637 Dec 24 10:39 .bashrc  
-    4 drwxrwxr-x 2 builder root 4096 Dec 24 10:39 .jupyter  
-    0 -rw-r--r-- 1 games root 0 Dec 24 10:41 magic  
-    4 -rw-rw-r-- 1 builder root 675 Dec 24 10:39 .profile
+```
+ $ docker run -it --rm -u 5 -p 8888:8888 jupyter-notebook bash  
+ games@36ec17b1d9c1:/notebooks$ whoami  
+ games  
+ games@36ec17b1d9c1:/notebooks$ id  
+ uid=5(games) gid=60(games) groups=60(games)  
+ games@36ec17b1d9c1:/notebooks$ env | grep HOME  
+ HOME=/home/ipython  
+ games@36ec17b1d9c1:/notebooks$ touch $HOME/magic  
+ touch: cannot touch ‘/home/ipython/magic’: Permission denied  
+ games@36ec17b1d9c1:/notebooks$ touch /notebooks/magic  
+ touch: cannot touch ‘/notebooks/magic’: Permission denied  
+   
+ $ docker run -it --rm -u 5:0 -p 8888:8888 jupyter-notebook bash  
+ games@e2ecabedab47:/notebooks$ whoami  
+ games  
+ games@e2ecabedab47:/notebooks$ id  
+ uid=5(games) gid=0(root) groups=60(games)  
+ games@e2ecabedab47:/notebooks$ env | grep HOME  
+ HOME=/home/ipython  
+ games@e2ecabedab47:/notebooks$ touch $HOME/magic  
+ games@e2ecabedab47:/notebooks$ touch /notebooks/magic  
+ games@e2ecabedab47:/notebooks$ ls -las $HOME  
+ total 24  
+ 4 drwxrwxr-x 4 builder root 4096 Dec 24 10:41 .  
+ 4 drwxr-xr-x 6 root root 4096 Dec 24 10:41 ..  
+ 4 -rw-rw-r-- 1 builder root 220 Dec 24 10:39 .bash_logout  
+ 4 -rw-rw-r-- 1 builder root 3637 Dec 24 10:39 .bashrc  
+ 4 drwxrwxr-x 2 builder root 4096 Dec 24 10:39 .jupyter  
+ 0 -rw-r--r-- 1 games root 0 Dec 24 10:41 magic  
+ 4 -rw-rw-r-- 1 builder root 675 Dec 24 10:39 .profile
 ```
 
 # Running as process ID 1

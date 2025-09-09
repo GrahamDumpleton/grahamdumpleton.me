@@ -52,21 +52,21 @@ What this means is that if an attribute of a class has any of these special meth
 You may well be thinking that you have never made use of descriptors, but fact is that function objects are actually descriptors. When a function is originally added to a class definition it is as a normal function. When you access that function using a dotted attribute path, you are invoking the \_\_get\_\_\(\) method to bind the function to the class instance, turning it into a bound method of that object.  
 
 
-```python
-def f\(obj\): pass  
- >>> hasattr\(f, '\_\_get\_\_'\)  
- True 
+```
+> def f\(obj\): pass  
+>  >>> hasattr\(f, '\_\_get\_\_'\)  
+>  True 
 ```
 
-```bash
->>> f  
- <function f at 0x10e963cf8>
+```
+> >>> f  
+>  <function f at 0x10e963cf8>
 ```
 
-```bash
->>> obj = object\(\)  
- >>> f.\_\_get\_\_\(obj, type\(obj\)\)  
- <bound method object.f of <object object at 0x10e8ac0b0>>
+```
+> >>> obj = object\(\)  
+>  >>> f.\_\_get\_\_\(obj, type\(obj\)\)  
+>  <bound method object.f of <object object at 0x10e8ac0b0>>
 ```
 
 So when calling a method of a class, it is not the \_\_call\_\_\(\) method of the original function object that is called, but the \_\_call\_\_\(\) method of the temporary bound object that is created as a result of accessing the function.  
@@ -74,26 +74,26 @@ So when calling a method of a class, it is not the \_\_call\_\_\(\) method of th
 You of course don't usually see all these intermediary steps and just see the outcome.  
 
 
-```python
->>> class Object\(object\):  
- ... def f\(self\): pass 
+```
+> >>> class Object\(object\):  
+>  ... def f\(self\): pass 
 ```
 
-```bash
->>> obj = Object\(\)  
- >>> obj.f  
- <bound method Object.f of <\_\_main\_\_.Object object at 0x10abf29d0>>
+```
+> >>> obj = Object\(\)  
+>  >>> obj.f  
+>  <bound method Object.f of <\_\_main\_\_.Object object at 0x10abf29d0>>
 ```
 
 Looking back now at the example given in the first blog post where we wrapped a decorator around a class method, we encountered the error:  
 
 
-```python
-class Class\(object\):  
- @function\_wrapper  
- @classmethod  
- def cmethod\(cls\):  
- pass 
+```
+> class Class\(object\):  
+>  @function\_wrapper  
+>  @classmethod  
+>  def cmethod\(cls\):  
+>  pass 
 ```
 
 > Class.cmethod\(\) 
@@ -123,38 +123,38 @@ For a normal instance method the result in this situation is effectively the sam
 The way to solve this problem where the wrapper is not honouring the descriptor protocol and performing binding on the wrapped object in the case of a method on a class, is for wrappers to also be descriptors.  
 
 
-```python
-class bound\_function\_wrapper\(object\): 
+```
+> class bound\_function\_wrapper\(object\): 
 ```
 
-```python
-def \_\_init\_\_\(self, wrapped\):  
- self.wrapped = wrapped 
+```
+> def \_\_init\_\_\(self, wrapped\):  
+>  self.wrapped = wrapped 
 ```
 
-```python
-def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
- return self.wrapped\(\*args, \*\*kwargs\) 
+```
+> def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
+>  return self.wrapped\(\*args, \*\*kwargs\) 
 ```
 
-```python
-class function\_wrapper\(object\): 
+```
+> class function\_wrapper\(object\): 
 ```
 
-```python
-def \_\_init\_\_\(self, wrapped\):  
- self.wrapped = wrapped 
+```
+> def \_\_init\_\_\(self, wrapped\):  
+>  self.wrapped = wrapped 
 ```
 
-```python
-def \_\_get\_\_\(self, instance, owner\):  
- wrapped = self.wrapped.\_\_get\_\_\( instance, owner\)  
- return bound\_function\_wrapper\(wrapped\) 
+```
+> def \_\_get\_\_\(self, instance, owner\):  
+>  wrapped = self.wrapped.\_\_get\_\_\( instance, owner\)  
+>  return bound\_function\_wrapper\(wrapped\) 
 ```
 
-```python
-def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
- return self.wrapped\(\*args, \*\*kwargs\)
+```
+> def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
+>  return self.wrapped\(\*args, \*\*kwargs\)
 ```
 
 If the wrapper is applied to a normal function, the \_\_call\_\_\(\) method of the wrapper is used. If the wrapper is applied to a method of a class, the \_\_get\_\_\(\) method is called, which returns a new bound wrapper and the \_\_call\_\_\(\) method of that is invoked instead. This allows our wrapper to be used around descriptors as it propagates the descriptor protocol.  
@@ -174,28 +174,28 @@ Well wraps\(\) just uses update\_wrapper\(\), so we just need to look at it.
 
 > WRAPPER\_UPDATES = \('\_\_dict\_\_',\) 
 
-```python
-def update\_wrapper\(wrapper, wrapped,  
- assigned = WRAPPER\_ASSIGNMENTS,  
- updated = WRAPPER\_UPDATES\): 
+```
+> def update\_wrapper\(wrapper, wrapped,  
+>  assigned = WRAPPER\_ASSIGNMENTS,  
+>  updated = WRAPPER\_UPDATES\): 
 ```
 
 > wrapper.\_\_wrapped\_\_ = wrapped 
 
-```python
-for attr in assigned:  
- try:  
- value = getattr\(wrapped, attr\)  
- except AttributeError:  
- pass  
- else:  
- setattr\(wrapper, attr, value\) 
+```
+> for attr in assigned:  
+>  try:  
+>  value = getattr\(wrapped, attr\)  
+>  except AttributeError:  
+>  pass  
+>  else:  
+>  setattr\(wrapper, attr, value\) 
 ```
 
-```python
-for attr in updated:  
- getattr\(wrapper, attr\).update\(  
- getattr\(wrapped, attr, \{\}\)\)
+```
+> for attr in updated:  
+>  getattr\(wrapper, attr\).update\(  
+>  getattr\(wrapped, attr, \{\}\)\)
 ```
 
 What is shown here is what is in Python 3.3, although that actually has a bug in it, which is fixed in Python 3.4. :-\)  
@@ -211,18 +211,18 @@ If we are using a function closure or straight class wrapper this copying is abl
 With the wrapper being a descriptor though, it technically now also needs to be done in the bound wrapper.  
 
 
-```python
-class bound\_function\_wrapper\(object\):  
- def \_\_init\_\_\(self, wrapped\):  
- self.wrapped = wrapped  
- functools.update\_wrapper\(self, wrapped\) 
+```
+> class bound\_function\_wrapper\(object\):  
+>  def \_\_init\_\_\(self, wrapped\):  
+>  self.wrapped = wrapped  
+>  functools.update\_wrapper\(self, wrapped\) 
 ```
 
-```python
-class function\_wrapper\(object\):  
- def \_\_init\_\_\(self, wrapped\):  
- self.wrapped = wrapped  
- functools.update\_wrapper\(self, wrapped\)
+```
+> class function\_wrapper\(object\):  
+>  def \_\_init\_\_\(self, wrapped\):  
+>  self.wrapped = wrapped  
+>  functools.update\_wrapper\(self, wrapped\)
 ```
 
 As the bound wrapper is created every time the wrapper is called for a function bound to a class, this is going to be too slow. We need a more performant way of handling this.  
@@ -235,28 +235,28 @@ As the bound wrapper is created every time the wrapper is called for a function 
 The solution to the performance issue is to use what is called an object proxy. This is a special wrapper class which looks and behaves like what it wraps.  
 
 
-```python
-class object\_proxy\(object\): 
+```
+> class object\_proxy\(object\): 
 ```
 
-```python
-def \_\_init\_\_\(self, wrapped\):  
- self.wrapped = wrapped  
- try:  
- self.\_\_name\_\_= wrapped.\_\_name\_\_  
- except AttributeError:  
- pass 
+```
+> def \_\_init\_\_\(self, wrapped\):  
+>  self.wrapped = wrapped  
+>  try:  
+>  self.\_\_name\_\_= wrapped.\_\_name\_\_  
+>  except AttributeError:  
+>  pass 
 ```
 
-```python
-@property  
- def \_\_class\_\_\(self\):  
- return self.wrapped.\_\_class\_\_ 
+```
+> @property  
+>  def \_\_class\_\_\(self\):  
+>  return self.wrapped.\_\_class\_\_ 
 ```
 
-```python
-def \_\_getattr\_\_\(self, name\):  
- return getattr\(self.wrapped, name\)
+```
+> def \_\_getattr\_\_\(self, name\):  
+>  return getattr\(self.wrapped, name\)
 ```
 
 A fully transparent object proxy is a complicated beast in its own right, so I am going to gloss over the details for the moment and cover it in a separate blog post at some point.  
@@ -268,32 +268,32 @@ In short though, it copies limited attributes from the wrapped object to itself,
 What we now do is derive our wrapper class from the object proxy and do away with calling update\_wrapper\(\).  
 
 
-```python
-class bound\_function\_wrapper\(object\_proxy\):  
- def \_\_init\_\_\(self, wrapped\):  
- super\(bound\_function\_wrapper, self\).\_\_init\_\_\(wrapped\)
+```
+> class bound\_function\_wrapper\(object\_proxy\):  
+>  def \_\_init\_\_\(self, wrapped\):  
+>  super\(bound\_function\_wrapper, self\).\_\_init\_\_\(wrapped\)
 ```
 
-```python
-def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
- return self.wrapped\(\*args, \*\*kwargs\) 
+```
+> def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
+>  return self.wrapped\(\*args, \*\*kwargs\) 
 ```
 
-```python
-class function\_wrapper\(object\_proxy\):  
- def \_\_init\_\_\(self, wrapped\):  
- super\(function\_wrapper, self\).\_\_init\_\_\(wrapped\)
+```
+> class function\_wrapper\(object\_proxy\):  
+>  def \_\_init\_\_\(self, wrapped\):  
+>  super\(function\_wrapper, self\).\_\_init\_\_\(wrapped\)
 ```
 
-```python
-def \_\_get\_\_\(self, instance, owner\):  
- wrapped = self.wrapped.\_\_get\_\_\( instance, owner\)  
- return bound\_function\_wrapper\(wrapped\) 
+```
+> def \_\_get\_\_\(self, instance, owner\):  
+>  wrapped = self.wrapped.\_\_get\_\_\( instance, owner\)  
+>  return bound\_function\_wrapper\(wrapped\) 
 ```
 
-```python
-def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
- return self.wrapped\(\*args, \*\*kwargs\) 
+```
+> def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
+>  return self.wrapped\(\*args, \*\*kwargs\) 
 ```
 
 In doing this, attributes like \_\_name\_\_ and \_\_doc\_\_, when queried from the wrapper, return the values from the wrapped function. We don't therefore as a result have the problem we did before where details were being returned from the wrapper instead.  

@@ -30,26 +30,27 @@ What I am going to do with this blog post is start to explain the monkey patchin
 
 Before we jump into monkey patching of arbitrary code we first need to recap how the wrapt package could be used to create a decorator. The primary pattern for this was:
 
-```python
-    import wrapt  
-    import inspect 
-
-    @wrapt.decorator  
-    def universal(wrapped, instance, args, kwargs):  
-    if instance is None:  
-    if inspect.isclass(wrapped):  
-    # Decorator was applied to a class.  
-    return wrapped(*args, **kwargs)  
-    else:  
-    # Decorator was applied to a function or staticmethod.  
-    return wrapped(*args, **kwargs)  
-    else:  
-    if inspect.isclass(instance):  
-    # Decorator was applied to a classmethod.  
-    return wrapped(*args, **kwargs)  
-    else:  
-    # Decorator was applied to an instancemethod.  
-    return wrapped(*args, **kwargs)
+```
+ import wrapt  
+ import inspect 
+ 
+ 
+ @wrapt.decorator  
+ def universal(wrapped, instance, args, kwargs):  
+     if instance is None:  
+         if inspect.isclass(wrapped):  
+             # Decorator was applied to a class.  
+             return wrapped(*args, **kwargs)  
+         else:  
+             # Decorator was applied to a function or staticmethod.  
+             return wrapped(*args, **kwargs)  
+     else:  
+         if inspect.isclass(instance):  
+             # Decorator was applied to a classmethod.  
+             return wrapped(*args, **kwargs)  
+         else:  
+             # Decorator was applied to an instancemethod.  
+             return wrapped(*args, **kwargs)
 ```
 
 A special feature of the decorators that could be created by the wrapt package was that within the decorator you could determine the context the decorator was used in. That is, whether the decorator was applied to a class, a function or static method, a class method or an instance method.
@@ -60,22 +61,22 @@ A decorator created using wrapt is therefore what I call a universal decorator. 
 
 Using this decorator is then no different to any other way that decorators would be used.
 
-```python
-    class Example(object):  
-    
-    @universal  
-    def name(self):  
-    return 'name'
+```
+ class Example(object):  
+   
+     @universal  
+     def name(self):  
+         return 'name'
 ```
 
 For those who have used Python long enough though, you would remember that the syntax for applying a decorator in this way hasn't always existed. Before the '@' syntax was allowed you could still create and use decorators, but you had to be more explicit in applying them. That is, you had to write:
 
-```python
-    class Example(object):  
-    
-    def name(self):  
-    return 'name'  
-    name = universal(name) 
+```
+ class Example(object):  
+   
+     def name(self):  
+         return 'name'  
+     name = universal(name) 
 ```
 
 This can still be done and when written this way it makes it clearer how decorators are in a way a form of monkey patching. This is because often all they are doing is introducing a wrapper around some existing function which allows the call to the original function to be intercepted. The wrapper function then allows you to perform actions either before or after the call to the original function, or allow you to modify the arguments passed to the wrapped function, or otherwise modify the result in some way, or even substitute the result completely.
@@ -84,32 +85,34 @@ What is an important distinction though with decorators is that the wrapper func
 
 In effect you are doing:
 
-```python
-    class Example(object):  
-    def name(self):  
-    return 'name'
-
-    Example.name = universal(Example.name)
+```
+ class Example(object):  
+     def name(self):  
+         return 'name'
+ 
+ 
+ Example.name = universal(Example.name)
 ```
 
 Although a decorator function created using the wrapt package can be used in this way and will still work as expected, in general I would discourage this pattern for monkey patching an existing method of a class.
 
 This is because it isn't actually equivalent to doing the same thing within the body of the class when it is defined. In particular the access of 'Example.name' actually invokes the descriptor protocol and so is returning an instance method. We can see this by running the code:
 
-```python
-    class Example(object):  
-    def name(self):  
-    return 'name'  
-    print type(name)
-
-    print type(Example.name)
+```
+ class Example(object):  
+     def name(self):  
+         return 'name'  
+     print type(name)
+ 
+ 
+ print type(Example.name)
 ```
 
 which produces:
 
-```javascript
-    <type 'function'>  
-    <type 'instancemethod'>
+```
+ <type 'function'>  
+ <type 'instancemethod'>
 ```
 
 In general this may not matter, but I have seen some really strange corner cases where the distinction has mattered. To deal with this therefore, the wrapt package provides an alternate way of applying wrapper functions when doing monkey patching after the fact. In the case of adding wrappers to methods of class, this will use a mechanism which avoids any problems caused by this subtle distinction.
@@ -120,51 +123,54 @@ For general monkey patching using the wrapt package, rather than using the decor
 
 The prototype for the wrapper function is the same as before, but we simply do not apply the '@wrapt.decorator' to it.
 
-```python
-    def wrapper(wrapped, instance, args, kwargs):  
-    return wrapped(*args, **kwargs)
+```
+ def wrapper(wrapped, instance, args, kwargs):  
+     return wrapped(*args, **kwargs)
 ```
 
 To add the wrapper function to a target function we now use the 'wrapt.wrap\_function\_wrapper\(\)' function.
 
-```python
-    class Example(object):  
-    def name(self):  
-    return 'name'
-
-    import wrapt  
-    
-    wrapt.wrap_function_wrapper(Example, 'name', wrapper)
+```
+ class Example(object):  
+     def name(self):  
+         return 'name'
+ 
+ 
+ import wrapt  
+   
+ wrapt.wrap_function_wrapper(Example, 'name', wrapper)
 ```
 
 In this case we had the class in the same code file, but we could also have done:
 
-```python
-    import example  
-    
-    import wrapt
-
-    wrapt.wrap_function_wrapper(example, 'Example.name', wrapper)
+```
+ import example  
+   
+ import wrapt
+ 
+ 
+ wrapt.wrap_function_wrapper(example, 'Example.name', wrapper)
 ```
 
 That is, we provide the first argument as the module the target is defined in, with the second argument being the object path to the method we wished to apply the wrapper to.
 
 We could also skip importing the module altogether and just used the name of the module.
 
-```python
-    import wrapt
-
-    wrapt.wrap_function_wrapper('example', 'Example.name', wrapper)
+```
+ import wrapt
+ 
+ 
+ wrapt.wrap_function_wrapper('example', 'Example.name', wrapper)
 ```
 
 Just to prove that just about anything can be simplified by the user of a decorator, we finally could write the whole thing as:
 
-```python
-    import wrapt  
-    
-    @wrapt.patch_function_wrapper('example', 'Example.name')  
-    def wrapper(wrapped, instance, args, kwargs):  
-    return wrapped(*args, **kwargs)
+```
+ import wrapt  
+   
+ @wrapt.patch_function_wrapper('example', 'Example.name')  
+ def wrapper(wrapped, instance, args, kwargs):  
+     return wrapped(*args, **kwargs)
 ```
 
 What will happen in this final example is that as soon as the module this is contained in is imported, the specified target function defined in the 'example' module will automatically be monkey patched with the wrapper function.
@@ -177,18 +183,19 @@ The problem is that you are trying to apply a patch after the module has been im
 
 In particular, it the target function you were trying to monkey patch was a normal global function of the module, some other code could have grabbed a direct reference to it by doing:
 
-```python
-    from example import function
+```
+ from example import function
 ```
 
 If you come along later and have:
 
-```python
-    import wrapt
-
-    @wrapt.patch_function_wrapper('example', 'function')  
-    def wrapper(wrapped, instance, args, kwargs):  
-    return wrapped(*args, **kwargs)
+```
+ import wrapt
+ 
+ 
+ @wrapt.patch_function_wrapper('example', 'function')  
+ def wrapper(wrapped, instance, args, kwargs):  
+     return wrapped(*args, **kwargs)
 ```
 
 then yes the copy of the function contained in the target module will have the wrapper applied, but the reference to it created by the other code will not have the wrapper.

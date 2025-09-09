@@ -17,7 +17,7 @@ In the last couple of posts \([1](/posts/2015/06/proxying-to-python-web-applicat
 In changing to running the Python web site under Docker, I didn’t cover the issue of how the instance of the Docker container itself would be started up and managed. All I gave was an example command line for manually starting the container.
 
 ```
-    docker run --rm -p 8002:80 blog.example.com
+ docker run --rm -p 8002:80 blog.example.com
 ```
 
 The assumption here was that you already had the necessary infrastructure in place to start such Docker containers when the system started, and restart them automatically if for some reason they stopped running.
@@ -46,43 +46,46 @@ As far as mod\_wsgi is concerned it doesn’t really care what the process does 
 
 In the prior posts, the basic configuration we ended up with for proxying the requests through to the Python web site running under Docker was:
 
-```bash
-    # blog.example.com
-
-    <VirtualHost *:80>  
-    ServerName blog.example.com
-
-    ProxyPass / http://docker.example.com:8002/  
-    ProxyPassReverse / http://docker.example.com:8002/  
-    
-    RequestHeader set X-Forwarded-Port 80  
-    </VirtualHost>
+```
+ # blog.example.com
+ 
+ 
+ <VirtualHost *:80>  
+ ServerName blog.example.com
+ 
+ 
+ ProxyPass / http://docker.example.com:8002/  
+ ProxyPassReverse / http://docker.example.com:8002/  
+   
+ RequestHeader set X-Forwarded-Port 80  
+ </VirtualHost>
 ```
 
 This was after we had removed the configuration which had created a mod\_wsgi daemon process group and delegated the WSGI application to run in it. We are now going to add back the daemon process group, but we will not set up any WSGI application to run in it. Instead we will setup a Python script to be loaded in the process when it starts using the ‘WSGIImportScript’ directive.
 
-```bash
-    # blog.example.com<VirtualHost *:80>  
-    ServerName blog.example.com  
-    
-    ProxyPass / http://docker.example.com:8002/  
-    ProxyPassReverse / http://docker.example.com:8002/  
-    
-    RequestHeader set X-Forwarded-Port 80  
-    
-    WSGIDaemonProcess blog.example.com threads=1  
-    WSGIImportScript /some/path/blog.example.com/docker-admin.py \  
-    process-group=blog.example.com application-group=%{GLOBAL}  
-    </VirtualHost>
+```
+ # blog.example.com<VirtualHost *:80>  
+ ServerName blog.example.com  
+   
+ ProxyPass / http://docker.example.com:8002/  
+ ProxyPassReverse / http://docker.example.com:8002/  
+   
+ RequestHeader set X-Forwarded-Port 80  
+   
+ WSGIDaemonProcess blog.example.com threads=1  
+ WSGIImportScript /some/path/blog.example.com/docker-admin.py \  
+     process-group=blog.example.com application-group=%{GLOBAL}  
+ </VirtualHost>
 ```
 
 In the ‘docker-admin.py’ file we now add:
 
-```python
-    import os
-
-    os.execl('/usr/local/bin/docker', '(docker:blog.example.com)', 'run',  
-    '--rm', '-p', '8002:80', ‘blog.example.com')
+```
+ import os
+ 
+ 
+ os.execl('/usr/local/bin/docker', '(docker:blog.example.com)', 'run',  
+     '--rm', '-p', '8002:80', ‘blog.example.com')
 ```
 
 With this in place, when Apache is started, mod\_wsgi will create a daemon process group with a single process. It will then immediately load and execute the ‘docker-admin.py’ script which in turn will execute the ‘docker' program to run up a Docker container using the image created for the backend WSGI application.
@@ -90,10 +93,10 @@ With this in place, when Apache is started, mod\_wsgi will create a daemon proce
 The resulting process tree would look like:
 
 ```
-    -+= 00001 root /sbin/launchd  
-    \-+= 64263 root /usr/sbin/httpd -D FOREGROUND  
-    |--- 64265 _www /usr/sbin/httpd -D FOREGROUND  
-    \--- 64270 _www (docker:blog.example.com.au) run --rm -p 8002:80 blog.example.com
+ -+= 00001 root /sbin/launchd  
+  \-+= 64263 root /usr/sbin/httpd -D FOREGROUND  
+  |--- 64265 _www /usr/sbin/httpd -D FOREGROUND  
+  \--- 64270 _www (docker:blog.example.com.au) run --rm -p 8002:80 blog.example.com
 ```
 
 Of note, the ‘docker’ program was left running in foreground mode waiting for the Docker container to exit. Because it is running the Python web application, that will not occur unless explicitly shutdown.

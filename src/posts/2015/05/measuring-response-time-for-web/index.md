@@ -26,78 +26,89 @@ The obvious quick solution people reach for to track the amount of time spent in
 
 Using the [wrapt](http://wrapt.readthedocs.org) package to create the decorator this could be implemented as:
 
-```python
-    from __future__ import print_function
-
-    from wrapt import decorator  
-    from timeit import default_timer
-
-    @decorator  
-    def timed_function(wrapped, instance, args, kwargs):  
-    start = default_timer()  
-    print('start', wrapped.__name__)
-
-        try:  
-    return wrapped(*args, **kwargs)
-
-        finally:  
-    duration = default_timer() - start  
-    print('finish %s %.3fms' % (wrapped.__name__, duration*1000.0))
+```
+ from __future__ import print_function
+ 
+ 
+ from wrapt import decorator  
+ from timeit import default_timer
+ 
+ 
+ @decorator  
+ def timed_function(wrapped, instance, args, kwargs):  
+     start = default_timer()  
+     print('start', wrapped.__name__)
+ 
+ 
+     try:  
+         return wrapped(*args, **kwargs)
+ 
+ 
+     finally:  
+         duration = default_timer() - start  
+         print('finish %s %.3fms' % (wrapped.__name__, duration*1000.0))
 ```
 
 For this implementation we are using 'timeit.default\_timer\(\)' as the clock source as it will ensure we use as high a resolution clock as possible for a specific platform.
 
 In the case of a WSGI application we could then apply this to the callable entry point.
 
-```python
-    from timer1 import timed_function
-
-    @timed_function  
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = b'Hello World!'
-
-        response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    start_response(status, response_headers)
-
-        return [output]
+```
+ from timer1 import timed_function
+ 
+ 
+ @timed_function  
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = b'Hello World!'
+ 
+ 
+     response_headers = [('Content-type', 'text/plain'),  
+             ('Content-Length', str(len(output)))]  
+     start_response(status, response_headers)
+ 
+ 
+     return [output]
 ```
 
 Running this WSGI application with any WSGI server we would then get something like:
 
 ```
-    start application  
-    finish application 0.030ms
+ start application  
+ finish application 0.030ms
 ```
 
 The time of 0.03 milliseconds for a 'Hello World\!' application seems to be in the right order of magnitude, but is the decorator truly sufficient. Lets test out a few more simple WSGI applications.
 
 First up lets just add a 'sleep\(\)' call into the WSGI application. With the response time of our most simple of cases being so small, if we sleep for a sizeable amount of time, then that base overhead should be lost as noise within the longer sleep time.
 
-```python
-    from timer1 import timed_function  
-    from time import sleep
-
-    @timed_function  
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = b'Hello World!'
-
-        response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    start_response(status, response_headers)
-
-        sleep(1.0)
-
-        return [output]
+```
+ from timer1 import timed_function  
+ from time import sleep
+ 
+ 
+ @timed_function  
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = b'Hello World!'
+ 
+ 
+     response_headers = [('Content-type', 'text/plain'),  
+         ('Content-Length', str(len(output)))]  
+     start_response(status, response_headers)
+ 
+ 
+     sleep(1.0)
+ 
+ 
+     return [output]
 ```
 
 Trigger a web request with this WSGI application and we get:
 
 ```
-    start application  
-    finish application 1000.653ms
+ start application  
+ finish application 1000.653ms
 ```
 
 And so the result is closer to the much longer sleep time as we expected.
@@ -108,29 +119,33 @@ Now in both these examples the WSGI application returned an iterable which was a
 
 Another way of writing a WSGI application is as a generator. That is, rather than returning all values at one time as a list, we yield each specific value making up the response. This allows the response to be generated as it is being returned.
 
-```python
-    from timer1 import timed_function  
-    from time import sleep
-
-    @timed_function  
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = b'Hello World!'
-
-        response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    start_response(status, response_headers)
-
-        sleep(1.0)
-
-        yield output
+```
+ from timer1 import timed_function  
+ from time import sleep
+ 
+ 
+ @timed_function  
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = b'Hello World!'
+ 
+ 
+     response_headers = [('Content-type', 'text/plain'),  
+             ('Content-Length', str(len(output)))]  
+     start_response(status, response_headers)
+ 
+ 
+     sleep(1.0)
+ 
+ 
+     yield output
 ```
 
 We again trigger a web request and the result this time is:
 
 ```
-    start application  
-    finish application 0.095ms
+ start application  
+ finish application 0.095ms
 ```
 
 In this case we are back to a sub millisecond value again for time, so obviously there is a problem with our decorator in this case.
@@ -149,48 +164,56 @@ If interested in the various ways that WSGI application callable objects can be 
 
 The solution to our problem with not being able to use a traditional function timing decorator can be found within the [WSGI](https://www.python.org/dev/peps/pep-3333/) protocol specification itself. Specifically it is stated in the specification:
 
-```python
-_If the iterable returned by the application has a close\(\) method, the server or gateway must call that method upon completion of the current request, whether the request was completed normally, or terminated early due to an application error during iteration or an early disconnect of the browser. \(The close\(\) method requirement is to support resource release by the application. This protocol is intended to complement PEP 342 's generator support, and other common iterables with close\(\) methods.\)_
+```
+> _If the iterable returned by the application has a close\(\) method, the server or gateway must call that method upon completion of the current request, whether the request was completed normally, or terminated early due to an application error during iteration or an early disconnect of the browser. \(The close\(\) method requirement is to support resource release by the application. This protocol is intended to complement PEP 342 's generator support, and other common iterables with close\(\) methods.\)_
 ```
 
 What this means is that where the iterable from the WSGI application would otherwise be returned, we can instead return a wrapper object around that iterable and in our wrapper provide a 'close\(\)' method. This 'close\(\)' method is then guaranteed to be called at the end of the request regardless of whether it completes successfully or not.
 
 We can therefore use this as the place for ending the timing of the request where the iterable was returned. One requirement in using such a wrapper though is that the wrapper itself must in turn call the 'close\(\)' method of any iterable which was wrapped to preserve any expectation it has that its own 'close\(\)' method is called.
 
-```python
-    from __future__ import print_function
-
-    from wrapt import decorator, ObjectProxy  
-    from timeit import default_timer  
-    
-    class WSGIApplicationIterable1(ObjectProxy):
-
-        def __init__(self, wrapped, name, start):  
-    super(WSGIApplicationIterable1, self).__init__(wrapped)  
-    self._self_name = name  
-    self._self_start = start
-
-        def close(self):  
-    if hasattr(self.__wrapped__, 'close'):  
-    self.__wrapped__.close()
-
-            duration = default_timer() - self._self_start  
-    print('finish %s %.3fms' % (self._self_name, duration*1000.0))
-
-    @decorator  
-    def timed_wsgi_application1(wrapped, instance, args, kwargs):  
-    name = wrapped.__name__
-
-        start = default_timer()  
-    print('start', name)
-
-        try:  
-    return WSGIApplicationIterable1(wrapped(*args, **kwargs), name, start)
-
-        except:  
-    duration = default_timer() - start  
-    print('finish %s %.3fms' % (name, duration*1000.0))  
-    raise
+```
+ from __future__ import print_function
+ 
+ 
+ from wrapt import decorator, ObjectProxy  
+ from timeit import default_timer  
+   
+ class WSGIApplicationIterable1(ObjectProxy):
+ 
+ 
+     def __init__(self, wrapped, name, start):  
+         super(WSGIApplicationIterable1, self).__init__(wrapped)  
+         self._self_name = name  
+         self._self_start = start
+ 
+ 
+     def close(self):  
+         if hasattr(self.__wrapped__, 'close'):  
+             self.__wrapped__.close()
+ 
+ 
+         duration = default_timer() - self._self_start  
+         print('finish %s %.3fms' % (self._self_name, duration*1000.0))
+ 
+ 
+ @decorator  
+ def timed_wsgi_application1(wrapped, instance, args, kwargs):  
+     name = wrapped.__name__
+ 
+ 
+     start = default_timer()  
+     print('start', name)
+ 
+ 
+     try:  
+         return WSGIApplicationIterable1(wrapped(*args, **kwargs), name, start)
+ 
+ 
+     except:  
+         duration = default_timer() - start  
+         print('finish %s %.3fms' % (name, duration*1000.0))  
+         raise
 ```
 
 In the implementation of the wrapper for the WSGI application iterable I have used the 'ObjectProxy' class from the wrapt package. The 'ObjectProxy' class in this case acts as a transparent object proxy for whatever is wrapped. That is, any action on the proxy object will be performed on the wrapped object unless that action is somehow overridden in the proxy object. So in this case we have overridden the 'close\(\)' method to allow us to insert our code for stopping the timer.
@@ -199,70 +222,83 @@ This wrapper class could have been implemented as a standalone class without rel
 
 Using this new decorator our test example is:
 
-```python
-    from timer1 import timed_wsgi_application1  
-    from time import sleep
-
-    @timed_wsgi_application1  
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = b'Hello World!'
-
-        response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    start_response(status, response_headers)
-
-        sleep(1.0)
-
-        yield output
+```
+ from timer1 import timed_wsgi_application1  
+ from time import sleep
+ 
+ 
+ @timed_wsgi_application1  
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = b'Hello World!'
+ 
+ 
+     response_headers = [('Content-type', 'text/plain'),  
+             ('Content-Length', str(len(output)))]  
+     start_response(status, response_headers)
+ 
+ 
+     sleep(1.0)
+ 
+ 
+     yield output
 ```
 
 When a web request is now issued we get:
 
 ```
-    start application  
-    finish application 1000.593ms
+ start application  
+ finish application 1000.593ms
 ```
 
 This is now the result we are expecting.
 
 Just to make sure that we are preserving properly the semantics for 'close\(\)' being called, we can use the test example of:
 
-```python
-    from __future__ import print_function
-
-    from timer1 import timed_wsgi_application1  
-    from time import sleep
-
-    class Iterable(object):  
-    
-    def __init__(self, output):  
-    self.output = output
-
-        def __iter__(self):  
-    return self
-
-        def next(self):  
-    try:  
-    return self.output.pop(0)  
-    except IndexError:  
-    raise StopIteration
-
-        def close(self):  
-    print('close')
-
-    @timed_wsgi_application1  
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = b'Hello World!'
-
-        response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    start_response(status, response_headers)
-
-        sleep(1.0)
-
-        return Iterable([output])
+```
+ from __future__ import print_function
+ 
+ 
+ from timer1 import timed_wsgi_application1  
+ from time import sleep
+ 
+ 
+ class Iterable(object):  
+   
+     def __init__(self, output):  
+         self.output = output
+ 
+ 
+     def __iter__(self):  
+         return self
+ 
+ 
+     def next(self):  
+         try:  
+             return self.output.pop(0)  
+         except IndexError:  
+             raise StopIteration
+ 
+ 
+     def close(self):  
+         print('close')
+ 
+ 
+ @timed_wsgi_application1  
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = b'Hello World!'
+ 
+ 
+     response_headers = [('Content-type', 'text/plain'),  
+             ('Content-Length', str(len(output)))]  
+     start_response(status, response_headers)
+ 
+ 
+     sleep(1.0)
+ 
+ 
+     return Iterable([output])
 ```
 
 What is being done here is that rather than returning a list or using a generator function, we return an iterable implemented as a class object. This iterable object defines a 'close\(\)' method.
@@ -270,9 +306,9 @@ What is being done here is that rather than returning a list or using a generato
 If we use this test example the result is:
 
 ```
-    start application  
-    close  
-    finish application 1000.851ms
+ start application  
+ close  
+ finish application 1000.851ms
 ```
 
 That 'close' is displayed means that when the WSGI server calls the 'close\(\)' method on the result from our WSGI application timing decorator, that we are in turn correctly then calling the 'close\(\)' method of the iterable that was originally returned by the WSGI application.

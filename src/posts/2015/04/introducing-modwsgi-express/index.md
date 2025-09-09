@@ -37,7 +37,7 @@ A large part of what I have been working on for the past year and a half has the
 The first major difference with mod\_wsgi-express over the traditional path of installing mod\_wsgi is that you can install it like any other Python package. In other words you can 'pip install' it directly from PyPi. You can even list it in a 'requirements.txt' file for 'pip.
 
 ```
-    pip install mod_wsgi
+ pip install mod_wsgi
 ```
 
 If you have a complete Apache httpd server installation on your system then that is all that is required. The resulting mod\_wsgi module for Apache will have been compiled against and will be installed as part of your Python installation or virtual environment.
@@ -49,8 +49,8 @@ Before I get onto what exactly the 'mod\_wsgi-express' script does, I do want to
 For this case where you also need to be able to install a fresh version of the Apache httpd server itself, you can do:
 
 ```
-    pip install mod_wsgi-httpd  
-    pip install mod_wsgi 
+ pip install mod_wsgi-httpd  
+ pip install mod_wsgi 
 ```
 
 In this case we are installing two packages. We are first installing 'mod\_wsgi-httpd' and then 'mod\_wsgi'.
@@ -70,23 +70,23 @@ This is where the 'mod\_wsgi-express' script comes into play.
 If we have a WSGI application defined in a WSGI script file called 'hello.wsgi', all we now need to do is run:
 
 ```
-    mod_wsgi-express start-server hello.wsgi
+ mod_wsgi-express start-server hello.wsgi
 ```
 
 Doing this will yield something like:
 
 ```
-    Server URL : http://localhost:8000/  
-    Server Root : /tmp/mod_wsgi-localhost:8000:502  
-    Server Conf : /tmp/mod_wsgi-localhost:8000:502/httpd.conf  
-    Error Log File : /tmp/mod_wsgi-localhost:8000:502/error_log (warn)  
-    Request Capacity : 5 (1 process * 5 threads)  
-    Request Timeout : 60 (seconds)  
-    Queue Backlog : 100 (connections)  
-    Queue Timeout : 45 (seconds)  
-    Server Capacity : 20 (event/worker), 20 (prefork)  
-    Server Backlog : 500 (connections)  
-    Locale Setting : en_AU.UTF-8
+ Server URL : http://localhost:8000/  
+ Server Root : /tmp/mod_wsgi-localhost:8000:502  
+ Server Conf : /tmp/mod_wsgi-localhost:8000:502/httpd.conf  
+ Error Log File : /tmp/mod_wsgi-localhost:8000:502/error_log (warn)  
+ Request Capacity : 5 (1 process * 5 threads)  
+ Request Timeout : 60 (seconds)  
+ Queue Backlog : 100 (connections)  
+ Queue Timeout : 45 (seconds)  
+ Server Capacity : 20 (event/worker), 20 (prefork)  
+ Server Backlog : 500 (connections)  
+ Locale Setting : en_AU.UTF-8
 ```
 
 You can then access the WSGI application on the specified URL, that by default being port 8000 on the localhost.
@@ -104,13 +104,13 @@ Like when using mod\_wsgi in Apache in the more traditional approach, the 'mod\_
 I'll try to explain those reasons and the benefits another time, but if you really want to use a module name instead, then that is also possible. So if instead of 'hello.wsgi' you actually had 'hello.py', making it a Python module, you could instead run:
 
 ```
-    mod_wsgi-express start-server --application-type module hello
+ mod_wsgi-express start-server --application-type module hello
 ```
 
 It is also even possible to provide a Paste 'ini' file as input by specifying the 'paste' application type.
 
 ```
-    mod_wsgi-express start-server --application-type paste hello.ini
+ mod_wsgi-express start-server --application-type paste hello.ini
 ```
 
 # Hosting static file assets
@@ -122,7 +122,7 @@ This is where 'mod\_wsgi-express' being based around mod\_wsgi running under Apa
 First up, if all static file assets are to exist at a sub URL of the site, then they can be readily mapped into place using the '--url-alias' option. The arguments to this are the sub URL and then the path to the directory containing the static files.
 
 ```
-    mod_wsgi-express start-server --url-alias /static ./htdocs/static hello.wsgi
+ mod_wsgi-express start-server --url-alias /static ./htdocs/static hello.wsgi
 ```
 
 For any site though, there are often special static files which need to exist at the root of the site. These are files such as 'robots.txt' and 'favicon.ico'.
@@ -130,15 +130,15 @@ For any site though, there are often special static files which need to exist at
 These could be mapped individually using '--url-alias' as it does also allow the file system path to be that of a file:
 
 ```
-    mod_wsgi-express start-server --url-alias /static ./htdocs/static \  
-    --url-alias /favicon.ico ./htdocs/favicon.ico \  
-    --url-alias /robots.txt ./htdocs/robots.txt hello.wsgi
+ mod_wsgi-express start-server --url-alias /static ./htdocs/static \  
+   --url-alias /favicon.ico ./htdocs/favicon.ico \  
+   --url-alias /robots.txt ./htdocs/robots.txt hello.wsgi
 ```
 
 A better alternative though is to simply contain all the files in the one directory, here called 'htdocs', with the location matching the URL they should appear at, and declare that as the document root.
 
 ```
-    mod_wsgi-express start-server --document-root ./htdocs hello.wsgi
+ mod_wsgi-express start-server --document-root ./htdocs hello.wsgi
 ```
 
 If you are a long time mod\_wsgi user you may be familiar with the problem that mounting a WSGI application at the root of the site actually hides any static files that exist in the document root for the server. In the case of mod\_wsgi-express though, specific Apache configuration is used such that any static files in the directory will actually overlay and take precedence over the WSGI application.
@@ -156,13 +156,13 @@ Since mod\_wsgi-express actually provides such a convenient way of hosting stati
 Thus instead of the quick command often used by Python users to run up a server to temporarily host some static files, of:
 
 ```
-    python -m SimpleHTTPServer
+ python -m SimpleHTTPServer
 ```
 
 you can with mod\_wsgi-express do:
 
 ```
-    mod_wsgi-express start-server --application-type static --document-root .
+ mod_wsgi-express start-server --application-type static --document-root .
 ```
 
 You are therefore running a production grade server for the task rather than the Python SimpleHTTPServer implementation.
@@ -176,7 +176,7 @@ This only starts to scratch the surface of what one can do with mod\_wsgi-expres
 If you want to play with mod\_wsgi-express and get a head start on what some of its other bundled capabilities are, then you can run the command:
 
 ```
-    mod_wsgi-express start-server --help
+ mod_wsgi-express start-server --help
 ```
 
 Also check out the PyPi page for 'mod\_wsgi' at:

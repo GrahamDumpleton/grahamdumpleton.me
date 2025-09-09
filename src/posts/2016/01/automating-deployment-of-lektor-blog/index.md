@@ -23,9 +23,9 @@ Lektor more than adequately covers the creation of an initial empty site templat
 
 My only grumble with that process was that it doesn’t like to have the directory you want to use in existence already. If you try and use an existing directory you get an error like:
 
-```sql
-    Error: Could not create target folder: [Errno 17] File exists: ‘/Users/graham/Projects/lektor-empty-site'  
-    Aborted!
+```
+ Error: Could not create target folder: [Errno 17] File exists: ‘/Users/graham/Projects/lektor-empty-site'  
+ Aborted!
 ```
 
 For me this came about because I created a repository on GitHub first, made a local checkout and then tried to populate it such that everything was at the top level of the repository rather than in a sub directory. Lektor doesn’t like this. You therefore either have to create the project in a subdirectory and then move everything manually to the top level, or create the project first and then only do ‘git init’ and link it to the remote GitHub repository. If there is a way of using Lektor such that I could have populated the current directory rather than having to use a new directory, then do please let me know.
@@ -92,54 +92,55 @@ In this case I am going to use the repository on GitHub located at:
 
 The ‘s2i’ program is now run, supplying it the location of the source files, the name of the S2I builder image on the Docker Hub registry and the name to be given to the Docker image produced and which will contain our final application.
 
-```python
-    $ s2i build https://github.com/GrahamDumpleton/wsgi-hello-world.git openshift/python-27-centos7 my-python-app  
-    ---> Copying application source ...  
-    ---> Installing dependencies ...  
-    Downloading/unpacking gunicorn (from -r requirements.txt (line 1))  
-    Installing collected packages: gunicorn  
-    ...  
-    Successfully installed gunicorn  
-    Cleaning up...  
-    
-    
-
-    $ docker images  
-    REPOSITORY TAG IMAGE ID CREATED VIRTUAL SIZE  
-    my-python-app latest beda88ceb3ad 14 minutes ago 444.1 MB
+```
+ $ s2i build https://github.com/GrahamDumpleton/wsgi-hello-world.git openshift/python-27-centos7 my-python-app  
+ ---> Copying application source ...  
+ ---> Installing dependencies ...  
+ Downloading/unpacking gunicorn (from -r requirements.txt (line 1))  
+ Installing collected packages: gunicorn  
+ ...  
+ Successfully installed gunicorn  
+ Cleaning up...  
+   
+ 
+ 
+ 
+ $ docker images  
+ REPOSITORY TAG IMAGE ID CREATED VIRTUAL SIZE  
+ my-python-app latest beda88ceb3ad 14 minutes ago 444.1 MB
 ```
 
 With the build complete, we can now run our application.
 
-```python
-    $ docker run --rm -p 8080:8080 my-python-app  
-    ---> Serving application with gunicorn (wsgi) ...  
-    [2016-01-17 10:49:58 +0000] [1] [INFO] Starting gunicorn 19.4.5  
-    [2016-01-17 10:49:58 +0000] [1] [INFO] Listening at: http://0.0.0.0:8080 (1)  
-    [2016-01-17 10:49:58 +0000] [1] [INFO] Using worker: sync  
-    [2016-01-17 10:49:58 +0000] [30] [INFO] Booting worker with pid: 30
+```
+ $ docker run --rm -p 8080:8080 my-python-app  
+ ---> Serving application with gunicorn (wsgi) ...  
+ [2016-01-17 10:49:58 +0000] [1] [INFO] Starting gunicorn 19.4.5  
+ [2016-01-17 10:49:58 +0000] [1] [INFO] Listening at: http://0.0.0.0:8080 (1)  
+ [2016-01-17 10:49:58 +0000] [1] [INFO] Using worker: sync  
+ [2016-01-17 10:49:58 +0000] [30] [INFO] Booting worker with pid: 30
 ```
 
 and access it using ‘curl’ to validate it works.
 
-```bash
-    $ curl $(docker-machine ip default):8080  
-    Hello World!
+```
+ $ curl $(docker-machine ip default):8080  
+ Hello World!
 ```
 
 Important here to understand is that it wasn’t necessary to define how to create the Docker image. That is, all the WSGI 'Hello World’ Git repository contained was:
 
-```bash
-    $ ls -las  
-    total 40  
-    0 drwxr-xr-x    8 graham staff   272  7 Jan 19:21 .  
-    0 drwxr-xr-x   71 graham staff  2414 17 Jan 14:05 ..  
-    0 drwxr-xr-x   15 graham staff   510 17 Jan 15:18 .git  
-    8 -rw-r--r--    1 graham staff   702  6 Jan 17:07 .gitignore  
-    8 -rw-r--r--    1 graham staff  1300  6 Jan 17:07 LICENSE  
-    8 -rw-r--r--    1 graham staff   163  6 Jan 17:09 README.rst  
-    8 -rw-r--r--    1 graham staff     9  6 Jan 21:05 requirements.txt  
-    8 -rw-r--r—     1 graham staff   278  6 Jan 17:09 wsgi.py
+```
+ $ ls -las  
+ total 40  
+ 0 drwxr-xr-x    8 graham staff   272  7 Jan 19:21 .  
+ 0 drwxr-xr-x   71 graham staff  2414 17 Jan 14:05 ..  
+ 0 drwxr-xr-x   15 graham staff   510 17 Jan 15:18 .git  
+ 8 -rw-r--r--    1 graham staff   702  6 Jan 17:07 .gitignore  
+ 8 -rw-r--r--    1 graham staff  1300  6 Jan 17:07 LICENSE  
+ 8 -rw-r--r--    1 graham staff   163  6 Jan 17:09 README.rst  
+ 8 -rw-r--r--    1 graham staff     9  6 Jan 21:05 requirements.txt  
+ 8 -rw-r--r—     1 graham staff   278  6 Jan 17:09 wsgi.py
 ```
 
 There was no ‘Dockerfile’. It is the ‘s2i’ program in combination with the S2I builder image which does all this for you.
@@ -160,32 +161,33 @@ So although primarily designed for hosting Python web applications, my existing 
 
 If we were running on our normal machine at this point and not using Docker, the steps required to build our static files from our Lektor project and host it using ‘mod\_wsgi-express’ would be as simple as:
 
-```bash
-    $ lektor build --output-path /tmp/data  
-    Started build  
-    U index.html  
-    U about/index.html  
-    U projects/index.html  
-    U blog/index.html  
-    U static/style.css  
-    U blog/first-post/index.html  
-    Finished build in 0.07 sec  
-    Started prune  
-    Finished prune in 0.00 sec  
-    
-
-    $ mod_wsgi-express start-server --application-type static --document-root /tmp/data  
-    Server URL : http://localhost:8000/  
-    Server Root : /tmp/mod_wsgi-localhost:8000:502  
-    Server Conf : /tmp/mod_wsgi-localhost:8000:502/httpd.conf  
-    Error Log File : /tmp/mod_wsgi-localhost:8000:502/error_log (warn)  
-    Request Capacity : 5 (1 process * 5 threads)  
-    Request Timeout : 60 (seconds)  
-    Queue Backlog : 100 (connections)  
-    Queue Timeout : 45 (seconds)  
-    Server Capacity : 20 (event/worker), 20 (prefork)  
-    Server Backlog : 500 (connections)  
-    Locale Setting : en_AU.UTF-8
+```
+ $ lektor build --output-path /tmp/data  
+ Started build  
+ U index.html  
+ U about/index.html  
+ U projects/index.html  
+ U blog/index.html  
+ U static/style.css  
+ U blog/first-post/index.html  
+ Finished build in 0.07 sec  
+ Started prune  
+ Finished prune in 0.00 sec  
+  
+ 
+ 
+ $ mod_wsgi-express start-server --application-type static --document-root /tmp/data  
+ Server URL : http://localhost:8000/  
+ Server Root : /tmp/mod_wsgi-localhost:8000:502  
+ Server Conf : /tmp/mod_wsgi-localhost:8000:502/httpd.conf  
+ Error Log File : /tmp/mod_wsgi-localhost:8000:502/error_log (warn)  
+ Request Capacity : 5 (1 process * 5 threads)  
+ Request Timeout : 60 (seconds)  
+ Queue Backlog : 100 (connections)  
+ Queue Timeout : 45 (seconds)  
+ Server Capacity : 20 (event/worker), 20 (prefork)  
+ Server Backlog : 500 (connections)  
+ Locale Setting : en_AU.UTF-8
 ```
 
 We could then access our web site created by Lektor at the URL ‘http://localhost:8000/'.
@@ -198,35 +200,40 @@ In order to now create our S2I builder for Lektor, we are going to build on my e
 
 The existing Docker base image for Python web applications is on the Docker Hub registry as ‘grahamdumpleton/mod-wsgi-docker’. As to the S2I builder support I have been working on, this has been rolled into that same image, although if wishing to use it as an S2I builder you will need to instead use ‘grahamdumpleton/mod-wsgi-docker-s2i’. This latter image is pretty minimal and just sets the exposed ‘PORT’ and ‘USER’. 
 
-```dockerfile
-    # grahamdumpleton/mod-wsgi-docker-s2i:python-2.7  
-    
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7
-
-    USER 1001
-
-    EXPOSE 80
-
-    CMD [ "/usr/local/s2i/bin/usage" ]
+```
+ # grahamdumpleton/mod-wsgi-docker-s2i:python-2.7  
+   
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7
+ 
+ 
+ USER 1001
+ 
+ 
+ EXPOSE 80
+ 
+ 
+ CMD [ "/usr/local/s2i/bin/usage" ]
 ```
 
 For our Lektor S2I builder image, what we are now going to use is the following ‘Dockerfile’.
 
-```dockerfile
-    # grahamdumpleton/s2i-lektor:1.1  
-    
-    FROM grahamdumpleton/mod-wsgi-docker-s2i:python-2.7
-
-    RUN pip install Lektor==1.1
-
-    COPY .whiskey /app/.whiskey/
+```
+ # grahamdumpleton/s2i-lektor:1.1  
+   
+ FROM grahamdumpleton/mod-wsgi-docker-s2i:python-2.7
+ 
+ 
+ RUN pip install Lektor==1.1
+ 
+ 
+ COPY .whiskey /app/.whiskey/
 ```
 
 This ‘Dockerfile’ only does two additional things on top of the underlying S2I builder for Python. The first is to install Lektor and the second is to copy in some extra files into the Docker image. Those extra files are:
 
 ```
-    .whiskey/server_args  
-    .whiskey/action_hooks/build
+ .whiskey/server_args  
+ .whiskey/action_hooks/build
 ```
 
 What you will note is that we aren’t actually adding any ‘assemble’ or ‘run’ scripts as we have talked about. This is because these already exist in the base image and already do everything we need to prepare the image and then start up a web server for us.
@@ -236,9 +243,9 @@ Different to how the OpenShift S2I Python builder is designed, the ‘assemble�
 Of these, the ‘.whiskey/action\_hooks/build’ file is a shell script which is invoked by the ‘assemble’ script during the build of the Docker image. What it contains is:
 
 ```
-    #!/usr/bin/env bash  
-    
-    lektor build --output-path /data
+ #!/usr/bin/env bash  
+   
+ lektor build --output-path /data
 ```
 
 This will be run by the ‘assemble’ script in the same directory as the source files that were copied into the image from either the local source directory or the remote Git repository.
@@ -248,7 +255,7 @@ This script therefore is what is going to trigger Lektor to generate the static 
 The second file called ‘.whiskey/server\_args’ contains:
 
 ```
-    --application-type static --document-root /data
+ --application-type static --document-root /data
 ```
 
 With the way that the base image is setup, and ‘run’ called when the Docker image is started, it will by default automatically run up ‘mod\_wsgi-express’. It will do this with a number of default options which are required when running ‘mod\_wsgi-express’ in a Docker container, such as directing logging to the terminal so that Docker can capture it. What the ‘server\_args’ file does is allow us to supply any additional options to ‘mod\_wsgi-express’. In this case we are giving it options to specify that it is to host static files with no primary Python WSGI application being present, where the static files are located in the ‘/data’ directory.
@@ -263,63 +270,71 @@ For the complete source code for this S2I builder image for Lektor you can see:
 
 A Docker image corresponding to Lektor 1.1 is also already up on the Docker Hub registry as ‘grahamdumpleton/s2i-lektor:1.1’. As such, we can now run ‘s2i’ as:
 
-```python
-    $ s2i build https://github.com/GrahamDumpleton/lektor-empty-site.git grahamdumpleton/s2i-lektor:1.1 my-lektor-site  
-    ---> Installing application source  
-    ---> Building application from source  
-    -----> Running .whiskey/action_hooks/build  
-    Started build  
-    U index.html  
-    U about/index.html  
-    U projects/index.html  
-    U blog/index.html  
-    U static/style.css  
-    U blog/first-post/index.html  
-    Finished build in 0.08 sec  
-    Started prune  
-    Finished prune in 0.00 sec
-
-    $ docker run --rm -p 8080:80 my-lektor-site  
-    ---> Executing the start up script  
-    [Sun Jan 17 12:28:03.698888 2016] [mpm_event:notice] [pid 17:tid 140541365122816] AH00489: Apache/2.4.18 (Unix) mod_wsgi/4.4.21 Python/2.7.11 configured -- resuming normal operations  
-    [Sun Jan 17 12:28:03.699328 2016] [core:notice] [pid 17:tid 140541365122816] AH00094: Command line: 'httpd (mod_wsgi-express) -f /tmp/mod_wsgi-localhost:80:1001/httpd.conf -E /dev/stderr -D MOD_WSGI_STATIC_ONLY -D MOD_WSGI_MPM_ENABLE_EVENT_MODULE -D MOD_WSGI_MPM_EXISTS_EVENT_MODULE -D MOD_WSGI_MPM_EXISTS_WORKER_MODULE -D MOD_WSGI_MPM_EXISTS_PREFORK_MODULE -D FOREGROUND'
+```
+ $ s2i build https://github.com/GrahamDumpleton/lektor-empty-site.git grahamdumpleton/s2i-lektor:1.1 my-lektor-site  
+ ---> Installing application source  
+ ---> Building application from source  
+ -----> Running .whiskey/action_hooks/build  
+ Started build  
+ U index.html  
+ U about/index.html  
+ U projects/index.html  
+ U blog/index.html  
+ U static/style.css  
+ U blog/first-post/index.html  
+ Finished build in 0.08 sec  
+ Started prune  
+ Finished prune in 0.00 sec
+ 
+ 
+ $ docker run --rm -p 8080:80 my-lektor-site  
+ ---> Executing the start up script  
+ [Sun Jan 17 12:28:03.698888 2016] [mpm_event:notice] [pid 17:tid 140541365122816] AH00489: Apache/2.4.18 (Unix) mod_wsgi/4.4.21 Python/2.7.11 configured -- resuming normal operations  
+ [Sun Jan 17 12:28:03.699328 2016] [core:notice] [pid 17:tid 140541365122816] AH00094: Command line: 'httpd (mod_wsgi-express) -f /tmp/mod_wsgi-localhost:80:1001/httpd.conf -E /dev/stderr -D MOD_WSGI_STATIC_ONLY -D MOD_WSGI_MPM_ENABLE_EVENT_MODULE -D MOD_WSGI_MPM_EXISTS_EVENT_MODULE -D MOD_WSGI_MPM_EXISTS_WORKER_MODULE -D MOD_WSGI_MPM_EXISTS_PREFORK_MODULE -D FOREGROUND'
 ```
 
 Testing our site with ‘curl’ we get:
 
-```python
-    $ curl $(docker-machine ip default):8080  
-    <!doctype html>  
-    <meta charset="utf-8">  
-    <link rel="stylesheet" href="./static/style.css">  
-    <title>Welcome to Empty Site! — Empty Site</title>  
-    <body>  
-    <header>  
-    <h1>Empty Site</h1>  
-    <nav>  
-    <ul class="nav navbar-nav">  
-    <li class="active"><a href="./">Welcome</a></li>
-
-    <li><a href="./blog/">Blog</a></li>
-
-    <li><a href="./projects/">Projects</a></li>
-
-    <li><a href="./about/">About</a></li>
-
-    </ul>  
-    </nav>  
-    </header>  
-    <div class="page">
-
-    <h2>Welcome to Empty Site!</h2>  
-    <p>This is a basic demo website that shows how to use Lektor for a basic  
-    website with some pages and a blog.</p>
-
-    </div>  
-    <footer>  
-    &copy; Copyright 2016 by Graham Dumpleton.  
-    </footer>  
-    </body>
+```
+ $ curl $(docker-machine ip default):8080  
+ <!doctype html>  
+ <meta charset="utf-8">  
+ <link rel="stylesheet" href="./static/style.css">  
+ <title>Welcome to Empty Site! — Empty Site</title>  
+ <body>  
+  <header>  
+  <h1>Empty Site</h1>  
+  <nav>  
+  <ul class="nav navbar-nav">  
+  <li class="active"><a href="./">Welcome</a></li>
+ 
+ 
+ <li><a href="./blog/">Blog</a></li>
+ 
+ 
+ <li><a href="./projects/">Projects</a></li>
+ 
+ 
+ <li><a href="./about/">About</a></li>
+ 
+ 
+ </ul>  
+  </nav>  
+  </header>  
+  <div class="page">
+ 
+ 
+ <h2>Welcome to Empty Site!</h2>  
+  <p>This is a basic demo website that shows how to use Lektor for a basic  
+ website with some pages and a blog.</p>
+ 
+ 
+   
+  </div>  
+  <footer>  
+  &copy; Copyright 2016 by Graham Dumpleton.  
+  </footer>  
+ </body>
 ```
 
 # Integration with OpenShift
@@ -334,29 +349,30 @@ If however using the latest OpenShift things are even simpler. This is because O
 
 Under OpenShift, all I need to do to deploy my Lektor based blog site is:
 
-```python
-    $ oc new-app grahamdumpleton/s2i-lektor:1.1~https://github.com/GrahamDumpleton/lektor-empty-site.git --name blog  
-    --> Found Docker image a95cedc (17 hours old) from Docker Hub for "grahamdumpleton/s2i-lektor:1.1"  
-    * An image stream will be created as "s2i-lektor:1.1" that will track this image  
-    * A source build using source code from https://github.com/GrahamDumpleton/lektor-empty-site.git will be created  
-    * The resulting image will be pushed to image stream "blog:latest"  
-    * Every time "s2i-lektor:1.1" changes a new build will be triggered  
-    * This image will be deployed in deployment config "blog"  
-    * Port 80/tcp will be load balanced by service "blog"  
-    --> Creating resources with label app=blog ...  
-    ImageStream "s2i-lektor" created  
-    ImageStream "blog" created  
-    BuildConfig "blog" created  
-    DeploymentConfig "blog" created  
-    Service "blog" created  
-    --> Success  
-    Build scheduled for "blog" - use the logs command to track its progress.  
-    Run 'oc status' to view your app.  
-    
-    
-
-    $ oc expose service blog  
-    route "blog" exposed
+```
+ $ oc new-app grahamdumpleton/s2i-lektor:1.1~https://github.com/GrahamDumpleton/lektor-empty-site.git --name blog  
+ --> Found Docker image a95cedc (17 hours old) from Docker Hub for "grahamdumpleton/s2i-lektor:1.1"  
+  * An image stream will be created as "s2i-lektor:1.1" that will track this image  
+  * A source build using source code from https://github.com/GrahamDumpleton/lektor-empty-site.git will be created  
+  * The resulting image will be pushed to image stream "blog:latest"  
+  * Every time "s2i-lektor:1.1" changes a new build will be triggered  
+  * This image will be deployed in deployment config "blog"  
+  * Port 80/tcp will be load balanced by service "blog"  
+ --> Creating resources with label app=blog ...  
+  ImageStream "s2i-lektor" created  
+  ImageStream "blog" created  
+  BuildConfig "blog" created  
+  DeploymentConfig "blog" created  
+  Service "blog" created  
+ --> Success  
+  Build scheduled for "blog" - use the logs command to track its progress.  
+  Run 'oc status' to view your app.  
+   
+ 
+ 
+ 
+ $ oc expose service blog  
+ route "blog" exposed
 ```
 
 I can then access the blog site at the host name which OpenShift has assigned it. If I have my own host name, then I just need to edit the route which was created to make the blog site public to add in my own host name instead.
@@ -365,9 +381,9 @@ In this case I needed to use the OpenShift command line tool to create my blog s
 
 This definition is provided as part of the ‘s2i-lektor’ project on GitHub and so to load it we just run:
 
-```bash
-    $ oc create -f https://raw.githubusercontent.com/GrahamDumpleton/s2i-lektor/master/lektor.json  
-    imagestream "lektor" created
+```
+ $ oc create -f https://raw.githubusercontent.com/GrahamDumpleton/s2i-lektor/master/lektor.json  
+ imagestream "lektor" created
 ```
 
 If we now go to the OpenShift UI for our project we have the option of adding a Lektor based site.

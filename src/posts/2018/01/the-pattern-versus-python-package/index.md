@@ -22,62 +22,66 @@ Lets have a quick look at some of the examples Brandon gave and see how they wou
 
 Jumping to the example of the dynamic wrapper that Brandon gave, the equivalent using wrapt would be:
 
-```python
-    import wrapt
-
-    class WriteLoggingFile(wrapt.ObjectProxy):
-
-        def __init__(self, wrapped, logger):  
-    super(WriteLoggingFile, self).__init__(wrapped)  
-    self._self_logger = logger
-
-        def write(self, s):  
-    self.__wrapped__.write(s)  
-    self._self_logger.debug('wrote %s bytes to %s', len(s), self.__wrapped__)
-
-        def writelines(self, strings):  
-    if self.closed:  
-    raise ValueError('this file is closed')  
-    for s in strings:  
-    self.write(s)
+```
+ import wrapt
+ 
+ 
+ class WriteLoggingFile(wrapt.ObjectProxy):
+ 
+ 
+     def __init__(self, wrapped, logger):  
+         super(WriteLoggingFile, self).__init__(wrapped)  
+         self._self_logger = logger
+ 
+ 
+     def write(self, s):  
+         self.__wrapped__.write(s)  
+         self._self_logger.debug('wrote %s bytes to %s', len(s), self.__wrapped__)
+ 
+ 
+     def writelines(self, strings):  
+         if self.closed:  
+             raise ValueError('this file is closed')  
+         for s in strings:  
+             self.write(s)
 ```
 
 All that needed to be provided was the methods you want to override. All that boilerplate functionality of the special methods for attribute access and update, and object iteration etc, are provided by the wrapt.ObjectProxy base class that the wrapper inherits from.
 
 Now lets look at what happens when we introspect an instance of the wrapper object.
 
-```python
-    >>> import sys, logging  
-    >>> stdout = WriteLoggingFile(sys.stdout, logging)  
-    >>> dir(stdout)  
-    ['__class__', '__delattr__', '__doc__', '__enter__', '__exit__',  
-    '__format__', '__getattribute__', '__hash__', '__init__', '__iter__',  
-    '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__',  
-    '__sizeof__', '__str__', '__subclasshook__', 'close', 'closed',  
-    'encoding', 'errors', 'fileno', 'flush', 'isatty', 'mode', 'name',  
-    'newlines', 'next', 'read', 'readinto', 'readline', 'readlines',  
-    'seek', 'softspace', 'tell', 'truncate', 'write', 'writelines',  
-    'xreadlines']
+```
+ >>> import sys, logging  
+ >>> stdout = WriteLoggingFile(sys.stdout, logging)  
+ >>> dir(stdout)  
+ ['__class__', '__delattr__', '__doc__', '__enter__', '__exit__',  
+  '__format__', '__getattribute__', '__hash__', '__init__', '__iter__',  
+  '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__',  
+  '__sizeof__', '__str__', '__subclasshook__', 'close', 'closed',  
+  'encoding', 'errors', 'fileno', 'flush', 'isatty', 'mode', 'name',  
+  'newlines', 'next', 'read', 'readinto', 'readline', 'readlines',  
+  'seek', 'softspace', 'tell', 'truncate', 'write', 'writelines',  
+  'xreadlines']
 ```
 
 We get what we want to see, which is the same as what we would get if we introspect the wrapped object.
 
 The wrapt.ObjectProxy class does much more than that though. Take for example the following:
 
-```bash
-    >>> isinstance(stdout, type(sys.stdout))  
-    True  
-    >>> isinstance(stdout, file)  
-    True
+```
+ >>> isinstance(stdout, type(sys.stdout))  
+ True  
+ >>> isinstance(stdout, file)  
+ True
 ```
 
 The isinstance\(\) check will also succeed and say that the wrapper is an instance of the type of object which was wrapped.
 
 It should be noted that you can't completely fool Python though:
 
-```python
-    >>> type(stdout)  
-    <class '__main__.WriteLoggingFile'>
+```
+ >>> type(stdout)  
+ <class '__main__.WriteLoggingFile'>
 ```
 
 But then, if you want to allow for duck typing, you should never directly compare types and should always use isinstance\(\).
@@ -86,28 +90,30 @@ But then, if you want to allow for duck typing, you should never directly compar
 
 The next example which has an equivalent when using wrapt is monkey patching an instance of an object rather than use a wrapper. Using wrapt this would be written as:
 
-```python
-    def bind_write_method(logger):  
-    @wrapt.function_wrapper  
-    def write_and_log(wrapped, instance, args, kwargs):  
-    wrapped(*args, **kwargs)  
-    logger.debug('wrote %s bytes to %s', len(args[0]), instance)  
-    return write_and_log
-
-    f = open('/dev/null', 'w')  
-    f.write = bind_write_method(logging)(f.write)
+```
+ def bind_write_method(logger):  
+     @wrapt.function_wrapper  
+     def write_and_log(wrapped, instance, args, kwargs):  
+         wrapped(*args, **kwargs)  
+         logger.debug('wrote %s bytes to %s', len(args[0]), instance)  
+     return write_and_log
+ 
+ 
+ f = open('/dev/null', 'w')  
+ f.write = bind_write_method(logging)(f.write)
 ```
 
 The @wrapt.function\_wrapper is a factory for creating a wrapper function. If you have used wrapt before, it does the same job as @wrapt.decorator, but doesn't have as many of the features for customisation that the latter does. When doing monkey patching, using @wrapt.function\_wrapper is less confusing naming wise as well.
 
 Using wrapt to do this in this way, introspection even still works correctly on the patched method.
 
-```bash
-    >>> f.write.__name__  
-    write
-
-    >>> inspect.getargspec(f.write)  
-    ArgSpec(args=['self', 'text'], varargs=None, keywords=None, defaults=None)
+```
+ >>> f.write.__name__  
+ write
+ 
+ 
+ >>> inspect.getargspec(f.write)  
+ ArgSpec(args=['self', 'text'], varargs=None, keywords=None, defaults=None)
 ```
 
 # Not just for Python decorators

@@ -16,20 +16,22 @@ So far in this current series of blog posts I [introduced](/posts/2014/12/hostin
 
 As shown in the previous blog posts I gave an example of the Dockerfile you would use for a simple WSGI hello world application:
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
-
-    CMD [ "wsgi.py" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
+ 
+ 
+ CMD [ "wsgi.py" ]
 ```
 
 I also presented a more complicated example for a Django site. The Dockerfile for that was still only:
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
-
-    CMD [ "--working-directory", "example", \  
-    "--url-alias", "/static", "example/htdocs", \  
-    "--application-type", "module", "example.wsgi" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
+ 
+ 
+ CMD [ "--working-directory", "example", \  
+  "--url-alias", "/static", "example/htdocs", \  
+  "--application-type", "module", "example.wsgi" ]
 ```
 
 In neither of these though is there anything that looks like a command to start up Apache/mod\_wsgi or any other WSGI server. So first up lets explore how an application is started up inside of a Docker container.
@@ -43,27 +45,27 @@ The first is to create a base image which contains the application you want to r
 For example, if you had created an image containing the Python interpreter and a Django web application with all dependencies installed, you could start up the Django web application using the Django development server using:
 
 ```
-    docker run my-python-env python example/manage.py runserver
+ docker run my-python-env python example/manage.py runserver
 ```
 
 If you wanted to start up an interactive shell so you could explore the environment of the container and/or manually run up your application, you could start it with:
 
 ```
-    docker run -it my-python-env bash
+ docker run -it my-python-env bash
 ```
 
 The second approach entails viewing the container itself as an application. If setup up in this way the image would be hardwired to start up a specific command when the container is launched.
 
 For example, if when building your container you specified in the Dockerfile:
 
-```dockerfile
-    CMD [ “python”, “example/manage.py”, “runserver” ]
+```
+ CMD [ “python”, “example/manage.py”, “runserver” ]
 ```
 
 when you now start the container, you do not need to provide the command to run. In other words, running:
 
 ```
-    docker run my-python-env
+ docker run my-python-env
 ```
 
 would automatically start the Django development server.
@@ -73,7 +75,7 @@ You could if you wish still provide a command, but it will override the default 
 If you therefore wanted to change for some reason the port the Django development server was listening on within the container, you would have to duplicate the whole command.
 
 ```
-    docker run my-python-env python example/manage.py runserver 80
+ docker run my-python-env python example/manage.py runserver 80
 ```
 
 The ‘CMD’ instruction, although it allows you to supply a default command, doesn’t therefore go so far as to make the container behave like it is an application in its own right, which can accept arbitrary command line arguments when run.
@@ -82,34 +84,35 @@ To have a container behave like that, we use an alternative instruction to ‘CM
 
 So we swap the ‘CMD’ instruction with ‘ENTRYPOINT’, setting it to the default command for the container.
 
-```dockerfile
-    ENTRYPOINT [ “python”, “example/manage.py”, “runserver” ]
+```
+ ENTRYPOINT [ “python”, “example/manage.py”, “runserver” ]
 ```
 
 When we now run the container as:
 
 ```
-    docker run my-python-env
+ docker run my-python-env
 ```
 
 the Django development server will again be run, but we can now supply additional command line options which will be appended to the default command.
 
 ```
-    docker run my-python-env 80
+ docker run my-python-env 80
 ```
 
 Although we changed to the ‘ENTRYPOINT’ instruction, it and the ‘CMD’ instruction are not exclusive. You could actually write in the Dockerfile:
 
-```dockerfile
-    ENTRYPOINT [ “python”, “example/manage.py”, “runserver” ]
-
-    CMD [ “80” ]
+```
+ ENTRYPOINT [ “python”, “example/manage.py”, “runserver” ]
+ 
+ 
+ CMD [ “80” ]
 ```
 
 In this case when you start up the container, the combined command line of:
 
 ```
-    python example/manage.py runserver 80
+ python example/manage.py runserver 80
 ```
 
 would be run.
@@ -117,13 +120,13 @@ would be run.
 Supply any command line options when starting the container in this case, and they will override those specified by the ‘CMD’ instruction, but the ‘ENTRYPOINT’ instruction will be left as is. Running:
 
 ```
-    docker run my-python-env 8080
+ docker run my-python-env 8080
 ```
 
 would therefore result in the combined command line of:
 
 ```
-    python example/manage.py runserver 8080
+ python example/manage.py runserver 8080
 ```
 
 Those therefore are the basic principals around how to launch an application within a container when it is started. Now lets look at what the Docker image I have created for running a Python WSGI application is using.
@@ -134,29 +137,29 @@ In the prior blog post I explained how the Docker image I provide isn’t just o
 
 The other thing that the ‘onbuild’ image did was to define the process for how the web application would then be started up when the container was run. The complete Dockerfile for the ‘onbuild’ image was:
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7  
-    
-    WORKDIR /app  
-    
-    ONBUILD COPY . /app  
-    ONBUILD RUN mod_wsgi-docker-build  
-    
-    EXPOSE 80  
-    
-    ENTRYPOINT [ "mod_wsgi-docker-start" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7  
+   
+ WORKDIR /app  
+   
+ ONBUILD COPY . /app  
+ ONBUILD RUN mod_wsgi-docker-build  
+   
+ EXPOSE 80  
+   
+ ENTRYPOINT [ "mod_wsgi-docker-start" ]
 ```
 
 As can be seen, this specified an ‘ENTRYPOINT’ instruction, which as we now know from above, will result in the ‘mod\_wsgi-docker-start’ command being run automatically when the container is started.
 
 Remember though that to create an image with your specific Python web application you actually had to create a further image deriving from this ‘onbuild’ image. For our Django web application that was:
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
-    
-    CMD [ "--working-directory", "example", \  
-    "--url-alias", "/static", "example/htdocs", \  
-    "--application-type", "module", "example.wsgi" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+   
+ CMD [ "--working-directory", "example", \  
+  "--url-alias", "/static", "example/htdocs", \  
+  "--application-type", "module", "example.wsgi" ]
 ```
 
 This final Dockerfile doesn’t itself specify an ‘ENTRYPOINT’ instruction, but it does define a ‘CMD’ instruction.
@@ -166,9 +169,9 @@ This highlights an important point. That is that an ‘ENTRYPOINT’ instruction
 As it turns out, a ‘CMD’ instruction will also be inherited by a derived image, but in this case the final image specified its own ‘CMD’ instruction. The final result of all this was that when the container was started up, the full command that was executed was:
 
 ```
-    mod_wsgi-docker-start —working-directory example \  
-    —url-alias /static example/htdocs \  
-    —application-type module example.wsgi
+ mod_wsgi-docker-start —working-directory example \  
+     —url-alias /static example/htdocs \  
+     —application-type module example.wsgi
 ```
 
 As was the case when building the final image and the ‘mod\_wsgi-docker-build’ was being run in the context of building that image, there is various magic going on inside ‘mod\_wsgi-docker-start’ so time to delve into what it is doing.
@@ -181,11 +184,11 @@ When deploying the web application and starting it up, it is common practice to 
 
 One of the first things that the ‘mod\_wsgi-docker-start’ script therefore does is execute any ‘deploy’ hook.
 
-```python
-    if [ -x .docker/action_hooks/deploy ]; then  
-    echo " -----> Running .docker/action_hooks/deploy"  
-    .docker/action_hooks/deploy  
-    fi
+```
+ if [ -x .docker/action_hooks/deploy ]; then  
+   echo " -----> Running .docker/action_hooks/deploy"  
+   .docker/action_hooks/deploy  
+ fi
 ```
 
 As with the hooks for the build process, this should reside in the ‘.docker/action\_hooks’ directory and the script needs to be executable.
@@ -197,15 +200,16 @@ If however you were using Docker to create a throw away instance of a Python web
 One use therefore of the ‘deploy’ hook if running a Django web application is to run inside of the hook script the ‘migrate’ Django management command.
 
 ```
-    #!/usr/bin/env bash
-
-    python example/manage.py migrate
+ #!/usr/bin/env bash
+ 
+ 
+ python example/manage.py migrate
 ```
 
 There is one important thing to note here which is different to what happens when hook scripts are run during the build phase. That is that during the build phase the ‘mod\_wsgi-docker-build’ script itself and any hook scripts would use:
 
 ```
-    set -eo pipefail
+ set -eo pipefail
 ```
 
 The intent of this was to cause a hard failure when building the image rather than leaving the image in an inconsistent state.
@@ -219,9 +223,10 @@ It is something I don’t know what the best answer is right now so am open to s
 Having run any ‘deploy’ hooks we are now ready to start up the actual Python web application. The part of the ‘mod\_wsgi-docker-start’ script which does this is:
 
 ```
-    SERVER_ARGS="--log-to-terminal --startup-log --port 80"
-
-    exec mod_wsgi-express start-server ${SERVER_ARGS} "$@"
+ SERVER_ARGS="--log-to-terminal --startup-log --port 80"
+ 
+ 
+ exec mod_wsgi-express start-server ${SERVER_ARGS} "$@"
 ```
 
 The key step in this is the execution of the ‘mod\_wsgi-express’ command. I will defer to a subsequent blog post to talk more about what ‘mod\_wsgi-express' is doing, but it is enough to know right now that it is what is actually starting up Apache and loading up your Python WSGI application so that it can then handle any web requests.
@@ -267,7 +272,7 @@ So due to the requirement that Apache needs to run as process ID 1, there is at 
 As previously described, one of the things that one can do when ‘ENTRYPOINT’ is used, is override the actual command that would be run by a container, even when the Dockerfile for the image defined a ‘CMD’ instruction. It was thus possible to run:
 
 ```
-    docker run -it my-python-env bash
+ docker run -it my-python-env bash
 ```
 
 This gives us access to an interactive shell to explore the container or run any commands manually.
@@ -281,7 +286,7 @@ Before I show how that is done, one feature of Docker that is worth pointing out
 What you can therefore do if you already have a running container you want to inspect is run:
 
 ```
-    docker exec -it hungry_bardeen bash
+ docker exec -it hungry_bardeen bash
 ```
 
 where the name is the auto generated name for the container or one you have assigned when the container was started.
@@ -297,7 +302,7 @@ The first thing we have to do is work out how we can reset the value of the ‘E
 So we can try running:
 
 ```
-    docker run -it —entrypoint bash my-python-app
+ docker run -it —entrypoint bash my-python-app
 ```
 
 This will have the desired affect of running bash for us, but will generally fail.
@@ -307,7 +312,7 @@ The reason it will fail is that any ‘CMD’ defined within the image will be p
 Trying to wipe out the options specified by ‘CMD’ using:
 
 ```
-    docker run -it —entrypoint bash my-python-app ''
+ docker run -it —entrypoint bash my-python-app ''
 ```
 
 doesn’t help as ‘bash’ will then look for and try to execute a script with an empty name.
@@ -315,7 +320,7 @@ doesn’t help as ‘bash’ will then look for and try to execute a script with
 To get around this problem and make things a little easier, the image I supply for hosting Python WSGI applications supplies an additional command called ‘mod\_wsgi-docker-shell’. What one would therefore run is:
 
 ```
-    docker run -it —entrypoint mod_wsgi-docker-shell my-python-app
+ docker run -it —entrypoint mod_wsgi-docker-shell my-python-app
 ```
 
 In this case the ‘mod\_wsgi-docker-shell’ script would be run and although what is defined by the ‘CMD’ instruction is still passed as arguments to it, they will ignored and ‘mod\_wsgi-docker-shell’ will ‘exec’ the ‘bash’ command with no arguments.
@@ -323,7 +328,7 @@ In this case the ‘mod\_wsgi-docker-shell’ script would be run and although w
 That therefore is my little backdoor. The only other way I found of getting around the issue, is the non obvious command of:
 
 ```
-    docker run -it —entrypoint nice my-python-app bash
+ docker run -it —entrypoint nice my-python-app bash
 ```
 
 In this case we are relying on the fact that the ‘nice’ command will in turn execute any arguments it is supplied. I thought that ‘mod\_wsgi-docker-shell’ may be more obvious though.

@@ -38,17 +38,17 @@ This blog post is therefore the first introduction to this endeavour. I will sho
 
 Lets start out therefore with the canonical WSGI hello world application.
 
-```python
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = 'Hello World!'  
-    
-    response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    
-    start_response(status, response_headers)  
-    
-    return [output]
+```
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = 'Hello World!'  
+   
+     response_headers = [('Content-type', 'text/plain'),  
+                         ('Content-Length', str(len(output)))]  
+   
+     start_response(status, response_headers)  
+   
+     return [output]
 ```
 
 Create a new empty directory and place this in a file called 'wsgi.py'.
@@ -57,10 +57,11 @@ This Hello World program has no associated static files, nor does it require any
 
 The next step is to create a 'Dockerfile' to build up our Docker image. As we are going to use the pre packaged Docker image I am providing and it embeds various magic, all that the 'Dockerfile' needs to contain is:
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
-
-    CMD [ "wsgi.py" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
+ 
+ 
+ CMD [ "wsgi.py" ]
 ```
 
 For the image being derived from, an 'ENTRYPOINT' is already defined which will run up Apache/mod\_wsgi. The 'CMD' instruction therefore only needs to provide any options, which at this point consists only of the path to the WSGI script file, which we had called 'wsgi.py'.
@@ -68,13 +69,13 @@ For the image being derived from, an 'ENTRYPOINT' is already defined which will 
 We can now build the Docker image for the Hello World example:
 
 ```
-    docker build -t my-python-app .
+ docker build -t my-python-app .
 ```
 
 and then run it:
 
 ```
-    docker run -it --rm -p 8000:80 --name my-running-app my-python-app
+ docker run -it --rm -p 8000:80 --name my-running-app my-python-app
 ```
 
 The Hello World WSGI application will now be accessible by pointing your browser at port 8000 on the Docker host.
@@ -86,24 +87,24 @@ We don't run Hello World applications as our web sites, so we also need to be ab
 So imagine that you have a Django web application constructed using the standard layout. From the top directory of this we would therefore have something like:
 
 ```
-    example/  
-    example/example/  
-    example/example/__init__.py  
-    example/example/settings.py  
-    example/example/urls.py  
-    example/example/views.py  
-    example/example/wsgi.py  
-    example/htdocs/  
-    example/htdocs/admin  
-    example/htdocs/admin/...  
-    example/manage.py  
-    requirements.txt
+ example/  
+ example/example/  
+ example/example/__init__.py  
+ example/example/settings.py  
+ example/example/urls.py  
+ example/example/views.py  
+ example/example/wsgi.py  
+ example/htdocs/  
+ example/htdocs/admin  
+ example/htdocs/admin/...  
+ example/manage.py  
+ requirements.txt
 ```
 
 The 'requirements.txt' which was used to create any local virtual environment used during development would already exist, and at the minimum would contain:
 
 ```
-    Django
+ Django
 ```
 
 Within the directory would then be the actual project directory which was created using the Django admin 'startproject' command.
@@ -111,8 +112,8 @@ Within the directory would then be the actual project directory which was create
 As this example requires static files, we setup the Django settings file to define the location of a directory to keep the static files:
 
 ```
-    STATIC_ROOT = os.path.join(BASE_DIR, 'htdocs')  
-    STATIC_URL = '/static/'
+ STATIC_ROOT = os.path.join(BASE_DIR, 'htdocs')  
+ STATIC_URL = '/static/'
 ```
 
 and then run the Django admin 'collectstatic' command. The 'collectstatic' command copies all the static file assets from any Django applications into the common 'htdocs' directory. This directory will then need to be mounted at the '/static' URL when we run Apache/mod\_wsgi.
@@ -125,12 +126,13 @@ With the way Django lays out the project and creates the 'wsgi.py' file such tha
 
 With all that said, we now actually create the 'Dockerfile' and in it we place:
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
-
-    CMD [ "--working-directory", "example", \  
-    "--url-alias", "/static", "example/htdocs", \  
-    "--application-type", "module", "example.wsgi" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild
+ 
+ 
+ CMD [ "--working-directory", "example", \  
+       "--url-alias", "/static", "example/htdocs", \  
+       "--application-type", "module", "example.wsgi" ]
 ```
 
 The options to the 'CMD' instruction in this case serve the following purposes.

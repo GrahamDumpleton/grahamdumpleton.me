@@ -22,20 +22,20 @@ In the mean time, the best thing you can do to ensure Docker images are portable
 
 In our prior post, where we got to was that when running our IPython Docker container as a random user ID, it would fail even when running some basics checks.
 
-```python
-    $ docker run --rm -it -u 100000 -p 8888:8888 jupyter-notebook bash  
-    I have no name!@78bdfa8dba92:/notebooks$ whoami  
-    whoami: cannot find name for user ID 100000  
-    I have no name!@78bdfa8dba92:/notebooks$ id  
-    uid=100000 gid=0(root)  
-    I have no name!@78bdfa8dba92:/notebooks$ pwd  
-    /notebooks  
-    I have no name!@78bdfa8dba92:/notebooks$ env | grep HOME  
-    HOME=/  
-    I have no name!@78bdfa8dba92:/notebooks$ touch $HOME/magic  
-    touch: cannot touch ‘//magic’: Permission denied  
-    I have no name!@78bdfa8dba92:/notebooks$ touch /notebooks/magic  
-    touch: cannot touch ‘/notebooks/magic’: Permission denied
+```
+ $ docker run --rm -it -u 100000 -p 8888:8888 jupyter-notebook bash  
+ I have no name!@78bdfa8dba92:/notebooks$ whoami  
+ whoami: cannot find name for user ID 100000  
+ I have no name!@78bdfa8dba92:/notebooks$ id  
+ uid=100000 gid=0(root)  
+ I have no name!@78bdfa8dba92:/notebooks$ pwd  
+ /notebooks  
+ I have no name!@78bdfa8dba92:/notebooks$ env | grep HOME  
+ HOME=/  
+ I have no name!@78bdfa8dba92:/notebooks$ touch $HOME/magic  
+ touch: cannot touch ‘//magic’: Permission denied  
+ I have no name!@78bdfa8dba92:/notebooks$ touch /notebooks/magic  
+ touch: cannot touch ‘/notebooks/magic’: Permission denied
 ```
 
 The problems basically boiled down to file system access permissions, this being caused by the fact that we were running as a different user ID to what we expected.
@@ -44,37 +44,37 @@ The first specific problem was that the ‘HOME’ directory environment variabl
 
 As a first step, lets simply try overriding the ‘HOME’ directory and forcing it to be what we desired it to be by adding to the ‘Dockerfile':
 
-```dockerfile
-    ENV HOME=/home/ipython
+```
+ ENV HOME=/home/ipython
 ```
 
 Starting the Docker container with an interactive shell we now get:
 
-```python
-    $ docker run --rm -it -u 100000 -p 8888:8888 jupyter-notebook bash  
-    I have no name!@e40f5e18f666:/notebooks$ whoami  
-    whoami: cannot find name for user ID 100000  
-    I have no name!@e40f5e18f666:/notebooks$ id  
-    uid=100000 gid=0(root)  
-    I have no name!@e40f5e18f666:/notebooks$ pwd  
-    /notebooks  
-    I have no name!@e40f5e18f666:/notebooks$ env | grep HOME  
-    HOME=/home/ipython  
-    I have no name!@e40f5e18f666:/notebooks$ touch $HOME/magic  
-    touch: cannot touch ‘/home/ipython/magic’: Permission denied
+```
+ $ docker run --rm -it -u 100000 -p 8888:8888 jupyter-notebook bash  
+ I have no name!@e40f5e18f666:/notebooks$ whoami  
+ whoami: cannot find name for user ID 100000  
+ I have no name!@e40f5e18f666:/notebooks$ id  
+ uid=100000 gid=0(root)  
+ I have no name!@e40f5e18f666:/notebooks$ pwd  
+ /notebooks  
+ I have no name!@e40f5e18f666:/notebooks$ env | grep HOME  
+ HOME=/home/ipython  
+ I have no name!@e40f5e18f666:/notebooks$ touch $HOME/magic  
+ touch: cannot touch ‘/home/ipython/magic’: Permission denied
 ```
 
 The ‘HOME’ directory environment variable is now correct, but we still cannot create files due to the fact that the home directory is owned by the ‘ipython’ user and we are running with a different user ID.
 
-```bash
-    $ ls -las $HOME  
-    total 24  
-    4 drwxr-xr-x 3 ipython ipython 4096 Dec 22 21:53 .  
-    4 drwxr-xr-x 4 root root 4096 Dec 22 21:53 ..  
-    4 -rw-r--r-- 1 ipython ipython 220 Dec 22 21:53 .bash_logout  
-    4 -rw-r--r-- 1 ipython ipython 3637 Dec 22 21:53 .bashrc  
-    4 drwx------ 2 ipython ipython 4096 Dec 22 21:53 .jupyter  
-    4 -rw-r--r-- 1 ipython ipython 675 Dec 22 21:53 .profile
+```
+ $ ls -las $HOME  
+ total 24  
+ 4 drwxr-xr-x 3 ipython ipython 4096 Dec 22 21:53 .  
+ 4 drwxr-xr-x 4 root root 4096 Dec 22 21:53 ..  
+ 4 -rw-r--r-- 1 ipython ipython 220 Dec 22 21:53 .bash_logout  
+ 4 -rw-r--r-- 1 ipython ipython 3637 Dec 22 21:53 .bashrc  
+ 4 drwx------ 2 ipython ipython 4096 Dec 22 21:53 .jupyter  
+ 4 -rw-r--r-- 1 ipython ipython 675 Dec 22 21:53 .profile
 ```
 
 # Using group access permissions
@@ -93,30 +93,30 @@ The question now is if the group would normally be set to whatever the primary g
 
 Lets first look at the case of where we override the user ID but still use one which does have a user defined for it.
 
-```bash
-    $ docker run --rm -it -u 5 -p 8888:8888 jupyter-notebook bash  
-    games@d0e1f5776ccb:/notebooks$ id  
-    uid=5(games) gid=60(games) groups=60(games)
+```
+ $ docker run --rm -it -u 5 -p 8888:8888 jupyter-notebook bash  
+ games@d0e1f5776ccb:/notebooks$ id  
+ uid=5(games) gid=60(games) groups=60(games)
 ```
 
 Here we specify the user ID ‘5’, which corresponds to the ‘games’ user. That user happens to have a corresponding primary group which maps to its own personal group of ‘games’. In overriding the user ID, the primary group for the user is still picked and used as the effective group. Thus the ‘id’ command shows the ‘gid’ being ’60’, corresponding to the ‘games’ group.
 
 Do note that this is only the case where only the user ID was overridden. It so happens that the ‘-u’ option to ‘docker run’ can also be used to override the effective group used as well.
 
-```bash
-    $ docker run --rm -it -u 5:1 -p 8888:8888 jupyter-notebook bash  
-    games@58d9074c872c:/notebooks$ id  
-    uid=5(games) gid=1(daemon) groups=60(games)
+```
+ $ docker run --rm -it -u 5:1 -p 8888:8888 jupyter-notebook bash  
+ games@58d9074c872c:/notebooks$ id  
+ uid=5(games) gid=1(daemon) groups=60(games)
 ```
 
 Here we have overridden the effective group to be group ID of ‘1’, corresponding to the ‘daemon’ group.
 
 Back to our random user ID, when we select a user ID which doesn’t have a corresponding user account we see:
 
-```bash
-    docker run --rm -it -u 10000 -p 8888:8888 jupyter-notebook bash  
-    I have no name!@f4050457c1ee:/notebooks$ id  
-    uid=10000 gid=0(root)
+```
+ docker run --rm -it -u 10000 -p 8888:8888 jupyter-notebook bash  
+ I have no name!@f4050457c1ee:/notebooks$ id  
+ uid=10000 gid=0(root)
 ```
 
 That is, the effective group is set as the ‘gid’ of ‘0’, corresponding to the group for ‘root’.
@@ -137,22 +137,22 @@ By making such a choice for the effective group, it means that the group will be
 
 Updating our ‘Dockerfile’ based on this, we end up with:
 
-```dockerfile
-    RUN adduser --disabled-password --gid 0 --gecos "IPython" ipython  
-    
-    RUN mkdir -m 0775 /notebooks && chown ipython:root /notebooks  
-    
-    VOLUME /notebooks  
-    WORKDIR /notebooks  
-    
-    USER ipython  
-    
-    # Add a notebook profile.RUN mkdir -p -m 0775 ~ipython/.jupyter/ && \  
-    echo "c.NotebookApp.ip = '*'" >> ~ipython/.jupyter/jupyter_notebook_config.py  
-    
-    RUN chmod -R u+w,g+w /home/ipython  
-    
-    ENV HOME=/home/ipython
+```
+ RUN adduser --disabled-password --gid 0 --gecos "IPython" ipython  
+   
+ RUN mkdir -m 0775 /notebooks && chown ipython:root /notebooks  
+   
+ VOLUME /notebooks  
+ WORKDIR /notebooks  
+   
+ USER ipython  
+   
+ # Add a notebook profile.RUN mkdir -p -m 0775 ~ipython/.jupyter/ && \  
+  echo "c.NotebookApp.ip = '*'" >> ~ipython/.jupyter/jupyter_notebook_config.py  
+   
+ RUN chmod -R u+w,g+w /home/ipython  
+   
+ ENV HOME=/home/ipython
 ```
 
 The key changes are:
@@ -168,27 +168,27 @@ Lets now check what happens for each of the use cases we expect.
 
 For the case where the Docker container runs as the default user as specified by the ‘USER’ statement we now get:
 
-```bash
-    $ docker run --rm -it -p 8888:8888 jupyter-notebook bash  
-    ipython@68d5a31bcc03:/notebooks$ whoami  
-    ipython  
-    ipython@68d5a31bcc03:/notebooks$ id  
-    uid=1000(ipython) gid=0(root) groups=0(root)  
-    ipython@68d5a31bcc03:/notebooks$ pwd  
-    /notebooks  
-    ipython@68d5a31bcc03:/notebooks$ env | grep HOME  
-    HOME=/home/ipython  
-    ipython@68d5a31bcc03:/notebooks$ touch $HOME/magic  
-    ipython@68d5a31bcc03:/notebooks$ touch /notebooks  
-    ipython@68d5a31bcc03:/notebooks$ ls -las $HOME  
-    total 24  
-    4 drwxrwxr-x 4 ipython root 4096 Dec 23 02:26 .  
-    4 drwxr-xr-x 6 root root 4096 Dec 23 02:26 ..  
-    4 -rw-rw-r-- 1 ipython root 220 Dec 23 02:15 .bash_logout  
-    4 -rw-rw-r-- 1 ipython root 3637 Dec 23 02:15 .bashrc  
-    4 drwxrwxr-x 2 ipython root 4096 Dec 23 02:15 .jupyter  
-    0 -rw-r--r-- 1 ipython root 0 Dec 23 02:26 magic  
-    4 -rw-rw-r-- 1 ipython root 675 Dec 23 02:15 .profile
+```
+ $ docker run --rm -it -p 8888:8888 jupyter-notebook bash  
+ ipython@68d5a31bcc03:/notebooks$ whoami  
+ ipython  
+ ipython@68d5a31bcc03:/notebooks$ id  
+ uid=1000(ipython) gid=0(root) groups=0(root)  
+ ipython@68d5a31bcc03:/notebooks$ pwd  
+ /notebooks  
+ ipython@68d5a31bcc03:/notebooks$ env | grep HOME  
+ HOME=/home/ipython  
+ ipython@68d5a31bcc03:/notebooks$ touch $HOME/magic  
+ ipython@68d5a31bcc03:/notebooks$ touch /notebooks  
+ ipython@68d5a31bcc03:/notebooks$ ls -las $HOME  
+ total 24  
+ 4 drwxrwxr-x 4 ipython root 4096 Dec 23 02:26 .  
+ 4 drwxr-xr-x 6 root root 4096 Dec 23 02:26 ..  
+ 4 -rw-rw-r-- 1 ipython root 220 Dec 23 02:15 .bash_logout  
+ 4 -rw-rw-r-- 1 ipython root 3637 Dec 23 02:15 .bashrc  
+ 4 drwxrwxr-x 2 ipython root 4096 Dec 23 02:15 .jupyter  
+ 0 -rw-r--r-- 1 ipython root 0 Dec 23 02:26 magic  
+ 4 -rw-rw-r-- 1 ipython root 675 Dec 23 02:15 .profile
 ```
 
 Everything in our checks still works okay and running up the actual Jupyter Notebook application also works fine, with us being able to create and save new notebooks.
@@ -201,27 +201,27 @@ If we use the ‘-u ipython’ or ‘-u 1000’ option, where ‘1000’ was the
 
 For the case of overriding the user with a random user ID, we get:
 
-```python
-    $ docker run --rm -it -u 10000 -p 8888:8888 jupyter-notebook bash  
-    I have no name!@dbe290496d44:/notebooks$ whoami  
-    whoami: cannot find name for user ID 10000  
-    I have no name!@dbe290496d44:/notebooks$ id  
-    uid=10000 gid=0(root)  
-    I have no name!@dbe290496d44:/notebooks$ pwd  
-    /notebooks  
-    I have no name!@dbe290496d44:/notebooks$ env | grep HOME  
-    HOME=/home/ipython  
-    I have no name!@dbe290496d44:/notebooks$ touch $HOME/magic  
-    I have no name!@dbe290496d44:/notebooks$ touch /notebooks/magic  
-    I have no name!@dbe290496d44:/notebooks$ ls -las $HOME  
-    total 24  
-    4 drwxrwxr-x 4 ipython root 4096 Dec 23 02:32 .  
-    4 drwxr-xr-x 6 root root 4096 Dec 23 02:32 ..  
-    4 -rw-rw-r-- 1 ipython root 220 Dec 23 02:31 .bash_logout  
-    4 -rw-rw-r-- 1 ipython root 3637 Dec 23 02:31 .bashrc  
-    4 drwxrwxr-x 2 ipython root 4096 Dec 23 02:31 .jupyter  
-    0 -rw-r--r-- 1 10000 root 0 Dec 23 02:32 magic  
-    4 -rw-rw-r-- 1 ipython root 675 Dec 23 02:31 .profile
+```
+ $ docker run --rm -it -u 10000 -p 8888:8888 jupyter-notebook bash  
+ I have no name!@dbe290496d44:/notebooks$ whoami  
+ whoami: cannot find name for user ID 10000  
+ I have no name!@dbe290496d44:/notebooks$ id  
+ uid=10000 gid=0(root)  
+ I have no name!@dbe290496d44:/notebooks$ pwd  
+ /notebooks  
+ I have no name!@dbe290496d44:/notebooks$ env | grep HOME  
+ HOME=/home/ipython  
+ I have no name!@dbe290496d44:/notebooks$ touch $HOME/magic  
+ I have no name!@dbe290496d44:/notebooks$ touch /notebooks/magic  
+ I have no name!@dbe290496d44:/notebooks$ ls -las $HOME  
+ total 24  
+ 4 drwxrwxr-x 4 ipython root 4096 Dec 23 02:32 .  
+ 4 drwxr-xr-x 6 root root 4096 Dec 23 02:32 ..  
+ 4 -rw-rw-r-- 1 ipython root 220 Dec 23 02:31 .bash_logout  
+ 4 -rw-rw-r-- 1 ipython root 3637 Dec 23 02:31 .bashrc  
+ 4 drwxrwxr-x 2 ipython root 4096 Dec 23 02:31 .jupyter  
+ 0 -rw-r--r-- 1 10000 root 0 Dec 23 02:32 magic  
+ 4 -rw-rw-r-- 1 ipython root 675 Dec 23 02:31 .profile
 ```
 
 Unlike before when overriding with a random user ID with no corresponding user account, the attempts to create files in the file system now works okay.
@@ -238,30 +238,30 @@ One final check to go, will this updated version of the ‘jupyter/notebook’ D
 
 If we access the running container on OpenShift we can perform the same checks as above okay.
 
-```python
-    $ oc rsh ipython-3-c7oit  
-    I have no name!@ipython-3-c7oit:/notebooks$ whoami  
-    whoami: cannot find name for user ID 1000210000  
-    I have no name!@ipython-3-c7oit:/notebooks$ id  
-    uid=1000210000 gid=0(root)  
-    I have no name!@ipython-3-c7oit:/notebooks$ pwd  
-    /notebooks  
-    I have no name!@ipython-3-c7oit:/notebooks$ env | grep HOME  
-    HOME=/home/ipython  
-    I have no name!@ipython-3-c7oit:/notebooks$ touch $HOME/magic  
-    I have no name!@ipython-3-c7oit:/notebooks$ touch /notebooks/magic  
-    I have no name!@ipython-3-c7oit:/notebooks$ ls -las $HOME  
-    total 20  
-    4 drwxrwxr-x. 5 ipython root 4096 Dec 23 03:20 .  
-    0 drwxr-xr-x. 3 root root 20 Dec 23 03:13 ..  
-    4 -rw-------. 1 1000210000 root 31 Dec 23 03:20 .bash_history  
-    4 -rw-rw-r--. 1 ipython root 220 Dec 23 03:13 .bash_logout  
-    4 -rw-rw-r--. 1 ipython root 3637 Dec 23 03:13 .bashrc  
-    0 drwxr-xr-x. 5 1000210000 root 64 Dec 23 03:19 .ipython  
-    0 drwxrwxr-x. 2 ipython root 39 Dec 23 03:14 .jupyter  
-    0 drwx------. 3 1000210000 root 18 Dec 23 03:18 .local  
-    0 -rw-r--r--. 1 1000210000 root 0 Dec 23 03:20 magic  
-    4 -rw-rw-r--. 1 ipython root 675 Dec 23 03:13 .profile
+```
+ $ oc rsh ipython-3-c7oit  
+ I have no name!@ipython-3-c7oit:/notebooks$ whoami  
+ whoami: cannot find name for user ID 1000210000  
+ I have no name!@ipython-3-c7oit:/notebooks$ id  
+ uid=1000210000 gid=0(root)  
+ I have no name!@ipython-3-c7oit:/notebooks$ pwd  
+ /notebooks  
+ I have no name!@ipython-3-c7oit:/notebooks$ env | grep HOME  
+ HOME=/home/ipython  
+ I have no name!@ipython-3-c7oit:/notebooks$ touch $HOME/magic  
+ I have no name!@ipython-3-c7oit:/notebooks$ touch /notebooks/magic  
+ I have no name!@ipython-3-c7oit:/notebooks$ ls -las $HOME  
+ total 20  
+ 4 drwxrwxr-x. 5 ipython root 4096 Dec 23 03:20 .  
+ 0 drwxr-xr-x. 3 root root 20 Dec 23 03:13 ..  
+ 4 -rw-------. 1 1000210000 root 31 Dec 23 03:20 .bash_history  
+ 4 -rw-rw-r--. 1 ipython root 220 Dec 23 03:13 .bash_logout  
+ 4 -rw-rw-r--. 1 ipython root 3637 Dec 23 03:13 .bashrc  
+ 0 drwxr-xr-x. 5 1000210000 root 64 Dec 23 03:19 .ipython  
+ 0 drwxrwxr-x. 2 ipython root 39 Dec 23 03:14 .jupyter  
+ 0 drwx------. 3 1000210000 root 18 Dec 23 03:18 .local  
+ 0 -rw-r--r--. 1 1000210000 root 0 Dec 23 03:20 magic  
+ 4 -rw-rw-r--. 1 ipython root 675 Dec 23 03:13 .profile
 ```
 
 # Named user vs numeric user ID
@@ -282,23 +282,29 @@ What exactly the [lowest recommended user ID](https://en.wikipedia.org/wiki/User
 
 Making this change we now end up with the ‘Dockerfile’ being:
 
-```dockerfile
-    RUN adduser --disabled-password --uid 1001 --gid 0 --gecos "IPython" ipython
-
-    RUN mkdir -m 0775 /notebooks && chown ipython:root /notebooks
-
-    VOLUME /notebooks  
-    WORKDIR /notebooks
-
-    USER 1001
-
-    # Add a notebook profile.  
-    RUN mkdir -p -m 0775 ~ipython/.jupyter/ && \  
-    echo "c.NotebookApp.ip = '*'" >> ~ipython/.jupyter/jupyter_notebook_config.py
-
-    RUN chmod -R u+w,g+w /home/ipython
-
-    ENV HOME=/home/ipython
+```
+ RUN adduser --disabled-password --uid 1001 --gid 0 --gecos "IPython" ipython
+ 
+ 
+ RUN mkdir -m 0775 /notebooks && chown ipython:root /notebooks
+ 
+ 
+ VOLUME /notebooks  
+ WORKDIR /notebooks
+ 
+ 
+ USER 1001
+ 
+ 
+ # Add a notebook profile.  
+ RUN mkdir -p -m 0775 ~ipython/.jupyter/ && \  
+  echo "c.NotebookApp.ip = '*'" >> ~ipython/.jupyter/jupyter_notebook_config.py
+ 
+ 
+ RUN chmod -R u+w,g+w /home/ipython
+ 
+ 
+ ENV HOME=/home/ipython
 ```
 
 All up this should give us a the most portable solution. Working where the Docker container is hosted directly on Docker, but also working on a hosting service such as OpenShift, which uses Docker under the covers, but which overrides the user ID containers run as. Using a numeric user ID for ‘USER’ also allows a hosting service to still used our preferred user if it does not want to allow containers to run as ‘root’, as will know it can trust that it will run as the user ID indicated.
@@ -309,10 +315,10 @@ It would be great to say at this point that we are done and everything works fin
 
 The remaining problem relates to what happens when we run the ‘whoami’ command:
 
-```python
-    $ docker run --rm -it -u 10000 -p 8888:8888 jupyter-notebook bash  
-    I have no name!@dbe290496d44:/notebooks$ whoami  
-    whoami: cannot find name for user ID 10000
+```
+ $ docker run --rm -it -u 10000 -p 8888:8888 jupyter-notebook bash  
+ I have no name!@dbe290496d44:/notebooks$ whoami  
+ whoami: cannot find name for user ID 10000
 ```
 
 As we can see, ‘whoami’ isn’t able to return a valid value due to the user ID everything runs as not actually matching a user account.

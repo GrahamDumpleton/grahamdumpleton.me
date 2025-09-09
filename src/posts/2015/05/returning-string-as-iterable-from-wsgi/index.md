@@ -16,28 +16,31 @@ The possible performance consequences of returning many separate data blocks fro
 
 In this post I want to investigate an even more severe case of this problem that can occur. For that we need to go back and start over with the more typical way that most Python web frameworks return response data. That is, as a single large string.
 
-```python
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = 1024*1024*b'X'
-
-        response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    start_response(status, response_headers)
-
-        return [output]
+```
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = 1024*1024*b'X'
+ 
+ 
+     response_headers = [('Content-type', 'text/plain'),  
+             ('Content-Length', str(len(output)))]  
+     start_response(status, response_headers)
+ 
+ 
+     return [output]
 ```
 
 In this example I have increased the length of the string to be returned so it is 1MB in size.
 
 If we run this under mod\_wsgi-express and use 'curl' then we get an adequately quick response as we would expect.
 
-```bash
-    $ time curl -s -o /dev/null http://localhost:8000/
-
-    real 0m0.017s  
-    user 0m0.006s  
-    sys 0m0.005s
+```
+ $ time curl -s -o /dev/null http://localhost:8000/
+ 
+ 
+ real 0m0.017s  
+ user 0m0.006s  
+ sys 0m0.005s
 ```
 
 # Response as an iterable
@@ -46,38 +49,42 @@ As is known, the response from a WSGI application needs to be an iterable of byt
 
 That the WSGI server will accept any iterable does mean that people new to writing Python WSGI applications often make a simple mistake. That is that instead of returning a list of byte strings, they simply return the byte string instead.
 
-```python
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = 1024*1024*b'X'
-
-        response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    start_response(status, response_headers)
-
-        return output
+```
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = 1024*1024*b'X'
+ 
+ 
+     response_headers = [('Content-type', 'text/plain'),  
+             ('Content-Length', str(len(output)))]  
+     start_response(status, response_headers)
+ 
+ 
+     return output
 ```
 
 Because a byte string is also an iterable then the code will still appear to run fine, returning the response expected back to the HTTP client. For a small byte string the time taken to display the page back in the browser would appear to be normal, but for a larger byte string it would become evident that something is wrong.
 
 Running this test with mod\_wsgi-express again, we can see the time taken balloon out from 17 milliseconds to over 3 seconds:
 
-```bash
-    $ time curl -s -o /dev/null http://localhost:8000/
-
-    real 0m3.659s  
-    user 0m0.294s  
-    sys 0m1.544s
+```
+ $ time curl -s -o /dev/null http://localhost:8000/
+ 
+ 
+ real 0m3.659s  
+ user 0m0.294s  
+ sys 0m1.544s
 ```
 
 Use gunicorn, and as we saw in the previous post the results are much worse again.
 
-```bash
-    $ time curl -s -o /dev/null http://localhost:8000/
-
-    real 0m23.762s  
-    user 0m1.446s  
-    sys 0m7.085s
+```
+ $ time curl -s -o /dev/null http://localhost:8000/
+ 
+ 
+ real 0m23.762s  
+ user 0m1.446s  
+ sys 0m7.085s
 ```
 
 The reason the results are so bad is that when a string is returned as the iterable, when iterating over it you are dealing with the byte string one byte at a time. This means that when the WSGI server is writing the response back to the HTTP client, it is in turn doing it one byte at a time. The overhead of writing one byte at a time to the socket connection is dwarfing everything else.
@@ -86,12 +93,13 @@ As was covered in the prior post, this is entirely expected behaviour for a WSGI
 
 Acknowledging that this would be a problem with a users code, lets now though see what happens when this example is run through uWSGI.
 
-```bash
-    $ time curl -s -o /dev/null http://localhost:8000/
-
-    real 0m0.019s  
-    user 0m0.006s  
-    sys 0m0.007s
+```
+ $ time curl -s -o /dev/null http://localhost:8000/
+ 
+ 
+ real 0m0.019s  
+ user 0m0.006s  
+ sys 0m0.007s
 ```
 
 Rather than the larger time we would expect to see, when using uWSGI the time taken is still down at 19 milliseconds.
@@ -106,30 +114,35 @@ In addition to there being a problem when run on a conforming WSGI server, there
 
 This can be illustrated by now going back and adding the WSGI application timing decorator.
 
-```python
-    from timer1 import timed_wsgi_application1
-
-    @timed_wsgi_application1  
-    def application(environ, start_response):
-
-        status = '200 OK'  
-    output = 1024*1024*b'X'
-
-        response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    start_response(status, response_headers)
-
-        return output
+```
+ from timer1 import timed_wsgi_application1
+ 
+ 
+ @timed_wsgi_application1  
+ def application(environ, start_response):
+ 
+ 
+     status = '200 OK'  
+     output = 1024*1024*b'X'
+ 
+ 
+     response_headers = [('Content-type', 'text/plain'),  
+             ('Content-Length', str(len(output)))]  
+     start_response(status, response_headers)
+ 
+ 
+     return output
 ```
 
 With the decorator, running with uWSGI again we now get:
 
-```bash
-    $ time curl -s -o /dev/null http://localhost:8000/
-
-    real 0m13.876s  
-    user 0m0.925s  
-    sys 0m3.407s
+```
+ $ time curl -s -o /dev/null http://localhost:8000/
+ 
+ 
+ real 0m13.876s  
+ user 0m0.925s  
+ sys 0m3.407s
 ```
 
 So only now do we get the sort of result we were expecting, with it taking 13 seconds.
@@ -146,20 +159,22 @@ What you instead end up with is pseudo WSGI applications which are in fact locke
 
 If you are developing Python web applications at the WSGI level rather than using a web framework and you value WSGI application portability, one thing you can do to try and ensure WSGI compliance is to use the WSGI validator found in the 'wsgiref.validate' module of the Python standard library.
 
-```python
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = 1024*1024*b'X'
-
-        response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    start_response(status, response_headers)
-
-        return output  
-    
-    import wsgiref.validate  
-    
-    application = wsgiref.validate.validator(application)
+```
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = 1024*1024*b'X'
+ 
+ 
+     response_headers = [('Content-type', 'text/plain'),  
+             ('Content-Length', str(len(output)))]  
+     start_response(status, response_headers)
+ 
+ 
+     return output  
+   
+ import wsgiref.validate  
+   
+ application = wsgiref.validate.validator(application)
 ```
 
 This will perform a range of checks to ensure some basic measure of WSGI compliance and also good practice.
@@ -167,7 +182,7 @@ This will perform a range of checks to ensure some basic measure of WSGI complia
 In this particular example of where a string was returned as the WSGI application iterable, the WSGI validator will flag it as a problem, with the error:
 
 ```
-    AssertionError: You should not return a string as your application iterator, instead return a single-item list containing that string.
+ AssertionError: You should not return a string as your application iterator, instead return a single-item list containing that string.
 ```
 
 So run the validator on your application during development or testing at times and exercise your WSGI application to get good coverage. This will at least help with some of the main issues that may come up, although by no means all given how many odd corner cases that exist within the WSGI specification.

@@ -24,39 +24,39 @@ The posts so far in this series were bashed out in quick succession in a bit ove
 In this post I am only going to look at the overhead of decorating a normal function with the decorator mechanism which has been described. The relevant part of the decorator mechanism which comes into play in this case is:  
 
 
-```python
-class function\_wrapper\(object\_proxy\): 
+```
+> class function\_wrapper\(object\_proxy\): 
 ```
 
-```python
-def \_\_init\_\_\(self, wrapped, wrapper\):  
- super\(function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
- self.wrapper = wrapper  
- ...
+```
+> def \_\_init\_\_\(self, wrapped, wrapper\):  
+>  super\(function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
+>  self.wrapper = wrapper  
+>  ...
 ```
 
-```python
-def \_\_get\_\_\(self, instance, owner\):  
- ...
+```
+> def \_\_get\_\_\(self, instance, owner\):  
+>  ...
 ```
 
-```python
-def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
- return self.wrapper\(self.wrapped, None, args, kwargs\) 
+```
+> def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
+>  return self.wrapper\(self.wrapped, None, args, kwargs\) 
 ```
 
-```python
-def decorator\(wrapper\):  
- def \_wrapper\(wrapped, instance, args, kwargs\):  
- def \_execute\(wrapped\):  
- if instance is None:  
- return function\_wrapper\(wrapped, wrapper\)  
- elif inspect.isclass\(instance\):  
- return function\_wrapper\(wrapped, wrapper.\_\_get\_\_\(None, instance\)\)  
- else:  
- return function\_wrapper\(wrapped, wrapper.\_\_get\_\_\(instance, type\(instance\)\)\)  
- return \_execute\(\*args, \*\*kwargs\)  
- return function\_wrapper\(wrapper, \_wrapper\)
+```
+> def decorator\(wrapper\):  
+>  def \_wrapper\(wrapped, instance, args, kwargs\):  
+>  def \_execute\(wrapped\):  
+>  if instance is None:  
+>  return function\_wrapper\(wrapped, wrapper\)  
+>  elif inspect.isclass\(instance\):  
+>  return function\_wrapper\(wrapped, wrapper.\_\_get\_\_\(None, instance\)\)  
+>  else:  
+>  return function\_wrapper\(wrapped, wrapper.\_\_get\_\_\(instance, type\(instance\)\)\)  
+>  return \_execute\(\*args, \*\*kwargs\)  
+>  return function\_wrapper\(wrapper, \_wrapper\)
 ```
 
 If you want to refresh your memory of the complete code that was previously presented you can check back to the [last post](/posts/2014/01/maintaining-decorator-state-using-class/) where it was described in full.  
@@ -64,32 +64,32 @@ If you want to refresh your memory of the complete code that was previously pres
 With our decorator factory, when creating a decorator and then decorating a normal function with it we would use:  
 
 
-```python
-@decorator  
- def my\_function\_wrapper\(wrapped, instance, args, kwargs\):  
- return wrapped\(\*args, \*\*kwargs\) 
+```
+> @decorator  
+>  def my\_function\_wrapper\(wrapped, instance, args, kwargs\):  
+>  return wrapped\(\*args, \*\*kwargs\) 
 ```
 
-```python
-@my\_function\_wrapper  
- def function\(\):  
- pass
+```
+> @my\_function\_wrapper  
+>  def function\(\):  
+>  pass
 ```
 
 This is in contrast to the same decorator created in the more traditional way using a function closure.  
 
 
-```python
-def my\_function\_wrapper\(wrapped\):  
- def \_my\_function\_wrapper\(\*args, \*\*kwargs\):  
- return wrapped\(\*args, \*\*kwargs\)  
- return \_my\_function\_wrapper 
+```
+> def my\_function\_wrapper\(wrapped\):  
+>  def \_my\_function\_wrapper\(\*args, \*\*kwargs\):  
+>  return wrapped\(\*args, \*\*kwargs\)  
+>  return \_my\_function\_wrapper 
 ```
 
-```python
-@my\_function\_wrapper  
- def function\(\):  
- pass
+```
+> @my\_function\_wrapper  
+>  def function\(\):  
+>  pass
 ```
 
 Now what actually occurs in these two different cases when we make the call:  
@@ -106,13 +106,13 @@ Now what actually occurs in these two different cases when we make the call:
 In order to trace the execution of our code we can use Python's profile hooks mechanism.  
 
 
-```python
-import sys 
+```
+> import sys 
 ```
 
-```python
-def tracer\(frame, event, arg\):  
- print\(frame.f\_code.co\_name, event\) 
+```
+> def tracer\(frame, event, arg\):  
+>  print\(frame.f\_code.co\_name, event\) 
 ```
 
 > sys.setprofile\(tracer\) 
@@ -157,20 +157,20 @@ By performing the trace above we know that our solution incurs an additional met
 To try and measure the increase in overhead in each solution we can use the 'timeit' module to time the execution of our function call. As a baseline, we first want to time the call of a function without any decorator applied.  
 
 
-```bash
-\# benchmarks.py 
+```
+> \# benchmarks.py 
 ```
 
-```python
-def function\(\):  
- pass 
+```
+> def function\(\):  
+>  pass 
 ```
 
 To time this we use the command:  
 
 
-```python
-$ python -m timeit -s 'import benchmarks' 'benchmarks.function\(\)'
+```
+> $ python -m timeit -s 'import benchmarks' 'benchmarks.function\(\)'
 ```
 
 The 'timeit' module when used in this way will perform a suitable large number of iterations of calling the function, divide the resulting total time for all calls with the count of the number and end up with a time value for a single call.  

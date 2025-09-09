@@ -61,18 +61,21 @@ If however you are using Apache/mod\_wsgi such partitioning can be quite easily 
 Take for example admin URLs in Django. If these are indeed infrequently used but can have a large transient memory requirement, what it is possible to do is:
 
 ```
-    WSGIDaemonProcess main processes=5 threads=5  
-    WSGIDaemonProcess admin processes=1 threads=3 \  
-    inactivity-timeout=30 maximum-requests=20
-
-    WSGIApplicationGroup %{GLOBAL}  
-    WSGIProcessGroup main
-
-    WSGIScriptAlias / /some/path/wsgi.py
-
-    <Location /admin>  
-    WSGIProcessGroup admin  
-    </Location>
+ WSGIDaemonProcess main processes=5 threads=5  
+ WSGIDaemonProcess admin processes=1 threads=3 \  
+     inactivity-timeout=30 maximum-requests=20
+ 
+ 
+ WSGIApplicationGroup %{GLOBAL}  
+ WSGIProcessGroup main
+ 
+ 
+ WSGIScriptAlias / /some/path/wsgi.py
+ 
+ 
+ <Location /admin>  
+ WSGIProcessGroup admin  
+ </Location>
 ```
 
 So what we have done is created two daemon process groups and specified that the admin pages should be handled in a distinct daemon process group of its own where we can be more aggressive with the configuration and use inactivity timeout and maximum requests to combat excessive memory use. In doing this we have left alone things for the bulk of the web application and so would not be impacting on it as far as process churn is concerned.
@@ -92,27 +95,32 @@ So instead of having every process having to be very fat and eventually load up 
 You might therefore have the following:
 
 ```
-    WSGIDaemonProcess main processes=1 threads=5  
-    WSGIDaemonProcess volume processes=3 threads=5  
-    WSGIDaemonProcess admin processes=1 threads=3 \  
-    inactivity-timeout=30 maximum-requests=20
-
-    WSGIApplicationGroup %{GLOBAL}  
-    WSGIProcessGroup main
-
-    WSGIScriptAlias / /some/path/wsgi.py
-
-    <Location ~ "^/$">  
-    WSGIProcessGroup volume  
-    </Location>
-
-    <Location /publications/article/>  
-    WSGIProcessGroup volume  
-    </Location>
-
-    <Location /admin>  
-    WSGIProcessGroup admin  
-    </Location>
+ WSGIDaemonProcess main processes=1 threads=5  
+ WSGIDaemonProcess volume processes=3 threads=5  
+ WSGIDaemonProcess admin processes=1 threads=3 \  
+     inactivity-timeout=30 maximum-requests=20
+ 
+ 
+ WSGIApplicationGroup %{GLOBAL}  
+ WSGIProcessGroup main
+ 
+ 
+ WSGIScriptAlias / /some/path/wsgi.py
+ 
+ 
+ <Location ~ "^/$">  
+ WSGIProcessGroup volume  
+ </Location>
+ 
+ 
+ <Location /publications/article/>  
+ WSGIProcessGroup volume  
+ </Location>
+ 
+ 
+ <Location /admin>  
+ WSGIProcessGroup admin  
+ </Location>
 ```
 
 In this case we are delegating just the URLs corresponding to the home page for the site and one further sub URL into one daemon process group. As less code within the application would be required to service these requests, the process should have a lower memory footprint and so we can afford to spread the requests across a greater number of processes, each with a small number of threads, to avoid as much as possible any adverse effects of the GIL from running a high number of threads.
@@ -130,10 +138,10 @@ Any such monitoring will at least have to allow you to monitor separately the me
 It is possible to define a 'display-name' option against each WSGIDaemonProcess directive to set a name for processes in that daemon process group. You can even ask mod\_wsgi to automatically name them based on the name of the daemon process group. For example:
 
 ```
-    WSGIDaemonProcess main display-name=%{GROUP} processes=1 threads=5  
-    WSGIDaemonProcess volume display-name=%{GROUP} processes=3 threads=5  
-    WSGIDaemonProcess admin display-name=%{GROUP} processes=1 threads=3 \  
-    inactivity-timeout=30 maximum-requests=20
+ WSGIDaemonProcess main display-name=%{GROUP} processes=1 threads=5  
+ WSGIDaemonProcess volume display-name=%{GROUP} processes=3 threads=5  
+ WSGIDaemonProcess admin display-name=%{GROUP} processes=1 threads=3 \  
+     inactivity-timeout=30 maximum-requests=20
 ```
 
 This would result in the processes being labelled as '\(wsgi:main\)', '\(wsgi:volume\)' and '\(wsgi:admin\)'.
@@ -155,32 +163,38 @@ One could do some tricks in the WSGI script involving selecting different enviro
 In the case of Apache/mod\_wsgi, WSGI environ key/value pairs can be set using the SetEnv directive in the Apache configuration file itself. What we can therefore do is:
 
 ```
-    WSGIDaemonProcess main processes=1 threads=5  
-    WSGIDaemonProcess volume processes=3 threads=5  
-    WSGIDaemonProcess admin processes=1 threads=3 \  
-    inactivity-timeout=30 maximum-requests=20
-
-    WSGIApplicationGroup %{GLOBAL}  
-    WSGIProcessGroup main
-
-    SetEnv newrelic.app_name 'My Site (main);My Site'
-
-    WSGIScriptAlias / /some/path/wsgi.py
-
-    <Location ~ "^/$">  
-    WSGIProcessGroup volume  
-    SetEnv newrelic.app_name 'MySite (volume);My Site'  
-    </Location>
-
-    <Location /publications/article/>  
-    WSGIProcessGroup volume  
-    SetEnv newrelic.app_name 'MySite (volume);My Site'  
-    </Location>
-
-    <Location /admin>  
-    WSGIProcessGroup admin  
-    SetEnv newrelic.app_name 'MySite (admin);My Site'  
-    </Location>
+ WSGIDaemonProcess main processes=1 threads=5  
+ WSGIDaemonProcess volume processes=3 threads=5  
+ WSGIDaemonProcess admin processes=1 threads=3 \  
+     inactivity-timeout=30 maximum-requests=20
+ 
+ 
+ WSGIApplicationGroup %{GLOBAL}  
+ WSGIProcessGroup main
+ 
+ 
+ SetEnv newrelic.app_name 'My Site (main);My Site'
+ 
+ 
+ WSGIScriptAlias / /some/path/wsgi.py
+ 
+ 
+ <Location ~ "^/$">  
+ WSGIProcessGroup volume  
+ SetEnv newrelic.app_name 'MySite (volume);My Site'  
+ </Location>
+ 
+ 
+ <Location /publications/article/>  
+ WSGIProcessGroup volume  
+ SetEnv newrelic.app_name 'MySite (volume);My Site'  
+ </Location>
+ 
+ 
+ <Location /admin>  
+ WSGIProcessGroup admin  
+ SetEnv newrelic.app_name 'MySite (admin);My Site'  
+ </Location>
 ```
 
 We are again are using specialisation via the Location directive. In this case we are using it to override what the application name the New Relic Python agent reports to for the different URLs.

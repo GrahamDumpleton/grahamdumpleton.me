@@ -26,33 +26,35 @@ In this blog post I will describe how when using mod\_wsgi-express inside of a D
 
 Our final Dockerfile from the prior post was:
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
-    CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
-    "--trust-proxy-header", "X-Forwarded-Port", \  
-    "--trust-proxy-header", "X-Forwarded-For", \  
-    "--trust-proxy-header", "X-Forwarded-Scheme", \  
-    "site.wsgi" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+ CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
+       "--trust-proxy-header", "X-Forwarded-Port", \  
+       "--trust-proxy-header", "X-Forwarded-For", \  
+       "--trust-proxy-header", "X-Forwarded-Scheme", \  
+       "site.wsgi" ]
 ```
 
 The configuration for the front end Apache which proxied requests through to our WSGI application running in the Docker container was:
 
-```bash
-    # blog.example.com
-
-    <VirtualHost *:80>  
-    ServerName blog.example.com
-
-    ProxyPass / http://docker.example.com:8002/  
-    
-    RequestHeader set X-Forwarded-Port 80  
-    </VirtualHost>
+```
+ # blog.example.com
+ 
+ 
+ <VirtualHost *:80>  
+ ServerName blog.example.com
+ 
+ 
+ ProxyPass / http://docker.example.com:8002/  
+   
+ RequestHeader set X-Forwarded-Port 80  
+ </VirtualHost>
 ```
 
 The Docker image was being run as:
 
 ```
-    docker run --rm -p 8002:80 blog.example.com
+ docker run --rm -p 8002:80 blog.example.com
 ```
 
 This was all making use of mod\_wsgi-express shipped as part of the ‘mod\_wsgi-docker’ image from Docker Hub.
@@ -67,13 +69,13 @@ In addition to being able to host a Python WSGI application with no need for a u
 
 The simplest way of doing this would be to create a ‘htdocs’ directory within your project and populate it with any static files you have. You then tell mod\_wsgi-express to use that directory as the root directory for any static document files.
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
-    CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
-    "--trust-proxy-header", "X-Forwarded-Port", \  
-    "--trust-proxy-header", "X-Forwarded-For", \  
-    "--trust-proxy-header", "X-Forwarded-Scheme", \  
-    "--document-root", "htdocs", "site.wsgi" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+ CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
+       "--trust-proxy-header", "X-Forwarded-Port", \  
+       "--trust-proxy-header", "X-Forwarded-For", \  
+       "--trust-proxy-header", "X-Forwarded-Scheme", \  
+       "--document-root", "htdocs", "site.wsgi" ]
 ```
 
 Normally when manually setting up mod\_wsgi, the WSGI application if mounted at the root of the web site would hide any static files which may reside in the Apache ‘DocumentRoot’ directory, however mod\_wsgi-express uses a method which allows any static files to be overlaid on top of the WSGI application.
@@ -87,9 +89,9 @@ The benefit of this approach is that you do not need to fiddle with mounting sel
 Imagine now that the ‘htdocs’ directory contained:
 
 ```
-    htdocs/robots.txt  
-    htdocs/static/  
-    htdocs/static/files.txt
+ htdocs/robots.txt  
+ htdocs/static/  
+ htdocs/static/files.txt
 ```
 
 That is, in the top level directory is contained a ‘robots.txt’ file as well as a sub directory. In the sub directory we then had a further file called ‘files.txt’.
@@ -97,8 +99,8 @@ That is, in the top level directory is contained a ‘robots.txt’ file as well
 If we now access either of the actual files using the URLs:
 
 ```
-    http://blog.example.com/robots.txt  
-    http://blog.example.com/static/files.txt
+ http://blog.example.com/robots.txt  
+ http://blog.example.com/static/files.txt
 ```
 
 then all works as expected and the contents of those files will be returned.
@@ -108,7 +110,7 @@ So long as the URLs always target the actual files in this way then all is good.
 Where a problem arises though is were the URL corresponding to the ’static’ subdirectory is accessed, and specifically where no trailing slash was added to the URL.
 
 ```
-    http://blog.example.com/static
+ http://blog.example.com/static
 ```
 
 Presuming that the URL is accessed from the public Internet where the Docker host is not going to be accessible, then the request from the browser will fail, indicating that the location is not accessible.
@@ -117,23 +119,23 @@ The reason for this is that when a URL is accessed which maps to a directory on 
 
 Looking at this using ‘curl’ we would see response headers coming back of:
 
-```bash
-    $ curl -v http://blog.example.com/static  
-    * Hostname was NOT found in DNS cache  
-    * Trying 1.2.3.4...  
-    * Connected to blog.example.com (1.2.3.4) port 80 (#0)  
-    > GET /static HTTP/1.1  
-    > User-Agent: curl/7.37.1  
-    > Host: blog.example.com  
-    > Accept: */*  
-    >  
-    < HTTP/1.1 301 Moved Permanently  
-    < Date: Wed, 01 Jul 2015 01:37:46 GMT  
-    * Server Apache is not blacklisted  
-    < Server: Apache  
-    < Location: http://docker.example.com:8002/static/  
-    < Content-Length: 246  
-    < Content-Type: text/html; charset=iso-8859-1
+```
+ $ curl -v http://blog.example.com/static  
+ * Hostname was NOT found in DNS cache  
+ * Trying 1.2.3.4...  
+ * Connected to blog.example.com (1.2.3.4) port 80 (#0)  
+ > GET /static HTTP/1.1  
+ > User-Agent: curl/7.37.1  
+ > Host: blog.example.com  
+ > Accept: */*  
+ >  
+ < HTTP/1.1 301 Moved Permanently  
+ < Date: Wed, 01 Jul 2015 01:37:46 GMT  
+ * Server Apache is not blacklisted  
+ < Server: Apache  
+ < Location: http://docker.example.com:8002/static/  
+ < Content-Length: 246  
+ < Content-Type: text/html; charset=iso-8859-1
 ```
 
 Apache has therefore responded with a HTTP status code of 301, indicating via the ‘Location’ response header that the resource being requested is actually located at 'http://docker.example.com:8002/static/'.
@@ -146,49 +148,51 @@ When using Apache to host just the WSGI application we didn’t have this issue 
 
 For response headers in this case where what mod\_wsgi was doing doesn’t apply, we can use another technique to fix up the URL. This is done by fixing the response headers in the front end proxy as the response passes back through it. This is done using the ‘ProxyPassReverse’ directive.
 
-```bash
-    # blog.example.com
-
-    <VirtualHost *:80>  
-    ServerName blog.example.com
-
-    ProxyPass / http://docker.example.com:8002/  
-    ProxyPassReverse / http://docker.example.com:8002/  
-    
-    RequestHeader set X-Forwarded-Port 80  
-    </VirtualHost>
+```
+ # blog.example.com
+ 
+ 
+ <VirtualHost *:80>  
+ ServerName blog.example.com
+ 
+ 
+ ProxyPass / http://docker.example.com:8002/  
+ ProxyPassReverse / http://docker.example.com:8002/  
+   
+ RequestHeader set X-Forwarded-Port 80  
+ </VirtualHost>
 ```
 
 When the ‘ProxyPassReverse’ directive is specified, the front end will adjust any URL in the ‘Location', 'Content-Location' and ‘URI' headers of HTTP redirect responses. It will replace the URL given to the directive with what the URL for the front facing Apache instance was.
 
 With this in place we now get the URL we would expect to see in the ‘Location’ response header.
 
-```bash
-    $ curl -v http://blog.example.com/static  
-    * Hostname was NOT found in DNS cache  
-    * Trying 1.2.3.4...  
-    * Connected to blog.example.com (1.2.3.4) port 80 (#0)  
-    > GET /static HTTP/1.1  
-    > User-Agent: curl/7.37.1  
-    > Host: blog.example.com  
-    > Accept: */*  
-    >  
-    < HTTP/1.1 301 Moved Permanently  
-    < Date: Wed, 01 Jul 2015 02:10:51 GMT  
-    * Server Apache is not blacklisted  
-    < Server: Apache  
-    < Location: http://blog.example.com/static/  
-    < Content-Length: 246  
-    < Content-Type: text/html; charset=iso-8859-1  
-    <  
-    <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">  
-    <html><head>  
-    <title>301 Moved Permanently</title>  
-    </head><body>  
-    <h1>Moved Permanently</h1>  
-    <p>The document has moved <a href="http://docker.example.com:8002/static/">here</a>.</p>  
-    </body></html>  
-    * Connection #0 to host blog.example.com left intact
+```
+ $ curl -v http://blog.example.com/static  
+ * Hostname was NOT found in DNS cache  
+ * Trying 1.2.3.4...  
+ * Connected to blog.example.com (1.2.3.4) port 80 (#0)  
+ > GET /static HTTP/1.1  
+ > User-Agent: curl/7.37.1  
+ > Host: blog.example.com  
+ > Accept: */*  
+ >  
+ < HTTP/1.1 301 Moved Permanently  
+ < Date: Wed, 01 Jul 2015 02:10:51 GMT  
+ * Server Apache is not blacklisted  
+ < Server: Apache  
+ < Location: http://blog.example.com/static/  
+ < Content-Length: 246  
+ < Content-Type: text/html; charset=iso-8859-1  
+ <  
+ <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">  
+ <html><head>  
+ <title>301 Moved Permanently</title>  
+ </head><body>  
+ <h1>Moved Permanently</h1>  
+ <p>The document has moved <a href="http://docker.example.com:8002/static/">here</a>.</p>  
+ </body></html>  
+ * Connection #0 to host blog.example.com left intact
 ```
 
 We aren’t done though as this time the actual body of the response is also being shown. Although the ‘Location’ header is now correct, the URL as it appears in the response content is still wrong.
@@ -197,99 +201,101 @@ We aren’t done though as this time the actual body of the response is also bei
 
 Fixing up any incidences of the incorrect URL in the response content is a bit more complicated. If using Apache 2.4 for the front end though, one can however use the ‘mod\_proxy\_html’ module. For our example here, after having enabled ‘mod\_proxy\_html’, we can modify the proxy setup to be:
 
-```bash
-    # blog.example.com
-
-    <VirtualHost *:80>  
-    ServerName blog.example.com
-
-    ProxyPass / http://docker.example.com:8002/  
-    ProxyPassReverse / http://docker.example.com:8002/  
-    
-    ProxyHTMLEnable On  
-    ProxyHTMLURLMap http://docker.example.com:8002 http://blog.example.com   
-    
-    RequestHeader set X-Forwarded-Port 80  
-    </VirtualHost>
+```
+ # blog.example.com
+ 
+ 
+ <VirtualHost *:80>  
+ ServerName blog.example.com
+ 
+ 
+ ProxyPass / http://docker.example.com:8002/  
+ ProxyPassReverse / http://docker.example.com:8002/  
+   
+ ProxyHTMLEnable On  
+ ProxyHTMLURLMap http://docker.example.com:8002 http://blog.example.com   
+   
+ RequestHeader set X-Forwarded-Port 80  
+ </VirtualHost>
 ```
 
 What this will do is cause any response from the backend of type 'text/html' or 'application/xhtml+xml’ to be processed as it is returned back via the proxy, with any text matching 'http://docker.example.com:8002' being replaced with 'http://blog.example.com'. The result then from our redirection would be:
 
-```bash
-    $ curl -v http://blog.example.com/static  
-    * Hostname was NOT found in DNS cache  
-    * Trying 1.2.3.4...  
-    * Connected to blog.example.com (1.2.3.4) port 80 (#0)  
-    > GET /static HTTP/1.1  
-    > User-Agent: curl/7.37.1  
-    > Host: blog.example.com  
-    > Accept: */*  
-    >  
-    < HTTP/1.1 301 Moved Permanently  
-    < Date: Wed, 01 Jul 2015 02:56:47 GMT  
-    * Server Apache is not blacklisted  
-    < Server: Apache  
-    < Location: http://blog.example.com/static/  
-    < Content-Type: text/html;charset=utf-8  
-    < Content-Length: 185  
-    <  
-    <html><head><title>301 Moved Permanently</title></head><body>  
-    <h1>Moved Permanently</h1>  
-    <p>The document has moved <a href="http://blog.example.com/static/">here</a>.</p>  
-    * Connection #0 to host blog.example.com left intact
+```
+ $ curl -v http://blog.example.com/static  
+ * Hostname was NOT found in DNS cache  
+ * Trying 1.2.3.4...  
+ * Connected to blog.example.com (1.2.3.4) port 80 (#0)  
+ > GET /static HTTP/1.1  
+ > User-Agent: curl/7.37.1  
+ > Host: blog.example.com  
+ > Accept: */*  
+ >  
+ < HTTP/1.1 301 Moved Permanently  
+ < Date: Wed, 01 Jul 2015 02:56:47 GMT  
+ * Server Apache is not blacklisted  
+ < Server: Apache  
+ < Location: http://blog.example.com/static/  
+ < Content-Type: text/html;charset=utf-8  
+ < Content-Length: 185  
+ <  
+ <html><head><title>301 Moved Permanently</title></head><body>  
+ <h1>Moved Permanently</h1>  
+ <p>The document has moved <a href="http://blog.example.com/static/">here</a>.</p>  
+ * Connection #0 to host blog.example.com left intact
 ```
 
 As it turns out, with the configuration being used in the backend, in following the now correct URL we will get a response of:
 
-```bash
-    $ curl -v http://blog.example.com/static/  
-    * Hostname was NOT found in DNS cache  
-    * Trying 1.2.3.4...  
-    * Connected to blog.example.com (1.2.3.4) port 80 (#0)  
-    > GET /static/ HTTP/1.1  
-    > User-Agent: curl/7.37.1  
-    > Host: blog.example.com  
-    > Accept: */*  
-    >  
-    < HTTP/1.1 404 Not Found  
-    < Date: Wed, 01 Jul 2015 02:57:55 GMT  
-    * Server Apache is not blacklisted  
-    < Server: Apache  
-    < Content-Type: text/html;charset=utf-8  
-    < Content-Length: 151  
-    <  
-    <html><head><title>404 Not Found</title></head><body>  
-    <h1>Not Found</h1>  
-    <p>The requested URL /static/ was not found on this server.</p>  
-    * Connection #0 to host blog.example.com left intact
+```
+ $ curl -v http://blog.example.com/static/  
+ * Hostname was NOT found in DNS cache  
+ * Trying 1.2.3.4...  
+ * Connected to blog.example.com (1.2.3.4) port 80 (#0)  
+ > GET /static/ HTTP/1.1  
+ > User-Agent: curl/7.37.1  
+ > Host: blog.example.com  
+ > Accept: */*  
+ >  
+ < HTTP/1.1 404 Not Found  
+ < Date: Wed, 01 Jul 2015 02:57:55 GMT  
+ * Server Apache is not blacklisted  
+ < Server: Apache  
+ < Content-Type: text/html;charset=utf-8  
+ < Content-Length: 151  
+ <  
+ <html><head><title>404 Not Found</title></head><body>  
+ <h1>Not Found</h1>  
+ <p>The requested URL /static/ was not found on this server.</p>  
+ * Connection #0 to host blog.example.com left intact
 ```
 
 So in some respects the example may have been a bit pointless as it subsequently led to a HTTP 404 response, but it did illustrate the redirection problem that exists for static files and how to deal with it.
 
 When using mod\_wsgi-express it is possible to enable directory listings:
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
-    CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
-    "--trust-proxy-header", "X-Forwarded-Port", \  
-    "--trust-proxy-header", "X-Forwarded-For", \  
-    "--trust-proxy-header", "X-Forwarded-Scheme", \  
-    "--document-root", "htdocs", \  
-    "—directory-listing”, \  
-    "site.wsgi" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+ CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
+       "--trust-proxy-header", "X-Forwarded-Port", \  
+       "--trust-proxy-header", "X-Forwarded-For", \  
+       "--trust-proxy-header", "X-Forwarded-Scheme", \  
+       "--document-root", "htdocs", \  
+       "—directory-listing”, \  
+       "site.wsgi" ]
 ```
 
 or even directory index files:
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
-    CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
-    "--trust-proxy-header", "X-Forwarded-Port", \  
-    "--trust-proxy-header", "X-Forwarded-For", \  
-    "--trust-proxy-header", "X-Forwarded-Scheme", \  
-    "--document-root", "htdocs", \  
-    "—directory-index", "index.html”, \  
-    "site.wsgi" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+ CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
+       "--trust-proxy-header", "X-Forwarded-Port", \  
+       "--trust-proxy-header", "X-Forwarded-For", \  
+       "--trust-proxy-header", "X-Forwarded-Scheme", \  
+       "--document-root", "htdocs", \  
+       "—directory-index", "index.html”, \  
+       "site.wsgi" ]
 ```
 
 so the redirection need not have ended up as a HTTP 404 response.
@@ -304,58 +310,58 @@ For such redirection responses, it is unlikely these days to encounter a situati
 
 As the URL in the response content is unlikely to be used, one could therefore change the response simply not to include it. This can be done with Apache by overriding the error document content in the back end.
 
-```dockerfile
-    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
-    CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
-    "--trust-proxy-header", "X-Forwarded-Port", \  
-    "--trust-proxy-header", "X-Forwarded-For", \  
-    "--trust-proxy-header", "X-Forwarded-Scheme", \  
-    "--document-root", "htdocs", \  
-    "--error-document", "301", "/301.html", \  
-    "site.wsgi" ]
+```
+ FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+ CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
+       "--trust-proxy-header", "X-Forwarded-Port", \  
+       "--trust-proxy-header", "X-Forwarded-For", \  
+       "--trust-proxy-header", "X-Forwarded-Scheme", \  
+       "--document-root", "htdocs", \  
+       "--error-document", "301", "/301.html", \  
+       "site.wsgi" ]
 ```
 
 The actual content you do want to respond with would then be placed as a static file in the ‘htdocs’ directory called ‘301.html’.
 
 ```
-    <html><head>  
-    <title>301 Moved Permanently</title>  
-    </head><body>  
-    <h1>Moved Permanently</h1>  
-    <p>The document has moved.</p>  
-    </body></html>
+ <html><head>  
+ <title>301 Moved Permanently</title>  
+ </head><body>  
+ <h1>Moved Permanently</h1>  
+ <p>The document has moved.</p>  
+ </body></html>
 ```
 
 Trying ‘curl’ once again, we now get:
 
-```bash
-    $ curl -v http://blog.example.com/static  
-    * Hostname was NOT found in DNS cache  
-    * Trying 1.2.3.4...  
-    * Connected to blog.example.com (1.2.3.4) port 80 (#0)  
-    > GET /static HTTP/1.1  
-    > User-Agent: curl/7.37.1  
-    > Host: blog.example.com  
-    > Accept: */*  
-    >  
-    < HTTP/1.1 301 Moved Permanently  
-    < Date: Wed, 01 Jul 2015 03:31:48 GMT  
-    * Server Apache is not blacklisted  
-    < Server: Apache  
-    < Location: http://blog.example.com/static/  
-    < Last-Modified: Wed, 01 Jul 2015 03:27:24 GMT  
-    < ETag: "89-519c7e6bebf00"  
-    < Accept-Ranges: bytes  
-    < Content-Length: 137  
-    < Content-Type: text/html  
-    <  
-    <html><head>  
-    <title>301 Moved Permanently</title>  
-    </head><body>  
-    <h1>Moved Permanently</h1>  
-    <p>The document has moved.</p>  
-    </body></html>  
-    * Connection #0 to host blog.example.com left intact
+```
+ $ curl -v http://blog.example.com/static  
+ * Hostname was NOT found in DNS cache  
+ * Trying 1.2.3.4...  
+ * Connected to blog.example.com (1.2.3.4) port 80 (#0)  
+ > GET /static HTTP/1.1  
+ > User-Agent: curl/7.37.1  
+ > Host: blog.example.com  
+ > Accept: */*  
+ >  
+ < HTTP/1.1 301 Moved Permanently  
+ < Date: Wed, 01 Jul 2015 03:31:48 GMT  
+ * Server Apache is not blacklisted  
+ < Server: Apache  
+ < Location: http://blog.example.com/static/  
+ < Last-Modified: Wed, 01 Jul 2015 03:27:24 GMT  
+ < ETag: "89-519c7e6bebf00"  
+ < Accept-Ranges: bytes  
+ < Content-Length: 137  
+ < Content-Type: text/html  
+ <  
+ <html><head>  
+ <title>301 Moved Permanently</title>  
+ </head><body>  
+ <h1>Moved Permanently</h1>  
+ <p>The document has moved.</p>  
+ </body></html>  
+ * Connection #0 to host blog.example.com left intact
 ```
 
 For this particular case of also using mod\_wsgi-express to serve up static files, this is the only situation like this that I know of. If however you were using other Apache modules on the backend which were resulting in other inbuilt Apache error responses being generated, then you may want to review those and also override the error documents for them if necessary.

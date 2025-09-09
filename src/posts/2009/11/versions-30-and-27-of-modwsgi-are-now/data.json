@@ -12,7 +12,7 @@
       "author": "Dirkjan Ochtman",
       "author_url": "https://www.blogger.com/profile/13084577766817754949",
       "author_profile_id": "13084577766817754949",
-      "content": "It seems 2.7 reacts weirdly to the Gentoo way of building it, at least...  \n  \n```javascript\n>> Compiling source in /var/tmp/portage/www-apache/mod\\_wsgi-2.7/work/mod\\_wsgi-2.7 ...  \n```\nmake -j2   \n/usr/sbin/apxs2 -c -I/usr/include/python2.6 -DNDEBUG -Os -march=native -pipe mod\\_wsgi.c -Wl,-O1 -L/usr/lib -L/usr/lib/python2.6/config -lpython2.6 -lpthread -ldl -lutil -lm  \napxs:Error: Unknown option: O.  \napxs:Error: Unknown option: s.  \napxs:Error: Unknown option: m.  \napxs:Error: Unknown option: r.  \napxs:Error: Unknown option: h.  \napxs:Error: Unknown option: =.",
+      "content": "It seems 2.7 reacts weirdly to the Gentoo way of building it, at least...  \n  \n```\n>>> Compiling source in /var/tmp/portage/www-apache/mod\\_wsgi-2.7/work/mod\\_wsgi-2.7 ...  \n```\nmake -j2   \n/usr/sbin/apxs2 -c -I/usr/include/python2.6 -DNDEBUG -Os -march=native -pipe mod\\_wsgi.c -Wl,-O1 -L/usr/lib -L/usr/lib/python2.6/config -lpython2.6 -lpthread -ldl -lutil -lm  \napxs:Error: Unknown option: O.  \napxs:Error: Unknown option: s.  \napxs:Error: Unknown option: m.  \napxs:Error: Unknown option: r.  \napxs:Error: Unknown option: h.  \napxs:Error: Unknown option: =.",
       "timestamp": "November 22, 2009 at 5:10 AM",
       "permalink": "http://blog.dscpl.com.au/2009/11/versions-30-and-27-of-modwsgi-are-now.html?showComment=1258827058774#c8029729503455561849",
       "is_blog_author": false

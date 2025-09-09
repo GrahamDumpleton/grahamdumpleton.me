@@ -35,13 +35,13 @@ In a development environment at least, to avoid the need to manually restart the
 As mod\_wsgi-express is still primarily intended for use in production, such a feature isn’t enabled by default, but it can be enabled on the command line using the ‘—reload-on-changes’ option. So if running 'mod\_wsgi-express’ directly, one would use:
 
 ```
-    mod_wsgi-express start-server —reload-on-changes app.wsgi
+ mod_wsgi-express start-server —reload-on-changes app.wsgi
 ```
 
 If using mod\_wsgi-express integrated with a Django project, then you would use:
 
 ```
-    python manage.py runmodwsgi —reload-on-changes
+ python manage.py runmodwsgi —reload-on-changes
 ```
 
 The automatic reloading of your web application when code changes are made will work whether you are running with a single or multithreaded process, and even if you are using a multi process configuration.
@@ -52,9 +52,9 @@ When an exception occurs in the code for your web application, what typically ha
 
 What you need to do to reveal information about exceptions obviously varies based on the framework being used. In the case of the Django web framework one thing you can do is enable a debug mode which will result in details of the exception being displayed within the HTTP 500 server error response page.
 
-```python
-    # SECURITY WARNING: don't run with debug turned on in production!  
-    DEBUG = True
+```
+ # SECURITY WARNING: don't run with debug turned on in production!  
+ DEBUG = True
 ```
 
 This will result in the display of the exception, a stack trace, and the values of any local variables for each stack frame for the stack trace back. Obviously you don’t want to leave this enabled when deploying to a production environment.
@@ -62,21 +62,21 @@ This will result in the display of the exception, a stack trace, and the values 
 As explained in the prior post where I detailed how to [integrate mod\_wsgi-express with Django](/posts/2015/04/integrating-modwsgi-express-as-django/) as a management command, a safer option to capture at least the details of the exception and the stack trace, is to enable Django logging to log the details of the exceptions to the error log.
 
 ```
-    LOGGING = {  
-    'version': 1,  
-    'disable_existing_loggers': False,  
-    'handlers': {  
-    'console': {  
-    'class': 'logging.StreamHandler',  
-    },  
-    },  
-    'loggers': {  
-    'django': {  
-    'handlers': ['console'],  
-    'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),  
-    },  
-    },  
-    }
+ LOGGING = {  
+     'version': 1,  
+     'disable_existing_loggers': False,  
+     'handlers': {  
+         'console': {  
+             'class': 'logging.StreamHandler',  
+         },  
+     },  
+     'loggers': {  
+         'django': {  
+             'handlers': ['console'],  
+             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),  
+         },  
+     },  
+ }
 ```
 
 This avoids the need to enable Django debug mode and is better in as much as the details will be captured persistently in the error log, rather than them only appearing on a transient web browser page, which would be lost when visiting another URL.
@@ -84,7 +84,7 @@ This avoids the need to enable Django debug mode and is better in as much as the
 One final option with Django is to configure it so that it will not catch the exceptions raised within your code when handling a request and convert it to a HTTP 500 server error response page itself.
 
 ```
-    DEBUG_PROPAGATE_EXCEPTIONS = True
+ DEBUG_PROPAGATE_EXCEPTIONS = True
 ```
 
 With this setting enabled, what will instead happen is that the exception will be allowed to propagate out from Django. Provided the Django application itself isn’t wrapped by some WSGI middleware that catches and suppresses the exception, the exception will make it all the way up to the WSGI server, which would generate its own HTTP 500 server error response page.
@@ -101,11 +101,11 @@ Even though it isn’t the default, I would always recommend that the ‘LOGGING
 
 If for some reason you do not want to log to the error log file all the time and only wish to do it when using mod\_wsgi-express, were it only being used in a development setting, then you can vary how the ‘LOGGING’ setting is configured by checking for the existence of the ‘MOD\_WSGI\_EXPRESS’ environment variable.
 
-```python
-    if os.environ.get('MOD_WSGI_EXPRESS'):  
-    LOGGING = {  
-    …  
-    }
+```
+ if os.environ.get('MOD_WSGI_EXPRESS'):  
+     LOGGING = {  
+         …  
+     }
 ```
 
 This environment variable will only be set when using mod\_wsgi-express and not when using a manually configured instance of Apache running mod\_wsgi.
@@ -119,13 +119,13 @@ Django has its debug mode which is enabled using the ‘DEBUG’ setting. When r
 So if running 'mod\_wsgi-express’ directly, one would use:
 
 ```
-    mod_wsgi-express start-server —debug-mode app.wsgi
+ mod_wsgi-express start-server —debug-mode app.wsgi
 ```
 
 If using mod\_wsgi-express integrated with a Django project, then you would use:
 
 ```
-    python manage.py runmodwsgi —debug-mode
+ python manage.py runmodwsgi —debug-mode
 ```
 
 Use of this option actually makes mod\_wsgi-express behave even more like traditional development servers in that it will only run with a single process and single thread. This mode also opens up access to a range of special debug features in mod\_wsgi-express as well.
@@ -136,12 +136,12 @@ The general workflow would therefore be to run mod\_wsgi-express in its default 
 
 As this debug mode of mod\_wsgi-express is a special mode, what can now be done is to trigger the enabling of Django debug mode off it being run. This will then have the effect of enabling the display of exceptions details within the browser. To do this the Django setting files would be configured as:
 
-```python
-    # SECURITY WARNING: don't run with debug turned on in production!  
-    if os.environ.get('MOD_WSGI_DEBUG_MODE'):  
-    DEBUG = True  
-    else:  
-    DEBUG = False
+```
+ # SECURITY WARNING: don't run with debug turned on in production!  
+ if os.environ.get('MOD_WSGI_DEBUG_MODE'):  
+     DEBUG = True  
+ else:  
+     DEBUG = False
 ```
 
 By triggering Django debug mode off of the mod\_wsgi-express debug mode, you reduce the risk that you might accidentally leave the Django debug mode enabled as you wouldn’t need to keep changing the setting. Instead Django debug mode would be enabled as a side effect purely of the ‘—debug-mode’ option being supplied to mod\_wsgi-express.
@@ -157,30 +157,30 @@ When using debug mode of mod\_wsgi-express a simpler way is however available fo
 To enable this feature if running 'mod\_wsgi-express’ directly, one would use the ‘—enable-debugger’ option in conjunction with the ‘—debug-mode’ option:
 
 ```
-    mod_wsgi-express start-server —debug-mode —enable-debugger app.wsgi
+ mod_wsgi-express start-server —debug-mode —enable-debugger app.wsgi
 ```
 
 Now when an exception occurs within your handler and that exception propagates back up to the WSGI server level, you will be automatically thrown into a ‘pdb’ debugger session.
 
 ```
-    /Users/graham/Testing/django-site/mysite/mysite/views.py(4)home()  
-    -> raise RuntimeError('xxx')  
-    (Pdb)
+ /Users/graham/Testing/django-site/mysite/mysite/views.py(4)home()  
+ -> raise RuntimeError('xxx')  
+ (Pdb)
 ```
 
 If using mod\_wsgi-express integrated with a Django project, then you could also use:
 
 ```
-    python manage.py runmodwsgi —debug-mode —enable-debugger
+ python manage.py runmodwsgi —debug-mode —enable-debugger
 ```
 
 However, as explained above, exceptions under Django will be caught and translated into a generic HTTP 500 server error response page. In order to disable this, we need to configure Django to allow exceptions to be propagated back up to the WSGI server. This is so that ‘pdb’ can catch the exception and enter debugging mode.
 
 As we only want exceptions to be propagated back up to the WSGI server when enabling post mortem debugging, then we can qualify the configuration in the Django settings module using:
 
-```python
-    if os.environ.get('MOD_WSGI_DEBUGGER_ENABLED'):  
-    DEBUG_PROPAGATE_EXCEPTIONS = True
+```
+ if os.environ.get('MOD_WSGI_DEBUGGER_ENABLED'):  
+     DEBUG_PROPAGATE_EXCEPTIONS = True
 ```
 
 By checking for the ‘MOD\_WSGI\_DEBUGGER\_ENABLED’ environment variable, we are ensuring again that we don’t accidentally leave this enabled when deploying to production.
@@ -194,44 +194,44 @@ An alternative provided by mod\_wsgi-express to avoid needing to modify your cod
 So if running 'mod\_wsgi-express’ directly, one would also add the ‘—debugger-startup’ option:
 
 ```
-    mod_wsgi-express start-server —debug-mode —enable-debugger —debugger-startup app.wsgi
+ mod_wsgi-express start-server —debug-mode —enable-debugger —debugger-startup app.wsgi
 ```
 
 If using mod\_wsgi-express integrated with a Django project, then you would use:
 
 ```
-    python manage.py runmodwsgi —debug-mode —enable-debugger —debugger-startup
+ python manage.py runmodwsgi —debug-mode —enable-debugger —debugger-startup
 ```
 
 What this option will do is throw you into ‘pdb’ as soon as the process has been started.
 
 ```
-    /Users/graham/.virtualenvs/django/lib/python2.7/site-packages/mod_wsgi/server/__init__.py(1040)__init__()->None  
-    -> self.activate_console()  
-    (Pdb)
+ /Users/graham/.virtualenvs/django/lib/python2.7/site-packages/mod_wsgi/server/__init__.py(1040)__init__()->None  
+ -> self.activate_console()  
+ (Pdb)
 ```
 
 At the ‘pdb’ prompt you can then set breakpoints for where you want the debugger to be later triggered when handling a request and resume the debugging session.
 
-```python
-    (Pdb) import mysite.views  
-    (Pdb) break mysite.views.home  
-    Breakpoint 1 at /Users/graham/Testing/django-site/mysite/mysite/views.py:3  
-    (Pdb) cont
+```
+ (Pdb) import mysite.views  
+ (Pdb) break mysite.views.home  
+ Breakpoint 1 at /Users/graham/Testing/django-site/mysite/mysite/views.py:3  
+ (Pdb) cont
 ```
 
 When a subsequent request then results in that code being executed, the ‘pdb’ prompt will once again be presented allowing you to step through the code from that point or interrogate any objects available in that context.
 
-```python
-    (Pdb) list  
-    1     from django.http import HttpResponse  
-    2  
-    3 B    def home(request):  
-    4  ->      raise RuntimeError('xxx')  
-    5          #return HttpResponse('Hello world!')  
-    [EOF]  
-    (Pdb) locals()  
-    {'request': <WSGIRequest: GET '/'>}
+```
+ (Pdb) list  
+   1     from django.http import HttpResponse  
+   2  
+   3 B    def home(request):  
+   4  -  raise RuntimeError('xxx')  
+   5          #return HttpResponse('Hello world!')  
+ [EOF]  
+ (Pdb) locals()  
+ {'request': <WSGIRequest: GET '/'>}
 ```
 
 # Production capable by default

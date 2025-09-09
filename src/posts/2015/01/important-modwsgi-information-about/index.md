@@ -75,8 +75,8 @@ As to Linux distributions who are already shipping mod\_wsgi version 4.4.X, I do
 Note that if the code change for CVE-2013-5704 is being back ported to an older Apache web server version though, the C preprocessor condition check must not be included, as the module magic number when back porting would not be getting updated. Thus the only change should be:
 
 ```
-     r->trailers_in = apr_table_make(r->pool, 5);  
-    r->trailers_out = apr_table_make(r->pool, 5);
+  r->trailers_in = apr_table_make(r->pool, 5);  
+  r->trailers_out = apr_table_make(r->pool, 5);
 ```
 
 What would be nice to see is Linux distributions simply pick up and use mod\_wsgi version 4.4.6, but I know I am dreaming on that, as they have a history of shipping out of date versions.

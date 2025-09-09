@@ -261,18 +261,23 @@ def remove_quote_prefix(line):
         return line
 
 
-def remove_nested_quotes(line):
+def remove_all_quote_levels(line):
     """
-    Remove nested quote characters from within indented code.
+    Remove quote levels from a line while preserving proper indentation.
+    Simple approach: replace specific quote patterns with equivalent spaces.
     
     Args:
         line (str): Line to process
         
     Returns:
-        str: Line with nested quotes removed
+        str: Line with quote levels removed and proper indentation preserved
     """
-    # Remove patterns like '    > ' from within indented code
-    return re.sub(r'^(\s+)>\s+', r'\1', line)
+    line = "" if line == "> " else line
+    # Replace nested pattern first: ">     > " with " " (1 space)
+    line = line.replace(">     > ", " ", 1)
+    # Replace single pattern: ">     " with "" (1 space)
+    line = line.replace(">     ", " ", 1)
+    return line
 
 
 def detect_language(code_lines):
@@ -350,18 +355,15 @@ def convert_quoted_to_code(quoted_lines):
     consecutive_blanks = 0
     
     for line in quoted_lines:
-        # Remove quote prefix
-        clean_line = remove_quote_prefix(line)
-        
         # Handle blank lines
-        if not clean_line.strip():
+        if not line.strip():
             consecutive_blanks += 1
             if consecutive_blanks <= 1:  # Allow only one blank line
                 code_lines.append("")
         else:
             consecutive_blanks = 0
-            # Clean up nested quotes in indentation
-            clean_line = remove_nested_quotes(clean_line)
+            # Remove all quote levels while preserving indentation
+            clean_line = remove_all_quote_levels(line)
             code_lines.append(clean_line)
     
     # Remove leading/trailing blank lines
@@ -399,7 +401,8 @@ def convert_quoted_sections_to_code_blocks(content):
                 # Convert to code block
                 code_content = convert_quoted_to_code(quoted_section)
                 if code_content:  # Only add if there's actual content
-                    language = detect_language(code_content)
+                    # language = detect_language(code_content)
+                    language = ""
                     
                     result_lines.append("```" + language)
                     result_lines.extend(code_content)

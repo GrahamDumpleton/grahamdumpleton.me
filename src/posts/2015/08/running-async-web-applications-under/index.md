@@ -31,51 +31,53 @@ When we talk about WSGI servers, what is the more typical thing to do is to use 
 If for example one was using ‘mod\_wsgi-express’ and had a WSGI script file, one would simply run:
 
 ```
-    mod_wsgi-express start-server /some/path/hello.wsgi
+ mod_wsgi-express start-server /some/path/hello.wsgi
 ```
 
 The contents of the ‘hello.wsgi’ file might then be:
 
-```python
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = 'Hello World!'  
-    
-    response_headers = [('Content-type', 'text/plain'),
-
-                ('Content-Length', str(len(output)))]  
-    
-    start_response(status, response_headers)  
-    
-    return [output]
+```
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = 'Hello World!'  
+   
+     response_headers = [('Content-type', 'text/plain'),
+ 
+ 
+             ('Content-Length', str(len(output)))]  
+   
+     start_response(status, response_headers)  
+   
+     return [output]
 ```
 
 Key here is that the only thing in this file is the WSGI application, there is nothing about any specific WSGI server which is being used. As such, you must use a separate WSGI server to be able to host this WSGI application.
 
 The alternative is to embed the WSGI server in the Python web application code file itself. Thus instead you might have a file call ‘app.py’ which contains:
 
-```python
-    def application(environ, start_response):  
-    status = '200 OK'  
-    output = 'Hello World!'  
-    
-    response_headers = [('Content-type', 'text/plain'),  
-    ('Content-Length', str(len(output)))]  
-    
-    start_response(status, response_headers)  
-    
-    return [output]
-
-    if __name__ == '__main__':  
-    from wsgiref.simple_server import make_server  
-    httpd = make_server('', 8000, application)  
-    httpd.serve_forever()
+```
+ def application(environ, start_response):  
+     status = '200 OK'  
+     output = 'Hello World!'  
+   
+     response_headers = [('Content-type', 'text/plain'),  
+         ('Content-Length', str(len(output)))]  
+   
+     start_response(status, response_headers)  
+   
+     return [output]
+ 
+ 
+ if __name__ == '__main__':  
+     from wsgiref.simple_server import make_server  
+     httpd = make_server('', 8000, application)  
+     httpd.serve_forever()
 ```
 
 When this ‘app.py’ is run as:
 
 ```
-    python app.py
+ python app.py
 ```
 
 it will start up the WSGI server which is contained within the ‘wsgiref’ module of the Python standard library. In other worlds, the Python application script file is self contained.
@@ -100,21 +102,24 @@ That all said, in the Python world one of the most popular ASYNC web frameworks 
 
 A simple ASYNC Tornado web application would be written as:
 
-```python
-    import tornado.ioloop  
-    import tornado.web
-
-    class MainHandler(tornado.web.RequestHandler):  
-    def get(self):  
-    self.write("Hello World!")
-
-    application = tornado.web.Application([  
-    (r"/", MainHandler),  
-    ])
-
-    if __name__ == "__main__":  
-    application.listen(8000)  
-    tornado.ioloop.IOLoop.current().start()
+```
+ import tornado.ioloop  
+ import tornado.web
+ 
+ 
+ class MainHandler(tornado.web.RequestHandler):  
+     def get(self):  
+         self.write("Hello World!")
+ 
+ 
+ application = tornado.web.Application([  
+     (r"/", MainHandler),  
+ ])
+ 
+ 
+ if __name__ == "__main__":  
+     application.listen(8000)  
+     tornado.ioloop.IOLoop.current().start()
 ```
 
 In this simple example you aren’t going to see much if any benefit over a WSGI application and server as it isn’t doing anything.
@@ -144,26 +149,31 @@ As to the IP address and port to use, these will be passed to your web applicati
 
 The modified Tornado web application which you add to the ‘app.py’ file you push up to OpenShift would therefore be:
 
-```python
-    import os
-
-    import tornado.ioloop  
-    import tornado.web
-
-    class MainHandler(tornado.web.RequestHandler):  
-    def get(self):  
-    self.write("Hello World!")
-
-    application = tornado.web.Application([  
-    (r"/", MainHandler),  
-    ])
-
-    port = int(os.environ.get('OPENSHIFT_PYTHON_PORT', '8000'))  
-    ip = os.environ.get('OPENSHIFT_PYTHON_IP', 'localhost')
-
-    if __name__ == "__main__":  
-    application.listen(port, ip)  
-    tornado.ioloop.IOLoop.current().start()
+```
+ import os
+ 
+ 
+ import tornado.ioloop  
+ import tornado.web
+ 
+ 
+ class MainHandler(tornado.web.RequestHandler):  
+     def get(self):  
+         self.write("Hello World!")
+ 
+ 
+ application = tornado.web.Application([  
+     (r"/", MainHandler),  
+ ])
+ 
+ 
+ port = int(os.environ.get('OPENSHIFT_PYTHON_PORT', '8000'))  
+ ip = os.environ.get('OPENSHIFT_PYTHON_IP', 'localhost')
+ 
+ 
+ if __name__ == "__main__":  
+     application.listen(port, ip)  
+     tornado.ioloop.IOLoop.current().start()
 ```
 
 So that the Tornado web framework code would be available, you also need to ensure you add ‘tornado’ to the ‘requirements.txt’ file as well. For the full details of creating a Python web application on OpenShift, I defer to the online [documentation](https://developers.openshift.com/en/python-getting-started.html).
@@ -180,8 +190,8 @@ When using the Tornado web server though there is a hidden trap which I don’t 
 
 The issue in this case is that when the Tornado web server receives a request which contains request content, it will by default read all that request content into memory before even passing the request to the handler for that request. This is noted in the Tornado [documentation](http://www.tornadoweb.org/en/stable/guide/structure.html#handling-request-input) by the statement:
 
-```python
-By default uploaded files are fully buffered in memory; if you need to handle files that are too large to comfortably keep in memory see the stream\_request\_body class decorator.
+```
+> By default uploaded files are fully buffered in memory; if you need to handle files that are too large to comfortably keep in memory see the stream\_request\_body class decorator.
 ```
 
 It is a little detail, but the potential impacts of it are significant. This is because of the fact that Tornado can in theory process so many requests at the same time and so those concurrent requests can each be buffering up to 100MB at the same time and so blowing out memory usage. In fact, I am not even sure if there is a hard limit.

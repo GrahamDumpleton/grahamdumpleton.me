@@ -20,42 +20,47 @@ This does still have some relevance to monkey patching, in as much as one of the
 
 To get started, lets consider the following Python script:
 
-```python
-    def function1():  
-    raise RuntimeError('xxx')
-
-    def function2():  
-    function1()
-
-    def function3():  
-    function2()
-
-    def function4():  
-    function3()
-
-    def function5():  
-    function4()
-
-    function5()
+```
+ def function1():  
+     raise RuntimeError('xxx')
+ 
+ 
+ def function2():  
+     function1()
+ 
+ 
+ def function3():  
+     function2()
+ 
+ 
+ def function4():  
+     function3()
+ 
+ 
+ def function5():  
+     function4()
+ 
+ 
+ function5()
 ```
 
 If we run this script we will get:
 
 ```
-    Traceback (most recent call last):  
-    File "generate-1.py", line 16, in <module>  
-    function5()  
-    File "generate-1.py", line 14, in function5  
-    function4()  
-    File "generate-1.py", line 11, in function4  
-    function3()  
-    File "generate-1.py", line 8, in function3  
-    function2()  
-    File "generate-1.py", line 5, in function2  
-    function1()  
-    File "generate-1.py", line 2, in function1  
-    raise RuntimeError('xxx')  
-    RuntimeError: xxx
+ Traceback (most recent call last):  
+   File "generate-1.py", line 16, in <module>  
+     function5()  
+   File "generate-1.py", line 14, in function5  
+     function4()  
+   File "generate-1.py", line 11, in function4  
+     function3()  
+   File "generate-1.py", line 8, in function3  
+     function2()  
+   File "generate-1.py", line 5, in function2  
+     function1()  
+   File "generate-1.py", line 2, in function1  
+     raise RuntimeError('xxx')  
+ RuntimeError: xxx
 ```
 
 In this case we have an exception occurring which was never actually caught within the script itself and is propagated all the way up to the top level, causing the script to be terminated and the traceback printed.
@@ -64,28 +69,34 @@ When the traceback was printed, it showed all stack frames from the top level al
 
 Now consider the Python script:
 
-```python
-    import traceback
-
-    def function1():  
-    raise RuntimeError('xxx')
-
-    def function2():  
-    function1()
-
-    def function3():  
-    try:  
-    function2()  
-    except Exception:  
-    traceback.print_exc()
-
-    def function4():  
-    function3()
-
-    def function5():  
-    function4()
-
-    function5()
+```
+ import traceback
+ 
+ 
+ def function1():  
+     raise RuntimeError('xxx')
+ 
+ 
+ def function2():  
+     function1()
+ 
+ 
+ def function3():  
+     try:  
+       function2()  
+     except Exception:  
+       traceback.print_exc()
+ 
+ 
+ def function4():  
+     function3()
+ 
+ 
+ def function5():  
+     function4()
+ 
+ 
+ function5()
 ```
 
 In this script we have a 'try/except' block half way down the sequence of calls. The call to 'function2\(\)' is made within the 'try' block and when the exception is raised, it is handled within the 'except' block. At that point we use the 'traceback.print\_exc\(\)' function to output the details of the exception, but then let the script continue on normally to completion.
@@ -93,14 +104,14 @@ In this script we have a 'try/except' block half way down the sequence of calls.
 For this Python script the output is:
 
 ```
-    Traceback (most recent call last):  
-    File "generate-2.py", line 11, in function3  
-    function2()  
-    File "generate-2.py", line 7, in function2  
-    function1()  
-    File "generate-2.py", line 4, in function1  
-    raise RuntimeError('xxx')  
-    RuntimeError: xxx
+ Traceback (most recent call last):  
+   File "generate-2.py", line 11, in function3  
+     function2()  
+   File "generate-2.py", line 7, in function2  
+     function1()  
+   File "generate-2.py", line 4, in function1  
+     raise RuntimeError('xxx')  
+ RuntimeError: xxx
 ```
 
 What you see here though is that we loose information about the outer stack frames for the sequence of calls that led down to the point where the 'try/except' block existed.
@@ -113,52 +124,58 @@ How then can we capture the outer stack frames so we have that additional contex
 
 There are a number of ways of obtaining information about the current stack. If we are just wanting to dump out the current stack to a log then we can use 'traceback.print\_stack\(\)'.
 
-```python
-    import traceback
-
-    def function1():  
-    raise RuntimeError('xxx')
-
-    def function2():  
-    function1()
-
-    def function3():  
-    try:  
-    function2()  
-    except Exception:  
-    traceback.print_stack()  
-    print '--------------'  
-    traceback.print_exc()
-
-    def function4():  
-    function3()
-
-    def function5():  
-    function4()
-
-    function5()
+```
+ import traceback
+ 
+ 
+ def function1():  
+     raise RuntimeError('xxx')
+ 
+ 
+ def function2():  
+     function1()
+ 
+ 
+ def function3():  
+     try:  
+         function2()  
+     except Exception:  
+         traceback.print_stack()  
+         print '--------------'  
+         traceback.print_exc()
+ 
+ 
+ def function4():  
+     function3()
+ 
+ 
+ def function5():  
+     function4()
+ 
+ 
+ function5()
 ```
 
 Run this variant of the Python script and we now get:
 
 ```
-      File "generate-3.py", line 23, in <module>  
-    function5()  
-    File "generate-3.py", line 21, in function5  
-    function4()  
-    File "generate-3.py", line 18, in function4  
-    function3()  
-    File "generate-3.py", line 13, in function3  
-    traceback.print_stack()  
-    --------------  
-    Traceback (most recent call last):  
-    File "generate-3.py", line 11, in function3  
-    function2()  
-    File "generate-3.py", line 7, in function2  
-    function1()  
-    File "generate-3.py", line 4, in function1  
-    raise RuntimeError('xxx')  
-    RuntimeError: xxx
+   File "generate-3.py", line 23, in <module>  
+     function5()  
+   File "generate-3.py", line 21, in function5  
+     function4()  
+   File "generate-3.py", line 18, in function4  
+     function3()  
+   File "generate-3.py", line 13, in function3  
+     traceback.print_stack()  
+ --------------  
+ Traceback (most recent call last):  
+   File "generate-3.py", line 11, in function3  
+     function2()  
+   File "generate-3.py", line 7, in function2  
+     function1()  
+   File "generate-3.py", line 4, in function1  
+     raise RuntimeError('xxx')  
+ RuntimeError: xxx
 ```
 
 So we now have the inner stack frames corresponding to the exception traceback, as well as those outer stack frames corresponding to the current stack. From this we can presumably now join these two sets of stack frames together and get a complete stack trace for where the exception occurred.
@@ -179,32 +196,38 @@ Dealing with such pre formatted output could therefore be a pain, especially if 
 
 When needing to perform introspection or otherwise derive information about Python objects, the module you want to use is the 'inspect' module. For the case of getting information about the current exception and current stack, the two functions you can use are 'inspect.trace\(\)' and 'inspect.stack\(\)'. Using these we can rewrite our Python script as:
 
-```python
-    import inspect
-
-    def function1():  
-    raise RuntimeError('xxx')
-
-    def function2():  
-    function1()
-
-    def function3():  
-    try:  
-    function2()  
-    except Exception:  
-    for item in reversed(inspect.stack()):  
-    print item[1:]  
-    print '--------------'  
-    for item in inspect.trace():  
-    print item[1:]
-
-    def function4():  
-    function3()
-
-    def function5():  
-    function4()
-
-    function5()
+```
+ import inspect
+ 
+ 
+ def function1():  
+     raise RuntimeError('xxx')
+ 
+ 
+ def function2():  
+     function1()
+ 
+ 
+ def function3():  
+     try:  
+         function2()  
+     except Exception:  
+         for item in reversed(inspect.stack()):  
+             print item[1:]  
+         print '--------------'  
+         for item in inspect.trace():  
+             print item[1:]
+ 
+ 
+ def function4():  
+     function3()
+ 
+ 
+ def function5():  
+     function4()
+ 
+ 
+ function5()
 ```
 
 This time we get:
@@ -223,57 +246,64 @@ So these functions provide us with the raw information rather than pre formatted
 
 Because though we might want to generate such a combined stack trace in multiple places we obviously separate this out into a function of its own.
 
-```python
-    import inspect
-
-    def print_full_stack():  
-    print 'Traceback (most recent call last):'  
-    for item in reversed(inspect.stack()[2:]):  
-    print ' File "{1}", line {2}, in {3}\n'.format(*item),  
-    for line in item[4]:  
-    print ' ' + line.lstrip(),  
-    for item in inspect.trace():  
-    print ' File "{1}", line {2}, in {3}\n'.format(*item),  
-    for line in item[4]:  
-    print ' ' + line.lstrip(),
-
-    def function1():  
-    raise RuntimeError('xxx')
-
-    def function2():  
-    function1()
-
-    def function3():  
-    try:  
-    function2()  
-    except Exception:  
-    print_full_stack()
-
-    def function4():  
-    function3()
-
-    def function5():  
-    function4()
-
-    function5()
+```
+ import inspect
+ 
+ 
+ def print_full_stack():  
+     print 'Traceback (most recent call last):'  
+     for item in reversed(inspect.stack()[2:]):  
+         print ' File "{1}", line {2}, in {3}\n'.format(*item),  
+     for line in item[4]:  
+         print ' ' + line.lstrip(),  
+     for item in inspect.trace():  
+         print ' File "{1}", line {2}, in {3}\n'.format(*item),  
+     for line in item[4]:  
+         print ' ' + line.lstrip(),
+ 
+ 
+ def function1():  
+     raise RuntimeError('xxx')
+ 
+ 
+ def function2():  
+     function1()
+ 
+ 
+ def function3():  
+     try:  
+         function2()  
+     except Exception:  
+         print_full_stack()
+ 
+ 
+ def function4():  
+     function3()
+ 
+ 
+ def function5():  
+     function4()
+ 
+ 
+ function5()
 ```
 
 The final result would now be:
 
 ```
-    Traceback (most recent call last):  
-    File "generate-5.py", line 32, in <module>  
-    function5()  
-    File "generate-5.py", line 30, in function5  
-    function4()  
-    File "generate-5.py", line 27, in function4  
-    function3()  
-    File "generate-5.py", line 22, in function3  
-    function2()  
-    File "generate-5.py", line 18, in function2  
-    function1()  
-    File "generate-5.py", line 15, in function1  
-    raise RuntimeError('xxx')
+ Traceback (most recent call last):  
+   File "generate-5.py", line 32, in <module>  
+     function5()  
+   File "generate-5.py", line 30, in function5  
+     function4()  
+   File "generate-5.py", line 27, in function4  
+     function3()  
+   File "generate-5.py", line 22, in function3  
+     function2()  
+   File "generate-5.py", line 18, in function2  
+     function1()  
+   File "generate-5.py", line 15, in function1  
+     raise RuntimeError('xxx')
 ```
 
 # Using the exception traceback
@@ -288,127 +318,143 @@ For the inner stack frames from the exception, the 'inspect.trace\(\)' function 
 
 That we are assuming we should skip two stack frames for the current stack is a little bit fragile. For example, consider the case where we don't actually call 'print\_full\_stack\(\)' within the 'except' block itself.
 
-```python
-    def function1():  
-    raise RuntimeError('xxx')
-
-    def function2():  
-    function1()
-
-    def function3a():  
-    print_full_stack()
-
-    def function3():  
-    try:  
-    function2()  
-    except Exception:  
-    function3a()
-
-    def function4():  
-    function3()
-
-    def function5():  
-    function4()
-
-    function5()
+```
+ def function1():  
+     raise RuntimeError('xxx')
+ 
+ 
+ def function2():  
+     function1()
+ 
+ 
+ def function3a():  
+     print_full_stack()
+ 
+ 
+ def function3():  
+     try:  
+         function2()  
+     except Exception:  
+         function3a()
+ 
+ 
+ def function4():  
+     function3()
+ 
+ 
+ def function5():  
+     function4()
+ 
+ 
+ function5()
 ```
 
 The result here is:
 
 ```
-    Traceback (most recent call last):  
-    File "generate-6.py", line 35, in <module>  
-    function5()  
-    File "generate-6.py", line 33, in function5  
-    function4()  
-    File "generate-6.py", line 30, in function4  
-    function3()  
-    File "generate-6.py", line 27, in function3  
-    function3a()  
-    File "generate-6.py", line 25, in function3  
-    function2()  
-    File "generate-6.py", line 18, in function2  
-    function1()  
-    File "generate-6.py", line 15, in function1  
-    raise RuntimeError('xxx')
+ Traceback (most recent call last):  
+   File "generate-6.py", line 35, in <module>  
+     function5()  
+   File "generate-6.py", line 33, in function5  
+     function4()  
+   File "generate-6.py", line 30, in function4  
+     function3()  
+   File "generate-6.py", line 27, in function3  
+     function3a()  
+   File "generate-6.py", line 25, in function3  
+     function2()  
+   File "generate-6.py", line 18, in function2  
+     function1()  
+   File "generate-6.py", line 15, in function1  
+     raise RuntimeError('xxx')
 ```
 
 As can be seen, we actually end up with an additional stack frame being inserted corresponding to 'function3a\(\)' which we called within the 'except' block and which in turn called 'print\_full\_stack\(\)'.
 
 To ensure we do the right thing here we need to look at what 'inspect.stack\(\)' and 'inspect.trace\(\)' actually do.
 
-```python
-    def stack(context=1):  
-    """Return a list of records for the stack above the caller's frame."""  
-    return getouterframes(sys._getframe(1), context)
-
-    def trace(context=1):  
-    """Return a list of records for the stack below the current exception."""  
-    return getinnerframes(sys.exc_info()[2], context)
+```
+ def stack(context=1):  
+     """Return a list of records for the stack above the caller's frame."""  
+     return getouterframes(sys._getframe(1), context)
+ 
+ 
+ def trace(context=1):  
+     """Return a list of records for the stack below the current exception."""  
+     return getinnerframes(sys.exc_info()[2], context)
 ```
 
 So the problem we have with the extra stack frame is that 'inspect.stack\(\)' uses 'sys.\_getframe\(\)' to grab the current stack. This is correct and what it is intended to do, but not really what we want. What we instead want is the outer stack frames corresponding to where the exception was caught.
 
 As it turns out this is available as an attribute on the traceback object for the exception called 'tb\_frame'. Learning from how these two functions are implemented, we can therefore change our function to print the full stack.
 
-```python
-    import sys  
-    import inspect
-
-    def print_full_stack(tb=None):  
-    if tb is None:  
-    tb = sys.exc_info()[2]
-
-        print 'Traceback (most recent call last):'  
-    for item in reversed(inspect.getouterframes(tb.tb_frame)[1:]):  
-    print ' File "{1}", line {2}, in {3}\n'.format(*item),  
-    for line in item[4]:  
-    print ' ' + line.lstrip(),  
-    for item in inspect.getinnerframes(tb):  
-    print ' File "{1}", line {2}, in {3}\n'.format(*item),  
-    for line in item[4]:  
-    print ' ' + line.lstrip(),
-
-    def function1():  
-    raise RuntimeError('xxx')
-
-    def function2():  
-    function1()
-
-    def function3a():  
-    print_full_stack()
-
-    def function3():  
-    try:  
-    function2()  
-    except Exception:  
-    function3a()
-
-    def function4():  
-    function3()
-
-    def function5():  
-    function4()
-
-    function5()
+```
+ import sys  
+ import inspect
+ 
+ 
+ def print_full_stack(tb=None):  
+     if tb is None:  
+         tb = sys.exc_info()[2]
+ 
+ 
+     print 'Traceback (most recent call last):'  
+     for item in reversed(inspect.getouterframes(tb.tb_frame)[1:]):  
+         print ' File "{1}", line {2}, in {3}\n'.format(*item),  
+         for line in item[4]:  
+             print ' ' + line.lstrip(),  
+         for item in inspect.getinnerframes(tb):  
+             print ' File "{1}", line {2}, in {3}\n'.format(*item),  
+         for line in item[4]:  
+             print ' ' + line.lstrip(),
+ 
+ 
+ def function1():  
+     raise RuntimeError('xxx')
+ 
+ 
+ def function2():  
+     function1()
+ 
+ 
+ def function3a():  
+     print_full_stack()
+ 
+ 
+ def function3():  
+     try:  
+         function2()  
+     except Exception:  
+         function3a()
+ 
+ 
+ def function4():  
+     function3()
+ 
+ 
+ def function5():  
+     function4()
+ 
+ 
+ function5()
 ```
 
 We are now back to the desired result we are after.
 
 ```
-    Traceback (most recent call last):  
-    File "generate-7.py", line 39, in <module>  
-    function5()  
-    File "generate-7.py", line 37, in function5  
-    function4()  
-    File "generate-7.py", line 34, in function4  
-    function3()  
-    File "generate-7.py", line 29, in function3  
-    function2()  
-    File "generate-7.py", line 22, in function2  
-    function1()  
-    File "generate-7.py", line 19, in function1  
-    raise RuntimeError('xxx')
+ Traceback (most recent call last):  
+   File "generate-7.py", line 39, in <module>  
+     function5()  
+   File "generate-7.py", line 37, in function5  
+     function4()  
+   File "generate-7.py", line 34, in function4  
+     function3()  
+   File "generate-7.py", line 29, in function3  
+     function2()  
+   File "generate-7.py", line 22, in function2  
+     function1()  
+   File "generate-7.py", line 19, in function1  
+     raise RuntimeError('xxx')
 ```
 
 # Using a saved traceback
@@ -419,45 +465,50 @@ It is likely a rare situation where it would be required, but this allows one to
 
 Be aware though that doing this can generate some surprising results.
 
-```python
-    def function1():  
-    raise RuntimeError('xxx')
-
-    def function2():  
-    function1()
-
-    def function3():  
-    try:  
-    function2()  
-    except Exception:  
-    return sys.exc_info()[2]
-
-    def function4():  
-    tb = function3()  
-    print_full_stack(tb)
-
-    def function5():  
-    function4()
-
-    function5()
+```
+ def function1():  
+     raise RuntimeError('xxx')
+ 
+ 
+ def function2():  
+     function1()
+ 
+ 
+ def function3():  
+     try:  
+         function2()  
+     except Exception:  
+         return sys.exc_info()[2]
+ 
+ 
+ def function4():  
+      tb = function3()  
+      print_full_stack(tb)
+ 
+ 
+ def function5():  
+      function4()
+ 
+ 
+ function5()
 ```
 
 In this case we return the traceback to an outer scope and only within that outer function attempt to print out the full stack for the exception.
 
 ```
-    Traceback (most recent call last):  
-    File "generate-8.py", line 37, in <module>  
-    function5()  
-    File "generate-8.py", line 35, in function5  
-    function4()  
-    File "generate-8.py", line 32, in function4  
-    print_full_stack(tb)  
-    File "generate-8.py", line 26, in function3  
-    function2()  
-    File "generate-8.py", line 22, in function2  
-    function1()  
-    File "generate-8.py", line 19, in function1  
-    raise RuntimeError('xxx')
+ Traceback (most recent call last):  
+   File "generate-8.py", line 37, in <module>  
+     function5()  
+   File "generate-8.py", line 35, in function5  
+     function4()  
+   File "generate-8.py", line 32, in function4  
+     print_full_stack(tb)  
+   File "generate-8.py", line 26, in function3  
+     function2()  
+   File "generate-8.py", line 22, in function2  
+     function1()  
+   File "generate-8.py", line 19, in function1  
+     raise RuntimeError('xxx')
 ```
 
 The problem here is that in 'function4\(\)' rather than seeing the line where the call to 'function3\(\)' was made, we see where the call to 'print\_full\_stack\(\)' is made.

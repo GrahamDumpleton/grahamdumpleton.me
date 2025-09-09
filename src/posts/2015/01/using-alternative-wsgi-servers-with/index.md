@@ -42,27 +42,35 @@ What supplying the 'app.py' file does at least do is prevent the startup of the 
 
 As an example, imagine that we had installed 'mod\_wsgi-express' by using the pip installable version of mod\_wsgi from PyPi. We might then write the 'app.py' file as:
 
-```python
-    import os
-
-    OPENSHIFT_REPO_DIR = os.environ['OPENSHIFT_REPO_DIR']
-
-    os.chdir(OPENSHIFT_REPO_DIR)
-
-    OPENSHIFT_PYTHON_IP = os.environ['OPENSHIFT_PYTHON_IP']  
-    OPENSHIFT_PYTHON_PORT = os.environ['OPENSHIFT_PYTHON_PORT']
-
-    OPENSHIFT_PYTHON_DIR = os.environ['OPENSHIFT_PYTHON_DIR']
-
-    SERVER_ROOT = os.path.join(OPENSHIFT_PYTHON_DIR, 'run', 'mod_wsgi')
-
-    VIRTUAL_ENV = os.environ['VIRTUAL_ENV']
-
-    program = os.path.join(VIRTUAL_ENV, 'bin', 'mod_wsgi-express')
-
-    os.execl(program, program, 'start-server', 'wsgi.py',  
-    '--server-root', SERVER_ROOT, '--log-to-terminal',  
-    '--host', OPENSHIFT_PYTHON_IP, '--port', OPENSHIFT_PYTHON_PORT)
+```
+ import os
+ 
+ 
+ OPENSHIFT_REPO_DIR = os.environ['OPENSHIFT_REPO_DIR']
+ 
+ 
+ os.chdir(OPENSHIFT_REPO_DIR)
+ 
+ 
+ OPENSHIFT_PYTHON_IP = os.environ['OPENSHIFT_PYTHON_IP']  
+ OPENSHIFT_PYTHON_PORT = os.environ['OPENSHIFT_PYTHON_PORT']
+ 
+ 
+ OPENSHIFT_PYTHON_DIR = os.environ['OPENSHIFT_PYTHON_DIR']
+ 
+ 
+ SERVER_ROOT = os.path.join(OPENSHIFT_PYTHON_DIR, 'run', 'mod_wsgi')
+ 
+ 
+ VIRTUAL_ENV = os.environ['VIRTUAL_ENV']
+ 
+ 
+ program = os.path.join(VIRTUAL_ENV, 'bin', 'mod_wsgi-express')
+ 
+ 
+ os.execl(program, program, 'start-server', 'wsgi.py',  
+         '--server-root', SERVER_ROOT, '--log-to-terminal',  
+         '--host', OPENSHIFT_PYTHON_IP, '--port', OPENSHIFT_PYTHON_PORT)
 ```
 
 When we try and use this, what we find is that sometimes it appears to work and sometimes it doesn't. Most of the time though OpenShift will tell us that the Python web application didn't start up properly.
@@ -77,32 +85,35 @@ The question is why does OpenShift think it isn't starting up properly most of t
 
 The answer is pretty obscure and is tied to how the OpenShift Python cartridge manages the startup of the Python web application when an 'app.py' file is provided. To discover this one has to dig down into the OpenShift control script for the Python cartridge.
 
-```python
-    nohup python -u app.py &> $LOGPIPE &
-
-    retries=3  
-    while [ $retries -gt 0 ]; do  
-    app_pid=$(appserver_pid)  
-    [ -n "${app_pid}" ] && break  
-    sleep 1  
-    let retries=${retries}-1  
-    done
-
-    sleep 2
-
-    if [ -n "${app_pid}" ]; then  
-    echo "$app_pid" > $OPENSHIFT_PYTHON_DIR/run/appserver.pid  
-    else  
-    echo "ERROR: Application failed to start, use 'rhc tail' for more informations."  
-    fi
+```
+ nohup python -u app.py &> $LOGPIPE &
+ 
+ 
+ retries=3  
+ while [ $retries -gt 0 ]; do  
+   app_pid=$(appserver_pid)  
+   [ -n "${app_pid}" ] && break  
+   sleep 1  
+   let retries=${retries}-1  
+ done
+ 
+ 
+ sleep 2
+ 
+ 
+ if [ -n "${app_pid}" ]; then  
+   echo "$app_pid" > $OPENSHIFT_PYTHON_DIR/run/appserver.pid  
+ else  
+   echo "ERROR: Application failed to start, use 'rhc tail' for more informations."  
+ fi
 ```
 
 The definition of the 'appserver\_pid' shell function reference by this is:
 
-```javascript
-    function appserver_pid() {  
-    pgrep -f "python -u app.py"  
-    }
+```
+ function appserver_pid() {  
+   pgrep -f "python -u app.py"  
+ }
 ```
 
 What is therefore happening is that the control script is running the code in 'app.py' as 'python -u app.py'. Rather than capture the process ID of the process when run and check that a process exists with that process ID, it checks using 'pgrep' to see if a process exists which has the exact text of 'python -u app.py' in the full command line used to start up the process.
@@ -112,9 +123,9 @@ The reason this will not work, or at least why it will not always work is that o
 Since it is checking for 'python -u app.py', lets see if we can fool it by naming the process which will persist after the 'os.execl\(\)' call using that string. This is done by changing the second argument to the 'os.execl\(\)' call.
 
 ```
-    os.execl(program, 'mod_wsgi-express (python -u app.py)', 'start-server',  
-    'wsgi.py', '--server-root', SERVER_ROOT, '--log-to-terminal',  
-    '--host', OPENSHIFT_PYTHON_IP, '--port', OPENSHIFT_PYTHON_PORT)
+ os.execl(program, 'mod_wsgi-express (python -u app.py)', 'start-server',  
+         'wsgi.py', '--server-root', SERVER_ROOT, '--log-to-terminal',  
+         '--host', OPENSHIFT_PYTHON_IP, '--port', OPENSHIFT_PYTHON_PORT)
 ```
 
 Unfortunately it doesn't seem to help.
@@ -128,10 +139,10 @@ Now 'mod\_wsgi-express' does actually provide a command line option called '--pr
 We therefore try overriding the name of the process when using 'os.execl\(\)', but also tell 'mod\_wsgi-express' to do something similar when it starts Apache.
 
 ```
-    os.execl(program, 'mod_wsgi-express (python -u app.py)', 'start-server',  
-    'wsgi.py', '--process-name', 'httpd (python -u app.py)',  
-    '--server-root', SERVER_ROOT, '--log-to-terminal',  
-    '--host', OPENSHIFT_PYTHON_IP, '--port', OPENSHIFT_PYTHON_PORT)
+ os.execl(program, 'mod_wsgi-express (python -u app.py)', 'start-server',  
+        'wsgi.py', '--process-name', 'httpd (python -u app.py)',  
+        '--server-root', SERVER_ROOT, '--log-to-terminal',  
+        '--host', OPENSHIFT_PYTHON_IP, '--port', OPENSHIFT_PYTHON_PORT)
 ```
 
 Success, and it now all appears to work okay.
@@ -162,12 +173,14 @@ We could start to look at using a process manager such as supervisord but that i
 
 Stepping back, what is simple to use for such a task is a shell script. A shell script is also much easier for writing small wrappers to process environment variables and work out a command line to then be used to execute a further process. In the hope that this will make our job easier, lets change the 'app.py' file to:
 
-```python
-    import os
-
-    SCRIPT = os.path.join(os.path.dirname(__file__), 'app.sh')
-
-    os.execl('/bin/bash', 'bash (python -u app.py)', SCRIPT)
+```
+ import os
+ 
+ 
+ SCRIPT = os.path.join(os.path.dirname(__file__), 'app.sh')
+ 
+ 
+ os.execl('/bin/bash', 'bash (python -u app.py)', SCRIPT)
 ```
 
 What we are therefore doing is replacing the Python process with a 'bash' process which is executing a shell script provided by 'app.sh' instead, but still overriding the process name as we did before.
@@ -177,22 +190,26 @@ Now I am not going to pretend that having a shell script properly handle relayin
 Moving on then, our final 'app.sh' shell script file is:
 
 ```
-    #!/usr/bin/env bash
-
-    trap 'kill -TERM $PID' TERM INT
-
-    mod_wsgi-express start-server \  
-    --server-root $OPENSHIFT_PYTHON_DIR/run/mod_wsgi \  
-    --log-to-terminal --host $OPENSHIFT_PYTHON_IP \  
-    --port $OPENSHIFT_PYTHON_PORT wsgi.py &
-
-    PID=$!  
-    wait $PID  
-    trap - TERM INT  
-    wait $PID  
-    STATUS=$?
-
-    exit $STATUS
+ #!/usr/bin/env bash
+ 
+ 
+ trap 'kill -TERM $PID' TERM INT
+ 
+ 
+ mod_wsgi-express start-server \  
+         --server-root $OPENSHIFT_PYTHON_DIR/run/mod_wsgi \  
+         --log-to-terminal --host $OPENSHIFT_PYTHON_IP \  
+         --port $OPENSHIFT_PYTHON_PORT wsgi.py &
+ 
+ 
+ PID=$!  
+ wait $PID  
+ trap - TERM INT  
+ wait $PID  
+ STATUS=$?
+ 
+ 
+ exit $STATUS
 ```
 
 This actually comes out as being quite clean compared to the 'app.py' when it was using 'os.execl\(\)' to execute 'mod\_wsgi-express' directly.
