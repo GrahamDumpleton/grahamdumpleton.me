@@ -12,6 +12,13 @@ module.exports = function(eleventyConfig) {
     return collectionApi.getFilteredByGlob("src/posts/*/*/*/index.md")
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   });
+
+  // Add RSS feed collection (newest first for proper RSS ordering)
+  // The feedPlugin seems to reverse the collection internally, so we sort oldest first
+  eleventyConfig.addCollection("rss-posts", function(collectionApi) {
+    return collectionApi.getFilteredByGlob("src/posts/*/*/*/index.md")
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  });
   
   // Add filters
   eleventyConfig.addFilter("date", function(date, format) {
@@ -86,7 +93,7 @@ module.exports = function(eleventyConfig) {
 		type: "rss", // or "atom", "json"
 		outputPath: "/feed.xml",
 		collection: {
-			name: "posts",
+			name: "rss-posts",
 			limit: 10,
 		},
 		metadata: {
