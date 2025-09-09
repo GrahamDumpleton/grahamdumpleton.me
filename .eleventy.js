@@ -1,3 +1,5 @@
+const { feedPlugin } = require("@11ty/eleventy-plugin-rss");
+
 module.exports = function(eleventyConfig) {
   // Copy static assets
   eleventyConfig.addPassthroughCopy("src/assets");
@@ -80,6 +82,24 @@ module.exports = function(eleventyConfig) {
   // Enable indented code blocks (disabled by default in Eleventy v2.0+)
   eleventyConfig.amendLibrary("md", (mdLib) => mdLib.enable("code"));
 
+  eleventyConfig.addPlugin(feedPlugin, {
+		type: "rss", // or "atom", "json"
+		outputPath: "/feed.xml",
+		collection: {
+			name: "posts",
+			limit: 10,
+		},
+		metadata: {
+			language: "en",
+			title: "Graham Dumpleton's Blog",
+			subtitle: "Technical blog posts about Python, web development, WSGI, mod_wsgi, and more",
+			base: "https://grahamdumpleton.me/",
+			author: {
+				name: "Graham Dumpleton"
+			}
+		}
+	});
+
   return {
     dir: {
       input: "src",
@@ -87,7 +107,7 @@ module.exports = function(eleventyConfig) {
       includes: "_includes",
       layouts: "_layouts"
     },
-    templateFormats: ["md", "liquid", "html"],
+    templateFormats: ["md", "liquid", "njk", "html"],
     markdownTemplateEngine: "liquid",
     htmlTemplateEngine: "liquid",
     // 11ty v3 configuration

@@ -16,7 +16,8 @@
     "migrate-comments-disable": "node scripts/migrate-comments.js --disable-comments"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^3.1.2"
+    "@11ty/eleventy": "^3.1.2",
+    "@11ty/eleventy-plugin-rss": "^2.0.4"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
