@@ -56,15 +56,55 @@ Each post is saved in its own subdirectory named after the HTML filename (withou
 
 ### 2. Post Extractor (`extract_post.py`)
 
-Extracts blog post data from Google Blogger HTML files.
+Extracts blog post data from Google Blogger HTML files and converts them to structured formats.
 
 **Usage:**
+
+Process all posts from metadata (batch mode):
+```bash
+uv run python scripts/extract_post.py
+```
+
+Process a single HTML file:
 ```bash
 uv run python scripts/extract_post.py <html_file_path>
 ```
 
+Process a single HTML file with image overwrite:
+```bash
+uv run python scripts/extract_post.py <html_file_path> --overwrite
+```
+
+Show help:
+```bash
+uv run python scripts/extract_post.py --help
+```
+
 **Features:**
-- Extracts blog post title, content, author, date
-- Parses comments and labels/tags
-- Generates structured JSON output
-- Preserves metadata and Open Graph data
+- **Batch Processing**: Automatically processes all posts from `posts-metadata.json`
+- **Single File Processing**: Process individual HTML files
+- **Image Download**: Downloads and localizes images from blog posts
+- **Overwrite Control**: `--overwrite` flag controls whether existing images are replaced
+- **Standardized Output**: Always creates `index.md` and `data.json` files in each post directory
+- **Content Extraction**: Extracts blog post title, content, author, date
+- **Comment Parsing**: Parses and converts comments to Markdown
+- **Label/Tag Extraction**: Extracts and preserves blog labels as tags
+- **Metadata Preservation**: Preserves Open Graph data and other metadata
+- **Markdown Generation**: Creates standalone Markdown files with YAML front matter
+- **JSON Output**: Generates structured JSON with all extracted data
+
+**Output Files:**
+For each processed post, the script creates two files in the post's directory:
+- `index.md`: Markdown file with YAML front matter containing post metadata and content
+- `data.json`: Complete structured JSON with all extracted data including comments and metadata
+
+**Image Handling:**
+- Downloads images referenced in blog posts to the post's directory
+- Updates image references in the content to point to local files
+- Skips existing images unless `--overwrite` flag is used
+- Generates safe filenames for images without proper names
+
+**Directory Structure:**
+The script works with the directory structure created by `download_posts.py`:
+- `posts/2007/03/resistance-is-futile/original.html` → generates `index.md` and `data.json` in the same directory
+- `posts/2019/01/administration-features-of-jupyterhub/original.html` → generates `index.md` and `data.json` in the same directory

@@ -4,27 +4,32 @@ Blog Post Extractor
 
 This script parses HTML files from Google Blogger and extracts key post information
 into a structured JSON format.
+
+Usage:
+  python extract_post.py                           # Process all posts from metadata
+  python extract_post.py <html_file_path>          # Process single HTML file
+  python extract_post.py <html_file_path> --overwrite  # Process single file, overwrite existing images
 """
 
 import json
 import sys
+import argparse
 from pathlib import Path
 from bs4 import BeautifulSoup
-from datetime import datetime
 import re
 import html2text
 import requests
-import urllib.parse
 from urllib.parse import urlparse
 
 
-def download_image(image_url, output_dir):
+def download_image(image_url, output_dir, overwrite=False):
     """
     Download an image from a URL and save it to the output directory.
     
     Args:
         image_url (str): URL of the image to download
         output_dir (Path): Directory to save the image to
+        overwrite (bool): Whether to overwrite existing files
         
     Returns:
         str: Local filename of the downloaded image, or None if download failed
@@ -41,12 +46,17 @@ def download_image(image_url, output_dir):
         # Ensure the filename is safe
         filename = re.sub(r'[^\w\-_\.]', '_', filename)
         
+        # Check if file already exists
+        output_path = output_dir / filename
+        if output_path.exists() and not overwrite:
+            print(f"Image already exists, skipping: {filename}")
+            return filename
+        
         # Download the image
         response = requests.get(image_url, timeout=30)
         response.raise_for_status()
         
         # Save to output directory
-        output_path = output_dir / filename
         with open(output_path, 'wb') as f:
             f.write(response.content)
         
@@ -56,13 +66,14 @@ def download_image(image_url, output_dir):
         return None
 
 
-def extract_and_download_images(content_element, output_dir):
+def extract_and_download_images(content_element, output_dir, overwrite=False):
     """
     Extract image URLs from content and download them.
     
     Args:
         content_element: BeautifulSoup element containing the content
         output_dir (Path): Directory to save images to
+        overwrite (bool): Whether to overwrite existing image files
         
     Returns:
         tuple: (markdown_content, list of downloaded image filenames)
@@ -76,7 +87,7 @@ def extract_and_download_images(content_element, output_dir):
         src = img.get('src')
         if src:
             # Download the image
-            local_filename = download_image(src, output_dir)
+            local_filename = download_image(src, output_dir, overwrite)
             if local_filename:
                 downloaded_images.append(local_filename)
                 # Update the src to point to the local file
@@ -139,12 +150,13 @@ def create_markdown_file(post_data, output_path):
                 f.write(f"{comment['content']}\n\n")
 
 
-def extract_post_data(html_file_path):
+def extract_post_data(html_file_path, overwrite=False):
     """
     Extract blog post data from an HTML file.
     
     Args:
         html_file_path (str): Path to the HTML file
+        overwrite (bool): Whether to overwrite existing image files
         
     Returns:
         dict: Extracted post data
@@ -178,7 +190,7 @@ def extract_post_data(html_file_path):
     if content_element:
         # Download images and update references
         output_dir = Path(html_file_path).parent
-        downloaded_images = extract_and_download_images(content_element, output_dir)
+        downloaded_images = extract_and_download_images(content_element, output_dir, overwrite)
         post_data['downloaded_images'] = downloaded_images
         
         # Convert HTML to Markdown with better code block handling
@@ -362,32 +374,97 @@ def extract_post_data(html_file_path):
     return post_data
 
 
-def main():
-    """Main function to run the extraction."""
-    if len(sys.argv) != 2:
-        print("Usage: python extract_post.py <html_file_path>")
-        sys.exit(1)
+def load_metadata(metadata_file):
+    """Load the posts metadata from JSON file."""
+    try:
+        with open(metadata_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Metadata file '{metadata_file}' not found.")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in metadata file: {e}")
+        return None
+
+
+def extract_year_month_from_url(url):
+    """
+    Extract year and month from URL path.
+    Expected format: http://blog.dscpl.com.au/YYYY/MM/filename.html
+    Returns tuple (year, month) or (None, None) if pattern doesn't match.
+    """
+    parsed = urlparse(url)
+    path_parts = parsed.path.strip('/').split('/')
     
-    html_file_path = sys.argv[1]
+    if len(path_parts) >= 2:
+        year = path_parts[0]
+        month = path_parts[1]
+        
+        # Validate that year and month are numeric
+        if year.isdigit() and month.isdigit():
+            return year, month
     
-    if not Path(html_file_path).exists():
-        print(f"Error: File '{html_file_path}' not found.")
-        sys.exit(1)
+    return None, None
+
+
+def get_basename_from_url(url):
+    """Extract basename (without extension) from URL."""
+    parsed = urlparse(url)
+    filename = parsed.path.split('/')[-1]
+    # Remove .html extension if present
+    if filename.endswith('.html'):
+        return filename[:-5]  # Remove last 5 characters (.html)
+    return filename
+
+
+def url_to_html_path(url, posts_dir):
+    """
+    Convert a URL to the expected HTML file path based on the download structure.
     
+    Args:
+        url (str): The original URL
+        posts_dir (Path): Base posts directory
+        
+    Returns:
+        Path: Path to the original.html file, or None if URL format is invalid
+    """
+    year, month = extract_year_month_from_url(url)
+    if not year or not month:
+        return None
+    
+    basename = get_basename_from_url(url)
+    if not basename:
+        return None
+    
+    # Create path: posts/YYYY/MM/filename/original.html
+    return posts_dir / year / month / basename / "original.html"
+
+
+def process_single_post(html_file_path, overwrite=False):
+    """
+    Process a single HTML file and extract post data.
+    
+    Args:
+        html_file_path (Path): Path to the HTML file
+        overwrite (bool): Whether to overwrite existing image files
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
     try:
         # Extract post data
-        post_data = extract_post_data(html_file_path)
+        post_data = extract_post_data(str(html_file_path), overwrite)
         
-        # Generate output filenames
-        html_path = Path(html_file_path)
-        json_output_path = html_path.with_suffix('.json')
-        md_output_path = html_path.with_suffix('.md')
+        # Generate output filenames (always index.md and data.json)
+        output_dir = html_file_path.parent
+        json_output_path = output_dir / "data.json"
+        md_output_path = output_dir / "index.md"
         
-        # Write to JSON file
+        # Write to JSON file (always recreate)
         with open(json_output_path, 'w', encoding='utf-8') as json_file:
             json.dump(post_data, json_file, indent=2, ensure_ascii=False)
         
-        # Create standalone Markdown file
+        # Create standalone Markdown file (always recreate)
         create_markdown_file(post_data, md_output_path)
         
         print(f"Successfully extracted post data to: {json_output_path}")
@@ -402,9 +479,147 @@ def main():
         if 'downloaded_images' in post_data and post_data['downloaded_images']:
             print(f"Downloaded images: {', '.join(post_data['downloaded_images'])}")
         
+        return True
+        
     except Exception as e:
-        print(f"Error processing file: {e}")
-        sys.exit(1)
+        print(f"Error processing file {html_file_path}: {e}")
+        return False
+
+
+def process_all_posts(posts_dir, overwrite=False):
+    """
+    Process all posts from the metadata file.
+    
+    Args:
+        posts_dir (Path): Base posts directory
+        overwrite (bool): Whether to overwrite existing image files
+        
+    Returns:
+        tuple: (successful_count, failed_count)
+    """
+    # Get the directory containing this script
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent
+    
+    # Load metadata
+    metadata_file = project_root / 'posts-metadata.json'
+    posts_data = load_metadata(metadata_file)
+    
+    if not posts_data:
+        return 0, 0
+    
+    print(f"Found {len(posts_data)} posts to process")
+    print(f"Posts directory: {posts_dir}")
+    if overwrite:
+        print("Overwrite mode: existing images will be replaced")
+    print()
+    
+    successful = 0
+    failed = 0
+    
+    for i, post in enumerate(posts_data, 1):
+        original_url = post.get('originalUrl')
+        title = post.get('title', 'Unknown')
+        
+        if not original_url:
+            print(f"[{i}/{len(posts_data)}] Skipping post with no URL: {title}")
+            failed += 1
+            continue
+        
+        print(f"[{i}/{len(posts_data)}] Processing: {title}")
+        print(f"  URL: {original_url}")
+        
+        # Convert URL to HTML file path
+        html_file_path = url_to_html_path(original_url, posts_dir)
+        if not html_file_path:
+            print("  Warning: Cannot determine HTML file path from URL, skipping")
+            failed += 1
+            continue
+        
+        if not html_file_path.exists():
+            print(f"  Warning: HTML file not found: {html_file_path}, skipping")
+            failed += 1
+            continue
+        
+        print(f"  Processing: {html_file_path}")
+        
+        # Process the post
+        if process_single_post(html_file_path, overwrite):
+            successful += 1
+        else:
+            failed += 1
+        
+        print()
+    
+    return successful, failed
+
+
+def main():
+    """Main function to run the extraction."""
+    parser = argparse.ArgumentParser(
+        description='Extract blog post data from HTML files',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python extract_post.py                           # Process all posts from metadata
+  python extract_post.py posts/2007/03/resistance-is-futile/original.html
+  python extract_post.py posts/2007/03/resistance-is-futile/original.html --overwrite
+        """
+    )
+    
+    parser.add_argument(
+        'html_file_path',
+        nargs='?',
+        help='Path to HTML file to process (optional - if not provided, processes all posts from metadata)'
+    )
+    
+    parser.add_argument(
+        '--overwrite',
+        action='store_true',
+        help='Overwrite existing image files (only applies to single file mode)'
+    )
+    
+    args = parser.parse_args()
+    
+    # Get the directory containing this script
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent
+    posts_dir = project_root / 'posts'
+    
+    if args.html_file_path:
+        # Single file mode
+        html_file_path = Path(args.html_file_path)
+        
+        if not html_file_path.exists():
+            print(f"Error: File '{html_file_path}' not found.")
+            sys.exit(1)
+        
+        print(f"Processing single file: {html_file_path}")
+        if args.overwrite:
+            print("Overwrite mode: existing images will be replaced")
+        print()
+        
+        success = process_single_post(html_file_path, args.overwrite)
+        if success:
+            print("Processing completed successfully")
+        else:
+            print("Processing failed")
+            sys.exit(1)
+    else:
+        # Batch processing mode
+        print("Batch processing mode - processing all posts from metadata")
+        print()
+        
+        successful, failed = process_all_posts(posts_dir, args.overwrite)
+        
+        print("=" * 50)
+        print("Processing Summary:")
+        print(f"  Successful: {successful}")
+        print(f"  Failed: {failed}")
+        print(f"  Total processed: {successful + failed}")
+        
+        if failed > 0:
+            sys.exit(1)
 
 
 if __name__ == "__main__":
