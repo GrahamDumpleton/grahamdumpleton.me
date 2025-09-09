@@ -131,7 +131,7 @@ def main():
     # Get the directory containing this script
     script_dir = Path(__file__).parent
     # Posts directory is one level up from archive
-    posts_dir = script_dir.parent / 'posts'
+    posts_dir = script_dir.parent / 'src/posts'
     
     if not posts_dir.exists():
         print(f"Posts directory not found: {posts_dir}")

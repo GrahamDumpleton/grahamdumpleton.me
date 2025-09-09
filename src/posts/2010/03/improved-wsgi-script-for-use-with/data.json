@@ -1,0 +1,454 @@
+{
+  "title": "An improved WSGI script for use with Django.",
+  "content": "Far too often one sees complaints on the Django users list and \\#django IRC channel that code that worked fine with the Django development server doesn't work with Apache/mod\\_wsgi. For a number of those cases you will see the accusation that Apache/mod\\_wsgi must be wrong or is somehow broken. The real reason however is that when using the Django development server various setup steps are carried out which aren't performed if you use the WSGI handler interface provided by Django. The available Django documentation on using the WSGI interface doesn't however go into a great deal of technical detail. The end result is that it isn't obvious what needs to be done when using the Django WSGI interface so as to have the process environment setup to be equivalent to the Django development server, therefore guaranteeing trouble free porting of an application to a production environment using Apache/mod\\_wsgi, or any other WSGI hosting mechanism.\n\n  \n\n\nThe purpose of the post is to explain what actually happens when you use the Django development server as far as the setup of critical parts of the process environment, and compare that to what happens if you use the Django WSGI interface in the manner as described in the Django documentation. From that I will describe an alternate way of setting up and configuring Django for use with the supplied WGSI interface so as to better replicate how things are done within the Django development server.\n\n  \n\n\nTo help track down what happens we will instrument the 'settings.py' from a Django site to include the following.\n    \n    \n    import sys, os  \n      \n    print \"__name__ =\", __name__  \n    print \"__file__ =\", __file__  \n    print \"os.getpid() =\", os.getpid()  \n    print \"os.getcwd() =\", os.getcwd()  \n    print \"os.curdir =\", os.curdir  \n    print \"sys.path =\", repr(sys.path)  \n    print \"sys.modules.keys() =\", repr(sys.modules.keys())  \n    print \"sys.modules.has_key('mysite') =\", sys.modules.has_key('mysite')  \n    if sys.modules.has_key('mysite'):  \n      print \"sys.modules['mysite'].__name__ =\", sys.modules['mysite'].__name__  \n      print \"sys.modules['mysite'].__file__ =\", sys.modules['mysite'].__file__  \n      print \"os.environ['DJANGO_SETTINGS_MODULE'] =\", os.environ.get('DJANGO_SETTINGS_MODULE', None)\n\nNow, for my example the Django site is located at '/usr/local/django/mysite'. To run the Django development server I now from within that directory run 'python manage.py runserver'. The result of that is the following.\n    \n    \n    __name__ = settings  \n    __file__ = /usr/local/django/mysite/settings.pyc  \n    os.getpid() = 3441  \n    os.getcwd() = /usr/local/django/mysite  \n    os.curdir = .  \n    sys.path = ['/usr/local/django/mysite', ...]  \n    sys.modules.keys() = [..., 'settings', ...]  \n    sys.modules.has_key('mysite') = False  \n    os.environ['DJANGO_SETTINGS_MODULE'] = None\n    \n    \n    __name__ = mysite.settings  \n    __file__ = /usr/local/django/mysite/../mysite/settings.pyc  \n    os.getpid() = 3441  \n    os.getcwd() = /usr/local/django/mysite  \n    os.curdir = .  \n    sys.path = ['/usr/local/django/mysite', ...]  \n    sys.modules.keys() = [..., 'mysite.settings', ..., 'mysite.sys', 'mysite.os', ..., 'mysite', ..., 'settings', ...]  \n    sys.modules.has_key('mysite') = True  \n    sys.modules['mysite'].__name__ = mysite  \n    sys.modules['mysite'].__file__ = /usr/local/django/mysite/../mysite/__init__.pyc  \n    os.environ['DJANGO_SETTINGS_MODULE'] = mysite.settings\n    \n    \n    __name__ = settings  \n    __file__ = /usr/local/django/mysite/settings.pyc  \n    os.getpid() = 3442  \n    os.getcwd() = /usr/local/django/mysite  \n    os.curdir = .  \n    sys.path = ['/usr/local/django/mysite', ...]  \n    sys.modules.keys() = [..., 'settings', ...]  \n    sys.modules.has_key('mysite') = False  \n    os.environ['DJANGO_SETTINGS_MODULE'] = None\n    \n    \n    __name__ = mysite.settings  \n    __file__ = /usr/local/django/mysite/../mysite/settings.pyc  \n    os.getpid() = 3442  \n    os.getcwd() = /usr/local/django/mysite  \n    os.curdir = .  \n    sys.path = ['/usr/local/django/mysite', ...]  \n    sys.modules.keys() = [..., 'mysite.settings', ..., 'mysite.sys', 'mysite.os', ..., 'mysite', ..., 'settings', ...]  \n    sys.modules.has_key('mysite') = True  \n    sys.modules['mysite'].__name__ = mysite  \n    sys.modules['mysite'].__file__ = /usr/local/django/mysite/../mysite/__init__.pyc  \n    os.environ['DJANGO_SETTINGS_MODULE'] = mysite.settings \n\nTwo things stand out from this. The first is that there are two different processes involved and the second is that the same settings file is imported twice by each process but using a different Python module name in each instance.\n\n  \n\n\nThe existence of the two processes is explained by the fact that when running the Django development server it has a reload option whereby if changes are made to any code, that it will automatically restart the application. To do this it is necessary to have a supervisor or monitor process and an actual worker process. Each time that a code change is made and detected, the worker process is killed off and the supervisor process will create a new process to replace it. In that way the worker process, which is what is accepting the HTTP requests and handling them, will always have the most up to date code.\n\n  \n\n\nThat the settings file is imported more than once is a bit more tricky and it is likely that the majority wouldn't even know that this occurs. Possibly people would only notice if they had placed debugging statements in the settings file like above, or they had added code to it other than simple variable settings and the code performed an action which was cumulative and thus a problem occurred through the action occurring twice.\n\n  \n\n\nSo, how does the settings module get imported twice?\n\n  \n\n\nThe first time it gets imported is when you run the 'python manage.py runserver' command, the 'manage.py' file will import the settings file as the 'settings' module from the same directory.\n\n  \n\n\nWorth noting at this point is that 'sys.path' includes the path '/usr/local/django/mysite', which is the directory the 'manage.py' and 'settings.py' are located in. This appears in 'sys.path' as it is standard behaviour of Python to add the directory that a script is contained in to 'sys.path' when a script is passed to Python to execute.\n\n  \n\n\nMoving on, after having imported the settings module, the 'manage.py' file will eventually call 'django.core.management.execute\\_manager\\(\\)' where the argument supplied is the reference to the 'settings' module it just imported. The code for the 'execute\\_manager\\(\\)' functions is as follows.\n    \n    \n    def execute_manager(settings_mod, argv=None):  \n       \"\"\"  \n       Like execute_from_command_line(), but for use by manage.py, a  \n       project-specific django-admin.py utility.  \n       \"\"\"  \n       setup_environ(settings_mod)  \n       utility = ManagementUtility(argv)  \n       utility.execute()\n\nThe first function called by this is 'setup\\_environ\\(\\)'. This function does two important things.\n\n  \n\n\nThe first thing the 'setup\\_environ\\(\\)' function does is set the 'DJANGO\\_SETTINGS\\_MODULE' environment variable. Where as the settings module was originally imported as 'settings', the environment variable is instead referenced as a sub module of the package which is the Django site. Thus, instead of 'settings' it is referenced as 'mysite.settings' in this example.\n\n  \n\n\nThe second thing that is done is that the parent directory of the site is added to 'sys.path'. That is, where the site directory is '/usr/local/django/mysite', the directory '/usr/local/django' is added. Having done that, the site package root is imported. For this example, this means that 'mysite' is imported. Immediately after this has been imported however, the directory which was added, ie., '/usr/local/django' in this case, is immediately removed from 'sys.path'.\n\n  \n\n\nAfter having does this initialisation, the 'execute\\_manager\\(\\)' function creates an instance of the Django 'ManagementUtility' class. Control is then handed off to this class by calling the 'execute\\(\\)' method.\n\n  \n\n\nDelving down into the 'ManagementUtility' class, the next important function to be called is one called 'get\\_commands\\(\\)' in the 'django.core.management' module.\n\n  \n\n\nWhat this function does is come up with a list of all the possible management commands. These can be management commands that are supplied as standard with Django, such as 'runserver', or can be management commands associated with installed Django applications for the site as listed in the 'INSTALLED\\_APPS' variable of the settings module.\n\n  \n\n\nTo get the 'INSTALLED\\_APPS' variable however, it has to load the settings module. To get this the 'django.conf' module is imported and a global object called 'settings' within that module is accessed. That object isn't however the settings module itself, but an instance of the 'LazySettings' class.\n\n  \n\n\nThis 'LazySettings' object acts as a wrapper around the actual settings module. So, it does still import the settings module, but also provides a mechanism for user code to configure various settings variables such that they will override those from the actual settings module.\n\n  \n\n\nBefore it can do that however, it still has to import the original settings module. When it does this it ignores the fact that it was originally imported by the 'manage.py' command and instead loads the settings module based on the name which is recorded in the 'DJANGO\\_SETTINGS\\_MODULE' environment variable which was set above by the 'setup\\_environ\\(\\)' function.\n\n  \n\n\nIt is this section of code where the notorious error 'Could not import settings '%s' \\(Is it on sys.path? Does it have syntax errors?\\)' comes from that so often afflicts people using mod\\_python and mod\\_wsgi when the Python module search path isn't set up correctly or the Apache user doesn't have the appropriate permissions to read the file.\n\n  \n\n\nAnyway, this is where the second import of the settings module is triggered.\n\n  \n\n\nWe aren't quite done however, as there are a couple of other important things that the initialisation of the settings object does which are worth mentioning.\n\n  \n\n\nThe first is that if the 'INSTALLED\\_APPS' uses a wildcard to refer to a group of applications contained with a module, then in order to enumerate what those applications are, the module containing them is imported to determine where the module is located. That directory is then scanned for sub directories and each of those is taken to be an actual application.\n\n  \n\n\nThe second thing that is done is that if the 'TIME\\_ZONE' variable is set within the settings module, then the 'TZ' environment variable is set and the 'time.tzset\\(\\)' function called.\n\n  \n\n\nOkay, we went on a little side trip there to understand what happens when the settings module is imported. As pointed out though, this had to be done to get that list of installed applications, including those enumerated when a wildcard was used. Having got that list, it is then possible to generate the list of commands that those installed applications provide.\n\n  \n\n\nTo round out the picture, once the list of commands is generated it will for the case of 'python manage.py runserver' load the command for 'runserver'. This will result in 'django.core.management.commands.runserver' module being imported and control passed to it. The effect of that will be in this case to run the Django development server and start serving HTTP requests.\n\n  \n\n\nAlthough the command module for the 'runserver' command principally deals with creating an instance of the development web server, it also does a couple of other configuration related steps which may be significant when we come to talk about Apache/mod\\_wsgi later.\n    \n    \n    from django.conf import settings  \n    from django.utils import translation  \n    print \"Validating models...\"  \n    self.validate(display_num_errors=True)  \n    print \"\\nDjango version %s, using settings %r\" % (django.get_version(), settings.SETTINGS_MODULE)  \n    print \"Development server is running at http://%s:%s/\" % (addr, port)  \n    print \"Quit the server with %s.\" % quit_command  \n      \n    # django.core.management.base forces the locale to en-us. We should  \n    # set it up correctly for the first request (particularly important  \n    # in the \"--noreload\" case).  \n    translation.activate(settings.LANGUAGE_CODE)\n\nThe first of these is that the models used by the application are validated. The second is that support for language locale is activated.\n\n  \n\n\nSo, we have worked out why it is the settings file was imported twice. We have also worked out why the package root for the site has been able to be imported even though after the fact the parent directory of the site isn't listed in 'sys.path'. The analysis also shows that various other side effects can occur, including importing of parts of the application, validation of data models, setting up of the language locale and time zone setting.\n\n  \n\n\nNow let us compare all this to what happens when the WSGI interface is used under Apache/mod\\_wsgi.\n\n  \n\n\nThe guidance has always been that all you really needed to do for WSGI was to use:\n    \n    \n    import os  \n    import sys  \n      \n    os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  \n      \n    import django.core.handlers.wsgi  \n    application = django.core.handlers.wsgi.WSGIHandler()\n\nThat in itself is not necessarily going to be sufficient. This is because Python isn't going to know where to find 'mysite' when it goes to import the settings module unless it had been installed in the standard Python 'site-packages' directory, which is unlikely. Thus, what you really need is as follows.\n    \n    \n    import os  \n    import sys  \n      \n    sys.path.insert(0, '/usr/local/django')  \n      \n    os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  \n      \n    import django.core.handlers.wsgi  \n    application = django.core.handlers.wsgi.WSGIHandler()\n\nThat is, we have inserted the parent directory of the site into 'sys.path'.\n\n  \n\n\nThe result now if we are to startup Apache/mod\\_wsgi and make a request will be the following.\n    \n    \n    __name__ = mysite.settings  \n    __file__ = /usr/local/django/mysite/settings.pyc  \n    os.getpid() = 3733  \n    os.getcwd() = /Users/grahamd  \n    os.curdir = .  \n    sys.path = ['/usr/local/django', ...]  \n    sys.modules.keys() = [..., 'mysite.settings', ..., 'mysite.os', ..., 'mysite.sys', ..., 'mysite', ...]  \n    sys.modules.has_key('mysite') = True  \n    sys.modules['mysite'].__name__ = mysite  \n    sys.modules['mysite'].__file__ = /usr/local/django/mysite/__init__.pyc  \n    os.environ['DJANGO_SETTINGS_MODULE'] = mysite.settings  \n    \n\nWhat is different?\n\n  \n\n\nFirst off there is only one process, but that is simply because there is no supervisor or monitor process to handle reloading like with the Django development server.\n\n  \n\n\nThe second difference is that the settings module is only imported once and that is from the site package and not as a top level module. That is, it is imported as 'mysite.settings' and not 'settings'.\n\n  \n\n\nThe final difference is that 'sys.path' lists '/usr/local/django' where as in the Django development server it listed '/usr/local/django/mysite'.\n\n  \n\n\nRemember though that with the Django development server the directory '/usr/local/django' was added to 'sys.path' but only long enough to have imported the 'mysite' package root for the site.\n\n  \n\n\nThe consequence of the directory having been removed when using the Django development server, is that if you wanted to import Python packages from a sibling directory to the site directory, you would need to explicitly add it to the 'PYTHONPATH' variable in the user environment from which 'python manage.py runserver' was run.\n\n  \n\n\nIn the case of using the WSGI interface directly as shown, the directory has to be included such that the settings module can be imported. Although by being added explicitly, it does mean that you have to be careful about what is contained in any sibling directories if you hadn't explicitly added the directory when using the Django development server. This is because those sibling directories will be considered when doing later module imports where as with Django development server they wouldn't.\n\n  \n\n\nThe bigger issue in respect of the differences between 'sys.path' for each hosting mechanism is that under Apache/mod\\_wsgi the directory '/usr/local/django/mysite' is missing.\n\n  \n\n\nWhy this causes a problem is that when using the Django development server people become used to being able to reference parts of a site without needing to use the site package prefix. This is especially problematic when references are within strings in the URL mappings contained in 'urls.py' but can also occur for Python module imports as well where they are within a further subdirectory of the site. Where either is used, the code will fail if the site is migrated to run under Apache/mod\\_wsgi.\n\n  \n\n\nObviously, the way around that is in the WSGI script file used for Apache/mod\\_wsgi to also add the directory '/usr/local/django/mysite' to 'sys.path', thus yielding the following.\n    \n    \n    import os  \n    import sys  \n      \n    sys.path.insert(0, '/usr/local/django/mysite')  \n    sys.path.insert(0, '/usr/local/django')  \n      \n    os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  \n      \n    import django.core.handlers.wsgi  \n    application = django.core.handlers.wsgi.WSGIHandler()\n\nIt should be noted that having to do this highlights an arguable flaw in what Django permits when using the development server. This is because it is now possible to import the same module file via two different names. If naming isn't done consistently, you could end up with multiple copies of the module in memory and with any code within it being executed twice. If any code references global variables within the module, then different parts of the code may not end up accessing the same variable.\n\n  \n\n\nThese points aside, is there anything else different between the Django development server and Apache/mod\\_wsgi?\n\n  \n\n\nThe obvious ones are that because the Django development server is never run, that the validation of the models and the setup of the language locale are never done.\n\n  \n\n\nMore significant is that the Django 'ManagementUtility' class is never created and the list of available management commands is never calculated. This means that any implicit actions resulting from that are never performed.\n\n  \n\n\nThe main side effect is that of initialisation of the settings object which wraps the settings module. As described, this sets up the timezone but also can cause additional module imports to be done as the installed applications have to be loaded when wildcards are used.\n\n  \n\n\nBecause the settings object is so key to the operation of Django, it will still be initialised at a later point when required. Even so, there is still a potential difference due to the order in which things are done.\n\n  \n\n\nEven more problematic than the order though is the context in which the settings modules is finally loaded and the associated initialisation performed.\n\n  \n\n\nFor the Django development server only a single thread is used and all the initialisation is done up front before any requests are handled.\n\n  \n\n\nIn the case of Apache/mod\\_wsgi where particular configurations can be multithreaded, the initialisation is only done within the context of the handling of the first request. While this is being done it is possible that a concurrent request could also be occurring.\n\n  \n\n\nIf there is anything about the Django core code or the way in which user code makes use of it which is not completely thread safe, then there is a risk that multithreading could result in aspects of the settings and other global data being accessed before it is properly initialised from concurrent requests other than the one that got to trigger the initialisation.\n\n  \n\n\nOne can only speculate on how such problems may manifest, but certainly it could explain a number of the odd problems people see when running under Apache/mod\\_wsgi, especially where the application can be under load from the moment that a process gets restarted.\n\n  \n\n\nI am starting to run out of steam with this blog post, so lets just jump straight to a possible solution. This is in the form of the alternate WSGI script file contents below.\n    \n    \n    import sys  \n      \n    sys.path.insert(0, '/usr/local/django/mysite')  \n      \n    import settings  \n      \n    import django.core.management  \n    django.core.management.setup_environ(settings)  \n    utility = django.core.management.ManagementUtility()  \n    command = utility.fetch_command('runserver')  \n      \n    command.validate()  \n      \n    import django.conf  \n    import django.utils  \n      \n    django.utils.translation.activate(django.conf.settings.LANGUAGE_CODE)  \n      \n    import django.core.handlers.wsgi  \n      \n    application = django.core.handlers.wsgi.WSGIHandler()\n\nWhat this is doing is duplicating the way that Django development server is set up.\n\n  \n\n\nKey is that because an import lock is held when the WSGI script file is first imported, everything is done up front, effectively in the context of a single thread before any concurrent requests can start executing. This avoids all the problems with multithreading.\n\n  \n\n\nWe also don't even set 'DJANGO\\_SETTINGS\\_MODULE' environment variable and instead leave it up to Django to set it just like with the Django development server. This does mean that the site directory is added to 'sys.path' and that the settings module has to be explicitly imported, with a subsequent second importing of the settings module by a different name, but this is exactly what the Django development server does. The temporary adding of the parent directory for the site into 'sys.path' to import the site package root is still even done by Django just as with the Django development server.\n\n  \n\n\nFurther, the management command infrastructure is initialised and the loading of commands triggered by fetching the command object for 'runserver'. The validation of models is even triggered along with initialisation of the language locale.\n\n  \n\n\nAfter all that, we create the WSGI application entry point as normal and we are done.\n\n  \n\n\nAll up, this should be nearly identical to what happens when the Django development server is used. About the only difference is that if 'python manage.py runserver' is used that the current working directory would usually be the site directory. Under Apache/mod\\_wsgi the current working directory is going to be something else. But then, you shouldn't ever be using relative paths for file system resources anyway.\n\n  \n\n\nAnyway, my brain is about fried now.\n\n  \n\n\nIf you know anything about the Django internals, I hope you find this interesting and will validate if my analysis is correct.\n\n  \n\n\nIf you are having problems with porting code between the Django development server and Apache/mod\\_wsgi, then perhaps you will give this alternate WSGI script file contents a go and see if things then work without problem.\n\n  \n\n\nOnce I get sufficient feedback and validation that this is a better solution for the WSGI script file, then I will update the integration guide for Django on the mod\\_wsgi site.\n\n  \n\n\nWhat would be nice though is if Django simply supplied a WSGI application entry point that could be supplied the site directory and which would internally simply ensure that everything is done correctly so that it behaves the same as the Django development server.",
+  "date": "2010-03-28",
+  "author": "Graham Dumpleton",
+  "url": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html",
+  "post_id": "5322237241401383060",
+  "blog_id": "2363643920942057324",
+  "comments": [
+    {
+      "comment_id": "6578393874331769647",
+      "author": null,
+      "author_url": null,
+      "author_profile_id": null,
+      "content": "I'm unable to completely remove the project name from app models imports under apache/wsgi. The projects are named differently in my development and production environments \\(probably my first mistake\\), so I need to be able to get the project name entirely out of the codebase.  \n  \nI can take it out completely in my development environment, but not with my apache/wsgi production environment. I've tried your recipe above, and no dice.  \n  \nCrucially, it only blows up with the custom comments app, and only in ONE SINGLE PLACE. I've got about five different \"from comments.models import MyComment\" statements in various parts of my code, and only in one templatetags library \\('entry\\_tags'\\) am I obliged to type \"from mysite.comments.models import MyComment\", or else it complains:  \n  \nTemplateSyntaxError: 'entry\\_tags' is not a valid tag library: Could not load template library from django.templatetags.entry\\_tags, No module named models  \n  \nI suspect this is mostly a problem with how the custom comments apps work, but it does show up under wsgi only...",
+      "timestamp": "March 29, 2010 at 7:06 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1269849967300#c6578393874331769647",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "5022476517194238499",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "锁柱子. I would try the following two things.  \n  \n1\\. Just to eliminate current working issues as a contributor, do \"os.chdir\\('/usr/local/django/mysite'\\)\", but with whatever your site directory is. Do this at start of WSGI script before any initialisation steps done.  \n  \n2\\. Add somehow some debug code or something in your template tag library or template itself which dumps out what is the set of Python 'globals\\(\\)' and 'locals\\(\\)' in the context in which the template tag is used, plus 'sys.modules.keys\\(\\)' and 'sys.modules\\['comments'\\].\\_\\_file\\_\\_'. Maybe there is already a module loaded under that name or something in the context which is causing a problem. In other words a naming clash with that name already being used by something else.  \n  \nAppreciate that you could take this issue of yours other to the mod\\_wsgi list so we can investigate further.",
+      "timestamp": "March 29, 2010 at 7:50 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1269852625824#c5022476517194238499",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "6751089671783820993",
+      "author": "Gustavo Narea",
+      "author_url": "https://www.blogger.com/profile/04022688498704778104",
+      "author_profile_id": "04022688498704778104",
+      "content": "Nice article, Graham\\!  \n  \nI just wanted to say, I believe it'd be even better not to rely on Django's development server in the first place, to make sure the application under development is really portable.  \n  \nWe use Paste Script and I know of some people of who use Cherrypy's server.  \n  \nGetting Django to work on Paste Script is now easier, thanks to twod.wsgi:  \nhttp://packages.python.org/twod.wsgi/manual/paste-factory.html  \n  \n\\- Gustavo.",
+      "timestamp": "March 29, 2010 at 8:02 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1269853368418#c6751089671783820993",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "5740428882142011837",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Gustavo, that will not help because of some of the issues I raise.  \n  \nPart of the problem is that the Django WSGIHandler doesn't force up front initialisation of Django during setup of the WSGI server and/or loading of the WSGI script. Ie., where single threadedness is guaranteed. As a result in a multithreaded system, whether than be Apache/mod\\_wsgi, Paste or CherryPy WSGI server, the lazy initialisation of Django within the context of a request, can be a potential problem where concurrent requests are executing.  \n  \nUnless twod.wsgi does something explicit to force upfront initialisation of Django before a request is actually handled, like I propose with my WSGI script changes, then it could also suffer some of the same odd problems that some people see for Apache/mod\\_wsgi even if those other hosting mechanisms are used.  \n  \nFWIW, Apache/mod\\_wsgi can also be used as a development platform for Django. One of the main reasons people use the Django development server is because of automatic code reloading, but that can also be done with Apache/mod\\_wsgi.",
+      "timestamp": "March 29, 2010 at 9:29 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1269858544328#c5740428882142011837",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "2056234524766666451",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "锁柱子. Also:  \n  \n3\\. Perform 'import comments' and just validate which module it is importing by dumping out '\\_\\_file\\_\\_' attribute of the module. This is in case it wasn't imported prior to 'from comments.models import ...'.",
+      "timestamp": "March 29, 2010 at 9:30 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1269858637802#c2056234524766666451",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "7392007701916167675",
+      "author": "Gustavo Narea",
+      "author_url": "https://www.blogger.com/profile/04022688498704778104",
+      "author_profile_id": "04022688498704778104",
+      "content": "Hi, Graham.  \n  \nAs you say, it wouldn't try to fix those import errors. Which is why I think it's a better solution from a portability point of view:  \n  \nWhat I'm saying is that developers shouldn't rely on Django's development server because it does some magic under the hood and this sometimes affects portability. Therefore I suggest to use a Django-agnostic development server; any server.  \n  \nIf an application is broken under mod\\_wsgi, it will likely be broken on any other server but it may still work under Django's.  \n  \nI wouldn't like to work around this problem by making my mod\\_wsgi script more complex. Specially because the API used may change or the steps to be performed may be different in future releases.  \n  \nOf course, if Django offered a single function to run that routine, I wouldn't mind calling it from my WSGI script.  \n  \nCheers,  \n  \n\\- Gustavo.",
+      "timestamp": "March 29, 2010 at 10:06 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1269860792660#c7392007701916167675",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "4992612590084076453",
+      "author": "Doug Blank",
+      "author_url": "https://www.blogger.com/profile/17756588602580974678",
+      "author_profile_id": "17756588602580974678",
+      "content": "Thank you for the detailed explanation of what actually happens with these two systems. A shortened, explanation-oriented version would be useful in the django docs. And fixing these differences would be useful too. Is there a django ticket for this?",
+      "timestamp": "March 29, 2010 at 11:14 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1269864880894#c4992612590084076453",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "7318451537107001690",
+      "author": "Doug",
+      "author_url": "https://www.blogger.com/profile/15556846298191919211",
+      "author_profile_id": "15556846298191919211",
+      "content": "I stopped using manage.py a long time ago because of the whole double settings approach it takes.  \n  \nI setup my project environment with an alias to django-admin.py \"da\" and a properly set DJANGO\\_SETTINGS\\_MODULE.  \n  \nThat ends up working just fine.  \n  \nThe one thing I never figured out with mod\\_wsgi was how to get multiple web apps running with different timezone settings. The last one initialized always seemed to win.",
+      "timestamp": "March 30, 2010 at 12:39 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1269869974138#c7318451537107001690",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "5063629652949357929",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Foo. To fix timezone issue you must use mod\\_wsgi daemon mode and delegate each Django instance to run in a separate daemon process group. There is simply no other way as you can't run two different application instances in same process that want different timezone settings. The separation offered by using multiple Python sub interpreters in the same process is not enough as the timezone setting is process wide.",
+      "timestamp": "March 30, 2010 at 8:35 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1269898515478#c5063629652949357929",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "6405223199659339070",
+      "author": "Carl",
+      "author_url": "https://www.blogger.com/profile/05987789426843540503",
+      "author_profile_id": "05987789426843540503",
+      "content": "This is very helpful, thanks for the sleuthing.  \n  \nAs Foo mentioned, there's a distinction between manage.py and runserver. You conflated the two in your post, but in fact if you set DJANGO\\_SETTINGS\\_MODULE in the environment and use \"django-admin.py runserver\", the double-import of settings.py goes away.  \n  \nI'm not sure how that affects the thread-safety issues you discuss, but to the extent that it is possible I think a solution that involves modifying how I invoke runserver is preferable to one that inserts cruft into my WSGI script.",
+      "timestamp": "April 7, 2010 at 6:18 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1270585112995#c6405223199659339070",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "1529491811690120096",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Carl. Thanks, I didn't note the importance of what Foo said as I didn't know that one could use 'django-admin.py' to do that. Thus why when I meant 'runserver' I always was meaning 'python manage.py runserver'. They are still both executing the same internal Django development server by the same mechanism.  \n  \nThe differences are that 'django-admin.py' relies on DJANGO\\_SETTINGS\\_MODULE and PYTHONPATH being set in environment. As such, it is more aligned with what mod\\_python and mod\\_wsgi in that that is effectively what they require. This extends to the double import going away and the parent directory being permanently in sys.path and the site directory not at all in sys.path.  \n  \nThis is part of my gripe, that there are multiple ways of starting things up and because what is set up is different in each case leads to issues with code not working when moved to a different way of doing the hosting.  \n  \nFor example, don't use the site name in 'urls.py' and use 'manage.py' and it will work. Do that with 'django-admin.py' and I believe it would fail as the site directory isn't in 'sys.path'.  \n  \nAnyway, using 'django-admin.py' may well be better if wanting more guarantees of portability to other hosting mechanisms as far as Python path issues, however it isn't going to help with the other stuff I raised as both methods still do those extra bits related to the management utility instance and command loading which WSGI approach doesn't do if documented method used. You still also have the issue of setup in multithreaded context within context of request if you use original WSGIHandler instance only and don't force setup when WSGI script loaded.  \n  \nSeems I may have to do a followup now showing how 'django-admin.py' results in a third variation in how the environment is setup.  \n  \nBTW, the Django tutorial seems to always use 'python manage.py runserver'. I would say therefore that this is what the majority use and most probably don't realise you can use 'django-admin.py' in similarly way providing configuration set up in user environment correctly.",
+      "timestamp": "April 7, 2010 at 10:37 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1270600661455#c1529491811690120096",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "9176010606586116652",
+      "author": "Steven Klass",
+      "author_url": "https://www.blogger.com/profile/00681756689019735665",
+      "author_profile_id": "00681756689019735665",
+      "content": "Wow. You helped me to understand this at a much deeper level. Thanks for taking the time to document it. I wasn't dealing with WSGI so much as just the way in which the --noreload affects \\(or rather f\\*xks\\) with the settings loading.   \n  \nMy thoughts --noreload is the only way to go unless you explicitly use it in combinatin of --settings. What's worse is the different behavior depending on whether you call it from manage.py or django-admin.py. Grumble Grumble Grumble.   \n  \nI am simply floored this hasn't been better documented.",
+      "timestamp": "May 14, 2010 at 10:58 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1273841917126#c9176010606586116652",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "1777932135403309085",
+      "author": "Art Botterell",
+      "author_url": "https://www.blogger.com/profile/14432630642920802019",
+      "author_profile_id": "14432630642920802019",
+      "content": "Huge thanks for this, Graham\\!",
+      "timestamp": "June 29, 2010 at 3:25 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1277789118769#c1777932135403309085",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "1715409636626083003",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@Art. Would you be able to add what sort of problem this has helped you solve. There is still a bit of a debate with Django devs over what this is actually helping solve. It certainly is fixing issues for some people, but there is a question over whether it is merely covering up where users aren't actually doing things by the book as far as how it is documented Django should work. Thus, as much information as possible about any issue you were having which this has fixed would be appreciated. If too hard to post details as blog comment, come over to the mod\\_wsgi mailing list.",
+      "timestamp": "June 29, 2010 at 3:32 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1277789523711#c1715409636626083003",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "2306375115660946734",
+      "author": "Jörn",
+      "author_url": "https://www.blogger.com/profile/05857839783348870711",
+      "author_profile_id": "05857839783348870711",
+      "content": "Hi Graham,  \n  \nthanks a lot for this detailed post.  \n  \nIt helped us A LOT to fix a big issues on our webservers.  \n  \nOur setup:  \n\\- multiple VirtualHosts on Apache  \n\\- each host serves one django site  \n\\- we run different versions of django \\(1.02, 1.1 and 1.2\\)  \n\\- we don't use virtualenv, we normally set up sys.path  \n\\- a site.wsgi file like recommended here:  \nhttp://code.djangoproject.com/wiki/django\\_apache\\_and\\_mod\\_wsgi and here:  \nhttp://code.google.com/p/modwsgi/wiki/IntegrationWithDjango  \n  \nThe problem:  \n\\- sporadically I received error mails with weird errors: the request path of site A threw an error with a path only available on site B  \n\\- I set up an test page showing all our hosts within iFrames. A \\(concurrent\\) refresh showed the problem: the server mixed up the sites and sometime even combined parts of the different sites.  \n  \nThe theory:  \n\\- concurrent requests mess up the import of different setting.py's  \n  \nThe solution:  \n\\- your post and your \"possible solutions\" fixed the problem.  \n  \nThis configuration should really be recommended on the mentioned sites.  \n  \nThanks again\\!  \n  \nBest  \nJörn",
+      "timestamp": "November 8, 2010 at 9:18 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1289211492256#c2306375115660946734",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "2565164429413307857",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Jörn, it is referenced from page on mod\\_wsgi site, albeit was only added in the last day or so. The modified WSGI script file should not have helped with your problem. I'd suggest that you might have an underlying Apache configuration problem. You are best off using daemon mode for a start and delegate each Django site to it's own daemon process. You can look at the WSGI request environment to validate whether instance running in correct daemon process group and interpreter.",
+      "timestamp": "November 8, 2010 at 9:23 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1289211800620#c2565164429413307857",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "8899425135163526878",
+      "author": "Jörn",
+      "author_url": "https://www.blogger.com/profile/05857839783348870711",
+      "author_profile_id": "05857839783348870711",
+      "content": "Hi Graham,  \n  \nobviously the different \"import approach\" fixed our problem.   \nInstead of the officially recommend:  \n  \nos.environ\\['DJANGO\\_SETTINGS\\_MODULE'\\] = 'mysite.settings'  \n  \nwe import settings explicitly \\(our .wsgi file is located in PROJECT\\_ROOT/apache/site.wsgi\\):  \n  \nAPACHE\\_DIR = os.path.dirname\\(os.path.abspath\\(\\_\\_file\\_\\_\\)\\)  \nPROJECT\\_ROOT = os.path.abspath\\(\"%s/..\" % APACHE\\_DIR\\)  \nDJANGO\\_SITES, SITE = os.path.split\\(PROJECT\\_ROOT\\)  \nSITE\\_PACKAGES = os.path.abspath\\(\"%s/../site-packages-1.1\" % DJANGO\\_SITES\\)  \n  \nsys.path.insert\\(0, PROJECT\\_ROOT\\)  \nsys.path.insert\\(0, DJANGO\\_SITES\\)  \nsys.path.insert\\(0, SITE\\_PACKAGES\\)  \n  \nimport settings\\_productive  \nimport django.core.management  \ndjango.core.management.setup\\_environ\\(settings\\_productive\\)  \n  \nThe daemon mode is the next configuration change we will do anyway.   \n  \nBest  \nJörn",
+      "timestamp": "November 8, 2010 at 9:33 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1289212422629#c8899425135163526878",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "3002266298653602141",
+      "author": "MidGe",
+      "author_url": "https://www.blogger.com/profile/02569250301676929135",
+      "author_profile_id": "02569250301676929135",
+      "content": "Great Post\\! Thank you\\!  \n  \nIt isn't very often that a search for a troubleshooting issue suggests a link to such a well documented answer. And it works\\!  \n  \nThanks again\\!",
+      "timestamp": "November 21, 2010 at 9:11 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1290334288222#c3002266298653602141",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "4334643895329834656",
+      "author": "bvce",
+      "author_url": "https://www.blogger.com/profile/02090509364532760353",
+      "author_profile_id": "02090509364532760353",
+      "content": "Graham,  \nThank you very much for this post. Trying to make configuration for wsgi with apcahe was hardly imposible.... with your help, fixed in minutes.  \nThanks for your time and effort.  \nbvcelari",
+      "timestamp": "December 14, 2010 at 10:30 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1292326211286#c4334643895329834656",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "5249717620815636075",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@bvcelari  \n  \nProblem is that this alternate script is really a workaround. Django devs think it should not be needed and that if it is then users are using Django wrongly.  \n  \nThus, using the script could be masking a problem in your code which might come back and bight you in other ways.",
+      "timestamp": "December 14, 2010 at 10:45 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1292327141955#c5249717620815636075",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "7818466370226130283",
+      "author": "primeq",
+      "author_url": "https://www.blogger.com/profile/10821112074359016243",
+      "author_profile_id": "10821112074359016243",
+      "content": "Django is great. Python is great. But when you need to give your life to something to make it work a lot of people will just walk.  \n  \nYou may be right with \"Django devs think it should not be needed ...then users are using Django wrongly\", but there's a sure way to fix it - said Django devs should post a guaranteed-to-work, self-contained example \\(not there, too many implicit assumptions made\\).  \n  \nYour post is pure gold. When I start working on something, result is everything to begin with, and then I go back and mess with it every which way, breaking stuff to figure out the mechanics behind the scene.  \n  \nYour post got me there making it work. Django can be like Linux - great x10^6, but it's possible to lose a lot of people because the knowledge needed to be a self-helper is a barrier too many people won't manage to cross. There's no shame in making something clear \\(and wsgi/django usage is not clear to anyone without making an investment we don't all have time for\\). Seems you had the time and inclination - and I thank your for this effort, even it if is a workaround as you say.",
+      "timestamp": "January 7, 2011 at 2:13 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1294369993403#c7818466370226130283",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "2472971747497961417",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@primeq A lot of this could be sorted if someone could just supply me with a relatively small Django site example which exhibits the sort of problem, reasonably reliably, that this alternate way of doing things is fixing. If had that, then could identify the cause and potentially what, if anything, that people are doing wrong and then ensure the Django folks document it as bad practice and prone to failure. Am still waiting though for that example site to be able to do that. :-\\(",
+      "timestamp": "January 7, 2011 at 2:16 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1294370202452#c2472971747497961417",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "3459031874361029661",
+      "author": null,
+      "author_url": null,
+      "author_profile_id": null,
+      "content": "It has saved my day =\\] Thanks so much, it really works fine.",
+      "timestamp": "January 18, 2011 at 12:33 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1295271228935#c3459031874361029661",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "5723804049079962075",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/03412253648404859888",
+      "author_profile_id": "03412253648404859888",
+      "content": "Please note that there is also an outstanding Django bug \\([\\#12464](http://code.djangoproject.com/ticket/12464)\\) which causes URL problems when the WSGI alias is \"/path\" \\(i.e., not /\\) and the URL request path is \"/path\" \\(i.e., no trailing slash\\). The only solution in that case seems to be to add a redirect in Apache from \"/path\" to \"/path/\".",
+      "timestamp": "January 25, 2011 at 10:46 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1295912792906#c5723804049079962075",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "3009873193137303462",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "David, that bug as I can see though has got nothing to do with what the blog post is about, so not sure why you are mentioning it here.",
+      "timestamp": "January 25, 2011 at 2:01 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1295924474504#c3009873193137303462",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "1925524801436707286",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/03412253648404859888",
+      "author_profile_id": "03412253648404859888",
+      "content": "Graham, sorry, you're right -- my comment was really meant for the Django Integration page on the mod\\_wsgi wiki, but I could not comment there, and I got to this blog post from a link in that article. After I tried the solution here and it didn't solve my problem, I did some more searching and found the Django bug report. Your blog post has obviously helped a number of people, but I thought you might want to the mention the other issue, since if that's the problem, the workaround doesn't involve changing the WSGI script.",
+      "timestamp": "January 26, 2011 at 3:49 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1295974160642#c1925524801436707286",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "1527851795807331074",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "David, highlighting things like that is what the mod\\_wsgi mailing list is for. Details of mailing list on mod\\_wsgi site wiki.",
+      "timestamp": "January 26, 2011 at 8:50 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1295992229496#c1527851795807331074",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "777186946967940324",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "David, I hope you are following my updates on that Django ticket you pointed out. It is frightfully more complicated than you think it is. ;-\\)",
+      "timestamp": "January 26, 2011 at 12:59 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1296007195911#c777186946967940324",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "969172542604649764",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/03412253648404859888",
+      "author_profile_id": "03412253648404859888",
+      "content": "Touche\\! I hope this issue gets some attention from Django core developers. The docstring of get\\_script\\_name\\(\\) actually makes mention of a DJANGO\\_USE\\_POST\\_REWRITE setting which isn't even used in the function -- there's no reference to it anywhere in the code base, nor on the users or developers lists.",
+      "timestamp": "January 26, 2011 at 2:48 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1296013705385#c969172542604649764",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "8988721054040052728",
+      "author": "danols",
+      "author_url": "https://www.blogger.com/profile/17262933369663372020",
+      "author_profile_id": "17262933369663372020",
+      "content": "This comment has been removed by a blog administrator.",
+      "timestamp": "February 7, 2011 at 11:27 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1297038463555#c8988721054040052728",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "5127562443760918693",
+      "author": "danols",
+      "author_url": "https://www.blogger.com/profile/17262933369663372020",
+      "author_profile_id": "17262933369663372020",
+      "content": "This comment has been removed by a blog administrator.",
+      "timestamp": "February 7, 2011 at 4:40 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1297057229522#c5127562443760918693",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "9137062639923852963",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/02418259698216326058",
+      "author_profile_id": "02418259698216326058",
+      "content": "Dear Graham,  \n  \nThanks for the excellent blog. I just needed to add the path line of the parent directory of the directory that contains settings.py and everything worked like a charm.  \n  \nDo media files automatically get served by apache once everything is setup? I did not expect this to be the case. Kindly do let me know.  \n  \nThanks once again.  \n  \nYours sincerely,  \nnav",
+      "timestamp": "March 29, 2011 at 8:54 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1301392469000#c9137062639923852963",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "2585853726340624601",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "If you have any further issues/comments with this blog post, please use the mod\\_wsgi mailing list. Thanks.",
+      "timestamp": "March 29, 2011 at 9:14 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1301393663431#c2585853726340624601",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "8288021462262267137",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/13593167762436347096",
+      "author_profile_id": "13593167762436347096",
+      "content": "I'm unable to completely remove the project name from app models imports under apache/wsgi. The projects are named differently in my development and production environments \\(probably my first mistake\\), so I need to be able to get the project name entirely out of the codebase.  \n  \nI can take it out completely in my development environment, but not with my apache/wsgi production environment. I've tried your recipe above, and no dice.  \n  \nI have this same problem too.  \n\\---------------------  \n[alliance leveling guide](http://alliancelevelingguidex.com/)",
+      "timestamp": "April 16, 2011 at 5:33 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1302896016338#c8288021462262267137",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "8401443832315031406",
+      "author": "ruffyleaf",
+      "author_url": "https://www.blogger.com/profile/00922058885729547123",
+      "author_profile_id": "00922058885729547123",
+      "content": "\"What would be nice though is if Django simply supplied a WSGI application entry point that could be supplied the site directory and which would internally simply ensure that everything is done correctly so that it behaves the same as the Django development server.\"  \n  \nYES\\!\\!\\! The best is if we don't have to do any configuration at all. At least minimal configuration.",
+      "timestamp": "July 29, 2011 at 5:29 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1311924594455#c8401443832315031406",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "7560149329316983675",
+      "author": "Erik",
+      "author_url": "https://www.blogger.com/profile/01146766980742337635",
+      "author_profile_id": "01146766980742337635",
+      "content": "Graham,  \n  \nFrom your presentation at:  \n  \nhttp://blip.tv/pycon-australia/getting-started-with-apache-mod\\_wsgi-3859481  \n  \nyou seemed to hope that future Django releases might make this preloading work unnecessary. Is this true for Django 1.3.1 with mod\\_wsgi 3.3.1?  \n  \nThanks for all your work\\!  \n  \nErik",
+      "timestamp": "March 29, 2012 at 1:21 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1332987660256#c7560149329316983675",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "16387682144101529",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Erik. They have done some cleanup of WSGI application entry point in latest version. They now generate a wsgi.py file and have eliminated I think the double import. They still don't preload by way of triggering management commands.",
+      "timestamp": "March 29, 2012 at 1:25 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1332987934116#c16387682144101529",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "6958516828007549431",
+      "author": "Marcp",
+      "author_url": "https://www.blogger.com/profile/02572884823929945682",
+      "author_profile_id": "02572884823929945682",
+      "content": "the alternate file you provided isn't working for me on windows with apache configured as \"Apache/2.2.17 \\(Win32\\) mod\\_ssl/2.2.17 OpenSSL/0.9.8o mod\\_wsgi/3.3 Python/2.7.6 PHP/5.3.4 mod\\_perl/2.0.4 Perl/v5.10.1\", I get an error on the \"import settings\" line, stating \"ImportError: No module named settings\"",
+      "timestamp": "December 19, 2013 at 2:41 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1387381282737#c6958516828007549431",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "136835131585669271",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "This post related to an old version of Django and may not be completely accurate for newer versions of Django. It may not even be appropriate for newer Django versions, so why specifically are you trying it.  \n  \nThe code would also possibly be dependent on both the project directory and its parent being on sys.path for module imports to work, something which is discouraged in recent Django versions.  \n  \nComments on a blog post are also a very bad forum for trying to solve problems. If there is specific reason you are trying this when using mod\\_wsgi, then use the mod\\_wsgi mailing list.",
+      "timestamp": "December 19, 2013 at 2:25 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1387423540407#c136835131585669271",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "2153896305981055365",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/14537960218786178681",
+      "author_profile_id": "14537960218786178681",
+      "content": "I must say that I am incredibly grateful that there are those as yourself out there who take the time to share what they know on a subject.... I thank you profusely for going through this... now I just have to say... Oh my god. Please get to the point\\! haha. For those of us who just want an enumeration of the differences and how to solve the problem \\(because we don't care about being Django mod\\_wsgi experts and may not ever set up a site like this again\\) this is a nightmare of overkill information that we just don't need. in todays incredible overload of information, especially when it comes to developers, this just makes my heart sink and my stomach sick when I have to read something like this to solve such a simple problem. Anyway, I'm sure lots of people out there will flame me for making this comment, and again I really appreciate the work that you have done, but now I get to stay at the office for a few hours while I comb through this post and become an expert on something I don't need to be in order to solve my simple problem. Ugh.",
+      "timestamp": "April 8, 2016 at 9:17 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1460071050926#c2153896305981055365",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "7754617003261117209",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@Jason Wolfe: If you are still having issues which even necessitate needing to know this I would be surprised. My understanding is that Django versions since this was posted have been changed and so a lot of the information here is not really relevant now. I certainly wouldn't be copy and pasting any code snippets from here to use and expect them to work with newer Django versions.",
+      "timestamp": "April 8, 2016 at 9:40 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1460072421587#c7754617003261117209",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "4591807964839190669",
+      "author": "Da Tijuca pra Albuquerque",
+      "author_url": "https://www.blogger.com/profile/18178398090986864757",
+      "author_profile_id": "18178398090986864757",
+      "content": "@Graham Dumpleton I'm grateful too for you and this posting. \\(In\\)fortunately, like you mention much has changed since, but I'm still having problems with getting my application URLs included by Django and served by mod\\_wsgi. I cannot find help. Could you point me to a newer posting or solution? It runs great witn runserver.  \n  \nThanks\\!",
+      "timestamp": "December 15, 2016 at 11:57 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1481763448365#c4591807964839190669",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "835761386797976865",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "If it is related to Django, possibly better to ask on StackOverflow or the Django users mailing list. If it is a mod\\_wsgi issue, use the mod\\_wsgi mailing list.",
+      "timestamp": "December 15, 2016 at 12:08 PM",
+      "permalink": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html?showComment=1481764111588#c835761386797976865",
+      "is_blog_author": true
+    }
+  ],
+  "labels": [
+    "django",
+    "mod_wsgi"
+  ],
+  "metadata": {
+    "published_timestamp": "2010-03-28T20:49:00+11:00",
+    "blog_title": "Graham Dumpleton",
+    "page_title": "Graham Dumpleton: An improved WSGI script for use with Django.",
+    "og_title": "An improved WSGI script for use with Django.",
+    "og_description": "Far too often one sees complaints on the Django users list and #django IRC channel that code that worked fine with the Django development se...",
+    "og_url": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html"
+  },
+  "downloaded_images": []
+}

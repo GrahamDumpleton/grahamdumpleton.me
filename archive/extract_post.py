@@ -21,6 +21,42 @@ import html2text
 import requests
 from urllib.parse import urlparse
 import hashlib
+from datetime import datetime
+
+
+def convert_date_to_iso(date_text):
+    """
+    Convert human-readable date format to ISO date format (YYYY-MM-DD).
+    
+    Args:
+        date_text (str): Human-readable date like "Monday, December 2, 2013"
+        
+    Returns:
+        str: ISO date format like "2013-12-02", or original text if conversion fails
+    """
+    if not date_text:
+        return date_text
+    
+    # Common date formats to try
+    date_formats = [
+        "%A, %B %d, %Y",      # Monday, December 2, 2013
+        "%B %d, %Y",          # December 2, 2013
+        "%d %B %Y",           # 2 December 2013
+        "%Y-%m-%d",           # 2013-12-02 (already ISO)
+        "%m/%d/%Y",           # 12/02/2013
+        "%d/%m/%Y",           # 02/12/2013
+    ]
+    
+    for date_format in date_formats:
+        try:
+            parsed_date = datetime.strptime(date_text.strip(), date_format)
+            return parsed_date.strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    
+    # If no format matches, return the original text
+    print(f"Warning: Could not parse date format: '{date_text}'")
+    return date_text
 
 
 def download_image(image_url, output_dir, overwrite=False):
@@ -378,6 +414,22 @@ def convert_quoted_sections_to_code_blocks(content):
     return '\n'.join(result_lines)
 
 
+def escape_yaml_string(text):
+    """
+    Escape quotes in a string for YAML front matter.
+    
+    Args:
+        text (str): The text to escape
+        
+    Returns:
+        str: The escaped text
+    """
+    if text is None:
+        return ""
+    # Escape backslashes first, then quotes
+    return text.replace("\\", "\\\\").replace('"', '\\"')
+
+
 def create_markdown_file(post_data, output_path):
     """
     Create a standalone Markdown file with YAML front matter for 11ty/Hugo.
@@ -389,16 +441,17 @@ def create_markdown_file(post_data, output_path):
     with open(output_path, 'w', encoding='utf-8') as f:
         # Write YAML front matter
         f.write("---\n")
-        f.write(f"title: \"{post_data['title']}\"\n")
-        f.write(f"author: \"{post_data['author']}\"\n")
-        f.write(f"date: \"{post_data['date']}\"\n")
-        f.write(f"url: \"{post_data['url']}\"\n")
+        f.write("layout: post\n")
+        f.write(f"title: \"{escape_yaml_string(post_data['title'])}\"\n")
+        f.write(f"author: \"{escape_yaml_string(post_data['author'])}\"\n")
+        f.write(f"date: \"{escape_yaml_string(post_data['date'])}\"\n")
+        f.write(f"url: \"{escape_yaml_string(post_data['url'])}\"\n")
         
         # Add post ID and blog ID if available
         if post_data.get('post_id'):
-            f.write(f"post_id: \"{post_data['post_id']}\"\n")
+            f.write(f"post_id: \"{escape_yaml_string(post_data['post_id'])}\"\n")
         if post_data.get('blog_id'):
-            f.write(f"blog_id: \"{post_data['blog_id']}\"\n")
+            f.write(f"blog_id: \"{escape_yaml_string(post_data['blog_id'])}\"\n")
         
         # Add labels as tags if any
         if post_data['labels']:
@@ -415,9 +468,9 @@ def create_markdown_file(post_data, output_path):
         if post_data.get('metadata'):
             metadata = post_data['metadata']
             if metadata.get('published_timestamp'):
-                f.write(f"published_timestamp: \"{metadata['published_timestamp']}\"\n")
+                f.write(f"published_timestamp: \"{escape_yaml_string(metadata['published_timestamp'])}\"\n")
             if metadata.get('blog_title'):
-                f.write(f"blog_title: \"{metadata['blog_title']}\"\n")
+                f.write(f"blog_title: \"{escape_yaml_string(metadata['blog_title'])}\"\n")
         
         f.write("---\n\n")
         
@@ -503,7 +556,7 @@ def extract_post_data(html_file_path, overwrite=False):
     date_element = soup.find('h2', class_='date-header')
     if date_element:
         date_text = date_element.get_text(strip=True)
-        post_data['date'] = date_text
+        post_data['date'] = convert_date_to_iso(date_text)
     
     # Extract author
     author_element = soup.find('span', class_='fn')
@@ -861,7 +914,7 @@ Examples:
     # Get the directory containing this script
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
-    posts_dir = project_root / 'posts'
+    posts_dir = project_root / 'src/posts'
     
     if args.html_file_path:
         # Single file mode

@@ -1,0 +1,327 @@
+---
+layout: post
+title: "Improving Commercial Python/WSGI Hosting Options"
+author: "Graham Dumpleton"
+date: "2009-04-17"
+url: "http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html"
+post_id: "8413796850426758491"
+blog_id: "2363643920942057324"
+tags: ['mod_python', 'mod_wsgi', 'python', 'wsgi']
+comments: 21
+published_timestamp: "2009-04-17T11:01:00+10:00"
+blog_title: "Graham Dumpleton"
+---
+
+I'd like to think that through my work with [mod\_python](http://www.modpython.org) and [mod\_wsgi](http://www.modwsgi.org) that Python web hosting options have improved, but truth is that neither mod\_python nor mod\_wsgi \(at this stage\) are really suitable for mass virtual hosting. As such, for low cost commodity Python web hosting the only real options are still CGI and [FASTCGI](http://www.fastcgi.com/).
+
+  
+
+
+In the case of FASTCGI this usually means mod\_fastcgi or mod\_fcgid under Apache, and although many web hosting companies do use these modules and so can provide support for Python, they often don't, or the support provided is less than ideal.
+
+  
+
+
+In taking the view that support for Python isn't very good, one does have to be careful however. This is because when you read support forums and irc channels, you obviously are only going to see the complaints and the calls for help to get things working. It may well be the case that this is an outspoken minority and the bulk of people are having no problem at all. Either way, there is still a perception that the Python community isn't being well serviced by web hosting companies and that something better is required.
+
+  
+
+
+As I have previously described in the mod\_wsgi [roadmap](/posts/2009/03/future-roadmap-for-modwsgi/), the intention is to support features that would allow mod\_wsgi to be used in mass virtual hosting, but there is a lot more to it than just providing yet another option that they might be able to use. In fact, there is no real reason why good Python web hosting couldn't be offered using FASTCGI right now.
+
+  
+
+
+I tend to think that the real problem is in part one of education. That is, lack of good documentation on how to setup FASTCGI for running Python within a commercial web hosting operation, and a clear indication of what the Python communities expectations are as to what should be available.
+
+  
+
+
+Some of the problems which arise are web hosting companies that provide only woefully out of date Python versions, no easy ability to install Python modules/packages, and in the case of FASTCGI, not even providing [flup](http://trac.saddi.com/flup) or some other FASTCGI bridge. End result is that although one may be able to use Python, it isn't necessarily easy and a lot of the hard work is pushed onto the user, rather than the web hosting company providing an environment which is easy to use to begin with.
+
+  
+
+
+With that in mind I am currently contemplating whether to start up a distinct uber project which has the specific goal of improving commercial Python/WSGI hosting options. This would not be done with the intent of just pushing my separate mod\_wsgi software, but would look at all available software and come up with guidelines and other documentation on how best to use whatever is available, including CGI and FASTCGI.
+
+  
+
+
+I can also see this going beyond just documentation, with it also producing code libraries and applications. For example, at the moment for someone to host a Python WSGI web application under CGI they need to know about what CGI/WSGI adapters are available. Similarly for FASTCGI you need to know about what FASTCGI/WSGI adapters are are available. That or you need for the Python web application being used to internally somehow support CGI or FASTCGI directly.
+
+  
+
+
+Frankly, with WSGI, these days it is pretty stupid for Python web applications themselves to be worried about CGI or FASTCGI. At the same time, the user also should not have to need to know about them either. What would be much better is that no matter what underlying Python hosting mechanism is used, that the web hosting company provide a means of hosting WSGI applications themselves.
+
+  
+
+
+As example, when using mod\_wsgi all you need to do is provide a WSGI script file which contains an 'application' object as entry point for the WSGI application. That WSGI script can also include any other code required to set up the environment for the WSGI application. There is no reason why this couldn't also be applied to CGI and FASTCGI.
+
+  
+
+
+So, instead of a user having to provide a .cgi or .fcgi file, they would provide a .wsgi file. It would then be up to the web hosting company to automatically ensure that the right thing happens.
+
+  
+
+
+Obviously, web hosting companies are going to be clueless as how to make that work and this is where one product of the project would be to provide a small set of Python wrapper applications which perform that mapping along with the instructions on how a web hosting company would integrate that into their systems. This would therefore need to include guidelines on how to set up Apache, including how to integrate it into suexec or cgiwrap as appropriate.
+
+  
+
+
+One of the problems that this wrapper application can solve is fixing up WSGI variables like SCRIPT\_NAME and PATH\_INFO. At the moment Python web applications often have hacks in them, or the user themselves are forced to have hacks in the WSGI script file, to adjust these variables where they aren't passed through correctly from the web server.
+
+  
+
+
+Another problem than that can be solved here is ensuring that logging from Python web applications ends up somewhere where the user can actually see and make use of it. One often sees instances where people are having trouble with something like FASTCGI, but due to how the system is set up, any error messages output when the FASTCGI script is being started disappear, making it really hard to debug problems. Because the wrapper application is in control of loading the WSGI script file, it can ensure that any log files are setup properly. It could even provide a feature to capture the errors and return them in a error page to the browser rather than them going to the log only.
+
+  
+
+
+So, that is the dream. In part I need to indirectly do some of the ground work for this in order to work out what features I need to add to make mod\_wsgi more useful in a mass virtual hosting setup. It would be nice though if there are others out there who have some measure of passion for seeing Python web hosting options improved contribute as well. Most of all, I would dearly like to get the web hosting companies themselves directly involved.
+
+  
+
+
+In respect of dealing with web hosting companies, to date my experiences in dealing with them have not been very inspiring. Where I have actively tried to contact them to try and learn how they run things, so I can work out what features mod\_wsgi should provide to make it easy for them to use, they have been quite unwilling to give up any information. Even when web hosting companies have contacted me about mod\_wsgi, it seems the contact is coming from managers or sales people and not the technical people. Even at the requests of these same people, their own technical people aren't necessarily forthcoming with the information I really need. Overall it has been quite frustrating to say the least.
+
+  
+
+
+Hopefully then if this project were to get off the ground and were seen to have active backing from the Python community, we might be able to make some progress. We may even be able to make web hosting companies see that there is more than just PHP out there.
+
+  
+
+
+Right now any feedback you may want to give on the whole idea and whether there is a need for it would be most helpful. Maybe I am barking up the wrong tree and all is actually wonderful after all. As much as I may believe there is a problem here needing to be solved, am sure that existing mod\_wsgi users would prefer I concentrate on just mod\_wsgi and not worry about all this other stuff. :-\)
+
+---
+
+## Comments
+
+### René Dudfield - April 17, 2009 at 4:11 PM
+
+I think the key is to work with Cpanel/whm, plex and other control panels to have them include good python support by default.  
+  
+Think of Cpanel as a platform like windows or linux, and you'll notice that python is not very portable for web host platforms.
+
+### Michael Watkins - April 17, 2009 at 4:24 PM
+
+Agreed. If the goal is to hit the mass market of "web hosters", a great many of whom are fairly clueless appliance operators - where CPanel/WHM is the appliance - then you've got to convince or work with those behind those tools to make things happen.  
+  
+Could take awhile.  
+  
+So I also agree with Graham's other thrust - coming up with well documented solutions. Get enough of those out there and eventually the CPanel-meisters will take note.  
+  
+Some firms - notably Webfaction - seem to have solved this problem by writing their own control code.  
+  
+PS: don't forget about SCGI\!
+
+### Graham Dumpleton - April 17, 2009 at 4:33 PM
+
+Yes, agree that management interfaces such as Cpanel/WHM are important.  
+  
+Once you look at getting into that, and providing Cpanel scripts for easy upload of application, the whole issue of Python packaging systems rears its ugly heads, as does controlled restart of application processes and migration to new code base and database schemas.  
+  
+As to SCGI, I don't see that as a viable option of mass hosting as mod\_scgi only has an external mode and doesn't have a dynamic mode like mod\_fastcgi and mod\_fcgid for Apache. To support SCGI means having to create a whole infrastructure behind the Apache instance for startup and management of the processes, ie., monit or supervisord. I believe this is getting too complicated for web hosting companies. They just want something that works with minimal configuration from Apache and no need for any sort of separate infrastructure for process management. For similar reasons, I don't think FASTCGI and SCGI is viable using lighttpd or nginx either, as they also only support an external mode. Same again with mod\_proxy, they all require extra infrastructure.  
+  
+Also, WebFaction isn't commodity mass virtual hosting as they provide you your own Apache instance. I am very much talking about shared hosting on one Apache instance. WebFaction can already use mod\_wsgi or mod\_python because you each have your own server to play in.
+
+### Michael Watkins - April 17, 2009 at 5:49 PM
+
+I think perhaps even more than the infrastructure concerns, most commodity web hosts don't want to touch Python because they don't understand it. They barely understand PHP. They've been burned many times by insecure PHP installations, by their own insecure infrastructure, and by poorly written PHP applications, hence "Hardened PHP", suhosin, suexec - and so on.  
+  
+Maybe the overall premise is wrong, that "anyone" can run a web application in a reasonable and secure manner, like plugging in a toaster.   
+  
+Or, maybe the environment has to change. With today's processors and disk it seems much more common for someone with a need to host an app to head for a "virtual private server" \(which may or may not have a "control panel" driving it\). You can get 512MB - 2GB of RAM in such a "server" for < 35$ a month, often much less, even from reasonably reliable providers.   
+  
+Had that been available to me almost 10 years ago, I would not have invested in my own co-located equipment. One of the better shared hosts at the time \(and still today\), Pair Networks, had no ability to deal with Python \(or Postgres then\), even on their "managed" dedicated servers.  
+  
+Re Webfaction, its never been clear to me when they require you to have your own Apache instance \(thus using some of your RAM allocation\) vs being able to use the shared "system" Apache. I could be wrong but I believe they do allow for use of the system Apache for the applications that they provide full \(meaning their own control software and installers\) for.  
+  
+RAM is a big issue for shared hosters. I suppose mod\_php delivers an execution environment which is friendly to RAM even with a bunch o' users all running different apps.  
+  
+That sort of execution model isn't common in Python land.   
+  
+Even though I find my needs well served by apache / lighttpd and SCGI with an obviously external Python process\(s\), I'm trying to wrap my head around this problem again which is why your rant caught my attention.
+
+### Graham Dumpleton - April 17, 2009 at 7:40 PM
+
+True, they probably don't understand and why it is in part an education process. I find that even people involved with Python web applications are sometimes quite clueless when it comes to Apache.  
+  
+There are a couple of forums in particular where I have given up trying to help people because some of the principles on the lists, either through arrogance or some religious zeal over alternatives to Apache, don't want to listen when you try and correct them about the misconceptions they have about how Apache works. End result is that they just keep telling people wrong information about how to set Apache up, or deliberately try and give people an impression that Apache is evil and that it shouldn't be used.  
+  
+So, like with those forums I have given up on, there is a risk that this idea will be a waste of time as well. In other words, you can document something to extreme detail, but if people don't want to read it and learn from it, there is nothing you can do.  
+  
+Sorry, I have dropped into rant mode now. Hopefully though you don't really see my main post as a rant. I do really want to try and improve things and aren't the sort to just complain about something and then expect someone else to fix it.  
+  
+Anyway, memory usage as you point out is another issue where one has to explain well how things work with Python and persistent processes. Any guidelines therefore need to cover how to setup things so that idle processes are killed off. One probably has to go as far as providing example scripts that can be periodically run to kill off processes which exceed some deemed maximum size.  
+  
+Same with security issues, all the issues need to be explained properly and it shown how to set things up properly. Personally I cringe when I see hosting companies who offer mod\_python for $4 a month on what is obviously a shared hosting system. They obviously just mustn't understand the dangers of running mod\_python in that sort of configuration.  
+  
+So, we try and explain what we know are the problems and what they have to look out for. At the same time we need to know their concerns and what limitations they have to work with. There is no point us saying do this or that if it isn't practical. For example, VPS systems would negate pretty well all the problems, but that doesn't help when they are trying to supports tens of thousands of sites on as minimal amount of hardware as possible. So, different solutions for different types of hosting types.
+
+### Michael Watkins - April 18, 2009 at 1:12 AM
+
+Graham, rest assured your comments are not being taken as a rant, although I would agree that some ranting is perfectly justified on this topic.  
+  
+I'm interested in this subject matter myself as recently I've had some reason to look beyond the comfy spot where my own applications reside and think about mass hosting, or at least "bulk" hosting, of Python apps.  
+  
+Are you aware of any fulsome examination and discussion of the different execution models - the mod\_php / mod\_python \(my knowledge of this is less than complete\) as compared to the other approaches?
+
+### Chris - April 18, 2009 at 1:48 AM
+
+Just throwing this out, but perhaps in addition to pursuing "mass virtual hosting," a parallel effort with the ever-growing number of specialized, Ruby/RoR hosting companies might make sense? They've got Rack, understand their platforms and probably appreciate having stable, mature tools. I've met "the masses" and they are going to keep doing PHP. If something like Zine were to become a killer app, that would help too.
+
+### elarson - April 18, 2009 at 3:33 AM
+
+I definitely see the advantages of thinking in terms of FastCGI when thinking of how to create a PHP for Python type environment, but I wonder if the proxy method might be simpler. For example, if the webhost provides a simple interface for starting a python script on a specific port and then providing simple X headers for gathering any extra data not provided by the default proxy modules. The host could then effectively monitor the long running process and provide details regarding issues.  
+  
+I'm just thinking aloud here and am curious if this method might be a better avenue.
+
+### Michael Watkins - April 18, 2009 at 3:59 AM
+
+I think the challenge here is to separate the issues. "Easy" and "Optimal" might mean different things to different \*types\* of web hosting firms.  
+  
+For example, a commodity firm that operates a cookie-cutter clone of CPanel/WHMCS install, with installation script managers like "Fantastico" and such - most of them \(sorry folks\) are clueless. Many are resellers of some other entity which provides them the cookie-cutter environment. It's multi-level marketing writ large.  
+  
+Anyway... for those folks "easy" probably means make it look like PHP, because "optimal" for them means having a Python interpreter process that resets on each and every request, in that way being able to serve up any site from any of their hundreds of served domains on a single box... with not very many instances of the Python process.  
+  
+That doesn't sound optimal in my view, mostly from a security perspective, but for the lowest-common denominator hoster, that is what they would like.   
+  
+Or at least that is what the CPanel authors would like, because its a model that they all \(CPanel and their user-clients\) understand well.  
+  
+"Easy" and "Optimal" for someone like me will probably be different. Lets say my profile is this:  
+  
+\- willing to provide hosting users with X amount of RAM and the ability to launch well behaved long-running processes   
+  
+\- willing to support any scheme which makes it relatively easy to support this model either with scripting, or ideally through simple configuration of a front end web server  
+  
+Yes, a hoster like that might very well want to run CPanel or Plesk or HSphere etc so if the approach can work within the boundaries of what those folks already support, so much the better. Seems to me that the plumbing is not such a big challenge, but the monitoring of resources - i.e. ensure this user runs only X number of processes using no more than Y RAM average, YY burst and Z cpu cycles on average / and ZZ burst.  
+  
+Maybe as Graham as alluded to the perfect solution is a situation where through configuration of the HTTPD \(ideally agnostic as to whether it is Apache or lighttpd or ...\) a Python application is launched, chrooted / privs dropped, run as the user. Somehow dealing with code-changes, hung processes and such happens.  
+  
+And it works for \(most\) all Python apps.  
+  
+"Easy" and "Almost optimal" would require some of the elements of the above but merely creates an easy way to hook up plumbing.  
+  
+I.e. you do the major configuration in a front end web server, expecting to deal with external processes. The plumbing is setting up a port or unix domain socket and choosing an integration type \(fcgi, wsgi, scgi, etc\).  
+  
+This is something I do now, partly automated. Monitoring of resources I have implemented at a very basic level but if we were to offer these services broadly we'd have to up the ante and dive in much deeper.  
+  
+I'm just thinking off the top of my head. Probably I should do that elsewhere and not pollute Graham's blog\!
+
+### Greg Whitescarver - April 18, 2009 at 4:28 AM
+
+You can count me in 'the masses' as I have primarily been working on PHP applications since the late 90's. That, however, might be a chicken/egg thing, since I have been dissuaded from adopting other languages like Ruby and Python largely because of convenience issues. I do consider myself language-agnostic in theory, but it's not my cup of tea to really tear into the Apache documentation when what I really want to be doing is building software.  
+  
+To that end, I think your proposed project would have tremendous value for both hosting providers \(even initially reluctant ones\), Python newbs, and even 'the masses', some of whom merely stick with PHP because that is what Dreamhost supports best.  
+  
+Speaking of Dreamhost, I don't know if they are one of the commodity hosting providers that have put a bad taste in your mouth, but from the customer perspective, I have personally had a very good experience with them. Indeed, you can run RoR and Django on Dreamhost without too much pain at this point. They also have a wiki that is edited by both customers and staff, so the documentation is always evolving.  
+  
+What's missing from the world is exactly what you're proposing, a sort of enabling and encouragement of WSGI support that is not a burden on the hosting customer. The more folks that feel it is not a problem to add a Python app to their $8/month Dreamhost account \(where they already have 5 PHP sites running\), the better.
+
+### Graham Dumpleton - April 18, 2009 at 10:39 AM
+
+@Michael: You can see some discussion about PHP vs Python and mod\_python/mod\_wsgi in the following posts:  
+  
+http://blog.ianbicking.org/2008/01/12/what-php-deployment-gets-right/  
+[/posts/2009/03/load-spikes-and-excessive-memory-usage/](/posts/2009/03/load-spikes-and-excessive-memory-usage/)  
+  
+@Chris: Yes the Ruby folks matter in as much as they have made good progress in getting web hosting companies to use Phusion Passenger. Not necessarily widely known and not well documented is that Phusion Passenger supports Python WSGI applications as well. Thus, if it satisfies all the criteria for what would be considered acceptable to web hosting companies, then it can be an option instead of using FASTCGI. I haven't looked enough at Phusion Passenger yet to know what it does about logging for different users applications nor what it does to keep users applications running as that user.  
+  
+@elarson: Web hosting companies aren't going to go and create themselves an infrastructure for handling management of back end processes access via proxy or fastcgi/scgi external modes. This is because it is likely going to be beyond most an only add complexity they perhaps don't want. If someone wants to separately develop such a solution and ensure it can work with web hosting companies systems, then that maybe, but otherwise don't think that is going to happen.  
+  
+@Greg: I have never dealt with DreamHost, although from memory have seen a poll where they were after feedback from customers as to whether to use more reliable mod\_fcgid, or try and support mod\_python or mod\_wsgi somehow. So maybe questions are being asked internally there as to whether there is a better way of doing things as well.
+
+### garylinux - April 18, 2009 at 2:37 PM
+
+One of the draw backs to python hosting in virtual hosting setups is the long running process. Sysadmins don't like them on virtual domains hosts. That only leaves cgi and that is slow in python.
+
+### Graham Dumpleton - April 19, 2009 at 2:41 PM
+
+@garylinux: When they use fastcgi in combination with PHP they are already using processes that survive beyond one request. How quickly they reap processes when idle, or whether they periodically restart them to ensure no creeping memory usage will depend on their configuration. So, they already use long running processes.  
+  
+Obviously Python web applications are different in that in PHP, the specific PHP application is thrown away at the end of the request. This doesn't mean though that the PHP application doesn't have a high transient memory requirement which then carries through with that process, albeit reusable, until process is terminated.  
+  
+They aren't therefore as different as they may seem, except for the fact that Python web applications are often a lot more memory hungary. Configure things properly though to ensure that idle process are shutdown and one can still carry a reasonable number of Python web applications, just not as many perhaps as with PHP.
+
+### garylinux - April 20, 2009 at 4:59 AM
+
+I agree with almost all you are saying except most virtual hosts \(That I have seen\) still use apache and mod\_php  
+  
+And the last think you said  
+"can still carry a reasonable number of Python web applications, just not as many perhaps as with PHP"   
+is one of the kickers not as much as php means not as much profit per machine.  
+  
+I also just did a quick icq questioning of a few sysadmins 2 of them are at the 2nd largest porn web host and one is admin at the host my servers are at.  
+They gave the same answer. If you want python on virtual domain get rid of the long running process.
+
+### Graham Dumpleton - April 20, 2009 at 9:12 AM
+
+@garylinux: If they are still running PHP embedded in Apache using mod\_php then all users code is running as the Apache user. This is an insecure way of running web applications. These are not the sort of web hosting companies we would want to attract.  
+  
+What we want for Python web hosting is quality of service. We don't want web hosting companies who only want to pay lip service to Python by only offering CGI and whose only interest is profit, rather than offering good service, by cramming as many unsuspecting users into a small as machine as possible.  
+  
+So, I don't believe we will loose anything by not catering to those sorts of operations.
+
+### Greg Whitescarver - April 20, 2009 at 1:44 PM
+
+Dreamhost does appear to have 'unsupported' support ;-\) for Passenger/WSGI which is better than nothing:  
+http://wiki.dreamhost.com/Passenger\_WSGI
+
+### Graham Dumpleton - April 20, 2009 at 1:56 PM
+
+@Greg: FWIW, I have talked to a couple of hosts who happened to be using Phusion Passenger for Rails and they didn't even know it could do WSGI as well.  
+  
+One problem am starting to see though with hosting mechanisms which are actually designed for another language, is that the requirements of the other language predominate and so the configuration settings, which are usually global and cannot be customised on individual language basis for dynamic mode, aren't suited to Python web hosting.  
+  
+I am suspecting this is even going to be the case with FASTCGI solutions. These are likely to be tuned for PHP. That is, equivalent of single threaded prefork with capacity to scale up to many processes. This is exactly the sort of configuration which is quite bad for fat Python web applications.  
+  
+If FASTCGI were the mechanism used, it may be necessary to modify the likes of mod\_fcgid to allow process spawning parameters to be customised based on extension type of the FASTCGI application. At least I don't think this can be down at present.
+
+### Cushag - June 15, 2009 at 4:18 AM
+
+It strikes me that the ideal would be to have an easy to install Apache module which is suitable for shared hosting - mod\_python mk2 if you like.  
+  
+An alternative tack might be to bypass the 'web hosters' and use Virtual Python. It would seem possible to install this on shared hosting even if Python isn't provided and no SSH. Having an easy to install Virtual Python optimised for shared hosting environments, with good security and performance might give the freedom to have Python almost anywhere.  
+  
+I also wonder if perhaps sometimes it is better to think 'outside the box' when using Python with webhosting, especially with computationally intensive tasks. A couple of approaches I've toyed with is using XMLRPC \(and also sockets\) to transfer the few kb of encrypted data to my own PC for intensive Python processing \(and sending back the few kb of processed data\). It's a kind of crude DIY Python application server, but maybe a model for having python on optimised application servers rather than residing on webservers might be an alternative approach.
+
+### Graham Dumpleton - June 15, 2009 at 10:24 AM
+
+@Cushag  
+  
+The point in part of mod\_wsgi is that it be a better mk2 version of mod\_python. If not familiar with mod\_wsgi you perhaps should have a look at it and the roadmap the blog post referred to.
+
+### Cushag - June 15, 2009 at 6:49 PM
+
+Thanks for this, sorry to be dumb, but I got the impression mod\_wsgi wouldn't be a substitute for mod\_python as such.   
+  
+Just to clarify, if a web hoster who doesn't yet have mod\_python and does not yet offer Python installs mod\_wsgi, will this mean that one can then use the same CGI scripts etc. as one would have with mod\_python without re-writing these?  
+  
+As I see it, a mk2 vsn of mod\_python would let me run this without any re-writing:   
+  
+\#\!/usr/bin/env python  
+print 'Content-type: text/plain\n\n'  
+print 'Hello world\!'  
+  
+  
+Ideally this mk2 would be easy to install, and it wouldn't be necessary to install anything beyond this. Very ideally this would also offer all the advantages of mod\_wsgi as well.  
+  
+IMO a key issue is whether the mk2 will be 'backwards compatible', so one can use CGI scripts etc. which work under mod\_python. \(even if this only works with scripts in CGI or SCGI directories\).
+
+### Graham Dumpleton - June 16, 2009 at 11:26 AM
+
+The way that mod\_python supports CGI scripts is a kludge and isn't always going to work.  
+  
+In respect of Python, CGI is superseded by WSGI. So no, there is no intention to offer direct support for CGI scripts implemented in Python, although you could always kludge together such a solution if you really want to on top of WSGI.  
+  
+So, you would be much better off porting any CGI applications implemented in Python to run on WSGI. If you still need to, you can then run that WSGI application on top of CGI using a CGI/WSGI bridge.  
+  
+If you don't understand what WSGI is, you perhaps should start doing some research on it. It is arguably the future for Python.
+

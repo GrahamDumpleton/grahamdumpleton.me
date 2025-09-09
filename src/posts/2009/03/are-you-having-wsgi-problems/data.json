@@ -1,0 +1,35 @@
+{
+  "title": "Are you having WSGI problems?",
+  "content": "Do you have problems passing data through your WSGI middleware? Is your memory fading and you are finding you have to parse your HTTP headers multiple times? Are you seeing inconsistent behaviour when your WSGI input stream is prematurely terminated? Well, PyCon'09 in Chicago is just around the corner and that means lots of smart Python people are going to be crammed into a room together, so maybe they can help.\n\n  \n\n\nHumour aside, what I am hearing is that there are a few people going to [PyCon](http://us.pycon.org/2009/about/) with a bit of interest in having some constructive discussions about [WSGI](http://www.python.org/dev/peps/pep-0333/) and the road forward. Personally I have issues with the WSGI 1.0 specification itself, that it is poorly defined in various areas and that there are certain features of HTTP that technically you can't even make use of in WSGI applications, such as chunked request content.\n\n  \n\n\nOther people have in the past expressed opinions about WSGI being too low level and the desire for a standardised higher level abstraction for request/response objects and middleware that is possibly even divorced from the low level WSGI specification. After all, WSGI was in part really only aimed at being a standard interface to the web server underneath, and although one could build application middleware with it, it is arguable whether it really should have been allowed to percolate up into the higher levels of an application as it has.\n\n  \n\n\nAnyway, the point of the post is that if there is a chance that all these smart people are going to talk about WSGI, lets give them some constructive input about what we all feel the problems of WSGI are. Yes they may have their own list of issues, but I am sure others will have different problems they are trying to solve. So, bring out your dirty laundry and have your say by posting your own observations about WSGI and any problems it may have and maybe we can make some forward progress rather than just accepting WSGI as is, warts and all.   \n\n\n  \n\n\nIf you do post your own blog entries, perhaps add a link to it in comments to this post so it is easy for those going to PyCon who are interested in your feedback to find them. If you know of any good past blogs about problems with WSGI, perhaps also link them here.\n\n  \n\n\nBTW, no I will not be at PyCon, so expect me to try and post about my own gripes with WSGI as well. Also note that mod\\_wsgi is not WSGI, it is only an implementation that provides support for the WSGI interface. As such, I am not talking here about bringing up issues with mod\\_wsgi, just the WSGI specification and how it is applied in web applications. If you want to talk about mod\\_wsgi, bring it up separately on the [mod\\_wsgi mailing list](http://groups.google.com/group/modwsgi?hl=en) over on Google Groups.",
+  "date": "2009-03-20",
+  "author": "Graham Dumpleton",
+  "url": "http://blog.dscpl.com.au/2009/03/are-you-having-wsgi-problems.html",
+  "post_id": "3571017548975464084",
+  "blog_id": "2363643920942057324",
+  "comments": [
+    {
+      "comment_id": "1692660204900728322",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Seems that what I was hearing rumours about was the WSGI sprint which is to occurring at PyCon. Details at:  \n  \nhttp://us.pycon.org/2009/sprints/projects/wsgi/",
+      "timestamp": "March 25, 2009 at 11:13 AM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/are-you-having-wsgi-problems.html?showComment=1237939980000#c1692660204900728322",
+      "is_blog_author": true
+    }
+  ],
+  "labels": [
+    "mod_wsgi",
+    "python",
+    "wsgi"
+  ],
+  "metadata": {
+    "published_timestamp": "2009-03-20T11:05:00+11:00",
+    "blog_title": "Graham Dumpleton",
+    "page_title": "Graham Dumpleton: Are you having WSGI problems?",
+    "og_title": "Are you having WSGI problems?",
+    "og_description": "Do you have problems passing data through your WSGI middleware? Is your memory fading and you are finding you have to parse your HTTP header...",
+    "og_url": "http://blog.dscpl.com.au/2009/03/are-you-having-wsgi-problems.html"
+  },
+  "downloaded_images": []
+}

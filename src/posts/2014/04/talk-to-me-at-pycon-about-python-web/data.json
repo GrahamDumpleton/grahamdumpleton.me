@@ -1,0 +1,46 @@
+{
+  "title": "Talk to me at PyCon about Python web application performance monitoring.",
+  "content": "It means I will be travelling over 16000 kilometres \\(10000 miles\\) to get there and endure a 20+ hour flight, but I will be at PyCon in Montreal next week.  \n  \nThis year I will not be presenting any talks during the conference itself, but I will be running a vendor workshop for New Relic called '[Measure all the things](http://blog.newrelic.com/2014/04/03/pycon-2014/)'. This workshop is **free** and open to all conference attendees.  \n  \nThe workshop will be held late in the afternoon of the second day of tutorials, April 10th at 5:15pm, immediately before the conference opening reception.  \n  \nIf you are involved in the development of Python web applications then it would be great to see you drop in and hear what I have to say about performance monitoring of Python web applications.  \n  \nThe presentation will be technical and is not just a demonstration of New Relic. If you want an actual demonstration of New Relic you will actually be best to drop in at our booth in the vendor expo hall some time during the conference.  \n  \nThe workshop itself will cover a number of monitoring-related topics, everything from the fundamentals of metric collection and event data to how the New Relic Python agent instruments your applications. For existing users of our Python agent, we’ll also be describing how you can build on top of the instrumentation we provide and collect even more information about what your application is doing.  \n  \nWe will have the standard Q&A session at the end of the workshop if you want to ask anything. More importantly though, if you are an existing user of New Relic I would love for you to come and talk to me any time during the conference about how you are using New Relic and give us feedback.  \n  \nWe would very much like to hear about how you think we could improve on what information we collect, especially for the Django web framework. We are working on some changes to improve visibility of what is going on in Django template rendering in particular that I would like to discuss with Django users to get some feedback on.  \n  \nBeing the author of mod\\_wsgi for Apache, as always I am happy for people to come and talk to me about that as well. My mod\\_wsgi project hasn't been getting much love of late, but the lack of updates is also testament to its stability and overall reputation for being rock solid.  \n  \nMy current plan for mod\\_wsgi is to reboot development with some new updates after PyCon. A new major version will include various changes I have been working on for quite some time now, which will make it easier to deploy mod\\_wsgi in various situations.  \n  \nFirst up I need to get through the chaos of PyCon. As much as PyCon can be quite hectic, do feel free to come and find me if you want to have a chat about New Relic or mod\\_wsgi though. Working remote from home normally, I don't get much chance to get out, so it is always great to talk to people in the Python community at conferences.  \n  \nI don't expect to be attending many talks, but will likely hang around the vendor expo hall a lot of the time. I also may consider setting up an open space if there is enough interest in a separate general discussion about Python web application deployment and performance monitoring. Let me know if you are interested in that at all.  \n  \nSee you all there.",
+  "date": "2014-04-04",
+  "author": "Graham Dumpleton",
+  "url": "http://blog.dscpl.com.au/2014/04/talk-to-me-at-pycon-about-python-web.html",
+  "post_id": "8080307756308093961",
+  "blog_id": "2363643920942057324",
+  "comments": [
+    {
+      "comment_id": "6637487303767468646",
+      "author": "reckoner",
+      "author_url": "https://www.blogger.com/profile/16631391011432511467",
+      "author_profile_id": "16631391011432511467",
+      "content": "I enjoyed your talk at PyCon. I'm really interested in the object proxy port. Would you say that is sufficiently mature? I'm using Python 2.7.",
+      "timestamp": "April 22, 2014 at 8:43 AM",
+      "permalink": "http://blog.dscpl.com.au/2014/04/talk-to-me-at-pycon-about-python-web.html?showComment=1398120220132#c6637487303767468646",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "3365620455355837999",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "The object proxy is a part of the wrapt package. Although PyPi statistics only show wrapt as getting about 300 downloads per week, the wrapt package is actually bundled within another package on PyPi which gets 25000 downloads per week and which sees a lot of use in production environments, with heavy reliance, due to the way wrapt is used, on that object proxy implementation. So quite confident that it works okay because if it wasn't I would be getting a lot of users screaming at me, which isn't happening. :-\\)",
+      "timestamp": "April 22, 2014 at 9:43 PM",
+      "permalink": "http://blog.dscpl.com.au/2014/04/talk-to-me-at-pycon-about-python-web.html?showComment=1398167001565#c3365620455355837999",
+      "is_blog_author": true
+    }
+  ],
+  "labels": [
+    "mod_wsgi",
+    "new relic",
+    "pycon",
+    "python"
+  ],
+  "metadata": {
+    "published_timestamp": "2014-04-04T12:19:00+11:00",
+    "blog_title": "Graham Dumpleton",
+    "page_title": "Graham Dumpleton: Talk to me at PyCon about Python web application performance monitoring.",
+    "og_title": "Talk to me at PyCon about Python web application performance monitoring.",
+    "og_description": "It means I will be travelling over 16000 kilometres (10000 miles) to get there and endure a 20+ hour flight, but I will be at PyCon in Montr...",
+    "og_url": "http://blog.dscpl.com.au/2014/04/talk-to-me-at-pycon-about-python-web.html"
+  },
+  "downloaded_images": []
+}

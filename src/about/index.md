@@ -1,0 +1,301 @@
+---
+layout: base
+title: About
+permalink: /about/
+---
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-11 col-xl-10 col-xxl-9">
+        <!-- About Header -->
+        <div class="text-center mb-5">
+            <div class="mb-4">
+                <img src="/assets/images/graham-avatar.jpg" alt="Graham Dumpleton" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+            </div>
+            <h1 class="display-4 fw-bold text-primary mb-3">About Graham Dumpleton</h1>
+            <p class="lead text-muted">
+                Software developer, open source creator, and technical education advocate
+            </p>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="card border-0 shadow-sm mb-5">
+            <div class="card-body p-4 p-md-5">
+                <div class="row">
+                    <div class="col-12">
+                        <h2 class="h4 fw-bold mb-4">
+                            <i class="bi bi-person-badge me-2"></i>Who I Am
+                        </h2>
+                        <p class="mb-4">
+                            I'm an experienced software developer with expertise across multiple programming languages 
+                            and technologies. My primary focus has been on Python development, but I've also worked 
+                            extensively with C/C++, JavaScript, TypeScript, Go, and numerous other supporting 
+                            technologies including Kubernetes, Docker (containers), and modern deployment practices.
+                        </p>
+                        
+                        <p class="mb-4">
+                            Currently, I'm on sabbatical (micro retirement) and pondering full retirement. The IT industry 
+                            has undergone significant upheavals in recent years, from the COVID-19 pandemic's impact on 
+                            remote work to widespread layoffs and the industry's shift back toward on-site requirements. 
+                            Additionally, the rapid advancement of AI technologies has created new challenges for 
+                            experienced developers seeking meaningful work opportunities. These factors have made it 
+                            increasingly difficult to find suitable positions, potentially forcing an earlier transition 
+                            to retirement than I had originally planned.
+                        </p>
+                        
+                        <p class="mb-4">
+                            If you have an interesting opportunity that aligns with my expertise, I'd welcome the chance 
+                            to discuss it. I'm open to remote positions (I am based in Australia) and particularly interested 
+                            in roles with companies that support open source development, where I can contribute to 
+                            meaningful projects that benefit the broader open source community.
+                        </p>
+                        
+                        <h3 class="h5 fw-bold mb-3">
+                            <i class="bi bi-tools me-2"></i>Key Projects & Contributions
+                        </h3>
+                        <p class="mb-3">
+                            Throughout my career, I've created and maintained several important open source projects that 
+                            have had significant impact on the Python ecosystem:
+                        </p>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body p-3">
+                                        <h5 class="h6 fw-bold mb-2">
+                                            <i class="bi bi-server me-2 text-primary"></i>mod_wsgi
+                                        </h5>
+                                        <p class="small mb-2">
+                                            The original author and maintainer of mod_wsgi, the Apache HTTP Server module 
+                                            that provides a WSGI compliant interface for hosting Python web applications. 
+                                            This project has been instrumental in enabling Python web applications to run 
+                                            efficiently on Apache servers worldwide.
+                                        </p>
+                                        <a href="https://modwsgi.readthedocs.io/" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">
+                                            <i class="bi bi-arrow-right me-1"></i>Documentation
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body p-3">
+                                        <h5 class="h6 fw-bold mb-2">
+                                            <i class="bi bi-gear me-2 text-success"></i>wrapt
+                                        </h5>
+                                        <p class="small mb-2">
+                                            Creator of the wrapt library, a powerful Python library for creating decorators 
+                                            and performing monkey patching. wrapt provides a robust foundation for 
+                                            implementing decorators that properly preserve function metadata and handle 
+                                            edge cases correctly.
+                                        </p>
+                                        <a href="https://wrapt.readthedocs.io/" class="btn btn-sm btn-outline-success" target="_blank" rel="noopener">
+                                            <i class="bi bi-arrow-right me-1"></i>Documentation
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="mb-3">
+                            In more recent years, my developer advocate work involved extensive hands-on training, 
+                            which led to the creation of projects focused on education and interactive learning:
+                        </p>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body p-3">
+                                        <h5 class="h6 fw-bold mb-2">
+                                            <i class="bi bi-mortarboard me-2 text-info"></i>Educates
+                                        </h5>
+                                        <p class="small mb-2">
+                                            Creator of Educates, an interactive training platform that provides hands-on 
+                                            learning environments for technical education. Educates enables instructors 
+                                            to create and deliver interactive workshops and training sessions with 
+                                            pre-configured environments, making it easier to teach complex technical 
+                                            concepts through practical, hands-on experience.
+                                        </p>
+                                        <a href="https://www.educates.dev/" class="btn btn-sm btn-outline-info" target="_blank" rel="noopener">
+                                            <i class="bi bi-arrow-right me-1"></i>Learn More
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 class="h5 fw-bold mb-3">
+                            <i class="bi bi-code-slash me-2"></i>Technical Expertise
+                        </h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        Python Web Development
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        C/C++ Development
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        WSGI & mod_wsgi
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        Apache HTTP Server
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        Python Decorators & Monkey Patching
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        Docker & Containers
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        OpenShift & Kubernetes
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        Interactive Training Platforms
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        Web Application Deployment
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        Performance Optimization
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        Developer Advocacy & Training
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        Open Source Development
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Blog Purpose -->
+        <div class="card border-0 shadow-sm mb-5">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="h4 fw-bold mb-4">
+                    <i class="bi bi-journal-text me-2"></i>About This Blog
+                </h2>
+                <p class="mb-4">
+                    This blog serves as a platform for sharing my knowledge and experiences in software development. 
+                    Here you'll find in-depth articles about:
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                WSGI specifications and implementations
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                mod_wsgi development and usage
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Python decorators and monkey patching (wrapt)
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Python web application deployment
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Docker and containerization
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                OpenShift and Kubernetes
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Performance optimization techniques
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Open source development practices
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Technical education and training
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Industry insights and trends
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-4" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Note:</strong> This blog was migrated from Blogger and contains posts dating back many years. 
+                    Some older posts may reference outdated technologies or practices, but they remain valuable for 
+                    understanding the evolution of Python web development. The conversion was semi-automated, so 
+                    translation of posts and code examples may not be perfect, but I will work to fix these issues 
+                    over time.
+                </div>
+            </div>
+        </div>
+
+        <!-- GitHub Links -->
+        <div class="card border-0 shadow-sm mb-5">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="h4 fw-bold mb-4">
+                    <i class="bi bi-github me-2"></i>GitHub Organizations
+                </h2>
+                <p class="mb-4">
+                    Explore my open source projects and contributions across different organizations:
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="https://github.com/GrahamDumpleton" class="btn btn-outline-dark" target="_blank" rel="noopener">
+                        <i class="bi bi-github me-2"></i>Personal GitHub
+                    </a>
+                    <a href="https://github.com/educates" class="btn btn-outline-info" target="_blank" rel="noopener">
+                        <i class="bi bi-mortarboard me-2"></i>Educates Organization
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sponsor Me Section -->
+        <div class="card border-0 shadow-sm mb-5">
+            <div class="card-body text-center p-4 p-md-5">
+                <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="bi bi-heart-fill fs-3"></i>
+                </div>
+                <h2 class="h4 fw-bold mb-3">Sponsor Me</h2>
+                <p class="text-muted mb-4">
+                    Support my open source work and help me continue creating tools that benefit the developer community.
+                </p>
+                <a href="https://github.com/sponsors/GrahamDumpleton" class="btn btn-warning btn-lg" target="_blank" rel="noopener">
+                    <i class="bi bi-heart-fill me-2"></i>Sponsor on GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

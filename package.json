@@ -1,0 +1,30 @@
+{
+  "name": "graham-dumpleton-blog",
+  "version": "1.0.0",
+  "description": "Graham Dumpleton's blog migrated from Blogger",
+  "main": ".eleventy.js",
+  "scripts": {
+    "build": "eleventy",
+    "serve": "eleventy --serve",
+    "dev": "eleventy --serve --watch",
+    "parse-blogger": "node scripts/parse-blogger.js",
+    "migrate-images": "node scripts/migrate-images.js",
+    "migrate-images-dry": "node scripts/migrate-images.js --dry-run",
+    "create-post-mapping": "node scripts/create-post-mapping.js",
+    "migrate-comments": "node scripts/migrate-comments.js",
+    "migrate-comments-dry": "node scripts/migrate-comments.js --dry-run",
+    "migrate-comments-disable": "node scripts/migrate-comments.js --disable-comments"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.2"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "markdown-it": "^14.1.0",
+    "turndown": "^7.2.1",
+    "xml2js": "^0.6.2"
+  },
+  "engines": {
+    "node": ">=20.11.1"
+  }
+}

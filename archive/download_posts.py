@@ -173,7 +173,7 @@ def main():
     
     # Define paths
     metadata_file = project_root / 'archive/posts-metadata.json'
-    posts_dir = project_root / 'posts'
+    posts_dir = project_root / 'src/posts'
     
     # Check for command line arguments
     if len(sys.argv) > 1:

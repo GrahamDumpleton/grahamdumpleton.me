@@ -1,0 +1,47 @@
+---
+layout: post
+title: "Authorship of mod_wsgi and mod_python."
+author: "Graham Dumpleton"
+date: "2009-11-15"
+url: "http://blog.dscpl.com.au/2009/11/authorship-of-modwsgi-and-modpython.html"
+post_id: "7793910287155632996"
+blog_id: "2363643920942057324"
+tags: ['mod_python', 'mod_wsgi']
+comments: 3
+published_timestamp: "2009-11-15T21:28:00+11:00"
+blog_title: "Graham Dumpleton"
+---
+
+I wrote [100% of mod\_wsgi](http://www.ohloh.net/p/mod_wsgi/contributors) for Apache, it does not borrow code from mod\_python. I was not the author of mod\_python for Apache although I did [contribute to the 3.2.X and 3.3.X releases](http://www.ohloh.net/p/mod_python/contributors). I also was not the author of the confusingly named [mod\_wsgi for nginx](http://hg.mperillo.ath.cx/nginx/mod_wsgi/) although the author of that package did borrow some code from mod\_wsgi for Apache.
+
+  
+
+
+Why I am saying this? Because I am getting a bit tired of the incorrect posts about this on various blogs, forums and IRC channels related to the major Python web frameworks and other Python topics. I really wish you guys would do your research properly before commenting on something you don't really know much about.
+
+  
+
+
+Especially those answering questions on the IRC channels, it would also be really good if you at least read the mod\_wsgi documentation. It gets very frustrating to keep seeing posts in the IRC logs where you give out incorrect information about usage of mod\_wsgi. As to people asking the questions, please go and read the documentation on the actual [mod\_wsgi web site](http://www.modwsgi.org/), especially where someone does provide a link to some specific part of it by way of an answer, rather than just believing that someone else's one line answer is all there is to know or even correct. Why if you have a mod\_wsgi question you can't just go to the [mod\_wsgi mailing list](http://groups.google.com/group/modwsgi) in the first place I have no idea.
+
+  
+
+
+And since I am having a rant, also stop using the term WSGI to generically refer to mod\_wsgi running on Apache. WSGI is a specification of an API for Python web applications. The mod\_wsgi module for Apache is just one implementation of the WSGI specification, and a lot more besides, for the Apache web server. The mod\_wsgi module for Apache is not the only implementation of the WSGI specification in respect of providing a hosting solution, both generally and for Apache. It gets really confusing some times when you use the term WSGI in isolation when talking about a specific hosting mechanism as one doesn't know what hosting mechanism you are actually talking about even though most of the time it is mod\_wsgi for Apache that you mean.
+
+---
+
+## Comments
+
+### Graham Dumpleton - November 22, 2009 at 12:37 PM
+
+For the record, should be known that Phusion Passenger's WSGI support does not borrow code from mod\_wsgi. This is another thing which has been incorrectly reported as well in some places.
+
+### Graham Dumpleton - November 23, 2009 at 10:48 AM
+
+Clarifying last comment, seems that people are saying that Phusion Passenger derives from nginx/mod\_wsgi and not Apache/mod\_wsgi. Comments I have seen do seem to acknowledge that Phusion Passenger does draw from nginx/mod\_scgi, but this is more in terms of code structure which is going to be quite common to any nginx module. Thus it would be quite reasonable expectation to see an overlap with how code interacts with nginx for nginx versions of mod\_wsgi, mod\_scgi and perhaps even mod\_fastcgi.
+
+### Graham Dumpleton - November 24, 2009 at 10:35 AM
+
+Filling out some more details about lineage, the uWSGI web site, another WSGI hosting system, says 'A bit of uWSGI code is based on mod\_wsgi ideas'. I don't know what, but they at least acknowledge that they have learnt some stuff from Apache/mod\_wsgi.
+

@@ -1,0 +1,96 @@
+{
+  "title": "Using Python virtual environments with mod_wsgi.",
+  "content": "You should be using Python virtual environments and if you don't know why you should, maybe you should find out.\n\nThat said, the use of Python virtual environments was the next topic that came up in my hallway track discussions at DjangoCon US 2014. The pain point here is in part actually of my own creation. This is because although there are better ways of using Python virtual environments with mod\\_wsgi available today than there used to be, I have never actually gone back and properly fixed up the [documentation](https://code.google.com/p/modwsgi/wiki/VirtualEnvironments) to reflect the changes.\n\nWhen using mod\\_wsgi embedded mode, one would use the 'WSGIPythonHome' directive, setting it to be the top level directory of the Python virtual environment you wish to use. If you don't know what that is supposed to be, then you can interrogate it using the command line Python interpreter:\n    \n    \n    >>> import sys  \n    >>> sys.prefix  \n    '/Users/graham/Projects/mod_wsgi/venv'\n\nMost important is that this should refer to a directory. It is an all too common mistake that I see that people set the 'WSGIPythonHome' directive to be the path to the 'python' executable from the virtual environment. That is plain wrong, so please do not do it, doing so will see the setting be ignored completely and the default algorithm for finding what Python installation to use will be used instead.\n\nIf using daemon mode of mod\\_wsgi and you are hosting only the one Python WSGI application, then you can again just rely on the 'WSGIPythonHome' directive, pointing it at the Python virtual environment you want to use. If you are hosting more than one WSGI application however, and you want each to use a different Python virtual environment, then you need to do a bit more work.\n\nThe mod\\_wsgi documentation on this steers you towards a convoluted bit of code to include in your WSGI application to do this, explain in part why this is the safest option.\n    \n    \n    ALLDIRS = ['usr/local/pythonenv/PYLONS-1/lib/python2.5/site-packages']\n    \n    \n    import sys   \n    import site\n    \n    \n    # Remember original sys.path.  \n    prev_sys_path = list(sys.path)\n    \n    \n    # Add each new site-packages directory.  \n    for directory in ALLDIRS:  \n     site.addsitedir(directory)\n    \n    \n    # Reorder sys.path so new directories at the front.  \n    new_sys_path = []   \n    for item in list(sys.path):   \n     if item not in prev_sys_path:   \n     new_sys_path.append(item)   \n     sys.path.remove(item)   \n    sys.path[:0] = new_sys_path\n\nPart of the reasoning behind giving that as the recipe was a distrust of the 'activate\\_this.py' script that is included in a Python virtual environment and advertised as the solution to use for embedded Python environments such as mod\\_wsgi.\n\nThe reason I was cool on 'activate\\_this.py' was that it stomped on the value of 'sys.prefix'. In the context of mod\\_wsgi, because the Python installation that mod\\_wsgi was actually compiled against or using may be at a different location, I was worried about whether modifying 'sys.prefix' would cause something to break.\n\nI therefore gave only guarded approval to using 'activate\\_this.py'.\n\nIn the many years mod\\_wsgi has been available though, I have to admit that no issues ever came up around 'sys.prefix' being overridden.\n\nSo, if you do not have access to make changes in the Apache configuration files for some reason, then the easiest way to activate a Python virtual environment in your WSGI script file is:\n    \n    \n    activate_this = '/usr/local/pythonenv/PYLONS-1/bin/activate_this.py'  \n    execfile(activate_this, dict(__file__=activate_this))\n\nThis is still a pain to have to include because you are adding to the WSGI script file knowledge of the execution environment it is being run in, which is notionally a bad idea.\n\nThe alternative to modifying the WSGI script file was to add just the 'site-packages' directory from the Python virtual environment in the Apache configuration.\n\nFor embedded mode of mod\\_wsgi you would do this by using the 'WSGIPythonPath' directive:\n    \n    \n    WSGIPythonPath /usr/local/pythonenv/PYLONS-1/lib/python2.5/site-packages\n\nIf using daemon mode of mod\\_wsgi you would use the 'python-path' option to the WSGIDaemonProcess directive.\n    \n    \n    WSGIDaemonProcess pylons python-path=/usr/local/pythonenv/PYLONS-1/lib/python2.5/site-packages\n\nWhat was ugly about this was that you had to refer to the 'site-packages' directory where it existed down in the Python virtual environment. That directory name also included the Python version, so if you ever changed what Python version you were using, you had to remember to go change the configuration.\n\nThe good news is that since mod\\_wsgi version 3.4 or later there is a better way.\n\nRather than fiddling with what goes into 'sys.path' using the 'WSGIPythonPath' directive or the 'python-path' option to 'WSGIDaemonProcess', you can use the 'python-home' option on the 'WSGIDaemonProcess' directive itself.\n    \n    \n    WSGIDaemonProcess pylons python-home=/usr/local/pythonenv/PYLONS-1\n\nAs when using the 'WSGIPythonHome' directive, this should be the top level directory of the Python virtual environment you wish to use. In this case the value will only be used for this specific mod\\_wsgi daemon process group.\n\nIf you are therefore using a new enough mod\\_wsgi version, and using mod\\_wsgi daemon mode, then switch to the 'python-home' option of 'WSGIDaemonProcess'.",
+  "date": "2014-09-02",
+  "author": "Graham Dumpleton",
+  "url": "http://blog.dscpl.com.au/2014/09/using-python-virtual-environments-with.html",
+  "post_id": "7380232566861350496",
+  "blog_id": "2363643920942057324",
+  "comments": [
+    {
+      "comment_id": "1711802127854602754",
+      "author": "Kernel Kiddy",
+      "author_url": "https://www.blogger.com/profile/14369183826161132195",
+      "author_profile_id": "14369183826161132195",
+      "content": "Graham, thank you for the post\\!  \nThis is the only place where I could finally find option python-home of WSGIDaemonProcess to set path to Python executable for my virtual host.  \n  \nIt is very strange that this option is not mentioned in documentation: https://code.google.com/p/modwsgi/wiki/ConfigurationDirectives\\#WSGIDaemonProcess",
+      "timestamp": "October 5, 2015 at 6:41 PM",
+      "permalink": "http://blog.dscpl.com.au/2014/09/using-python-virtual-environments-with.html?showComment=1444030914774#c1711802127854602754",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "1350841104098618409",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Documentation not up to date, simple as that. Has been present since mod\\_wsgi 3.4  \n  \nhttp://modwsgi.readthedocs.org/en/develop/release-notes/version-3.4.html",
+      "timestamp": "October 5, 2015 at 6:45 PM",
+      "permalink": "http://blog.dscpl.com.au/2014/09/using-python-virtual-environments-with.html?showComment=1444031159555#c1350841104098618409",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "269308476857477129",
+      "author": "okyere",
+      "author_url": "https://www.blogger.com/profile/04027648713007390902",
+      "author_profile_id": "04027648713007390902",
+      "content": "Graham,  \nGreat post. In my current set up, I have multiple python applications hosted on multiple virtual hosts. I have created only one virtual environment that all the applications use.  \n  \nOutside of all the virtual hosts, I have:  \n\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#  \nWSGISocketPrefix /var/run/wsgi  \nWSGIPythonHome /WebHA/catworld/featureanalytics-443S/webpython \\#folder of my virtualenv  \n\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#  \n  \nThen in each virtual host, I have among others:  \n\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#  \nDocumentRoot \"/WebHA/catworld/featureanalytics-443S/workforce\\_tool/\"  \nServerName wpat.cat.com  \nServerAlias wpat.cat.com  \n  \n  \nWSGIDaemonProcess wpat.cat.com user=http group=http processes=4 threads=4  \nWSGIProcessGroup wpat.cat.com  \nWSGIPassAuthorization On  \n  \nWSGIScriptAlias / /WebHA/catworld/featureanalytics-443S/workforce\\_tool/workforce\\_tool.wsgi  \nAlias /static /WebHA/catworld/featureanalytics-443S/workforce\\_tool/app/static  \n  \n  \nOrder allow,deny  \nAllow from all  \n  \n\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#  \n  \n  \nThe corresponding wsgi file for the above virtual host is:  \n\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#  \n\\#workforce\\_tool.wsgi  \n  \n\\#\\!/WebHA/catworld/featureanalytics-443S/webpython/bin/python  \n  \nactivate\\_this = '/WebHA/catworld/featureanalytics-443S/webpython/bin/activate\\_this.py'  \nexec\\(open\\(activate\\_this\\).read\\(\\)\\)  \n  \nimport sys  \nimport logging  \n  \nlogging.basicConfig\\(stream=sys.stderr\\)  \nsys.path.insert\\(0,\"/WebHA/catworld/featureanalytics-443S/workforce\\_tool/\"\\)  \n  \nfrom app import theapp as application  \napplication.secret\\_key = 'mykey'  \n\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#\\#  \n  \n**Python 3.4.3**  \n**mod\\_wsgi 4.4.22**  \nDaemon mode  \n  \n  \nI followed a tutorial online to set things up this way.  \nDue to other reasons, I have to switch to use anaconda/conda distribution of python. So I'll be creating conda environments for each app.  \n  \n**1\\. How will the code in the wsgi file change especially about activating the python environment?**  \n  \n**2\\. How will my set up change to use a different conda environment for each app/virtual host? I want to move away from using one environment for every python app.**",
+      "timestamp": "March 11, 2016 at 9:40 AM",
+      "permalink": "http://blog.dscpl.com.au/2014/09/using-python-virtual-environments-with.html?showComment=1457649653309#c269308476857477129",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "8264952382296746128",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@okyere Use the mod\\_wsgi mailing list. Blog posts are not a support forum. See http://modwsgi.readthedocs.org/en/develop/finding-help.html",
+      "timestamp": "March 11, 2016 at 9:42 AM",
+      "permalink": "http://blog.dscpl.com.au/2014/09/using-python-virtual-environments-with.html?showComment=1457649771881#c8264952382296746128",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "4180357402609351021",
+      "author": "MAC",
+      "author_url": "https://www.blogger.com/profile/13673729100778661299",
+      "author_profile_id": "13673729100778661299",
+      "content": "What a great post \\!  \nHelped me solve a similar situation getting conda environment working on a standard apache + mod\\_wsgi server.",
+      "timestamp": "November 11, 2016 at 10:06 AM",
+      "permalink": "http://blog.dscpl.com.au/2014/09/using-python-virtual-environments-with.html?showComment=1478819174588#c4180357402609351021",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "4959707216759007624",
+      "author": "erdem",
+      "author_url": "https://www.blogger.com/profile/13867824447111175142",
+      "author_profile_id": "13867824447111175142",
+      "content": "from flask import Flask  \nImportError: No module named flask  \nmod\\_wsgi \\(pid=5434\\): Target WSGI script '/var/www/FlaskApp/flaskapp.wsgi' cannot be loaded as Python module.  \n  \nI'm using anaconda.When I open the browser on my ıp adress to show my flask app I take Internal Server Error   \nThe server encountered an internal error or misconfiguration and was unable to complete your request.  \nWhat should I do ?",
+      "timestamp": "July 13, 2017 at 8:21 PM",
+      "permalink": "http://blog.dscpl.com.au/2014/09/using-python-virtual-environments-with.html?showComment=1499941319138#c4959707216759007624",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "2887428094514149756",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@erdem Please use the mod\\_wsgi mailing list if you are having problems. A blog post is not the place to discuss it.  \n  \nhttp://modwsgi.readthedocs.io/en/develop/finding-help.html  \n  \nAlso ensure you have read the following as information in this post is out of date:  \n  \nhttp://modwsgi.readthedocs.io/en/develop/user-guides/virtual-environments.html  \n  \nAlso ensure that your mod\\_wsgi was actually compiled for the Anaconda Python version you want to use. You cannot force mod\\_wsgi compiled for one Python version/installation to use a different Python version/installation or virtual environment created with a different Python version/installation.",
+      "timestamp": "July 13, 2017 at 8:47 PM",
+      "permalink": "http://blog.dscpl.com.au/2014/09/using-python-virtual-environments-with.html?showComment=1499942863608#c2887428094514149756",
+      "is_blog_author": true
+    }
+  ],
+  "labels": [
+    "apache",
+    "mod_wsgi",
+    "python",
+    "wsgi"
+  ],
+  "metadata": {
+    "published_timestamp": "2014-09-02T00:49:00+10:00",
+    "blog_title": "Graham Dumpleton",
+    "page_title": "Graham Dumpleton: Using Python virtual environments with mod_wsgi.",
+    "og_title": "Using Python virtual environments with mod_wsgi.",
+    "og_description": "You should be using Python virtual environments and if you don't know why you should, maybe you should find out.  That said, the use of Pyth...",
+    "og_url": "http://blog.dscpl.com.au/2014/09/using-python-virtual-environments-with.html"
+  },
+  "downloaded_images": []
+}

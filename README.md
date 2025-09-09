@@ -32,7 +32,7 @@ uv run python archive/download_posts.py --help
 
 **Features:**
 - Reads URLs from `archive/posts-metadata.json`
-- Creates organized directory structure (`posts/YYYY/MM/`)
+- Creates organized directory structure (`src/posts/YYYY/MM/`)
 - Downloads HTML content using the `requests` library
 - Skips existing files (unless `--overwrite` is used)
 - Handles network errors and timeouts gracefully
@@ -41,8 +41,8 @@ uv run python archive/download_posts.py --help
 
 **Directory Structure:**
 The script automatically creates subdirectories based on the URL path, with each post getting its own directory:
-- `http://blog.dscpl.com.au/2007/03/resistance-is-futile.html` → `posts/2007/03/resistance-is-futile/original.html`
-- `http://blog.dscpl.com.au/2019/01/administration-features-of-jupyterhub.html` → `posts/2019/01/administration-features-of-jupyterhub/original.html`
+- `http://blog.dscpl.com.au/2007/03/resistance-is-futile.html` → `src/posts/2007/03/resistance-is-futile/original.html`
+- `http://blog.dscpl.com.au/2019/01/administration-features-of-jupyterhub.html` → `src/posts/2019/01/administration-features-of-jupyterhub/original.html`
 
 Each post is saved in its own subdirectory named after the HTML filename (without the .html extension), with the downloaded content saved as `original.html`. This structure allows for additional files (like extracted content, metadata, etc.) to be stored alongside the original HTML file.
 
@@ -106,5 +106,5 @@ For each processed post, the script creates two files in the post's directory:
 
 **Directory Structure:**
 The script works with the directory structure created by `download_posts.py`:
-- `posts/2007/03/resistance-is-futile/original.html` → generates `index.md` and `data.json` in the same directory
-- `posts/2019/01/administration-features-of-jupyterhub/original.html` → generates `index.md` and `data.json` in the same directory
+- `src/posts/2007/03/resistance-is-futile/original.html` → generates `index.md` and `data.json` in the same directory
+- `src/posts/2019/01/administration-features-of-jupyterhub/original.html` → generates `index.md` and `data.json` in the same directory

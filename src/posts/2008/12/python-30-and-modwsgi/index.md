@@ -1,0 +1,20 @@
+---
+layout: post
+title: "Python 3.0 and mod_wsgi."
+author: "Graham Dumpleton"
+date: "2008-12-04"
+url: "http://blog.dscpl.com.au/2008/12/python-30-and-modwsgi.html"
+post_id: "4532974058474150097"
+blog_id: "2363643920942057324"
+tags: ['mod_wsgi', 'python']
+comments: 0
+published_timestamp: "2008-12-04T21:03:00+11:00"
+blog_title: "Graham Dumpleton"
+---
+
+Now that [Python 3.0](http://www.python.org/download/releases/3.0/) has been released, it is probably worth while pointing out that [mod\_wsgi](http://www.modwsgi.org/) has been ported to Python 3.0 for quite a while now. It didn't always work, but that was actually because various versions of the Python 3.0 betas and release candidates managed to break support for sub interpreters. All these issues in Python 3.0 have been fixed now and mod\_wsgi appears to be working fine for a basic WSGI test case. Of course, with Python 3.0 being so new and with the internal changes required to mod\_wsgi to handle Unicode strings, there are no doubt some gremlins lurking in the mod\_wsgi changes still. One can just hope that the WSGI folks out there don't ignore Python 3.0 for too long and start on porting some stuff to Python 3.0. This will then give me some decent code on which to test out mod\_wsgi support for Python 3.0.
+
+  
+
+
+Note that if you want to play with mod\_wsgi and Python 3.0, you will need to use the mod\_wsgi source code directly from the [subversion repository](http://code.google.com/p/modwsgi/source/checkout). You will also need to be aware of the [proposed amendments](http://www.wsgi.org/wsgi/Amendments_1.0) to the WSGI 1.0 specification to make it compatible with Python 3.0.

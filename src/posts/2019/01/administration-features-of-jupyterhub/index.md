@@ -1,0 +1,70 @@
+---
+layout: post
+title: "Administration features of JupyterHub"
+author: "Graham Dumpleton"
+date: "2019-01-01"
+url: "http://blog.dscpl.com.au/2019/01/administration-features-of-jupyterhub.html"
+post_id: "672559659319831819"
+blog_id: "2363643920942057324"
+tags: ['docker', 'jupyterhub', 'kubernetes', 'openshift', 'red hat']
+images: ['image_9dd15d83.png', 'image_cfecce1f.png']
+comments: 0
+published_timestamp: "2019-01-01T14:22:00+11:00"
+blog_title: "Graham Dumpleton"
+---
+
+You have seen now in the [last post](/posts/2018/12/deploying-multi-user-workshop/) how you can use JupyterHub to deploy a multi user workshop environment where each user is given access to their own interactive shell environment in their web browser. This is by having JupyterHub spawn a terminal application instead of the usual Jupyter notebooks it would be used for.
+
+The aim in being able to provide this out of the box experience, is that it avoids the problem of workshop attendees wasting time trying to install any command line tools on their own local computer that may be needed for a workshop. Instead, everything they need, be it command line tools, or copies of source code files, are ready for them and they can immediately get started with their workshop. This can save up to 20 minutes or more at the start of a workshop, especially if running the workshop at a conference where there is poor wifi connectivity and downloads are slow.
+
+For this, we are relying on JupyterHub to co-ordinate user authentication and spawning of a user environment, but JupyterHub can do more than that, providing a means to monitor user sessions, including allowing a course instructor to access an admin page where they can see logged in users and control their sessions.
+
+# The JupyterHub adminstration panel
+
+In order to designate that a specific user has administration privileges, when deploying the multi user workshop environment, you can specify a list of users as a template parameter.
+    
+    
+    $ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-jupyterhub/master/templates/hosted-workshop-production.json \
+        --param ADMIN_USERS="opentlc-mgr"
+    
+    
+
+The list of admin users can also be set after deployment by updating the `ADMIN_USERS` environment variable in the deployment config.
+
+When a user is designated as an administrator, they can access the JupyterHub admin panel using the `/hub/admin` URL path.
+
+![img-alternative-text](image_9dd15d83.png)
+
+From the admin panel, a course instructor is able to see all the users who have logged in and whether that users instance is currently running. If necessary they can stop or start a users instance.
+
+If a workshop attendee is having some sort of problem and the course instructor needs to be able to see the error they are getting for the command they have run, or needs to debug an issue in that particular users environment, they can from the admin panel click on "access server" for that user. This allows the course instructor to impersonate that user and see the exact same terminal view as the user themselves sees. Each can enter in commands in their own browser view and the other will see it.
+
+The admin panel provides the ability to perform basic operations related to users. For more control, JupyterHub also provides a REST API. This could be used for ad-hoc operations, or you could create a separate web application as an alternative to the bundled admin panel, exposing more of the operations which can be performed via the REST API.
+
+# Customising JupyterHub configuration
+
+The workshop environment created using the template, and the image it uses, is intended to provide a reasonable starting point suitable for any basic workshop. If you need to perform heavy customisation for your own purposes, you would fork the Git repository and directly modify it. For simple configuration changes, it is possible to override the JupyterHub configuration by adding additional configuration into a Kubernetes config map for the deployed JupyterHub instance.
+
+In the case where the application deployment is called `terminals` the name of the config map is `terminals-cfg`. You can place any configuration in here that JupyterHub or the components it uses understands, although what you may want to override is probably limited.
+
+One example of what you can use the config map for, is to define a user whitelist. A user whitelist is used where you don't want any user in the OpenShift cluster to be able to access the workshop environment, but instead want to limit it to a set list of users.
+
+![img-alternative-text](image_cfecce1f.png)
+
+# Culling of idle user terminal sessions
+
+The intent with the deployment and configuration is that it caters for the typical use case, providing default configuration for features that you would often want to be used. You can then override exactly how that feature works through template parameters at the point of creation, or by updating environment variables in the deployment configuration.
+
+One example of a feature that comes pre-configured is idle termination of user sessions.
+
+In the case of this feature, because JupyterHub is able to monitor web traffic passing through the configurable HTTP proxy it uses to direct traffic, it knows when a terminal session is no longer being used. This enables JupyterHub to shutdown the pod for the user session if the period of inactivity exceeds a certain time. This might be useful to reduce resource usage for terminal sessions which were never used.
+
+By default the inactivity timeout is set to 7200 minutes \(2 hours\), but you can override it using the `IDLE_TIMEOUT` template parameter, or deployment config environment variable.
+
+# Coming up next, hosting workshop notes
+
+The purpose of this post is to again show that by using JupyterHub we get a lot of features for free without needing to implement them ourselves. JupyterHub is very configurable though and so if necessary things can be tweaked even further. This includes for example being able to override the templates used to render JupyterHub pages such as the spawn progress page, control panel and admin panel. So if you wanted to give it your own look and feel or add branding, you could do that as well.
+
+Getting back to the original problem of running a workshop, what you have seen so far deals with the issue of being able to provide each user with an in browser interactive terminal where they can work, with all command line tools they need, ready to go.
+
+During the workshop, the workshop attendees still need the workshop notes for the exercises they need to work though. In the next post, we will look at how the hosting of workshop notes can be integrated with the workshop environment we have running so far.

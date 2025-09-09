@@ -1,0 +1,86 @@
+---
+layout: post
+title: "Accreditation For Python Web Hosting"
+author: "Graham Dumpleton"
+date: "2009-04-20"
+url: "http://blog.dscpl.com.au/2009/04/accreditation-for-python-web-hosting.html"
+post_id: "2241872873351545765"
+blog_id: "2363643920942057324"
+tags: ['python']
+comments: 10
+published_timestamp: "2009-04-20T09:31:00+10:00"
+blog_title: "Graham Dumpleton"
+---
+
+I have already described the [need](/posts/2009/04/improving-commercial-pythonwsgi-hosting/) for better Python web hosting. Some of the comments in that discussion make me wonder if we need some sort of accreditation for Python web hosting. After all, there is a huge difference between a web hosting company who only offers CGI and whose only goal is to maximise profit by cramming as many unsuspecting users into one machine as possible, and a web hosting company who consciously regards quality of service as being equally or more important, and as such offers a much higher quality of hosting than just CGI, with a ratio of users to machines which also benefits the users and not just themselves.
+
+  
+
+
+So, maybe one of the things that could come out of any project to improve the quality of Python web hosting, is a checklist of what would be regarded as the minimum criteria to be regarded as a provider of quality Python web hosting services. If the Python community saw this as worthwhile, maybe the Python Software Foundation itself might want to give it its blessing. In order to get the accreditation, as well as satisfy the criteria, part of the deal could be that web hosting companies give some sort of donation back to the Python Software Foundation for the right to carry the accreditation.
+
+  
+
+
+Obviously trying to run such a program could be fraught with danger and maybe accreditation should be only for some set period before being reviewed, but maybe something to think about.
+
+---
+
+## Comments
+
+### iain - April 20, 2009 at 6:48 PM
+
+You sound like a user who says "wouldn't it be great if someone built software \[x\]"  
+  
+In that tradition, I ask:  
+  
+Why don't you just create your own hosting company \(or platform\) that does it right?  
+  
+If you build a template, and it is successful, others will follow. If you do it right, I'll host with you ...
+
+### Graham Dumpleton - April 20, 2009 at 7:08 PM
+
+@i: If you read my original blog post I linked to you will see that I am going about creating the required software. I am not sitting here waiting for others as I know from experience of many years that there isn't really anyone else in the Python web community who seems to be particularly interested in working in this space. My track record of work on mod\_python and mod\_wsgi should show that I am not all hot air, I do get out there and do stuff. :-\)
+
+### iain - April 20, 2009 at 7:15 PM
+
+I on the other hand just post snarky comments\! :\)  
+  
+OK, so to anyone out there reading this considering doing python hosting right \(TM\), I would pay for this. In fact, I should put my money where my mouth is and just do this myself. Hmmm ...
+
+### Unknown - April 20, 2009 at 7:17 PM
+
+Perhaps because, just like the user who says "wouldn't it be great if someone built software \[x\]", Graham is not interested in investing time in doing it, or maybe it just isn't his area of expertise.  
+  
+I'm sure you said stuff like that at some point.  
+  
+If it's not what you do and you're not interested in doing it yourself, it makes much more sense to let other people do it.
+
+### Unknown - April 20, 2009 at 7:18 PM
+
+You guys are fast, two new comments while I wrote my previous one. Ignore it, now :\)
+
+### iain - April 20, 2009 at 7:22 PM
+
+The comments to the original post are interesting. The consensus seems to be:  
+\* this would be great; and  
+\* this would be hard.  
+  
+Maybe a one click slicehost solution or an amazon ami might be the answer ...
+
+### Graham Dumpleton - April 20, 2009 at 7:56 PM
+
+@i: SliceHost isn't the sort of target system I have in mind. With a SliceHost VPS you have full control of the system and it isn't a shared hosting configuration. Thus you can install whatever you want anyway, and so can already install and run mod\_wsgi. What am looking at is shared hosting where web hosting provider controls everything and all you do is supply your specific Python web application that you want to run.
+
+### Unknown - April 21, 2009 at 1:17 AM
+
+Have you checked out [WebFaction](http://www.webfaction.com?affiliate=oshecho) I think they have good python hosting. I've been using them for a little over a year now.
+
+### Unknown - April 21, 2009 at 3:45 AM
+
+I second Brandon's suggestion. I've been able to host mod\_wsgi stuff on Webfaction pretty easily.
+
+### Graham Dumpleton - April 21, 2009 at 9:54 AM
+
+@Brandon, gldnspud: I am well aware of what WebFaction provides. BTW, maybe you should go find out where mod\_wsgi comes from sometime. ;-\)
+
