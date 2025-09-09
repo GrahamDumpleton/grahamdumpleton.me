@@ -1,0 +1,171 @@
+---
+layout: base
+title: All Guides
+permalink: /pages/
+---
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h1 class="h2 fw-bold mb-0">
+                <i class="bi bi-book me-2"></i>All Guides
+            </h1>
+            <a href="/" class="btn btn-outline-primary">
+                <i class="bi bi-house me-1"></i>Back to Home
+            </a>
+        </div>
+        
+        <p class="text-muted mb-4">
+            Browse all {{ collections.pages | length }} topic guides covering various aspects of development, deployment, and best practices.
+        </p>
+    </div>
+</div>
+
+<!-- Search Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" class="form-control" id="searchInput" placeholder="Search guides by title, content, or tags...">
+        </div>
+    </div>
+</div>
+
+<!-- Pages Grid -->
+<div class="row" id="pagesContainer">
+    {% for page in collections.pages | reverse %}
+    <div class="col-lg-6 mb-4 page-item" data-title="{{ page.data.title | downcase }}" data-content="{{ page.content | strip_html | downcase | escape }}" data-tags="{% if page.data.tags %}{{ page.data.tags | join: ' ' | downcase }}{% endif %}">
+        <article class="card h-100 border-0 shadow-sm post-list-item">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <div>
+                        <time class="text-muted small">{{ page.date | date }}</time>
+                        {% if page.data.author %}
+                        <div class="text-muted small">
+                            <i class="bi bi-person me-1"></i>{{ page.data.author }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <h3 class="h5 fw-bold mb-3">
+                    <a href="{{ page.url }}" class="text-decoration-none stretched-link">
+                        {{ page.data.title }}
+                    </a>
+                </h3>
+                
+                {% if page.data.description %}
+                <div class="text-muted mb-3">{{ page.data.description | markdown_no_links | truncate: 150 }}</div>
+                {% endif %}
+                
+                {% if page.data.tags and page.data.tags.size > 0 %}
+                <div class="d-flex flex-wrap gap-1">
+                    {% for tag in page.data.tags limit:4 %}
+                    <span class="badge bg-light text-dark border">
+                        <i class="bi bi-tag me-1"></i>{{ tag }}
+                    </span>
+                    {% endfor %}
+                    {% if page.data.tags.size > 4 %}
+                    <span class="badge bg-light text-muted border">
+                        +{{ page.data.tags.size | minus: 4 }} more
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </article>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- No Results Message -->
+<div id="noResults" class="text-center py-5" style="display: none;">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-5">
+            <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+            <h3 class="h5 fw-bold mt-3 mb-2">No guides found</h3>
+            <p class="text-muted mb-0">Try adjusting your search terms or filters.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const pagesContainer = document.getElementById('pagesContainer');
+    const noResults = document.getElementById('noResults');
+    const pageItems = document.querySelectorAll('.page-item');
+    
+    // Check for search parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    
+    // If search parameter exists, populate the search input and filter
+    if (searchParam) {
+        searchInput.value = searchParam;
+        filterPages();
+    }
+    
+    function filterPages() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let visibleCount = 0;
+        
+        pageItems.forEach(item => {
+            const title = item.dataset.title;
+            const content = item.dataset.content;
+            const tags = item.dataset.tags || '';
+            
+            const matchesSearch = !searchTerm || 
+                title.includes(searchTerm) || 
+                content.includes(searchTerm) ||
+                tags.includes(searchTerm);
+            
+            if (matchesSearch) {
+                item.style.display = 'block';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        if (visibleCount === 0) {
+            pagesContainer.style.display = 'none';
+            noResults.style.display = 'block';
+        } else {
+            pagesContainer.style.display = 'block';
+            noResults.style.display = 'none';
+        }
+    }
+    
+    function updateURL(searchTerm) {
+        const url = new URL(window.location);
+        if (searchTerm) {
+            url.searchParams.set('search', searchTerm);
+        } else {
+            url.searchParams.delete('search');
+        }
+        window.history.replaceState({}, '', url);
+    }
+    
+    searchInput.addEventListener('input', function() {
+        filterPages();
+        updateURL(searchInput.value);
+    });
+    
+    // Add smooth scrolling for search results
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const firstVisible = document.querySelector('.page-item[style*="block"]');
+            if (firstVisible) {
+                firstVisible.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    });
+});
+</script>

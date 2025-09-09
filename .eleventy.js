@@ -10,9 +10,18 @@ module.exports = function(eleventyConfig) {
   // Copy post images (jpg, jpeg, png, gif, webp files in post directories)
   eleventyConfig.addPassthroughCopy("src/posts/**/*.{jpg,jpeg,png,gif,webp}");
   
+  // Copy page images (jpg, jpeg, png, gif, webp files in page directories)
+  eleventyConfig.addPassthroughCopy("src/pages/**/*.{jpg,jpeg,png,gif,webp}");
+  
   // Add collections
   eleventyConfig.addCollection("posts", function(collectionApi) {
     return collectionApi.getFilteredByGlob("src/posts/*/*/*/index.md")
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+  });
+
+  // Add pages collection for guides
+  eleventyConfig.addCollection("pages", function(collectionApi) {
+    return collectionApi.getFilteredByGlob("src/pages/*/index.md")
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   });
 
