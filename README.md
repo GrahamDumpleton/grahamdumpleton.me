@@ -1,12 +1,87 @@
-# Blogger Post Extractor
+# Graham Dumpleton's Blog
 
-A collection of Python scripts for managing blog post data from Google Blogger.
+A modern static blog site for Graham Dumpleton, originally migrated from the Blogger site at [blog.dscpl.com.au](http://blog.dscpl.com.au). The site is built and managed using [Eleventy (11ty)](https://www.11ty.dev/) for fast, static site generation.
 
-## Scripts
+## About This Site
+
+This is the personal blog of Graham Dumpleton, software developer and creator of mod_wsgi, wrapt, and other open source projects. The blog covers topics including Python, WSGI, web development, deployment practices, and technical education.
+
+The site was migrated from Google Blogger using custom Python scripts to extract and convert the original content, then rebuilt as a modern static site using Eleventy for improved performance and maintainability.
+
+## Static Site Generation with Eleventy
+
+This blog is powered by [Eleventy (11ty)](https://www.11ty.dev/), a simpler static site generator that transforms content into a fast, modern website.
+
+### Quick Start
+
+Build the static site:
+```bash
+npm run build
+```
+
+Start development server with live reload:
+```bash
+npm run dev
+```
+
+Start development server without watch mode:
+```bash
+npm run serve
+```
+
+### Site Features
+
+- **Modern Design**: Responsive Bootstrap 5-based layout with dark/light mode toggle
+- **Fast Performance**: Static site generation for optimal loading speeds
+- **SEO Optimized**: Open Graph and Twitter Card meta tags for social sharing
+- **Syntax Highlighting**: Prism.js for beautiful code syntax highlighting
+- **Content Management**: Automatic post collection and organization by date
+- **Asset Optimization**: Automatic copying and optimization of images and CSS
+
+### Site Structure
+
+```
+src/
+├── _layouts/          # Liquid template layouts
+│   ├── base.liquid    # Main site layout
+│   └── post.liquid    # Individual post layout
+├── assets/            # Static assets (CSS, images)
+├── posts/             # Blog posts organized by date
+│   └── YYYY/MM/       # Year/Month structure
+└── index.liquid       # Homepage template
+```
+
+### Content Management
+
+Posts are automatically processed from Markdown files with YAML front matter:
+- Each post directory contains `index.md` with metadata and content
+- Posts are automatically collected and sorted by date (newest first)
+- Images are automatically copied and linked from post directories
+- Tags and metadata are preserved from the original Blogger posts
+
+### Customization
+
+The site can be customized by modifying:
+- **Layouts**: Edit files in `src/_layouts/` to change page structure
+- **Styling**: Modify `src/assets/css/style.css` for custom styles
+- **Configuration**: Update `.eleventy.js` for site-wide settings
+- **Content**: Add new pages in `src/` or modify existing posts
+
+### 11ty Configuration
+
+The site is configured via `.eleventy.js` with:
+- **Template Engine**: Liquid templates for flexible content rendering
+- **Collections**: Organized blog posts with automatic sorting
+- **Custom Filters**: Date formatting, excerpt generation, and content processing
+- **Asset Management**: Automatic copying of CSS, images, and other static files
+
+## Blogger Migration Scripts
+
+The following Python scripts were used to migrate content from the original Blogger site:
 
 ### 1. Post Downloader (`download_posts.py`)
 
-Downloads web pages from URLs in the posts metadata and saves them to organized subdirectories.
+Downloads web pages from URLs in the posts metadata and saves them to organized subdirectories for migration from Blogger.
 
 **Usage:**
 
@@ -56,7 +131,7 @@ Each post is saved in its own subdirectory named after the HTML filename (withou
 
 ### 2. Post Extractor (`extract_post.py`)
 
-Extracts blog post data from Google Blogger HTML files and converts them to structured formats.
+Extracts blog post data from Google Blogger HTML files and converts them to structured formats suitable for Eleventy.
 
 **Usage:**
 
