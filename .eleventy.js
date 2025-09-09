@@ -1,5 +1,8 @@
 const { feedPlugin } = require("@11ty/eleventy-plugin-rss");
 
+// RSS feed cutoff date - posts older than this date will not appear in the RSS feed
+const RSS_CUTOFF_DATE = new Date('2025-01-01');
+
 module.exports = function(eleventyConfig) {
   // Copy static assets
   eleventyConfig.addPassthroughCopy("src/assets");
@@ -17,6 +20,7 @@ module.exports = function(eleventyConfig) {
   // The feedPlugin seems to reverse the collection internally, so we sort oldest first
   eleventyConfig.addCollection("rssPosts", function(collectionApi) {
     return collectionApi.getFilteredByGlob("src/posts/*/*/*/index.md")
+      .filter(post => new Date(post.date) >= RSS_CUTOFF_DATE)
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   });
   
@@ -98,7 +102,7 @@ module.exports = function(eleventyConfig) {
 		},
 		metadata: {
 			language: "en",
-			title: "Graham Dumpleton's Blog",
+			title: "Graham Dumpleton",
 			subtitle: "Technical blog posts about Python, web development, WSGI, mod_wsgi, and more",
 			base: "https://grahamdumpleton.me/",
 			author: {
