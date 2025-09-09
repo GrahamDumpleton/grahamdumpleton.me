@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html class='v2' dir='ltr' lang='en'>
+<head>
+<link href='https://www.blogger.com/static/v1/widgets/2508126174-css_bundle_v2.css' rel='stylesheet' type='text/css'/>
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='blogger' name='generator'/>
+<link href='http://blog.dscpl.com.au/favicon.ico' rel='icon' type='image/x-icon'/>
+<link href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html' rel='canonical'/>
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Graham Dumpleton - RSS" href="http://blog.dscpl.com.au/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Graham Dumpleton - Atom" href="https://www.blogger.com/feeds/2363643920942057324/posts/default" />
+
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/917687300411853962/comments/default" />
+<!--Can't find substitution for tag [blog.ieCssRetrofitLinks]-->
+<meta content='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html' property='og:url'/>
+<meta content='Python virtual environments and Docker.' property='og:title'/>
+<meta content='When creating a Docker base image for running Python applications, you have various choices for how you can get Python installed. You can in...' property='og:description'/>
+<title>Graham Dumpleton: Python virtual environments and Docker.</title>
+<style id='page-skin-1' type='text/css'><!--
+/*
+-----------------------------------------------
+Blogger Template Style
+Name:     Simple
+Designer: Blogger
+URL:      www.blogger.com
+----------------------------------------------- */
+/* Content
+----------------------------------------------- */
+body {
+font: normal normal 12px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #222222;
+background: #66bbdd none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 {
+font-size: 22px;
+}
+a:link {
+text-decoration:none;
+color: #2187bb;
+}
+a:visited {
+text-decoration:none;
+color: #888888;
+}
+a:hover {
+text-decoration:underline;
+color: #32aaff;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #ffffff;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #3299bb;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #3299bb;
+}
+.Header .description {
+font-size: 140%;
+color: #777777;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #eeeeee;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #eeeeee;
+border-left: 0 solid #eeeeee;
+border-right: 0 solid #eeeeee;
+}
+.tabs-inner .widget ul {
+background: #f5f5f5 url(https://resources.blogblog.com/blogblog/data/1kt/simple/gradients_light.png) repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #eeeeee;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 14px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #ffffff;
+border-right: 1px solid #eeeeee;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #000000;
+background-color: #eeeeee;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #eeeeee;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #eeeeee;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #eeeeee;
+}
+/* Headings
+----------------------------------------------- */
+div.widget > h2,
+div.widget h2.title {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #000000;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+h2.date-header {
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+}
+.date-header span {
+background-color: transparent;
+color: #222222;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 22px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 2px;
+background: #ffffff;
+border: 1px solid #eeeeee;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 5px;
+}
+.post-body .tr-caption-container {
+color: #222222;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #666666;
+background-color: #f9f9f9;
+border-bottom: 1px solid #eeeeee;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #eeeeee;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #eeeeee;
+}
+/* Comments
+----------------------------------------------- */
+.comments .comments-content .icon.blog-author {
+background-repeat: no-repeat;
+background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9sLFwMeCjjhcOMAAAD+SURBVDjLtZSvTgNBEIe/WRRnm3U8RC1neQdsm1zSBIU9VVF1FkUguQQsD9ITmD7ECZIJSE4OZo9stoVjC/zc7ky+zH9hXwVwDpTAWWLrgS3QAe8AZgaAJI5zYAmc8r0G4AHYHQKVwII8PZrZFsBFkeRCABYiMh9BRUhnSkPTNCtVXYXURi1FpBDgArj8QU1eVXUzfnjv7yP7kwu1mYrkWlU33vs1QNu2qU8pwN0UpKoqokjWwCztrMuBhEhmh8bD5UDqur75asbcX0BGUB9/HAMB+r32hznJgXy2v0sGLBcyAJ1EK3LFcbo1s91JeLwAbwGYu7TP/3ZGfnXYPgAVNngtqatUNgAAAABJRU5ErkJggg==);
+}
+.comments .comments-content .loadmore a {
+border-top: 1px solid #999999;
+border-bottom: 1px solid #999999;
+}
+.comments .comment-thread.inline-thread {
+background-color: #f9f9f9;
+}
+.comments .continue {
+border-top: 2px solid #999999;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #eeeeee;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #ffffff;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #ffffff;
+}
+.mobile-index-contents {
+color: #222222;
+}
+.mobile-link-button {
+background-color: #2187bb;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #eeeeee;
+color: #000000;
+border-top: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #eeeeee;
+}
+
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 1020px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 1020px;
+max-width: 1020px;
+_width: 1020px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 200px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 200px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("200px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 200px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 200px;
+margin-right: -200px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+body#layout div.add_widget {
+padding: 8px;
+}
+body#layout div.add_widget a {
+margin-left: 32px;
+}
+--></style>
+<link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' media='none' onload='if(media!=&#39;all&#39;)media=&#39;all&#39;' rel='stylesheet'/><noscript><link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' rel='stylesheet'/></noscript>
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+
+<!-- data-ad-client=ca-pub-6433235630058377 -->
+
+</head>
+<body class='loading variant-pale'>
+<div class='navbar section' id='navbar' name='Navbar'><div class='widget Navbar' data-version='1' id='Navbar1'><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/2363643920942057324?po\x3d917687300411853962\x26origin\x3dhttp://blog.dscpl.com.au',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script><script type="text/javascript">
+(function() {
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = '//pagead2.googlesyndication.com/pagead/js/google_top_exp.js';
+var head = document.getElementsByTagName('head')[0];
+if (head) {
+head.appendChild(script);
+}})();
+</script>
+</div></div>
+<div class='body-fauxcolumns'>
+<div class='fauxcolumn-outer body-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content'>
+<div class='content-fauxcolumns'>
+<div class='fauxcolumn-outer content-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content-outer'>
+<div class='content-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='fauxborder-right content-fauxborder-right'></div>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='header-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='fauxborder-right header-fauxborder-right'></div>
+<div class='region-inner header-inner'>
+<div class='header section' id='header' name='Header'><div class='widget Header' data-version='1' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://blog.dscpl.com.au/'>
+Graham Dumpleton
+</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>
+</span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='header-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</header>
+<div class='tabs-outer'>
+<div class='tabs-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left tabs-fauxborder-left'>
+<div class='fauxborder-right tabs-fauxborder-right'></div>
+<div class='region-inner tabs-inner'>
+<div class='tabs no-items section' id='crosscol' name='Cross-Column'></div>
+<div class='tabs no-items section' id='crosscol-overflow' name='Cross-Column 2'></div>
+</div>
+</div>
+<div class='tabs-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='main-outer'>
+<div class='main-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='fauxborder-right main-fauxborder-right'></div>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<div class='fauxcolumn-outer fauxcolumn-center-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-left-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-right-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main' name='Main'><div class='widget Blog' data-version='1' id='Blog1'>
+<div class='blog-posts hfeed'>
+
+          <div class="date-outer">
+        
+<h2 class='date-header'><span>Thursday, January 14, 2016</span></h2>
+
+          <div class="date-posts">
+        
+<div class='post-outer'>
+<div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<meta content='2363643920942057324' itemprop='blogId'/>
+<meta content='917687300411853962' itemprop='postId'/>
+<a name='917687300411853962'></a>
+<h3 class='post-title entry-title' itemprop='name'>
+Python virtual environments and Docker.
+</h3>
+<div class='post-header'>
+<div class='post-header-line-1'></div>
+</div>
+<div class='post-body entry-content' id='post-body-917687300411853962' itemprop='description articleBody'>
+<p>When creating a Docker base image for running Python applications, you have various choices for how you can get Python installed. You can install whatever Python version is supplied by your operating system. You can use Python packages from separate repositories such as&#160;the&#160;<a href="https://www.softwarecollections.org">Software Collections</a>&#160;(SCL) repository for CentOS, or the&#160;<a href="https://launchpad.net/~fkrull/+archive/ubuntu/deadsnakes">dead snakes</a>&#160;repository for Debian.&#160;Alternatively, you could install Python from source code.</p>
+<p>Once you have your base image constructed, you then need to work out the strategy you are going to use for installing any Python modules you require in a derived image for your Python application. You could also source these from operating system package repositories, or you could instead install them from the Python Package Index (PyPi).</p>
+<p>How you go about installing Python packages can complicate things though and you might get some unexpected results.</p>
+<p>The purpose of this blog post is to go through some of the issues that can arise, what best practices are to deal with them and whether a Python virtual environment should be used.</p>
+<h1>Installing Python packages</h1>
+<p>There are two primary options for installing Python packages.</p>
+<p>If you are using the operating system supplied Python installation, or are using the SCL repository for CentOS, then many Python modules may also be packaged up for those systems. You can therefore use the operating system packaging tools to install them that way.</p>
+<p>The alternative is to install packages from PyPi using &#8216;pip&#8217;. So rather than coming from the operating system package repository as a pre-built package, the software for a package is pulled down from PyPi, unpacked, compiled if necessary and then installed.</p>
+<p>Problems will arise though when these two different methods are used in the one Python installation.</p>
+<p>To illustrate the problem, consider the scenario where you are using the SCL repository for CentOS.</p>
+<blockquote>
+<pre>Installing:<br /> python27 x86_64 1.1-20.el7 centos-sclo-rh 4.8 k<br />Installing for dependencies:<br /> dwz x86_64 0.11-3.el7 base 99 k<br /> iso-codes noarch 3.46-2.el7 base 2.7 M<br /> perl-srpm-macros noarch 1-8.el7 base 4.6 k<br /> python27-python x86_64 2.7.8-3.el7 centos-sclo-rh 81 k<br /> python27-python-babel noarch 0.9.6-8.el7 centos-sclo-rh 1.4 M<br /> python27-python-devel x86_64 2.7.8-3.el7 centos-sclo-rh 384 k<br /> python27-python-docutils noarch 0.11-1.el7 centos-sclo-rh 1.5 M<br /> python27-python-jinja2 noarch 2.6-11.el7 centos-sclo-rh 518 k<br /> python27-python-libs x86_64 2.7.8-3.el7 centos-sclo-rh 5.6 M<br /> python27-python-markupsafe x86_64 0.11-11.el7 centos-sclo-rh 25 k<br /> python27-python-nose noarch 1.3.0-2.el7 centos-sclo-rh 274 k<br /> python27-python-pip noarch 1.5.6-5.el7 centos-sclo-rh 1.3 M<br /> python27-python-pygments noarch 1.5-2.el7 centos-sclo-rh 774 k<br /> python27-python-setuptools noarch 0.9.8-5.el7 centos-sclo-rh 400 k<br /> python27-python-simplejson x86_64 3.2.0-3.el7 centos-sclo-rh 173 k<br /> python27-python-sphinx noarch 1.1.3-8.el7 centos-sclo-rh 1.1 M<br /> python27-python-sqlalchemy x86_64 0.7.9-3.el7 centos-sclo-rh 2.0 M<br /> python27-python-virtualenv noarch 1.10.1-2.el7 centos-sclo-rh 1.3 M<br /> python27-python-werkzeug noarch 0.8.3-5.el7 centos-sclo-rh 534 k<br /> python27-python-wheel noarch 0.24.0-2.el7 centos-sclo-rh 76 k<br /> python27-runtime x86_64 1.1-20.el7 centos-sclo-rh 1.1 M<br /> redhat-rpm-config noarch 9.1.0-68.el7.centos base 77 k<br /> scl-utils-build x86_64 20130529-17.el7_1 base 17 k<br /> xml-common noarch 0.6.3-39.el7 base 26 k<br /> zip x86_64 3.0-10.el7 base 260 k</pre>
+</blockquote>
+<p>The only package we installed here was &#8216;python27&#8217;, yet because of dependencies listed for that package, Python modules for Jinja2, Werkzeug, SQLAlchemy and others, often used in Python web applications, were also installed.</p>
+<p>The reason this can be an issue is that versions of Python software from such repositories are often not the latest and are potentially quite out of date versions.</p>
+<p>Take &#8216;Jinja2' for instance, the most up to date version available at this time from PyPi is version 2.8. The version which was installed when we installed the &#8216;python27&#8217; package was a much older version 2.6.</p>
+<p>Remember now that this Docker image is intended to be used as a base image and users will install any Python modules on top. If one of the Python modules they required was &#8216;Jinja2&#8217; and they installed it, they may not get what they expect.</p>
+<blockquote>
+<pre>$ pip install Jinja2<br />Requirement already satisfied (use --upgrade to upgrade): Jinja2 in /opt/rh/python27/root/usr/lib/python2.7/site-packages<br />Cleaning up...</pre>
+<pre>$ pip freeze<br />Babel==0.9.6<br />Jinja2==2.6<br />MarkupSafe==0.11<br />Pygments==1.5<br />SQLAlchemy==0.7.9<br />Sphinx==1.1.3<br />Werkzeug==0.8.3<br />docutils==0.11<br />nose==1.3.0<br />simplejson==3.2.0<br />virtualenv==1.10.1<br />wheel==0.24.0<br />wsgiref==0.1.2</pre>
+</blockquote>
+<p>What happened was that when &#8216;pip&#8217; was run, it already found that &#8216;Jinja2&#8217; had been installed and so skipped installing it again.</p>
+<p>In the end, although the user was likely expecting to get the most up to date version of &#8216;Jinja2&#8217;, that isn&#8217;t what happened and they were left with version 2.6.</p>
+<p>Because the fact that installing a newer version was skipped was only a warning and doesn&#8217;t create an error, the user would likely be oblivious to what happened. They would only find out when their application is running and starts misbehaving or giving errors due to their application being coded for the API of a newer version.&#160;</p>
+<h1>Forced updates and pinning</h1>
+<p>One possible solution to this problem is to always ensure that you supply the &#8216;-U&#8217; or &#8216;--upgrade&#8217; option to &#8216;pip&#8217; when it is run. This will force an update and reinstallation of the Python modules being installed to the latest version even if they are already installed.</p>
+<blockquote>
+<pre>$ pip install -U Jinja2<br />Downloading/unpacking Jinja2 from https://pypi.python.org/packages/2.7/J/Jinja2/Jinja2-2.8-py2.py3-none-any.whl#md5=75acb6f1abfc46ed75f4fd392f321ac2<br /> Downloading Jinja2-2.8-py2.py3-none-any.whl (263kB): 263kB downloaded<br />Downloading/unpacking MarkupSafe from https://pypi.python.org/packages/source/M/MarkupSafe/MarkupSafe-0.23.tar.gz#md5=f5ab3deee4c37cd6a922fb81e730da6e (from Jinja2)<br /> Downloading MarkupSafe-0.23.tar.gz<br /> Running setup.py (path:/tmp/pip-build-Sd86kU/MarkupSafe/setup.py) egg_info for package MarkupSafe</pre>
+<pre>Installing collected packages: Jinja2, MarkupSafe<br /> Running setup.py install for MarkupSafe</pre>
+<pre>building 'markupsafe._speedups' extension<br />...<br />Successfully installed Jinja2 MarkupSafe<br />Cleaning up...<br />&#160;<br />$ pip freeze<br />Babel==0.9.6<br />Jinja2==2.8<br />MarkupSafe==0.23<br />Pygments==1.5<br />SQLAlchemy==0.7.9<br />Sphinx==1.1.3<br />Werkzeug==0.8.3<br />docutils==0.11<br />nose==1.3.0<br />simplejson==3.2.0<br />virtualenv==1.10.1<br />wheel==0.24.0<br />wsgiref==0.1.2</pre>
+</blockquote>
+<p>Although this will ensure we have the latest version, it has the potential to cause other problems.</p>
+<p>The issue here is if a newer version of a package which was installed had a backwards incompatible change. This could cause a failure if not all other packages which used that package, which were already installed, weren&#8217;t also updated. If a command was then run which used the package that was not updated, then it would fail in trying to use the now incompatible package.</p>
+<p>Pinning packages by specifying a specific version on the command line when running &#8216;pip&#8217;, or in a &#8216;requirements.txt&#8217; file doesn&#8217;t really help either. This is because any update to a newer version, regardless of whether it is the latest or not, risks causing a failure of a Python module installed due to some dependency in an operating system package.</p>
+<p>A further concern when using &#8216;pip&#8217; to install a newer version of a Python module that already exists is the fact that you are replacing files which may have been installed by a package when using the system packaging tools.&#160;In general this wouldn&#8217;t be an issue when using Docker as you wouldn&#8217;t ever subsequently remove a package installed using the system packaging tools in the life of that Docker container. It is still though not ideal that you are updating the same Python module and files with different packaging tools.</p>
+<p>The short of it is that it is simply bad practice to use &#8216;pip&#8217; to install Python modules into a Python installation, setup using system packaging tools, which has the same Python modules already installed that you are trying to add.</p>
+<h1>Per user package directory</h1>
+<p>If installing Python modules using &#8216;pip' into the same directory as where there is an existing version installed using the system packaging tools is a problem, what about using the per user package directory?</p>
+<p>When using &#8216;pip&#8217; this can be achieved using the &#8216;--user&#8217; option. There is similarly a &#8216;--user&#8217; option that can be used when running a &#8216;setup.py&#8217; file for a package when installing it.</p>
+<p>In both cases, rather than the Python modules being installed into the main &#8216;site-packages&#8217; directory of the Python installation, they are installed into a special directory in the users home directory. For Linux this directory is located at:</p>
+<blockquote>
+<pre>$HOME/.local/lib/pythonX.Y/site-packages</pre>
+</blockquote>
+<p>The &#8216;X.Y&#8217; will depend on the version of Python being used.</p>
+<p>Although this at least eliminates conflicts where &#8216;pip&#8217; could replace files installed by the system packaging tools, it doesn&#8217;t resolve the issue with the version of a package being updated without again having to resort to using the &#8216;-U&#8217; or &#8216;--update&#8217; option to &#8216;pip&#8217;.</p>
+<blockquote>
+<pre>$ pip install --user Jinja2<br />Requirement already satisfied (use --upgrade to upgrade): Jinja2 in /opt/rh/python27/root/usr/lib/python2.7/site-packages<br />Cleaning up...</pre>
+</blockquote>
+<p>Per user package directories are therefore not really a solution either.</p>
+<h1>Python virtual environments</h1>
+<p>It is in part because of the problems arising when trying to use a single common Python installation with multiple applications, where different Python module versions were required, that the idea of an isolated Python virtual environment came about. The most popular such tool for creating an isolated Python environment is &#8216;virtualenv&#8217;.</p>
+<p>Although the intent with Docker is that it would only hold and run the one application, could we still use a Python virtual environment anyway, thus avoiding the problems described.</p>
+<blockquote>
+<pre>$ virtualenv venv<br />New python executable in venv/bin/python2<br />Also creating executable in venv/bin/python<br />Installing Setuptools...done.<br />Installing Pip...done.</pre>
+<pre>$ source venv/bin/activate</pre>
+<pre>(venv)$ pip install Jinja2<br />Downloading/unpacking Jinja2<br /> Downloading Jinja2-2.8.tar.gz (357kB): 357kB downloaded<br /> Running setup.py egg_info for package Jinja2</pre>
+<pre>Downloading/unpacking MarkupSafe (from Jinja2)<br /> Downloading MarkupSafe-0.23.tar.gz<br /> Running setup.py egg_info for package MarkupSafe</pre>
+<pre>Installing collected packages: Jinja2, MarkupSafe<br /> Running setup.py install for Jinja2<br /> Running setup.py install for MarkupSafe</pre>
+<pre>building 'markupsafe._speedups' extension<br /> ...<br />Successfully installed Jinja2 MarkupSafe<br />Cleaning up...</pre>
+</blockquote>
+<p>And the answer is a most definite yes.</p>
+<p>The reason that the Python virtual environment works is because it creates its own fresh &#8216;site-packages&#8217; directory for installing new Python modules which is independent of the &#8216;site-packages&#8217; directory of the main Python installation.</p>
+<blockquote>
+<pre>$ pip freeze<br />Jinja2==2.8<br />MarkupSafe==0.23<br />wsgiref==0.1.2</pre>
+</blockquote>
+<p>The only Python packages that will be found in the &#8216;site-packages&#8217; directory will be &#8216;pip&#8217; itself, and the couple of packages it requires such as &#8216;setuptools&#8217;, and the additional packages that we install. There is therefore no danger of conflicts with any packages that were installed into the main Python installation by virtue of operating system packages.</p>
+<p>Note that this wasn&#8217;t always the case. Originally the &#8216;virtualenv&#8217; tool when creating a Python virtual environment would add to what was in the Python &#8216;site-packages&#8217; directory, rather than overriding it. Back then it was necessary to provide the &#8216;--no-site-packages&#8217; option to &#8216;virtualenv&#8217; to have it work as it does now. The default was changed because the sorts of problems described here would still occur if the &#8216;site-packages&#8217; directory wasn&#8217;t completely distinct.</p>
+<p>The option does exist in &#8216;virtualenv&#8217; to set up the virtual environment with the old behaviour by a command line option, but you really do not want to go there.</p>
+<p>And if you are wondering why &#8216;wsgiref&#8217; shows up in the &#8216;pip freeze&#8217; above even though it wasn&#8217;t installed as a separate package. It seems that even though &#8216;wsgiref&#8217; is part of the Python standard library, &#8216;setuptools&#8217; still thinks it is a distinct versioned package when using Python 2.7. As much as it is a bit confusing, its presence in the output of &#8216;pip freeze&#8217; can be ignored. You may want to ensure you don&#8217;t list &#8216;wsgiref&#8217; in a &#8216;requirements.txt' file though as you might then accidentally install it from PyPi, which could be an older version of the source code than what the Python standard library contains.</p>
+<h1>Building Python from source</h1>
+<p>So although we are only bundling up the one application in the Docker container, if using a Python version which is installed from an operating system package repository, or an associated package repository, a Python virtual environment is very much recommended to avoid problems.</p>
+<p>What now for the case where the Python version has been installed from source code?</p>
+<p>Well because we are compiling from source code and would be installing into a location distinct from the main system Python, there is no possibility for additional Python packages to get installed. The &#8216;site-packages&#8217; directory would therefore be empty.</p>
+<p>In order to allow further packages to be installed, we would at least install &#8216;pip&#8217;, but as for a Python virtual environment only &#8216;pip&#8217; and what it requires such as &#8216;setuptools&#8217; would be installed. Any further Python modules would also be installed using &#8216;pip&#8217; and so there is no conflict with any Python modules installed via system packaging tools.</p>
+<p>This means that strictly speaking if installing Python from source code in a Docker container, we could skip the use of a Python virtual environment. The only issue, depending on what user was used to install this Python version, would be whether file system permissions need to be fixed up to allow an arbitrary user to install subsequent Python modules during any build phase for the application in creating a derived image.</p>
+<h1>Setting up a virtual environment</h1>
+<p>What we therefore have is that if you are using a version of Python which comes as part of the operating system packages, or which is installed from a companion repository such as SCL for CentOS, you should really always ensure that you use a Python virtual environment. Do not attempt to install Python modules using &#8216;pip&#8217; into the &#8216;site-packages&#8217; directory for the main Python installation and avoid using Python packages from the operating system package repository.</p>
+<p>If you have compiled Python from source code as part of your Docker image, there is no strict need to use a Python virtual environment. Using tools like &#8216;pip&#8217; to install Python modules direct into the &#8217;site-packages&#8217; directory of the separate Python installation should be fine.</p>
+<p>The question now is what is the best way to set up any Python virtual environment when it is used. What file system permissions should be used to allow both &#8216;root&#8217; and non &#8216;root&#8217; users to install packages. How should the Python virtual environment be activated or enabled so that it is always used in the Docker container.</p>
+<p>All these issues I will discuss in a followup to this blog post.</p>
+<div style='clear: both;'></div>
+</div>
+<div class='post-footer'>
+<div class='post-footer-line post-footer-line-1'>
+<span class='post-author vcard'>
+Posted by
+<span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
+<meta content='https://www.blogger.com/profile/13609779138164842374' itemprop='url'/>
+<a class='g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' title='author profile'>
+<span itemprop='name'>Graham Dumpleton</span>
+</a>
+</span>
+</span>
+<span class='post-timestamp'>
+at
+<meta content='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html' itemprop='url'/>
+<a class='timestamp-link' href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html' rel='bookmark' title='permanent link'><abbr class='published' itemprop='datePublished' title='2016-01-14T21:46:00+11:00'>9:46&#8239;PM</abbr></a>
+</span>
+<span class='post-comment-link'>
+</span>
+<span class='post-icons'>
+<span class='item-action'>
+<a href='https://www.blogger.com/email-post/2363643920942057324/917687300411853962' title='Email Post'>
+<img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
+</a>
+</span>
+</span>
+<div class='post-share-buttons goog-inline-block'>
+<a class='goog-inline-block share-button sb-email' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=917687300411853962&target=email' target='_blank' title='Email This'><span class='share-button-link-text'>Email This</span></a><a class='goog-inline-block share-button sb-blog' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=917687300411853962&target=blog' onclick='window.open(this.href, "_blank", "height=270,width=475"); return false;' target='_blank' title='BlogThis!'><span class='share-button-link-text'>BlogThis!</span></a><a class='goog-inline-block share-button sb-twitter' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=917687300411853962&target=twitter' target='_blank' title='Share to X'><span class='share-button-link-text'>Share to X</span></a><a class='goog-inline-block share-button sb-facebook' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=917687300411853962&target=facebook' onclick='window.open(this.href, "_blank", "height=430,width=640"); return false;' target='_blank' title='Share to Facebook'><span class='share-button-link-text'>Share to Facebook</span></a><a class='goog-inline-block share-button sb-pinterest' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=917687300411853962&target=pinterest' target='_blank' title='Share to Pinterest'><span class='share-button-link-text'>Share to Pinterest</span></a>
+</div>
+</div>
+<div class='post-footer-line post-footer-line-2'>
+<span class='post-labels'>
+Labels:
+<a href='http://blog.dscpl.com.au/search/label/docker' rel='tag'>docker</a>,
+<a href='http://blog.dscpl.com.au/search/label/python' rel='tag'>python</a>
+</span>
+</div>
+<div class='post-footer-line post-footer-line-3'>
+<span class='post-location'>
+</span>
+</div>
+</div>
+</div>
+<div class='comments' id='comments'>
+<a name='comments'></a>
+<h4>11 comments:</h4>
+<div id='Blog1_comments-block-wrapper'>
+<dl class='avatar-comment-indent' id='comments-block'>
+<dt class='comment-author ' id='c1502501392372660173'>
+<a name='c1502501392372660173'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/05730935458962182010" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1502501392372660173-05730935458962182010"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Gyuri">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/05730935458962182010' rel='nofollow'>Gyuri</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1502501392372660173'>
+<p>
+Nice post, thanks! But don&#39; forget about anaconda/miniconda docker images. I think they can be used quite effectively with conda environments.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1452892024270#c1502501392372660173' title='comment permalink'>
+January 16, 2016 at 8:07&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1449595831'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1502501392372660173' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c8424320985109958245'>
+<a name='c8424320985109958245'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-8424320985109958245-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-8424320985109958245'>
+<p>
+Doesn&#39;t matter what Python distribution you use, if they preinstall some Python modules for you, problems can arise if using &#39;pip&#39;. If they don&#39;t use &#39;pip&#39; and require some other packaging tool that you must use to install Python modules, then it might just cause its own problems. One needs to dig deeper into how different Python installations are installed, setup and how it is expected they be used. You can&#39;t just assume that everything will work smoothly.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1452892435742#c8424320985109958245' title='comment permalink'>
+January 16, 2016 at 8:13&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/8424320985109958245' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c4421260140910211865'>
+<a name='c4421260140910211865'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/07169019965255079946" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4421260140910211865-07169019965255079946"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Rodrigo Valin">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/07169019965255079946' rel='nofollow'>Rodrigo Valin</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4421260140910211865'>
+<p>
+If Python2.7 is what you need, maybe you should try another disto, one with Python 2.7 as a base. I also would like to know why CentOS is packaging Python with dependencies on something not on the standard distribution.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1453119581195#c4421260140910211865' title='comment permalink'>
+January 18, 2016 at 11:19&#8239;PM
+</a>
+<span class='item-control blog-admin pid-707747775'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4421260140910211865' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c3189919561294038916'>
+<a name='c3189919561294038916'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-3189919561294038916-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-3189919561294038916'>
+<p>
+CentOS does have Python 2.7 as a base, but it happens to be 2.7.5. SCL is at least newer at 2.7.8. I expect that the base version with CentOS is going to be the same as packaged by the same people. Other Linux distributions could just as easily have similar issues.<br /><br />Overall the issue has noting to do with what distribution you use as anything where the Python version and Python modules are packaged using the operating system packaging system will suffer the same sorts of issues whether additional Python modules are installed implicitly or explicitly.<br /><br />So not a question of what I choose as for what I am doing with ultimately providing Docker base images for Python, I don&#39;t have luxury of making the choice as to what is used as I am not the end consumer. I have to provide Docker base images for a range of common Linux distributions because people will have their favourites, or even a requirement to use specific Linux distributions. I have to therefore come up with best practices across different Linux distributions and the point of the post is just to let people know what I am finding so you can ensure you are also applying best practices and not doing something that will cause you problems down the track.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1453265712741#c3189919561294038916' title='comment permalink'>
+January 20, 2016 at 3:55&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/3189919561294038916' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c3268191588811312104'>
+<a name='c3268191588811312104'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><img src="//resources.blogblog.com/img/blank.gif" width="35" height="35" alt="" title="Anonymous">
+
+</span></div>
+Anonymous
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-3268191588811312104'>
+<p>
+Graham, thanks for the infromative, well-written post. Today I&#39;m learning how to create a docker image for my Flask application, and this will set me in the right direction.<br /><br />One suggestion for formatting your blog post: put a &quot;Summary&quot; section right at the top that gets right to the point, which here is something like &quot;in most cases, you should use a virtualenv when packaging Python applications with Docker, even if you only need one set of Python packages in a container.&quot; As a blogger myself, I want people to read my entire post with the hows and whys, but I also want people who are in a hurry to get the most important part of the message right away!<br /><br />Chris Martin
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1458259841347#c3268191588811312104' title='comment permalink'>
+March 18, 2016 at 11:10&#8239;AM
+</a>
+<span class='item-control blog-admin pid-159164253'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/3268191588811312104' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c6815909848638266730'>
+<a name='c6815909848638266730'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6815909848638266730-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6815909848638266730'>
+<p>
+@Chris Have you considered not rolling your own image and instead use someone else&#39;s base image?<br /><br />I have my own base image which I introduced at:<br /><br />* http://blog.dscpl.com.au/2014/12/hosting-python-wsgi-applications-using.html<br /><br />and also covered in subsequent blog posts.<br /><br />Unfortunately I do need to deprecate that image because Docker Hub registry automated builds no longer work for any Docker image which uses setcap for Linux capabilities, even though they recommend that as way of avoiding running as root in their documentation.<br /><br />I have a replacement image in the works which is even better and supports multiple WSGI servers, or your own scripts or even ASYNC web servers for Python. It is already available, but design of some of the internals of how it works not finalised.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1458260215234#c6815909848638266730' title='comment permalink'>
+March 18, 2016 at 11:16&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6815909848638266730' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c2247094470763552988'>
+<a name='c2247094470763552988'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><img src="//resources.blogblog.com/img/blank.gif" width="35" height="35" alt="" title="Anonymous">
+
+</span></div>
+Anonymous
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-2247094470763552988'>
+<p>
+Graham, I ended up rolling my own image based on Debian. So far it&#39;s just for testing/evaluation purposes so I&#39;m using Flask&#39;s built-in WSGI server (not a real WSGI server for production use).
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1458333312940#c2247094470763552988' title='comment permalink'>
+March 19, 2016 at 7:35&#8239;AM
+</a>
+<span class='item-control blog-admin pid-159164253'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/2247094470763552988' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c1371395304087963852'>
+<a name='c1371395304087963852'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/07518753003213433012" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1371395304087963852-07518753003213433012"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Gavin">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/07518753003213433012' rel='nofollow'>Gavin</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1371395304087963852'>
+<p>
+Chris - you could also install python packages directly on the base image using a requirements file-<br /><br />pip install -r requirements.txt<br /><br />This would solve the problem of not upgrading a pre-installed library (as in your example of Jinja2 above). 
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1465834334109#c1371395304087963852' title='comment permalink'>
+June 14, 2016 at 2:12&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1189840190'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1371395304087963852' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c917927368531516257'>
+<a name='c917927368531516257'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-917927368531516257-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-917927368531516257'>
+<p>
+@Gavin How would that solve the problem? You are going to have the same sorts of problems when installing into a system Python. If you packages aren&#39;t pinned to a specific version and a version already exists, it will not install a newer version. The only reliable solution and which is regarded as best practice is to use a Python virtual environment.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1465862536714#c917927368531516257' title='comment permalink'>
+June 14, 2016 at 10:02&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/917927368531516257' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c5176073259515872176'>
+<a name='c5176073259515872176'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/11552346445375815058" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5176073259515872176-11552346445375815058"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="axe">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/11552346445375815058' rel='nofollow'>axe</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5176073259515872176'>
+<p>
+using default <br />pip install flask <br />in docker container gives me error on ubuntu:14.04 base image.<br />and I guess using a virtual env maybe works <br />.but how could we use virtualenv in docker containter???<br />could you plz post a dockerfile on github???<br /><br />
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1486736195722#c5176073259515872176' title='comment permalink'>
+February 11, 2017 at 1:16&#8239;AM
+</a>
+<span class='item-control blog-admin pid-608629526'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5176073259515872176' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c1469873677182197585'>
+<a name='c1469873677182197585'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1469873677182197585-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1469873677182197585'>
+<p>
+@axe You are better off asking on StackOverflow if you are after help on how to solve a specific issue you are having and need help debugging it.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html?showComment=1486878420320#c1469873677182197585' title='comment permalink'>
+February 12, 2017 at 4:47&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1469873677182197585' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+</dl>
+</div>
+<p class='comment-footer'>
+<a href='https://www.blogger.com/comment/fullpage/post/2363643920942057324/917687300411853962' onclick=''>Post a Comment</a>
+</p>
+</div>
+</div>
+
+        </div></div>
+      
+</div>
+<div class='blog-pager' id='blog-pager'>
+<span id='blog-pager-newer-link'>
+<a class='blog-pager-newer-link' href='http://blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html' id='Blog1_blog-pager-newer-link' title='Newer Post'>Newer Post</a>
+</span>
+<span id='blog-pager-older-link'>
+<a class='blog-pager-older-link' href='http://blog.dscpl.com.au/2016/01/roundup-of-docker-issues-when-hosting.html' id='Blog1_blog-pager-older-link' title='Older Post'>Older Post</a>
+</span>
+<a class='home-link' href='http://blog.dscpl.com.au/'>Home</a>
+</div>
+<div class='clear'></div>
+<div class='post-feeds'>
+<div class='feed-links'>
+Subscribe to:
+<a class='feed-link' href='http://blog.dscpl.com.au/feeds/917687300411853962/comments/default' target='_blank' type='application/atom+xml'>Post Comments (Atom)</a>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='column-left-outer'>
+<div class='column-left-inner'>
+<aside>
+</aside>
+</div>
+</div>
+<div class='column-right-outer'>
+<div class='column-right-inner'>
+<aside>
+<div class='sidebar section' id='sidebar-right-1'><div class='widget Profile' data-version='1' id='Profile1'>
+<h2>About Me</h2>
+<div class='widget-content'>
+<dl class='profile-datablock'>
+<dt class='profile-data'>
+<a class='profile-name-link g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' style='background-image: url(//www.blogger.com/img/logo-16.png);'>
+Graham Dumpleton
+</a>
+</dt>
+</dl>
+<a class='profile-link' href='https://www.blogger.com/profile/13609779138164842374' rel='author'>View my complete profile</a>
+<div class='clear'></div>
+</div>
+</div><div class='widget PageList' data-version='1' id='PageList1'>
+<h2>Quick Links</h2>
+<div class='widget-content'>
+<ul>
+<li>
+<a href='http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html'>Decorators and monkey patching.</a>
+</li>
+<li>
+<a href='http://blog.dscpl.com.au/p/using-python-with-docker.html'>Using Python with Docker.</a>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div><div class='widget BlogArchive' data-version='1' id='BlogArchive1'>
+<h2>Blog Archive</h2>
+<div class='widget-content'>
+<div id='ArchiveList'>
+<div id='BlogArchive1_ArchiveList'>
+<select id='BlogArchive1_ArchiveMenu'>
+<option value=''>Blog Archive</option>
+<option value='http://blog.dscpl.com.au/2019/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2018/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2018/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2018/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2018/01/'>January (1)</option>
+<option value='http://blog.dscpl.com.au/2017/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2016/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2016/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2016/07/'>July (1)</option>
+<option value='http://blog.dscpl.com.au/2016/04/'>April (2)</option>
+<option value='http://blog.dscpl.com.au/2016/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2016/02/'>February (2)</option>
+<option value='http://blog.dscpl.com.au/2016/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2015/12/'>December (6)</option>
+<option value='http://blog.dscpl.com.au/2015/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2015/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2015/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2015/06/'>June (5)</option>
+<option value='http://blog.dscpl.com.au/2015/05/'>May (7)</option>
+<option value='http://blog.dscpl.com.au/2015/04/'>April (4)</option>
+<option value='http://blog.dscpl.com.au/2015/03/'>March (4)</option>
+<option value='http://blog.dscpl.com.au/2015/01/'>January (2)</option>
+<option value='http://blog.dscpl.com.au/2014/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2014/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2014/09/'>September (7)</option>
+<option value='http://blog.dscpl.com.au/2014/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2014/05/'>May (1)</option>
+<option value='http://blog.dscpl.com.au/2014/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2014/02/'>February (4)</option>
+<option value='http://blog.dscpl.com.au/2014/01/'>January (8)</option>
+<option value='http://blog.dscpl.com.au/2013/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/10/'>October (4)</option>
+<option value='http://blog.dscpl.com.au/2012/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2011/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2011/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2011/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2011/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2011/01/'>January (5)</option>
+<option value='http://blog.dscpl.com.au/2010/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2010/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2010/08/'>August (2)</option>
+<option value='http://blog.dscpl.com.au/2010/06/'>June (2)</option>
+<option value='http://blog.dscpl.com.au/2010/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2010/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2010/03/'>March (3)</option>
+<option value='http://blog.dscpl.com.au/2009/11/'>November (4)</option>
+<option value='http://blog.dscpl.com.au/2009/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2009/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2009/08/'>August (3)</option>
+<option value='http://blog.dscpl.com.au/2009/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2009/04/'>April (5)</option>
+<option value='http://blog.dscpl.com.au/2009/03/'>March (5)</option>
+<option value='http://blog.dscpl.com.au/2009/02/'>February (1)</option>
+<option value='http://blog.dscpl.com.au/2008/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2008/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2008/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2007/11/'>November (2)</option>
+<option value='http://blog.dscpl.com.au/2007/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2007/09/'>September (3)</option>
+<option value='http://blog.dscpl.com.au/2007/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2007/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2007/03/'>March (2)</option>
+</select>
+</div>
+</div>
+<div class='clear'></div>
+</div>
+</div><div class='widget Label' data-version='1' id='Label1'>
+<h2>Labels</h2>
+<div class='widget-content list-label-widget-content'>
+<ul>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/python'>python</a>
+<span dir='ltr'>(111)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_wsgi'>mod_wsgi</a>
+<span dir='ltr'>(86)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wsgi'>wsgi</a>
+<span dir='ltr'>(58)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/apache'>apache</a>
+<span dir='ltr'>(35)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/docker'>docker</a>
+<span dir='ltr'>(34)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/openshift'>openshift</a>
+<span dir='ltr'>(26)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/decorators'>decorators</a>
+<span dir='ltr'>(15)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/django'>django</a>
+<span dir='ltr'>(13)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/kubernetes'>kubernetes</a>
+<span dir='ltr'>(12)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_python'>mod_python</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/red%20hat'>red hat</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/ipython'>ipython</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyterhub'>jupyterhub</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/new%20relic'>new relic</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wrapt'>wrapt</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/pycon'>pycon</a>
+<span dir='ltr'>(5)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/s2i'>s2i</a>
+<span dir='ltr'>(4)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/gunicorn'>gunicorn</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/uWSGI'>uWSGI</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/datadog'>datadog</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/nginx'>nginx</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/statsd'>statsd</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/web2py'>web2py</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/async'>async</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/dyndns53'>dyndns53</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/fastcgi'>fastcgi</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/heroku'>heroku</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyter'>jupyter</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/lektor'>lektor</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/php'>php</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/shiv'>shiv</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/testing'>testing</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/tornado'>tornado</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/warpdrive'>warpdrive</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/zipapp'>zipapp</a>
+<span dir='ltr'>(1)</span>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div></div>
+</aside>
+</div>
+</div>
+</div>
+<div style='clear: both'></div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+<div class='main-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<footer>
+<div class='footer-outer'>
+<div class='footer-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left footer-fauxborder-left'>
+<div class='fauxborder-right footer-fauxborder-right'></div>
+<div class='region-inner footer-inner'>
+<div class='foot section' id='footer-1'><div class='widget AdSense' data-version='1' id='AdSense1'>
+<div class='widget-content'>
+<script type="text/javascript"><!--
+google_ad_client="pub-6433235630058377";
+google_ad_host="pub-1556223355139109";
+google_ad_width=120;
+google_ad_height=600;
+google_ad_format="120x600_as";
+google_ad_type="text";
+google_ad_host_channel="0001";
+google_color_border="FFFFFF";
+google_color_bg="FFFFFF";
+google_color_link="999999";
+google_color_url="5588AA";
+google_color_text="666666";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<div class='clear'></div>
+</div>
+</div></div>
+<table border='0' cellpadding='0' cellspacing='0' class='section-columns columns-2'>
+<tbody>
+<tr>
+<td class='first columns-cell'>
+<div class='foot no-items section' id='footer-2-1'></div>
+</td>
+<td class='columns-cell'>
+<div class='foot no-items section' id='footer-2-2'></div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- outside of the include in order to lock Attribution widget -->
+<div class='foot section' id='footer-3' name='Footer'><div class='widget Attribution' data-version='1' id='Attribution1'>
+<div class='widget-content' style='text-align: center;'>
+Simple theme. Powered by <a href='https://www.blogger.com' target='_blank'>Blogger</a>.
+</div>
+<div class='clear'></div>
+</div></div>
+</div>
+</div>
+<div class='footer-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</footer>
+<!-- content -->
+</div>
+</div>
+<div class='content-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<script type='text/javascript'>
+    window.setTimeout(function() {
+        document.body.className = document.body.className.replace('loading', '');
+      }, 10);
+  </script>
+
+<script type="text/javascript" src="https://www.blogger.com/static/v1/widgets/552934507-widgets.js"></script>
+<script type='text/javascript'>
+window['__wavt'] = 'AOuZoY6yEBfUe-7gX7lZrW3vSf0OnPoV_A:1757388610371';_WidgetManager._Init('//www.blogger.com/rearrange?blogID\x3d2363643920942057324','//blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html','2363643920942057324');
+_WidgetManager._SetDataContext([{'name': 'blog', 'data': {'blogId': '2363643920942057324', 'title': 'Graham Dumpleton', 'url': 'http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html', 'canonicalUrl': 'http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html', 'homepageUrl': 'http://blog.dscpl.com.au/', 'searchUrl': 'http://blog.dscpl.com.au/search', 'canonicalHomepageUrl': 'http://blog.dscpl.com.au/', 'blogspotFaviconUrl': 'http://blog.dscpl.com.au/favicon.ico', 'bloggerUrl': 'https://www.blogger.com', 'hasCustomDomain': true, 'httpsEnabled': false, 'enabledCommentProfileImages': true, 'gPlusViewType': 'FILTERED_POSTMOD', 'adultContent': false, 'analyticsAccountNumber': '', 'encoding': 'UTF-8', 'locale': 'en', 'localeUnderscoreDelimited': 'en', 'languageDirection': 'ltr', 'isPrivate': false, 'isMobile': false, 'isMobileRequest': false, 'mobileClass': '', 'isPrivateBlog': false, 'isDynamicViewsAvailable': true, 'feedLinks': '\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default\x22 /\x3e\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/rss+xml\x22 title\x3d\x22Graham Dumpleton - RSS\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default?alt\x3drss\x22 /\x3e\n\x3clink rel\x3d\x22service.post\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22https://www.blogger.com/feeds/2363643920942057324/posts/default\x22 /\x3e\n\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/917687300411853962/comments/default\x22 /\x3e\n', 'meTag': '', 'adsenseClientId': 'ca-pub-6433235630058377', 'adsenseHostId': 'ca-host-pub-1556223355139109', 'adsenseHasAds': true, 'adsenseAutoAds': false, 'boqCommentIframeForm': true, 'loginRedirectParam': '', 'view': '', 'dynamicViewsCommentsSrc': '//www.blogblog.com/dynamicviews/4224c15c4e7c9321/js/comments.js', 'dynamicViewsScriptSrc': '//www.blogblog.com/dynamicviews/b4594f574ba3c273', 'plusOneApiSrc': 'https://apis.google.com/js/platform.js', 'disableGComments': true, 'interstitialAccepted': false, 'sharing': {'platforms': [{'name': 'Get link', 'key': 'link', 'shareMessage': 'Get link', 'target': ''}, {'name': 'Facebook', 'key': 'facebook', 'shareMessage': 'Share to Facebook', 'target': 'facebook'}, {'name': 'BlogThis!', 'key': 'blogThis', 'shareMessage': 'BlogThis!', 'target': 'blog'}, {'name': 'X', 'key': 'twitter', 'shareMessage': 'Share to X', 'target': 'twitter'}, {'name': 'Pinterest', 'key': 'pinterest', 'shareMessage': 'Share to Pinterest', 'target': 'pinterest'}, {'name': 'Email', 'key': 'email', 'shareMessage': 'Email', 'target': 'email'}], 'disableGooglePlus': true, 'googlePlusShareButtonWidth': 0, 'googlePlusBootstrap': '\x3cscript type\x3d\x22text/javascript\x22\x3ewindow.___gcfg \x3d {\x27lang\x27: \x27en\x27};\x3c/script\x3e'}, 'hasCustomJumpLinkMessage': false, 'jumpLinkMessage': 'Read more', 'pageType': 'item', 'postId': '917687300411853962', 'pageName': 'Python virtual environments and Docker.', 'pageTitle': 'Graham Dumpleton: Python virtual environments and Docker.'}}, {'name': 'features', 'data': {}}, {'name': 'messages', 'data': {'edit': 'Edit', 'linkCopiedToClipboard': 'Link copied to clipboard!', 'ok': 'Ok', 'postLink': 'Post Link'}}, {'name': 'template', 'data': {'name': 'Simple', 'localizedName': 'Simple', 'isResponsive': false, 'isAlternateRendering': false, 'isCustom': false, 'variant': 'pale', 'variantId': 'pale'}}, {'name': 'view', 'data': {'classic': {'name': 'classic', 'url': '?view\x3dclassic'}, 'flipcard': {'name': 'flipcard', 'url': '?view\x3dflipcard'}, 'magazine': {'name': 'magazine', 'url': '?view\x3dmagazine'}, 'mosaic': {'name': 'mosaic', 'url': '?view\x3dmosaic'}, 'sidebar': {'name': 'sidebar', 'url': '?view\x3dsidebar'}, 'snapshot': {'name': 'snapshot', 'url': '?view\x3dsnapshot'}, 'timeslide': {'name': 'timeslide', 'url': '?view\x3dtimeslide'}, 'isMobile': false, 'title': 'Python virtual environments and Docker.', 'description': 'When creating a Docker base image for running Python applications, you have various choices for how you can get Python installed. You can in...', 'url': 'http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html', 'type': 'item', 'isSingleItem': true, 'isMultipleItems': false, 'isError': false, 'isPage': false, 'isPost': true, 'isHomepage': false, 'isArchive': false, 'isLabelSearch': false, 'postId': 917687300411853962}}]);
+_WidgetManager._RegisterWidget('_NavbarView', new _WidgetInfo('Navbar1', 'navbar', document.getElementById('Navbar1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_HeaderView', new _WidgetInfo('Header1', 'header', document.getElementById('Header1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogView', new _WidgetInfo('Blog1', 'main', document.getElementById('Blog1'), {'cmtInteractionsEnabled': false, 'lightboxEnabled': true, 'lightboxModuleUrl': 'https://www.blogger.com/static/v1/jsbin/3842676126-lbx.js', 'lightboxCssUrl': 'https://www.blogger.com/static/v1/v-css/828616780-lightbox_bundle.css'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_ProfileView', new _WidgetInfo('Profile1', 'sidebar-right-1', document.getElementById('Profile1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_PageListView', new _WidgetInfo('PageList1', 'sidebar-right-1', document.getElementById('PageList1'), {'title': 'Quick Links', 'links': [{'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html', 'id': '3350721465154129789', 'title': 'Decorators and monkey patching.'}, {'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/using-python-with-docker.html', 'id': '5591286857776935907', 'title': 'Using Python with Docker.'}], 'mobile': false, 'showPlaceholder': true, 'hasCurrentPage': false}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogArchiveView', new _WidgetInfo('BlogArchive1', 'sidebar-right-1', document.getElementById('BlogArchive1'), {'languageDirection': 'ltr', 'loadingMessage': 'Loading\x26hellip;'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_LabelView', new _WidgetInfo('Label1', 'sidebar-right-1', document.getElementById('Label1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AdSenseView', new _WidgetInfo('AdSense1', 'footer-1', document.getElementById('AdSense1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AttributionView', new _WidgetInfo('Attribution1', 'footer-3', document.getElementById('Attribution1'), {}, 'displayModeFull'));
+</script>
+</body>
+</html>

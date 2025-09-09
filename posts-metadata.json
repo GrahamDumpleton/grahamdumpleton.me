@@ -1,0 +1,757 @@
+[
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/03/resistance-is-futile.html",
+    "title": "Resistance is futile.",
+    "date": "2007-03-06T11:00:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/03/reloading-of-python-code-into-web.html",
+    "title": "Reloading of Python code into web applications.",
+    "date": "2007-03-30T02:02:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/07/web-hosting-landscape-and-modwsgi.html",
+    "title": "Web hosting landscape and mod_wsgi.",
+    "date": "2007-07-02T12:30:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/07/commodity-shared-hosting-and-modwsgi.html",
+    "title": "Commodity shared hosting and mod_wsgi.",
+    "date": "2007-07-30T09:46:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/08/version-10-of-modwsgi-real-close-now.html",
+    "title": "Version 1.0 of mod_wsgi real close now.",
+    "date": "2007-08-14T10:52:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/09/relative-popularity-of-python-web.html",
+    "title": "Relative popularity of Python web frameworks.",
+    "date": "2007-09-01T23:12:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/09/version-10-of-modwsgi-is-now-available.html",
+    "title": "Version 1.0 of mod_wsgi is now available.",
+    "date": "2007-09-05T11:11:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/09/parallel-python-discussion-and-modwsgi.html",
+    "title": "Parallel Python discussion and mod_wsgi.",
+    "date": "2007-09-11T22:39:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/10/version-11-of-modwsgi-is-now-available.html",
+    "title": "Version 1.1 of mod_wsgi is now available.",
+    "date": "2007-10-01T03:30:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/10/google-hates-modwsgi.html",
+    "title": "Google hates mod_wsgi.",
+    "date": "2007-10-14T10:34:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/10/version-12-of-modwsgi-is-now-available.html",
+    "title": "Version 1.2 of mod_wsgi is now available.",
+    "date": "2007-10-31T09:41:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/11/poor-mans-python-virtual-environment.html",
+    "title": "Poor man's Python virtual environment.",
+    "date": "2007-11-11T05:13:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2007/11/version-13-of-modwsgi-is-now-available.html",
+    "title": "Version 1.3 of mod_wsgi is now available.",
+    "date": "2007-11-18T02:51:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2008/03/version-20-of-modwsgi-is-now-available.html",
+    "title": "Version 2.0 of mod_wsgi is now available.",
+    "date": "2008-03-21T06:17:00.007Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2008/08/version-23-of-modwsgi-is-now-available.html",
+    "title": "Version 2.3 of mod_wsgi is now available.",
+    "date": "2008-08-25T07:37:00.002Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2008/12/python-30-and-modwsgi.html",
+    "title": "Python 3.0 and mod_wsgi.",
+    "date": "2008-12-04T10:03:00.006Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2008/12/using-modwsgi-when-developing-django.html",
+    "title": "Using mod_wsgi when developing Django sites.",
+    "date": "2008-12-19T10:24:00.015Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/02/source-code-reloading-with-modwsgi-on.html",
+    "title": "Source code reloading with mod_wsgi on Windows.",
+    "date": "2009-02-25T22:41:00.009Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/03/final-chance-for-providing-input-into.html",
+    "title": "Final chance for providing input into mod_wsgi 3.0.",
+    "date": "2009-03-07T22:50:00.004Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html",
+    "title": "A Python interpreter is not created for each request in mod_python.",
+    "date": "2009-03-08T23:21:00.007Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/03/load-spikes-and-excessive-memory-usage.html",
+    "title": "Load spikes and excessive memory usage in mod_python.",
+    "date": "2009-03-09T11:22:00.002Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/03/future-roadmap-for-modwsgi.html",
+    "title": "Future roadmap for mod_wsgi.",
+    "date": "2009-03-19T09:30:00.002Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/03/are-you-having-wsgi-problems.html",
+    "title": "Are you having WSGI problems?",
+    "date": "2009-03-20T00:05:00.019Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/04/wsgi-and-printing-to-standard-output.html",
+    "title": "WSGI and printing to standard output.",
+    "date": "2009-04-03T04:47:00.030Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/04/version-24-of-modwsgi-is-now-available.html",
+    "title": "Version 2.4 of mod_wsgi is now available.",
+    "date": "2009-04-11T11:00:00.007Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html",
+    "title": "Improving Commercial Python/WSGI Hosting Options",
+    "date": "2009-04-17T01:01:00.017Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/04/accreditation-for-python-web-hosting.html",
+    "title": "Accreditation For Python Web Hosting",
+    "date": "2009-04-19T23:31:00.008Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/04/python-30-support-in-modwsgi-to-be.html",
+    "title": "Python 3.0 support in mod_wsgi to be disabled.",
+    "date": "2009-04-28T06:40:00.007Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html",
+    "title": "Blocking requests and nginx version of mod_wsgi.",
+    "date": "2009-05-08T04:53:00.056Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/05/version-25-of-modwsgi-is-now-available.html",
+    "title": "Version 2.5 of mod_wsgi is now available.",
+    "date": "2009-05-11T12:17:00.003Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/08/using-bobo-on-top-of-modwsgi.html",
+    "title": "Using bobo on top of mod_wsgi.",
+    "date": "2009-08-20T02:37:00.017Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/08/problems-with-example-web2py.html",
+    "title": "Problems with example web2py configurations for mod_wsgi.",
+    "date": "2009-08-20T05:26:00.046Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/08/more-on-those-problems-with-example.html",
+    "title": "More on those problems with example web2py configurations for mod_wsgi.",
+    "date": "2009-08-21T10:39:00.030Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html",
+    "title": "A roadmap for the Python WSGI specification.",
+    "date": "2009-09-17T11:50:00.003Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/10/details-on-wsgi-10-amendmentsclarificat.html",
+    "title": "Details on WSGI 1.0 amendments/clarifications.",
+    "date": "2009-10-02T05:00:00.006Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/10/wsgi-issues-with-http-head-requests.html",
+    "title": "WSGI issues with HTTP HEAD requests.",
+    "date": "2009-10-09T06:18:00.021Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/11/new-release-candidate-for-modwsgi-30-is.html",
+    "title": "New release candidate for mod_wsgi 3.0 is now available.",
+    "date": "2009-11-15T10:17:00.006Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/11/authorship-of-modwsgi-and-modpython.html",
+    "title": "Authorship of mod_wsgi and mod_python.",
+    "date": "2009-11-15T10:28:00.023Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/11/versions-30-and-27-of-modwsgi-are-now.html",
+    "title": "Versions 3.0 and 2.7 of mod_wsgi are now available.",
+    "date": "2009-11-21T11:15:00.005Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2009/11/save-on-memory-with-modwsgi-30.html",
+    "title": "Save on memory with mod_wsgi 3.0.",
+    "date": "2009-11-26T10:54:00.017Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/03/dropping-support-for-apache-13-in.html",
+    "title": "Dropping support for Apache 1.3 in mod_wsgi.",
+    "date": "2010-03-11T10:32:00.005Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html",
+    "title": "An improved WSGI script for use with Django.",
+    "date": "2010-03-28T09:49:00.095Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/03/going-to-singapore-pycon.html",
+    "title": "Going To Singapore PyCon.",
+    "date": "2010-03-31T10:10:00.006Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/04/time-to-find-new-job.html",
+    "title": "Time to find a new job.",
+    "date": "2010-04-04T00:49:00.053Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/05/i-will-be-presenting-at-sydney-pycon.html",
+    "title": "I will be presenting at Sydney PyCon.",
+    "date": "2010-05-18T04:20:00.003Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/05/modpython-project-soon-to-be-officially.html",
+    "title": "The mod_python project soon to be officially dead.",
+    "date": "2010-05-27T10:29:00.018Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/06/modpython-project-is-now-officially.html",
+    "title": "The mod_python project is now officially dead.",
+    "date": "2010-06-17T12:53:00.006Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/06/sydney-pycon-modwsgi-talk-slides.html",
+    "title": "Sydney PyCon mod_wsgi talk slides available.",
+    "date": "2010-06-27T23:15:00.007Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/08/light-hearted-look-at-status-of-wsgi-on.html",
+    "title": "Light hearted look at status of WSGI on Python 3.",
+    "date": "2010-08-02T02:52:00.005Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/08/2010-modwsgi-world-road-show.html",
+    "title": "The 2010 mod_wsgi world road show.",
+    "date": "2010-08-26T22:56:00.004Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/10/is-pep-3333-final-solution-for-wsgi-on.html",
+    "title": "Is PEP 3333 the final solution for WSGI on Python 3?",
+    "date": "2010-10-21T00:11:00.006Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/12/prognosticating-about-2011.html",
+    "title": "Prognosticating about 2011.",
+    "date": "2010-12-31T00:39:00.029Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2010/12/solving-some-of-problems-with.html",
+    "title": "Solving some of the problems with wsgi.file_wrapper.",
+    "date": "2010-12-31T04:27:00.043Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2011/01/implementing-wsgi-application-objects.html",
+    "title": "Implementing WSGI application objects.",
+    "date": "2011-01-05T04:53:00.006Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2011/01/content-length-and-wsgifilewrapper.html",
+    "title": "Content length and wsgi.file_wrapper.",
+    "date": "2011-01-05T10:54:00.005Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2011/01/decorating-wsgi-applications.html",
+    "title": "Decorating WSGI applications.",
+    "date": "2011-01-07T02:12:00.006Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2011/01/testing-wsgifilewrapper-implementation.html",
+    "title": "Testing a wsgi.file_wrapper implementation.",
+    "date": "2011-01-22T06:20:00.005Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html",
+    "title": "An awesome year for Python web hosting.",
+    "date": "2011-01-27T22:16:00.006Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html",
+    "title": "Should my next conference talk be on how web servers work?",
+    "date": "2011-03-23T21:18:00.013Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html",
+    "title": "Why is WSGI deployment under FASTCGI so painful?",
+    "date": "2011-09-20T12:36:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2011/10/what-excited-me-about-new-relic.html",
+    "title": "What excited me about New Relic.",
+    "date": "2011-10-28T06:53:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2011/11/new-relic-is-not-just-for-apachemodwsgi.html",
+    "title": "New Relic is not just for Apache/mod_wsgi.",
+    "date": "2011-11-02T06:11:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2012/08/version-34-of-modwsgi-is-now-available.html",
+    "title": "Version 3.4 of mod_wsgi is now available.",
+    "date": "2012-08-25T06:42:00.002Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2012/10/requests-running-in-wrong-django.html",
+    "title": "Requests running in wrong Django instance under Apache/mod_wsgi.",
+    "date": "2012-10-08T12:21:00.002Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2012/10/obligations-for-calling-close-on.html",
+    "title": "Obligations for calling close() on the iterable returned by a WSGI application.",
+    "date": "2012-10-11T03:56:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2012/10/why-are-you-using-embedded-mode-of.html",
+    "title": "Why are you using embedded mode of mod_wsgi?",
+    "date": "2012-10-13T10:46:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2012/10/wsgi-middleware-and-hidden-write.html",
+    "title": "WSGI middleware and the hidden write() callable.",
+    "date": "2012-10-14T12:17:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2012/12/let-me-google-that-for-you.html",
+    "title": "Let me Google that for you.",
+    "date": "2012-12-05T10:12:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2013/12/a-dynamic-dns-service-using-aws.html",
+    "title": "A dynamic DNS service using AWS Route53/S3 and Heroku.",
+    "date": "2013-12-02T02:06:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html",
+    "title": "How you implemented your Python decorator is wrong.",
+    "date": "2014-01-07T06:40:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/01/the-interaction-between-decorators-and.html",
+    "title": "The interaction between decorators and descriptors.",
+    "date": "2014-01-07T11:00:00.004Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/01/implementing-factory-for-creating.html",
+    "title": "Implementing a factory for creating decorators.",
+    "date": "2014-01-08T06:46:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/01/implementing-universal-decorator.html",
+    "title": "Implementing a universal decorator.",
+    "date": "2014-01-09T12:06:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/01/decorators-which-accept-arguments.html",
+    "title": "Decorators which accept arguments.",
+    "date": "2014-01-11T12:05:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/01/maintaining-decorator-state-using-class.html",
+    "title": "Maintaining decorator state using a class.",
+    "date": "2014-01-12T23:07:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html",
+    "title": "The missing @synchronized decorator.",
+    "date": "2014-01-14T11:03:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/01/the-synchronized-decorator-as-context.html",
+    "title": "The @synchronized decorator as context manager.",
+    "date": "2014-01-15T11:43:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/02/performance-overhead-of-using-decorators.html",
+    "title": "Performance overhead of using decorators.",
+    "date": "2014-02-08T11:42:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/02/performance-overhead-when-applying.html",
+    "title": "Performance overhead when applying decorators to methods.",
+    "date": "2014-02-17T12:36:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/02/use-of-threading-in-modwsgi-daemon-mode.html",
+    "title": "Use of threading in mod_wsgi daemon mode.",
+    "date": "2014-02-20T04:26:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/02/vertically-partitioning-python-web.html",
+    "title": "Vertically partitioning Python web applications.",
+    "date": "2014-02-20T11:58:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/04/talk-to-me-at-pycon-about-python-web.html",
+    "title": "Talk to me at PyCon about Python web application performance monitoring.",
+    "date": "2014-04-04T01:19:00.002Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/05/security-release-for-modwsgi-version-35.html",
+    "title": "Security release for mod_wsgi (version 3.5).",
+    "date": "2014-05-21T07:58:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/08/transparent-object-proxies-in-python.html",
+    "title": "Transparent object proxies in Python.",
+    "date": "2014-08-17T04:57:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/09/reporting-on-djangocon-us-2014-hallway.html",
+    "title": "Reporting on the DjangoCon US 2014 hallway track.",
+    "date": "2014-09-01T04:34:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/09/setting-lang-and-lcall-when-using.html",
+    "title": "Setting LANG and LC_ALL when using mod_wsgi.",
+    "date": "2014-09-01T05:26:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/09/using-python-virtual-environments-with.html",
+    "title": "Using Python virtual environments with mod_wsgi.",
+    "date": "2014-09-01T14:49:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/09/what-is-current-version-of-modwsgi.html",
+    "title": "What is the current version of mod_wsgi?",
+    "date": "2014-09-01T16:20:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/09/debugging-with-pdb-when-using-modwsgi.html",
+    "title": "Debugging with pdb when using mod_wsgi.",
+    "date": "2014-09-01T21:18:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/09/python-module-search-path-and-modwsgi.html",
+    "title": "Python module search path and mod_wsgi.",
+    "date": "2014-09-02T05:56:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/09/hosting-php-web-applications-in.html",
+    "title": "Hosting PHP web applications in conjunction with mod_wsgi.",
+    "date": "2014-09-02T21:00:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/11/managing-developer-experience-using.html",
+    "title": "Managing the developer experience using docker.",
+    "date": "2014-11-28T12:11:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/12/hosting-python-wsgi-applications-using.html",
+    "title": "Hosting Python WSGI applications using Docker.",
+    "date": "2014-12-02T09:21:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/12/deferred-build-actions-for-docker-images.html",
+    "title": "Deferred build actions for Docker images.",
+    "date": "2014-12-10T11:19:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/12/launching-applications-in-docker.html",
+    "title": "Launching applications in Docker containers.",
+    "date": "2014-12-16T12:33:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2014/12/apachemodwsgi-for-windows-on-life.html",
+    "title": "Apache/mod_wsgi for Windows on life support.",
+    "date": "2014-12-18T11:41:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/01/using-alternative-wsgi-servers-with.html",
+    "title": "Using alternative WSGI servers with OpenShift.",
+    "date": "2015-01-06T12:38:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/01/important-modwsgi-information-about.html",
+    "title": "Important mod_wsgi information about coming Apache httpd update.",
+    "date": "2015-01-13T12:15:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/03/safely-applying-monkey-patches-in-python.html",
+    "title": "Safely applying monkey patches in Python.",
+    "date": "2015-03-11T08:00:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/03/using-wrapt-to-support-testing-of.html",
+    "title": "Using wrapt to support testing of software.",
+    "date": "2015-03-12T06:50:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/03/ordering-issues-when-monkey-patching-in.html",
+    "title": "Ordering issues when monkey patching in Python.",
+    "date": "2015-03-18T04:39:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/03/generating-full-stack-traces-for.html",
+    "title": "Generating full stack traces for exceptions in Python.",
+    "date": "2015-03-21T12:36:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/04/introducing-modwsgi-express.html",
+    "title": "Introducing mod_wsgi-express.",
+    "date": "2015-04-02T11:56:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/04/using-modwsgi-express-with-django.html",
+    "title": "Using mod_wsgi-express with Django.",
+    "date": "2015-04-05T13:22:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/04/integrating-modwsgi-express-as-django.html",
+    "title": "Integrating mod_wsgi-express as a Django admin command.",
+    "date": "2015-04-06T06:14:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/04/automatic-patching-of-python.html",
+    "title": "Automatic patching of Python applications.",
+    "date": "2015-04-09T20:37:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/05/using-modwsgi-express-as-development.html",
+    "title": "Using mod_wsgi-express as a development server.",
+    "date": "2015-05-06T00:46:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/05/using-benchmarks-to-understand-how-wsgi.html",
+    "title": "Using benchmarks to understand how WSGI servers work.",
+    "date": "2015-05-14T00:34:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/05/measuring-response-time-for-web.html",
+    "title": "Measuring response time for web requests in a WSGI application.",
+    "date": "2015-05-15T09:00:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/05/effects-of-yielding-multiple-blocks-in.html",
+    "title": "Effects of yielding multiple blocks in a WSGI application response.",
+    "date": "2015-05-19T01:49:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/05/returning-string-as-iterable-from-wsgi.html",
+    "title": "Returning a string as the iterable from a WSGI application.",
+    "date": "2015-05-19T11:03:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/05/monitoring-response-content-from-wsgi.html",
+    "title": "Monitoring the response content from a WSGI application.",
+    "date": "2015-05-23T11:41:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/05/performance-monitoring-of-real-wsgi.html",
+    "title": "Performance monitoring of real WSGI application traffic.",
+    "date": "2015-05-26T01:30:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/06/implementing-request-monitoring-within.html",
+    "title": "Implementing request monitoring within the WSGI server.",
+    "date": "2015-06-07T12:09:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/06/my-dynamic-dns-service-using-aws.html",
+    "title": "My dynamic DNS service using AWS Route53/S3 now supports OpenShift.",
+    "date": "2015-06-18T02:40:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/06/musings-about-paas-and-running-many.html",
+    "title": "Musings about PaaS and running many small micro services.",
+    "date": "2015-06-18T07:45:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/06/installing-custom-python-version-into.html",
+    "title": "Installing a custom Python version into a Docker image.",
+    "date": "2015-06-26T01:51:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/06/proxying-to-python-web-application.html",
+    "title": "Proxying to a Python web application running in Docker.",
+    "date": "2015-06-30T05:01:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/07/redirection-problems-when-proxying-to.html",
+    "title": "Redirection problems when proxying to Apache running in Docker.",
+    "date": "2015-07-01T04:04:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/07/using-apache-to-start-and-manage-docker.html",
+    "title": "Using Apache to start and manage Docker containers.",
+    "date": "2015-07-03T11:48:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/08/running-async-web-applications-under.html",
+    "title": "Running ASYNC web applications under OpenShift.",
+    "date": "2015-08-11T11:32:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/10/a-new-job-and-new-set-of-goals.html",
+    "title": "A new job and a new set of goals.",
+    "date": "2015-10-01T02:53:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/12/running-ipython-as-docker-container.html",
+    "title": "Running IPython as a Docker container under OpenShift.",
+    "date": "2015-12-18T04:37:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/12/don-run-as-root-inside-of-docker.html",
+    "title": "Don&#39;t run as root inside of Docker containers.",
+    "date": "2015-12-18T10:04:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html",
+    "title": "Overriding the user Docker containers run as.",
+    "date": "2015-12-21T20:11:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/12/random-user-ids-when-running-docker.html",
+    "title": "Random user IDs when running Docker containers.",
+    "date": "2015-12-23T05:39:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/12/unknown-user-when-running-docker.html",
+    "title": "Unknown user when running Docker container.",
+    "date": "2015-12-24T11:19:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.html",
+    "title": "Issues with running as PID 1 in a Docker container.",
+    "date": "2015-12-29T01:44:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/01/roundup-of-docker-issues-when-hosting.html",
+    "title": "Roundup of Docker issues when hosting IPython.",
+    "date": "2016-01-04T04:04:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html",
+    "title": "Python virtual environments and Docker.",
+    "date": "2016-01-14T10:46:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html",
+    "title": "Automating deployment of Lektor blog sites.",
+    "date": "2016-01-17T22:54:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/02/building-better-user-experience-for.html",
+    "title": "Building a better user experience for deploying Python web applications. ",
+    "date": "2016-02-18T04:45:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/02/a-walkthrough-of-using-openshift-3.html",
+    "title": "A walkthrough of using OpenShift 3.",
+    "date": "2016-02-24T01:56:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/03/speeding-up-docker-build-times-for.html",
+    "title": "Speeding up Docker build times for Python applications.",
+    "date": "2016-03-01T22:09:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/04/learning-more-about-using-openshift-3.html",
+    "title": "Learning more about using OpenShift 3.",
+    "date": "2016-04-07T06:18:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/04/how-are-you-using-docker-in-your.html",
+    "title": "How are you using Docker in your development workflow?",
+    "date": "2016-04-07T22:53:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/07/installing-modwsgi-on-macos-x-with.html",
+    "title": "Installing mod_wsgi on MacOS X with native operating system tools.",
+    "date": "2016-07-26T04:15:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/08/testing-out-deployment-of-python-based.html",
+    "title": "Testing out deployment of Python based Opal health care framework.",
+    "date": "2016-08-01T06:43:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/12/what-user-should-you-use-to-run-docker.html",
+    "title": "What USER should you use to run Docker images.",
+    "date": "2016-12-01T05:38:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2016/12/backdoors-for-becoming-root-in-docker.html",
+    "title": "Backdoors for becoming root in a Docker container.",
+    "date": "2016-12-09T05:22:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2017/04/deploying-jupyter-notebooks-in-hosted.html",
+    "title": "Deploying Jupyter Notebooks in a hosted environment.",
+    "date": "2017-04-30T06:20:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2018/01/the-pattern-versus-python-package.html",
+    "title": "The &quot;Decorator Pattern&quot; versus the Python &quot;wrapt&quot; package.",
+    "date": "2018-01-30T07:31:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2018/04/book-2-deploying-to-openshift.html",
+    "title": "Book #2: Deploying to OpenShift",
+    "date": "2018-04-13T09:53:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2018/10/packaging-modwsgi-into-zipapp-using-shiv.html",
+    "title": "Packaging mod_wsgi into a zipapp using shiv.",
+    "date": "2018-10-22T09:11:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2018/12/using-jupyterhub-as-generic-application.html",
+    "title": "Using JupyterHub as a generic application spawner",
+    "date": "2018-12-28T06:05:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2018/12/running-interactive-terminal-in-browser.html",
+    "title": "Running an interactive terminal in the browser",
+    "date": "2018-12-29T02:58:00.002Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2018/12/creating-your-own-custom-terminal-image.html",
+    "title": "Creating your own custom terminal image",
+    "date": "2018-12-30T06:42:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2018/12/deploying-multi-user-workshop.html",
+    "title": "Deploying a multi user workshop environment",
+    "date": "2018-12-31T02:57:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2019/01/administration-features-of-jupyterhub.html",
+    "title": "Administration features of JupyterHub",
+    "date": "2019-01-01T03:22:00.001Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2019/01/dashboard-combining-workshop-notes-and.html",
+    "title": "Dashboard combining workshop notes and terminal",
+    "date": "2019-01-01T23:18:00Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/2019/01/integrating-workshop-notes-with-image.html",
+    "title": "Integrating  the workshop notes with the image",
+    "date": "2019-01-03T06:48:00.004Z"
+  }
+]

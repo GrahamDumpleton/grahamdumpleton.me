@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html class='v2' dir='ltr' lang='en'>
+<head>
+<link href='https://www.blogger.com/static/v1/widgets/2508126174-css_bundle_v2.css' rel='stylesheet' type='text/css'/>
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='blogger' name='generator'/>
+<link href='http://blog.dscpl.com.au/favicon.ico' rel='icon' type='image/x-icon'/>
+<link href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html' rel='canonical'/>
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Graham Dumpleton - RSS" href="http://blog.dscpl.com.au/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Graham Dumpleton - Atom" href="https://www.blogger.com/feeds/2363643920942057324/posts/default" />
+
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/6796371828982948720/comments/default" />
+<!--Can't find substitution for tag [blog.ieCssRetrofitLinks]-->
+<meta content='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html' property='og:url'/>
+<meta content='A roadmap for the Python WSGI specification.' property='og:title'/>
+<meta content='EDIT: Note that the discussion around this on the Python WEB-SIG went round in many circles and died. Thus nothing much here came into being...' property='og:description'/>
+<title>Graham Dumpleton: A roadmap for the Python WSGI specification.</title>
+<style id='page-skin-1' type='text/css'><!--
+/*
+-----------------------------------------------
+Blogger Template Style
+Name:     Simple
+Designer: Blogger
+URL:      www.blogger.com
+----------------------------------------------- */
+/* Content
+----------------------------------------------- */
+body {
+font: normal normal 12px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #222222;
+background: #66bbdd none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 {
+font-size: 22px;
+}
+a:link {
+text-decoration:none;
+color: #2187bb;
+}
+a:visited {
+text-decoration:none;
+color: #888888;
+}
+a:hover {
+text-decoration:underline;
+color: #32aaff;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #ffffff;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #3299bb;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #3299bb;
+}
+.Header .description {
+font-size: 140%;
+color: #777777;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #eeeeee;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #eeeeee;
+border-left: 0 solid #eeeeee;
+border-right: 0 solid #eeeeee;
+}
+.tabs-inner .widget ul {
+background: #f5f5f5 url(https://resources.blogblog.com/blogblog/data/1kt/simple/gradients_light.png) repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #eeeeee;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 14px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #ffffff;
+border-right: 1px solid #eeeeee;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #000000;
+background-color: #eeeeee;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #eeeeee;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #eeeeee;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #eeeeee;
+}
+/* Headings
+----------------------------------------------- */
+div.widget > h2,
+div.widget h2.title {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #000000;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+h2.date-header {
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+}
+.date-header span {
+background-color: transparent;
+color: #222222;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 22px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 2px;
+background: #ffffff;
+border: 1px solid #eeeeee;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 5px;
+}
+.post-body .tr-caption-container {
+color: #222222;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #666666;
+background-color: #f9f9f9;
+border-bottom: 1px solid #eeeeee;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #eeeeee;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #eeeeee;
+}
+/* Comments
+----------------------------------------------- */
+.comments .comments-content .icon.blog-author {
+background-repeat: no-repeat;
+background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9sLFwMeCjjhcOMAAAD+SURBVDjLtZSvTgNBEIe/WRRnm3U8RC1neQdsm1zSBIU9VVF1FkUguQQsD9ITmD7ECZIJSE4OZo9stoVjC/zc7ky+zH9hXwVwDpTAWWLrgS3QAe8AZgaAJI5zYAmc8r0G4AHYHQKVwII8PZrZFsBFkeRCABYiMh9BRUhnSkPTNCtVXYXURi1FpBDgArj8QU1eVXUzfnjv7yP7kwu1mYrkWlU33vs1QNu2qU8pwN0UpKoqokjWwCztrMuBhEhmh8bD5UDqur75asbcX0BGUB9/HAMB+r32hznJgXy2v0sGLBcyAJ1EK3LFcbo1s91JeLwAbwGYu7TP/3ZGfnXYPgAVNngtqatUNgAAAABJRU5ErkJggg==);
+}
+.comments .comments-content .loadmore a {
+border-top: 1px solid #999999;
+border-bottom: 1px solid #999999;
+}
+.comments .comment-thread.inline-thread {
+background-color: #f9f9f9;
+}
+.comments .continue {
+border-top: 2px solid #999999;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #eeeeee;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #ffffff;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #ffffff;
+}
+.mobile-index-contents {
+color: #222222;
+}
+.mobile-link-button {
+background-color: #2187bb;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #eeeeee;
+color: #000000;
+border-top: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #eeeeee;
+}
+
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 1020px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 1020px;
+max-width: 1020px;
+_width: 1020px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 200px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 200px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("200px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 200px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 200px;
+margin-right: -200px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+body#layout div.add_widget {
+padding: 8px;
+}
+body#layout div.add_widget a {
+margin-left: 32px;
+}
+--></style>
+<link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' media='none' onload='if(media!=&#39;all&#39;)media=&#39;all&#39;' rel='stylesheet'/><noscript><link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' rel='stylesheet'/></noscript>
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+
+<!-- data-ad-client=ca-pub-6433235630058377 -->
+
+</head>
+<body class='loading variant-pale'>
+<div class='navbar section' id='navbar' name='Navbar'><div class='widget Navbar' data-version='1' id='Navbar1'><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/2363643920942057324?po\x3d6796371828982948720\x26origin\x3dhttp://blog.dscpl.com.au',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script><script type="text/javascript">
+(function() {
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = '//pagead2.googlesyndication.com/pagead/js/google_top_exp.js';
+var head = document.getElementsByTagName('head')[0];
+if (head) {
+head.appendChild(script);
+}})();
+</script>
+</div></div>
+<div class='body-fauxcolumns'>
+<div class='fauxcolumn-outer body-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content'>
+<div class='content-fauxcolumns'>
+<div class='fauxcolumn-outer content-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content-outer'>
+<div class='content-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='fauxborder-right content-fauxborder-right'></div>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='header-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='fauxborder-right header-fauxborder-right'></div>
+<div class='region-inner header-inner'>
+<div class='header section' id='header' name='Header'><div class='widget Header' data-version='1' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://blog.dscpl.com.au/'>
+Graham Dumpleton
+</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>
+</span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='header-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</header>
+<div class='tabs-outer'>
+<div class='tabs-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left tabs-fauxborder-left'>
+<div class='fauxborder-right tabs-fauxborder-right'></div>
+<div class='region-inner tabs-inner'>
+<div class='tabs no-items section' id='crosscol' name='Cross-Column'></div>
+<div class='tabs no-items section' id='crosscol-overflow' name='Cross-Column 2'></div>
+</div>
+</div>
+<div class='tabs-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='main-outer'>
+<div class='main-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='fauxborder-right main-fauxborder-right'></div>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<div class='fauxcolumn-outer fauxcolumn-center-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-left-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-right-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main' name='Main'><div class='widget Blog' data-version='1' id='Blog1'>
+<div class='blog-posts hfeed'>
+
+          <div class="date-outer">
+        
+<h2 class='date-header'><span>Thursday, September 17, 2009</span></h2>
+
+          <div class="date-posts">
+        
+<div class='post-outer'>
+<div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<meta content='2363643920942057324' itemprop='blogId'/>
+<meta content='6796371828982948720' itemprop='postId'/>
+<a name='6796371828982948720'></a>
+<h3 class='post-title entry-title' itemprop='name'>
+A roadmap for the Python WSGI specification.
+</h3>
+<div class='post-header'>
+<div class='post-header-line-1'></div>
+</div>
+<div class='post-body entry-content' id='post-body-6796371828982948720' itemprop='description articleBody'>
+<div><b>EDIT: Note that the discussion around this on the Python WEB-SIG went round in many circles and died. Thus nothing much here came into being and thus should be viewed merely for amusement value and not taken as being any indicator of any sort of reality.</b></div><div><br /></div><div>The discussion on the Python WEB-SIG about what to do about WSGI and Python 3.X has been going round and round in circles for some time now without any resolution. I could be optimistic and say it was a spiral which was at least slowly approaching a solution, but given how long it has been going on, I am much too pessimistic now about seeing any consensus coming out of the Python WEB-SIG.</div><div><br /></div><div>This whole process has been quite frustrating as I don't have the time to sit around and constantly prod the discussion forward. Because of the whole uncertainty though, I have also held off releasing mod_wsgi 3.0, which for all intent and purposes has been ready for quite a while, including support for Python 3.X. That the WSGI question for Python 3.X was unresolved, it just never felt right to release it, because if it turns out people decided to do something quite different in respect of WSGI for Python 3.X, then it would inconvenience anyone who had relied on how mod_wsgi had already implemented support for Python 3.X.</div><div><br /></div><div>Anyway, a few weeks back I was having a bit of discussion about WSGI directly with Robert Brewer of the CherryPy project. This discussion has also stalled, partly because I still don't have the time at present to pursue it but also perhaps because Robert and I also didn't seem to agree on some issues. Despite that, the discussion has been good in that it has at least helped to crystalise in my mind how some aspects of the WSGI specification should be interpreted and why people perhaps have divergent opinions on what to do.</div><div><br /></div><div>Since then I have also learnt that Armin Ronacher and Ian Bicking have set off on their own course in rewriting the WSGI specification. So, it looks like the proliferation of divergent views is possibly just going to get worse and not better, especially since looks like everyone is giving up on the Python WEB-SIG and more or less going it alone.</div><div><br /></div><div>The point of this post is then for me to describe how I see things in respect of some aspects of WSGI and how that might relate to WSGI going forward, not just for Python 3.X, but also in relation to future versions of the WSGI specification for Python 2.X. It is also in part about setting down some language or terms to apply to discussions about WSGI so we are all reading from the same page.</div><div><br /></div><div>Now, the major sticking point in the discussions with how WSGI 1.0 should be applied to Python 3.X was the argument over whether byte strings or unicode strings should be used. And if unicode strings were used, what encoding should be used when interpreting the original byte string value for those CGI variables.</div><div><br /></div><div>The specification for WSGI 1.0 is quite clear on this point though in that it says:</div><div><br /></div><div>"""HTTP does not directly support unicode, and neither does this interface. All encoding/decoding must be handled by the application; all strings passed to or from the server must be standard Python byte strings, not unicode objects. The result of using a unicode object where a string object is required, is undefined."""</div><div><br /></div><div>In other words, this clearly states that byte strings should be used everywhere, and so for Python 3.X that would mean that all strings used in the interface should be of type 'bytes'.</div><div><br /></div><div>The alternate view that unicode strings should be used arises in part because the WSGI 1.0 specification also says:</div><div><br /></div><div>"""On Python platforms where the str or StringType type is in fact unicode-based (e.g. Jython, IronPython, Python 3000, etc.), all "strings" referred to in this specification must contain only code points representable in ISO-8859-1 encoding (\u0000 through \u00FF, inclusive)."""</div><div><br /></div><div>That Python 3000, ie., Python 3.X, is mentioned, suggests that for Python 3.X at least, a unicode string must be used albeit subject to the restriction mentioned.</div><div><br /></div><div>You have to remember though that the WSGI specification was drafted back in 2003 before Python 3.0 even existed. The first discussion about a distinct byte string type in Python 3.0 didn't seem to arise until the latter part of 2004.</div><div><br /></div><div>It is arguable therefore, that Python 3000 should not be mentioned in that context within the WSGI specification, because Python 3.0 ended up with a distinct byte string type in the form of the 'bytes' type and so the alternate way of doing things for Jython, for example, didn't need to apply.</div><div><br /></div><div>Setting that aside for a moment, lets review the key bits of the WSGI interface and how the bytes vs unicode strings factors into that.</div><div><br /></div><div>If one takes the first statement from the WSGI 1.0 specification above that all strings are byte strings as gospel, then we can say the following in respect of certain key aspects of the WSGI interface where string type is an issue.</div><div><br /></div><div>1. The application is passed an instance of a Python dictionary containing what is referred to as the WSGI environment. All keys in this dictionary are byte strings.</div><div><br /></div><div>2. For the WSGI variable 'wsgi.url_scheme' contained in the WSGI environment, the value of the variable should be a byte string.</div><div><br /></div><div>3. For the CGI variables contained in the WSGI environment, the values of the variables are byte strings.</div><div><br /></div><div>4. The WSGI input stream 'wsgi.input' contained in the WSGI environment and from which request content is read, should yield byte strings.</div><div><br /></div><div>5. The status line specified by the WSGI application must be a byte string.</div><div><br /></div><div>6. The list of response headers specified by the WSGI application must contain tuples consisting of two values, where each value is a byte string.</div><div><br /></div><div>7. The iterable returned by the application and from which response content is derived, must yield byte strings.</div><div><br /></div><div>For later reference, will label this as 'Definition #1'.</div><div><br /></div><div>As written, this will work with CPython implementations of Python 2.X and Python 3.X with no ambiguity. For Python 2.X, the byte strings will be the 'str' type. For Python 3.X, the byte strings will be the 'bytes' type.</div><div><br /></div><div>For a Python 2.X implementation on Jython, which doesn't have a distinct byte string implementation, this can still work, but as the second statement from the WSGI specification above indicates, a unicode string is used instead with the restriction on what characters can appear in the string.</div><div><br /></div><div>What should be highlighted is that for Jython, as I understand it at least, when reading from a socket connection it returns a unicode string. That unicode string will only have characters in the range \u0000 through \u00FF, inclusive. Further, it is possible to transcode that unicode string without needing to go through a separate byte string type.</div><div><br /></div><div>Neither of these act the same with Python 3.X, where reading from a socket connection returns an instance of the 'bytes' type. Although you can decode that to a unicode string, you can't transcode that unicode string to another unicode string without converting it back to an instance of the 'bytes' type first.</div><div><br /></div><div>This is therefore why I can't see how Python 3.X can be compared to the Jython case and treated the same way.</div><div><br /></div><div>Even if you did try and apply it the same way, you need to consider that wsgi.input is nearly always going to be associated with a socket connection. To apply it literally the WSGI adapter would also need to convert all the strings of type 'bytes' read from the socket connection to unicode strings before they are passed back to the WSGI application for consumption.</div><div><br /></div><div>Because though the WSGI application may want the unicode string to have been decoded as UTF-8 instead of ISO-8859-1, it is just going to have to convert them back to 'bytes' and decode them again. To have to do that would be just plain stupid.</div><div><br /></div><div>Those who push that unicode strings should be used for Python 3.X, admittedly don't use that interpretation and instead still have wsgi.input returning 'bytes'. To do that though, they are admitting in part that the above rule cannot or should not be applied. As such, they are only taking part of what was actually stated for Python 3000, and in reality they are ignoring what the WSGI 1.0 specification says even though they point to the WSGI specification for justification of their interpretation.</div><div><br /></div><div>Admittedly though, having to deal with everything as 'bytes' in Python 3.X could be a bit onerous, given that byte strings in Python 3.X no longer behave exactly like they did for the byte string type in Python 2.X. Even so, WSGI 1.0 is how it is and I believe it is quite clear that byte strings should be used for Python 3.X.</div><div><br /></div><div>The discussion on the Python WEB-SIG is therefore really more about making WSGI easier to use in Python 3.X, rather than just confirming how WSGI 1.0 should work under Python 3.X.</div><div><br /></div><div>Any attempt though to make WSGI more usable under Python 3.X should perhaps though not be called WSGI 1.0, but be defined as a later version of WSGI. If it is a later version, to avoid having two WSGI specification streams, one for Python 2.X and another for Python 3.X, the revised version must also be able to be applied to Python 2.X in a meaningful way so that there remains one specification.</div><div><br /></div><div>Personally though, I think that part of the problem with the WSGI specification is that it tries to describe things only in terms of byte strings and unicode strings. I believe this is wrong and just makes it harder to apply in respect of the different ways Python is implemented between Python 2.X, 3.X on CPython and Jython implementations.</div><div><br /></div><div>What I want to see is the WSGI specification be described in terms of three different types of strings. These are:</div><div><ul><li>byte string</li><li>unicode string</li><li>native string</li></ul></div><div>What I mean here by 'native string' is the primary string type for a particular Python implementation. For Python 2.X as implemented by CPython, this is a byte string. For Python 3.X, this is a unicode string.</div><div><br /></div><div>I feel that it is important to distinguish native string from a particular implementation as I believe it makes it easier to specify how WSGI should work. The general rule WSGI sets down is that byte strings should be used everywhere, but this isn't necessarily the best approach and the native string is arguably better used in some places and as such what type it actually is depends on what Python implementation is used. Doing this means it will be easier to have one definition that works for different implementations rather than having to effectively maintain multiple versions or special exceptions.</div><div><br /></div><div>As to 'byte string', since some Python implementations don't actually have a distinct byte string type, what constitutes a byte string would be determined from what type is returned were a read performed on a socket object. This is why for Python 3.X, the 'bytes' type it provides is still what needs to be used, where as for a Python implementation on top of Jython, a unicode string with restriction on characters being in range 0x00 to 0xFF is used.</div><div><br /></div><div>Using those terms for the different string types, as a first step towards a new version of WSGI specification, I see Definition #1 above at least being redefined as follows.</div><div><br /></div><div>1. The application is passed an instance of a Python dictionary containing what is referred to as the WSGI environment. All keys in this dictionary are native strings. For CGI variables, all names are going to be ISO-8859-1 and so where native strings are unicode strings, that encoding is used for the names of CGI variables</div><div><br /></div><div>2. For the WSGI variable 'wsgi.url_scheme' contained in the WSGI environment, the value of the variable should be a native string.</div><div><br /></div><div>3. For the CGI variables contained in the WSGI environment, the values of the variables are byte strings.</div><div><br /></div><div>4. The WSGI input stream 'wsgi.input' contained in the WSGI environment and from which request content is read, should yield byte strings.</div><div><br /></div><div>5. The status line specified by the WSGI application must be a byte string.</div><div><br /></div><div>6. The list of response headers specified by the WSGI application must contain tuples consisting of two values, where each value is a byte string.</div><div><br /></div><div>7. The iterable returned by the application and from which response content is derived, must yield byte strings.</div><div><br /></div><div>For later reference, will label this as 'Definition #2'.</div><div><br /></div><div>So, still no trouble for us to implement that for Python 3.X as is. The question is whether the result is useful.</div><div><br /></div><div>To gauge this, first consider the WSGI hello world example. This is:</div><pre>def application(environ, start_response):<br />status = '200 OK'<br />output = 'Hello World!'<br /><br />response_headers = [('Content-type', 'text/plain'),<br />                   ('Content-Length', str(len(output)))]<br />start_response(status, response_headers)<br /><br />return [output]</pre><div>It would be nice if this example would continue to work in Python 3.X. If it doesn't then it is going to be mighty confusing for anyone reading any existing books or documentation on WSGI who is moving from Python 2.X to Python 3.X.</div><div><br /></div><div>Unfortunately, since all those strings will be unicode strings when run under Python 3.X, it isn't going to work. For this simple hello world example to work with WSGI under Python 3.X per Definition #1 or #2, it would need to be written as:</div><pre>def application(environ, start_response):<br />status = b'200 OK'<br />output = b'Hello World!'<br /><br />response_headers = [(b'Content-type', b'text/plain'),<br />                    (b'Content-Length', bytes(str(len(output))))]<br /><br />start_response(status, response_headers)<br /><br />return [output]</pre><div>Now, the reason that byte strings are required in the first place is so that the WSGI server doesn't need to make any decisions about what encoding to use when converting unicode strings to byte strings.<br /></div><div><br /></div><div>In reality though, values such as the status line and the HTTP response headers are generally limited in the characters they can use. Specifically they are limited to characters within the ISO-8859-1 character set.</div><div><br /></div><div>For those values we can therefore take a dual pronged approach. If the values are byte strings then we just pass them through as is. If they are unicode strings, then they would be converted to byte strings by applying ISO-8859-1 encoding. In the event that the unicode string cannot be converted to ISO-8859-1, then an error would be raised.</div><div><br /></div><div>For the response content itself, the encoding needing to be used would more often than not be UTF-8, but this will not always be the case. One may be able to deduce the encoding from the charset attribute of the content type response header, but even that isn't a full proof solution. This is because the charset need not be specified. Also, for a multipart response, different encodings may be used for the different parts of the response.</div><div><br /></div><div>A further problem is that when a unicode string is encoded to bytes, the number of bytes can be different to the number of characters in the original unicode string. If a content length is supplied by the WSGI application along with the unicode strings for the response, can you really completely trust that it is correct. If it was a properly calculated length, why isn't the WSGI application just returning byte strings for content in the first place.</div><div><br /></div><div>Ultimately, how the response content should be converted to bytes and what any corresponding content length for the response will be, will only be truly known to the WSGI application. Having the WSGI server be responsible for this task is therefore not really practical.</div><div><br /></div><div>That said, it still would be preferable for the WSGI hello world example to work unmodified.</div><div><br /></div><div>It could be said that it is just a hello world example and in practice has no relevance, but that isn't quite true. This is because the simplicity of WSGI means that it is fairly trivial for people to produce small purpose built WSGI applications to perform simple tasks, without requiring the use of a large framework. Further, because ISO-8859-1 is the predominant language on the Internet, they may not care therefore about implementing full unicode support.</div><div><br /></div><div>Now, since ISO-8859-1 character data is effectively preserved when converting to bytes, including the derived length, we can therefore apply the same approach as we did before with the status line and response headers. That is, if it is bytes it is passed straight through. If it is a unicode string, it is converted to bytes as ISO-8859-1. If that fails, an error is generated.</div><div><br /></div><div>Doing this, the WSGI hello world example will work as written and instil a bit of confidence in users moving to Python 3.X that life shouldn't be that difficult after all.</div><div><br /></div><div>That deals with the response, but what about the request.</div><div><br /></div><div>Obviously 'wsgi.input' needs to still be dealt with as byte strings. The same issues arise here as for response content. Only the WSGI application will know what encoding is required, if at all, or whether different parts of the request content need to be treated differently.</div><div><br /></div><div>We are left now with the WSGI environment and this is what the bulk of the discussion on the Python WEB-SIG revolved around.</div><div><br /></div><div>Consider here the following example code from Python 2.X and WSGI 1.0.</div><pre>def application(environ, start_response):<br /> if environ['REQUEST_METHOD'] == 'GET':<br />     ...</pre><div>In the bytes everywhere interpretation of Definition #1, for Python 3.X this would have to be written as:</div><pre>def application(environ, start_response):<br /> if environ[b'REQUEST_METHOD'] == b'GET':<br />     ...</pre><div>This is because unlike Python 2.X, you can't really compare byte strings and unicode strings and so use them interchangeably.</div><div><br /></div><div>In the interpretation given by Definition #2 above where the keys in the WSGI environment are native strings, one would still need to use:</div><pre>def application(environ, start_response):<br /> if environ['REQUEST_METHOD'] == b'GET':<br />     ...</pre><div>We still don't therefore get the ability to take simple hello world type WSGI applications from Python 2.X and use them unchanged. Unchanged in as much as the native string would be used rather than having to know you have to use byte strings instead. This is awkward and what we want to avoid for the simple case.</div><div><br /></div><div>The original suggestion in this area on the Python WEB-SIG was that for Python 3.X all WSGI environment values be passed as unicode strings decoded from the original byte strings as read from the socket connection, as ISO-8859-1.</div><div><br /></div><div>The intent here is that ISO-8859-1 will preserve the original character data and so although for some CGI variables the actual character data may need to be in a different encoding, one can transcode the data by converting back to bytes and thence again to unicode with the correct encoding without loosing any information.</div><div><br /></div><div>Remember though we want one specification that will work with both Python 2.X and Python 3.X. Thus, we wouldn't want the specification to necessarily refer only to unicode strings. Instead, we would again use the term 'native string'. This way it would work just as well with Python 2.X and be compatible with how WSGI works for Python 2.X today.</div><div><br /></div><div>Combining then the observations about the request and response, the key parts of the WSGI interface where the string type comes into play could thus be defined as follows.</div><div><br /></div><div>1. The application is passed an instance of a Python dictionary containing what is referred to as the WSGI environment. All keys in this dictionary are native strings. For CGI variables, all names are going to be ISO-8859-1 and so where native strings are unicode strings, that encoding is used for the names of CGI variables</div><div><br /></div><div>2. For the WSGI variable 'wsgi.url_scheme' contained in the WSGI environment, the value of the variable should be a native string.</div><div><br /></div><div>3. For the CGI variables contained in the WSGI environment, the values of the variables are native strings. Where native strings are unicode strings, ISO-8859-1 encoding would be used such that the original character data is preserved and as necessary the unicode string can be converted back to bytes and thence decoded to unicode again using a different encoding.</div><div><br /></div><div>4. The WSGI input stream 'wsgi.input' contained in the WSGI environment and from which request content is read, should yield byte strings.</div><div><br /></div><div>5. The status line specified by the WSGI application should be a byte string. Where native strings are unicode strings, the native string type can also be returned in which case it would be encoded as ISO-8859-1.</div><div><br /></div><div>6. The list of response headers specified by the WSGI application should contain tuples consisting of two values, where each value is a byte string. Where native strings are unicode strings, the native string type can also be returned in which case it would be encoded as ISO-8859-1.</div><div><br /></div><div>7. The iterable returned by the application and from which response content is derived, should yield byte strings. Where native strings are unicode strings, the native string type can also be returned in which case it would be encoded as ISO-8859-1.</div><div><br /></div><div>For later reference, will label this as 'Definition #3'.</div><div><br /></div><div>In effect this is what the main proposal has been on the Python WEB-SIG for a while. What is different is that I have incorporated in the term native string to the definition so that the one definition can be equally applied to Python 2.X implemented on CPython as well as Jython.</div><div><br /></div><div>The result is, that as written, the above still describes how WSGI 1.0 works with Python 2.X today and an application written for Python 3.X would effectively be the same. The only thing likely to be seen as different, is that in Python 3.X you have to convert the values of the CGI variables back to byte strings before converting them to a unicode string with a specific encoding if the default is not suitable. In Python 2.X it is already a byte string, so one less step. Although it is an extra step, for the bulk of the CGI variables it wouldn't even be necessary to do such a conversion and so this is going to be much more friendly than using bytes.</div><div><br /></div><div>The big question now is, if this is where people want to go, should WSGI 1.0 be ammended to get rid of the bytes everywhere definition, and instead use this more flexible definition, or should it be viewed as a new version of WSGI.</div><div><br /></div><div>One might think it is the logical thing to do, but every so often someone would comment on the Python WEB-SIG that 'no, I want bytes instead'.</div><div><br /></div><div>What was frustrating was that was about all they would say. They would never then go into more detail and explain exactly what their expectations were.</div><div><br /></div><div>Did they really want it that all the keys and values in the WSGI environment dictionary should be bytes as per the original description. Or was there complaint more about the values of certain key CGI variables.</div><div><br /></div><div>To try and understand what the concern is, we need to start looking at what CGI variables are passed in the WSGI environment.</div><div><br /></div><div>Of the CGI variables passed in the WSGI environment there can more or less be seen to be three distinct categories.</div><div><br /></div><div>The first consists of just the REQUEST_URI variable. This is the original URI provided by the remote client and identifies the resource being requested. This value includes any original percent-encoded characters from before the server decodes them. The URI may also contain repeating slashes, which may be collapsed into single slashes by some servers when it is being processed and the path normalised.</div><div><br /></div><div>The most important CGI variables and those which fall into the second category are SCRIPT_NAME, PATH_INFO and QUERY_STRING. These are normally derived from REQUEST_URI by the underlying web server after any decoding and normalising of the URI.</div><div><br /></div><div>Because rewrites can occur in the web server, REQUEST_URI may not necessarily have a direct relationship with the final resource mapped to. In other words, SCRIPT_NAME, PATH_INFO and QUERY_STRING may actually be derived from some completely different URI calculated within the server. Because of this, REQUEST_URI, although interesting for debugging purposes, should possibly not be used by WSGI applications directly which intend to be portable between WSGI hosting mechanisms.</div><div><br /></div><div>When these second category of variables finally get passed to a WSGI application, the SCRIPT_NAME variable identifies the mount point of the WSGI application. The PATH_INFO variable identifies the target resource within the context of that WSGI application, and QUERY_STRING are the request query parameters typical of GET style requests.</div><div><br /></div><div>Before we start looking further at the variables in the first two categories, will just state that the last category of CGI variables is effectively everything else.</div><div><br /></div><div>Now, in the case of the first category consisting of just the REQUEST_URI variable, this is according to the standards only meant to include ASCII characters. Even then, in a URI certain ASCII characters are themselves reserved and need to be percent-escaped. The end result is that in its original form, there seems to be no reason to retain the value as a byte string, at least not at the level of the WSGI application. A WSGI server may need to keep it as bytes when initially processing it, but if a portable WSGI application possibly shouldn't be using REQUEST_URI directly anyway, what is the point of preserving it as bytes when passed through to the WSGI application.</div><div><br /></div><div>The only justification seems to be where WSGI applications do for some reason still want to deal directly with the value of the REQUEST_URI and so need to ignore what decoding of the variable was done by the server and do it themselves. In this case they need to decode the percent-escaped values and this is where it starts to get tricky. This is because the decoded</div><div>bytes are the raw bytes before any charset encoding is applied to convert it to a unicode string. Ignoring the issues around knowing what charset encoding to apply, the argument simply seems to be that performing manipulations on the strings is simply best done as bytes. If that is the case, it would be a pain if one had to always convert the value of REQUEST_URI back to a byte string first.</div><div><br /></div><div>Anyway, as much as the fact that the relationship between SCRIPT_NAME, PATH_INFO and QUERY_STRING to the original value of REQUEST_URI can be tenuous where a server is performing rewriting, one cant say that there aren't valid reasons to be working on REQUEST_URI directly, and if to use REQUEST_URI always means needing to go back to bytes, then perhaps it should always be passed as a byte string. It would be nice though for those pushing bytes to properly explain why they need to be working with REQUEST_URI directly. Up to now they have tended to gloss over why it is important and I don't know enough about implementing Python web frameworks and HTTP decoding to understand why SCRIPT_NAME, PATH_INFO and QUERY_STRING aren't sufficient.</div><div><br /></div><div>Looking again at the second category of variables, SCRIPT_NAME, PATH_INFO and QUERY_STRING. These are derived from REQUEST_URI by the server. How to extract QUERY_STRING is fairly obvious, but not so with SCRIPT_NAME. This is because the value of SCRIPT_NAME is actually the logical URL at which the WSGI application is mounted. This will be dictated by the way a user has configured the web server. If the WSGI application was mapped such that all requests handled by the server are to be handled by the WSGI application, then SCRIPT_NAME will be empty. If only requests under a certain URL were to be handled by the WSGI application, then SCRIPT_NAME will be that sub URL.</div><div><br /></div><div>These are the simple cases, what SCRIPT_NAME will be can get more complicated than that in a web server which performs some degree of mapping URLs to physical files in the file system. Here the mount point of the WSGI application will be a combination of some URL prefix, a sub section of a file system path and the name of a file containing the WSGI application code or some other information allowing the request to be bridged to the WSGI application.</div><div><br /></div><div>In the first case where the configuration dictates at what URL the WSGI application is mounted, the charset encoding for that part of the URL will be dictated by what charset encoding the configuration file or code specifying the mapping uses. In the latter case where the file system path also matches some component of the URL, then technically, the charset encoding is dictated by both that used for the configuration and that used by the file system. File system paths are typically UTF-8, but configuration and/or code may not.</div><div><br /></div><div>The end result can be a mess where technically different parts of the byte string containing the URL, may need to have been bytes decoded using different charsets. For determining SCRIPT_NAME, one can only really hope that the underlying web server is getting things right. I guess if it isn't then it will not end up matching against the declared location for the WSGI application and it will never be called and return a 404 instead.</div><div><br /></div><div>So, we just need to trust the underlying web server as far as SCRIPT_NAME is concerned. In the case of PATH_INFO though, that is up to the WSGI application and for that, it could well be a different encoding again from what the underlying web server required based on configuration or file system paths. The same also applies to QUERY_STRING, where the encoding is only going to be known or be able to be determined by the WSGI application.</div><div><br /></div><div>Now, if PATH_INFO and QUERY_STRING are always passed as ISO-8859-1, it is quite possible then that the WSGI application will always have to convert them back to a byte string to convert them back to a unicode string with the correct encoding. Since modern web applications tend to always use UTF-8, this is an additional overhead that could be eliminated.</div><div><br /></div><div>This then is perhaps in part why people want byte strings passed instead for these values. That is, it allows the WSGI application to decide what encoding is used.</div><div><br /></div><div>The downside of always passing bytes for the values of these variables is that those not using large frameworks which hide any conversion from byte strings to unicode strings are encumbered with the complexity of having to deal with it even for simple web applications.</div><div><br /></div><div>If modern web applications tend to use UTF-8 the question is then why these variables couldn't instead be converted to unicode strings using that encoding. The problem with that is that for applications which use the full range of ISO-8859-1, this will fail. This in part gets back to why ISO-8859-1 was used in the first place. That is, it works for ISO-8859-1, but it is also byte preserving and can be reversed if you need to use a different encoding.</div><div><br /></div><div>It would perhaps seem that it is going to be impossible to satisfy everyone.</div><div><br /></div><div>One compromise which has been suggested is that the values of SCRIPT_NAME, PATH_INFO and QUERY_STRING be converted to unicode strings using UTF-8. If any of the three variables fails to be converted, then a fallback would occur and ISO-8859-1 would be used. Performing the latter would mean that for that small proportion of cases which are going to be using an encoding other than UTF-8 or ISO-8859-1, that they still have a way of recovering the raw byte string and converting it using the encoding they do need to use.</div><div><br /></div><div>The only trick in this is knowing what encoding was successfully used. The proposal here is that a new WSGI environment variable be introduced. This variable would be called 'wsgi.uri_encoding'. If the conversion was successful using UTF-8, the 'wsgi.uri_encoding' would be set to 'UTF-8'. If it failed, the values of the variables would instead be ISO-8859-1 and 'wsgi.uri_encoding' would correspondingly be set to 'ISO-8859-1'.</div><div><br /></div><div>What we have then is a solution which is likely to handle automatically the vast majority of real world cases. Importantly, no horrible magic would be required for simple applications that don't want to deal with all this stuff.</div><div><br /></div><div>One possible issue might be that to avoid having separate additional variables indicating encoding used for each of SCRIPT_NAME, PATH_INFO and QUERY_STRING, we have said that all of them must be converted successfully as UTF-8. Strictly speaking though the encoding of SCRIPT_NAME is dictated by the web server as explained previously. In practice though, the likelyhood of different encodings being used for different parts of the URL is slim, with UTF-8 more than likely being used for everything. For simplicity it seems a reasonable compromise.</div><div><br /></div><div>One out on top of this may also be to dicate as part of the WSGI specification that any WSGI adapter must provide an option to allow the encoding used to convert the values of the three variables to be set. That way, if an application was using a special encoding, then that would be attempted instead of UTF-8 with a fallback to ISO-8859-1 still occurring after that. If the special encoding works, then that would be set in 'wsgi.uri_encoding' as it was before if UTF-8 had worked, or ISO-8859-1 if the fallback occurred.</div><div><br /></div><div>Trying to summarise all that and hopefully perhaps addressing what the bytes advocates desire, or giving them what they need without actually needing to drop down to bytes for everything, what we end up with is the following revised statements about the WSGI interface.</div><div><br /></div><div>1. The application is passed an instance of a Python dictionary containing what is referred to as the WSGI environment. All keys in this dictionary are native strings. For CGI variables, all names are going to be ISO-8859-1 and so where native strings are unicode strings, that encoding is used for the names of CGI variables</div><div><br /></div><div>2. For the WSGI variable 'wsgi.url_scheme' contained in the WSGI environment, the value of the variable should be a native string.</div><div><br /></div><div>3. For CGI variables other than REQUEST_URI, SCRIPT_NAME, PATH_INFO and QUERY_STRING contained in the WSGI environment, the values of the variables are native strings. Where native strings are unicode strings, ISO-8859-1 encoding would be used such that the original character data is preserved and as necessary the unicode string can be converted back to bytes and thence decoded to a unicode string again using a different encoding.</div><div><br /></div><div>4. The WSGI input stream 'wsgi.input' contained in the WSGI environment and from which request content is read, should yield byte strings.</div><div><br /></div><div>5. The status line specified by the WSGI application should be a byte string. Where native strings are unicode strings, the native string type can also be returned in which case it would be encoded as ISO-8859-1.</div><div><br /></div><div>6. The list of response headers specified by the WSGI application should contain tuples consisting of two values, where each value is a byte string. Where native strings are unicode strings, the native string type can also be returned in which case it would be encoded as ISO-8859-1.</div><div><br /></div><div>7. The iterable returned by the application and from which response content is derived, should yield byte strings. Where native strings are unicode strings, the native string type can also be returned in which case it would be encoded as ISO-8859-1.</div><div><br /></div><div>8. For the CGI variable REQUEST_URI, the value of the variable contained in the WSGI environment will be a byte string.</div><div><br /></div><div>9. For the CGI variables SCRIPT_NAME, PATH_INFO and QUERY_STRING, the values of the variables in the WSGI environment will be unicode strings. What encoding was used in converting the values to unicode strings will be stored in the special WSGI variable called 'wsgi.uri_encoding'. The values would be converted to unicode strings using any encoding explicitly specified by the user, or UTF-8 if not supplied. If for either case the conversion failed, then ISO-8859-1 would be used.</div><div><br /></div><div>10. For the WSGI variable 'wsgi.uri_encoding' contained in the WSGI environment, the value of the variable should be a native string.</div><div><br /></div><div>For later reference, will label this as 'Definition #4'.</div><div><br /></div><div>Note that we haven't changed anything about the third category of CGI variables. These would still be native strings as per Definition #3. This is because these are nearly always going to be ISO-8859-1 anyway. The only exceptions may be CGI variables corresponding to HTTP headers such as Referrer. To try and deal with every exception is going to get too messy if we have to always have a second variable indicating the encoding used and possibly allow user to override the encoding. Thus, leave them as is and accept that they will have to be dealt with specially.</div><div><br /></div><div>The only time that approach might be a pain though is for server specific CGI variables such as DOCUMENT_ROOT and SCRIPT_FILENAME. Where such server specific variables are provided a WSGI adapter would be entitled to convert them to unicode strings, in the case where native string is unicode, using the correct encoding rather than ISO-8859-1. This would actually be essential in some cases else those paths when supplied to operating system functions which operate on paths would otherwise fail.</div><div><br /></div><div>At this point we have definitely deviated from what the WSGI 1.0 specification says. This is especially the case where applied to Python 2.X as unicode strings would start to be passed for the values of some variables in the WSGI environment. As such, Definition #4 if it were to be adopted should almost certainly be cast instead as WSGI 1.1 with 'wsgi.version' being the tuple '(1,1)'.</div><div><br /></div><div>If it is a new version number, we may as well go and fixup some of the short comings in other areas of WSGI 1.0. As such, suggested that the following changes also be made on top of what has already been listed in Definition #4 for WSGI 1.1.</div><div><br /></div><div>11. The 'readline()' function of 'wsgi.input' may optionally take a size hint. This will mean that 'cgi.FieldStorage' will be legal.</div><div><br /></div><div>12. The 'wsgi.input' must provide an empty string as end of input stream marker. This will make it easier to consume 'wsgi.input' as not required to ensure that one doesn't read more than CONTENT_LENGTH. It also opens the window for supporting chunked request content and mutating input filters where CONTENT_LENGTH will not be present or may not be accurate.</div><div><br /></div><div>13. The size argument to 'read()' function of 'wsgi.input' would be optional and if not supplied the function would return all available request content. Thus would make 'wsgi.input' more file like as the WSGI specification suggests it is, but isn't really per original definition.</div><div><br /></div><div>14. The 'wsgi.file_wrapper' supplied by the WSGI adapter must honour the Content-Length response header and must only return from the file that amount of content. This would guarantee that using wsgi.file_wrapper to return part of a file for byte range requests would work.</div><div><br /></div><div>15. Any WSGI application or middleware should not return more data than specified by the Content-Length response header if defined.</div><div><br /></div><div>16. The WSGI adapter must not pass on to the server any data above what the Content-Length response header defines if supplied.</div><div><br /></div><div>So, what are the final set of suggestions.</div><div><br /></div><div>The first is that although WSGI 1.0 on Python 3.X should strictly be bytes everywhere as per Definition #1, it is probably too late to enforce this now. This is because wsgiref in Python 3.X has been using the interpretation as per Definition #3, where the values of the WSGI variables would be passed as ISO-8859-1 and where unicode strings are allowed in the response so long as they can be converted to byte strings as ISO-8859-1. Although mod_wsgi 3.0 has not yet been officially released, it was also using this interim interpretation, with people having been using the code either from the subversion trunk or by way of the release candidates.</div><div><br /></div><div>It is known that there are various people out there implementing WSGI applications with Python 3.X with the expectation that things will work as per Definition #3. It sort of seems a bit brutal to tell them that all their effort is wasted.</div><div><br /></div><div>The second suggestion is though that WSGI 1.0 for Python 3.X, per Definition #3, be immediately deprecated and instead Definition #4, which uses 'wsgi.uri_encoding' to indicate encoding of SCRIPT_NAME, PATH_INFO and QUERY_STRING be adopted as WSGI 1.1. Any Python 3.X WSGI adapter should default to WSGI 1.1 although could be configured as necessary to use the WSGI 1.0 interpretation instead. By promoting WSGI 1.1 as the default for Python 3.X, we are setting the way forward and people will not be as inclined to ignore it and persist with WSGI 1.0.</div><div><br /></div><div>The final one is that in the case of Python 2.X WSGI adpaters, these would still default to WSGI 1.0, but could be configured instead to use WSGI 1.1 as per Definition #4.</div><div><br /></div><div>The purpose of WSGI 1.1 in Python 2.X, as well as being the way forward in general, would be to allow an easier transition to Python 3.X, by allowing people to convert to WSGI 1.1 first and then using 2to3 to jump to Python 3.X. The thought here is that WSGI 1.1 per Definition #4 may be a better platform for 2to3 than WSGI 1.0 as the WSGI adpater itself will be worrying about the conversion to unicode strings for key values in the WSGI environment which will possibly remove some of the issues with the 2to3 conversion.</div><div><br /></div><div>If we want to be brave, we also introduce WSGI 2.0 at this point as well. This would be WSGI 1.1 but with 'start_response' eliminated and a simple tuple returned. The hello world application for WSGI 2.0 would be.</div><pre>def application(environ):<br />   status = '200 OK'<br />   output = 'Hello World!'<br /><br />   response_headers = [('Content-type', 'text/plain'),<br />                       ('Content-Length', str(len(output)))]<br /><br />   return (status, response_headers, [output])</pre><div>So, there we have my ideas for a roadmap for WSGI. These aren't strictly speaking all my own ideas, but instead bring together ideas of various people in an attempt to come up with some whole that might satisfy most of what people are putting forward as requirements.</div><div><br /></div><div>Hopefully having laid this all out with the rational and an actual roadmap, we might be able to now bridge any last gaps in the divergent opinions that are out there. I fear that if we can't manage that soon, it is all a lost cause and may as well just move onto other stuff and give up on Python 3.X. It is just becoming too much of a waste of time trying to shephard this forward.</div><div><br /></div><div>If you are going to pull all this apart and give feedback, or you have a differing opinion, then describe it as part of a complete solution by way of an amended definition like I have given along with an explanation rationalising why you think it should be done your way. Too many times the discussions on the Python WEB-SIG went off on tagents in relation to specific issues and the overall picture was lost of how that fit into the whole. I felt that it was when this happened that people started switching off and the discussion died.</div><div><br /></div><div>And please, all you people who want to see WSGI somehow encompass support for asynchronous systems as well as synchronous, hold your fire. That is a distinct issue and is irrelevant to the main problem. A number of times the discussion on the Python WEB-SIG has been derailed because people brought up asynchronous system support. So just leave it be, let us get WSGI for synchronous systems worked out first.</div><div><br /></div><div>Finally, Robert Brewer and Ian Bicking, who hopefully will read this, as maintainers of the other two high profile WSGI hosting mechanisms, I would really like you to see you state your own definitions for how you believe any update should work, or at least clearly state which of the above you think is the right one if you agree. Ultimately I believe it is going to be us three who decide this as we effectively control it by what we implement in our respective packages.</div><div><br /></div>
+<div style='clear: both;'></div>
+</div>
+<div class='post-footer'>
+<div class='post-footer-line post-footer-line-1'>
+<span class='post-author vcard'>
+Posted by
+<span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
+<meta content='https://www.blogger.com/profile/13609779138164842374' itemprop='url'/>
+<a class='g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' title='author profile'>
+<span itemprop='name'>Graham Dumpleton</span>
+</a>
+</span>
+</span>
+<span class='post-timestamp'>
+at
+<meta content='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html' itemprop='url'/>
+<a class='timestamp-link' href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html' rel='bookmark' title='permanent link'><abbr class='published' itemprop='datePublished' title='2009-09-17T21:50:00+10:00'>9:50&#8239;PM</abbr></a>
+</span>
+<span class='post-comment-link'>
+</span>
+<span class='post-icons'>
+<span class='item-action'>
+<a href='https://www.blogger.com/email-post/2363643920942057324/6796371828982948720' title='Email Post'>
+<img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
+</a>
+</span>
+</span>
+<div class='post-share-buttons goog-inline-block'>
+<a class='goog-inline-block share-button sb-email' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=6796371828982948720&target=email' target='_blank' title='Email This'><span class='share-button-link-text'>Email This</span></a><a class='goog-inline-block share-button sb-blog' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=6796371828982948720&target=blog' onclick='window.open(this.href, "_blank", "height=270,width=475"); return false;' target='_blank' title='BlogThis!'><span class='share-button-link-text'>BlogThis!</span></a><a class='goog-inline-block share-button sb-twitter' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=6796371828982948720&target=twitter' target='_blank' title='Share to X'><span class='share-button-link-text'>Share to X</span></a><a class='goog-inline-block share-button sb-facebook' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=6796371828982948720&target=facebook' onclick='window.open(this.href, "_blank", "height=430,width=640"); return false;' target='_blank' title='Share to Facebook'><span class='share-button-link-text'>Share to Facebook</span></a><a class='goog-inline-block share-button sb-pinterest' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=6796371828982948720&target=pinterest' target='_blank' title='Share to Pinterest'><span class='share-button-link-text'>Share to Pinterest</span></a>
+</div>
+</div>
+<div class='post-footer-line post-footer-line-2'>
+<span class='post-labels'>
+Labels:
+<a href='http://blog.dscpl.com.au/search/label/mod_wsgi' rel='tag'>mod_wsgi</a>,
+<a href='http://blog.dscpl.com.au/search/label/python' rel='tag'>python</a>,
+<a href='http://blog.dscpl.com.au/search/label/wsgi' rel='tag'>wsgi</a>
+</span>
+</div>
+<div class='post-footer-line post-footer-line-3'>
+<span class='post-location'>
+</span>
+</div>
+</div>
+</div>
+<div class='comments' id='comments'>
+<a name='comments'></a>
+<h4>23 comments:</h4>
+<div id='Blog1_comments-block-wrapper'>
+<dl class='avatar-comment-indent' id='comments-block'>
+<dt class='comment-author ' id='c8874247909419935068'>
+<a name='c8874247909419935068'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/12100140919727858844" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-8874247909419935068-12100140919727858844"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="fumanchu">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/12100140919727858844' rel='nofollow'>fumanchu</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-8874247909419935068'>
+<p>
+Finally! :)<br /><br />Your proposal is very very close to what we&#39;ve already got in CherryPy 3.2 beta; at a cursory glance, the only difference is that we aren&#39;t making SCRIPT_NAME etc unicode for Python 2.x. I&#39;ll take a look and see how onerous that might be ASAP.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253205590786#c8874247909419935068' title='comment permalink'>
+September 18, 2009 at 2:39&#8239;AM
+</a>
+<span class='item-control blog-admin pid-961240191'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/8874247909419935068' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c9213038606597393866'>
+<a name='c9213038606597393866'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/04335807773215473429" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-9213038606597393866-04335807773215473429"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="James Thiele">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/04335807773215473429' rel='nofollow'>James Thiele</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-9213038606597393866'>
+<p>
+Please &quot;Just Do It&quot; - release your version.<br /><br />It won&#39;t be the first or last time a programming community has had potentially competing standards.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253220653929#c9213038606597393866' title='comment permalink'>
+September 18, 2009 at 6:50&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1908498129'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/9213038606597393866' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c2086791978121468918'>
+<a name='c2086791978121468918'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/04688223805457202941" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-2086791978121468918-04688223805457202941"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="PJE">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/04688223805457202941' rel='nofollow'>PJE</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-2086791978121468918'>
+<p>
+I personally vote for #3 as an amendment/clarification of WSGI 1.0, and then just get working on WSGI 2.0 ASAP.  It&#39;s really sort of embarrassing that Ruby&#39;s port of WSGI is basically on the 2.0 version already, while we languish with ancient backward-compatibility issues.<br /><br />Anyway, thanks for writing such a nice, step-by-step explanation of the issues.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253223975544#c2086791978121468918' title='comment permalink'>
+September 18, 2009 at 7:46&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1207128175'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/2086791978121468918' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c7891537119931661906'>
+<a name='c7891537119931661906'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/01720512194160561870" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7891537119931661906-01720512194160561870"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Wheat">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/01720512194160561870' rel='nofollow'>Wheat</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7891537119931661906'>
+<p>
+Word count gives me 7,271 words. Longest python blog post ever? I think I wore out my mouse wheel just scrolling through it! Good stuff though.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253225135859#c7891537119931661906' title='comment permalink'>
+September 18, 2009 at 8:05&#8239;AM
+</a>
+<span class='item-control blog-admin pid-657286061'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7891537119931661906' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c2237330141414077047'>
+<a name='c2237330141414077047'></a>
+<div class="avatar-image-container vcard"><span dir="ltr"><a href="https://www.blogger.com/profile/17232793593574502483" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-2237330141414077047-17232793593574502483"><img src="https://resources.blogblog.com/img/blank.gif" width="35" height="35" class="delayLoad" style="display: none;" longdesc="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEho25gOlaDBgp7sSxt7XyZEptOjfO-bV99uG-YEQBdIELX5e8g8yky3CtPv_bH13Bm8Td_cZ4n9NVC-I8aandFNAu1Wwrn1SDT-0slZ9vausNEGrTA2I7kusnf0fZwcOKs1qtg/s45-c-r/7094252405dd3dd5f798b132834d39b2?s=128&amp;d=identicon&amp;r=PG" alt="" title="Vinay Sajip">
+
+<noscript><img src="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEho25gOlaDBgp7sSxt7XyZEptOjfO-bV99uG-YEQBdIELX5e8g8yky3CtPv_bH13Bm8Td_cZ4n9NVC-I8aandFNAu1Wwrn1SDT-0slZ9vausNEGrTA2I7kusnf0fZwcOKs1qtg/s45-c-r/7094252405dd3dd5f798b132834d39b2?s=128&amp;d=identicon&amp;r=PG" width="35" height="35" class="photo" alt=""></noscript></a></span></div>
+<a href='https://www.blogger.com/profile/17232793593574502483' rel='nofollow'>Vinay Sajip</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-2237330141414077047'>
+<p>
+Thank you for the clear and precise discussion of the issues. I hope that something workable can be arrived at soon.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253228414795#c2237330141414077047' title='comment permalink'>
+September 18, 2009 at 9:00&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1192189492'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/2237330141414077047' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c339026403214174343'>
+<a name='c339026403214174343'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/10879711379090472478" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-339026403214174343-10879711379090472478"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="mae">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/10879711379090472478' rel='nofollow'>mae</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-339026403214174343'>
+<p>
+Thank you! I agree 100%, Robert already replied what about Ian? I hope this is settle for ones and for all.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253235451947#c339026403214174343' title='comment permalink'>
+September 18, 2009 at 10:57&#8239;AM
+</a>
+<span class='item-control blog-admin pid-652805269'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/339026403214174343' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c4736657606673068033'>
+<a name='c4736657606673068033'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4736657606673068033-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4736657606673068033'>
+<p>
+Robert (fumanchu)<br /><br />Yeah, took me a while after I told you I was writing this and sent you first part to look at it. Work is a bit full on at the moment. Am though becoming somewhat of an expert on Jira/Confluence upgrades and complex JIRA workflow configuration. Generally leaves me quite buggered and not inclined to do much at home, plus our almost 2 year old demands a lot of time as well.<br /><br />If you are saying that for what we want to call WSGI 1.1 (wsgi.uri_encoding) as we discussed previously and which mutated into what I described, that in Python 2.X it would still have used bytes for SCRIPT_NAME etc, I am a bit surprised. I got the impression that you were using unicode for SCRIPT_NAME etc, but also that for non category 1/2, ie. all the other CGI variables, you were also intending to use unicode as well for Python 2.X. This is in part where my comment came about in terms of us disagreeing on things. That is, I thought you were going even further to using unicode in Python 2.X that I had in mind.<br /><br />It was uncertainties like that which made be really want to lay out all the possibilities as a clear set of rules and try and have everyone try and explain things as a complete set of such rules when trying to discuss different opinions, else it can start to get hard to understand the full picture of what someone thinks. As is, still making assumptions that you are even talking about definition #4 as applied to Python 2.X.<br /><br />At the time I was also of mind to push the line on using definition #1 for WSGI 1.0 on Python 3.X, simply because that is really what the specification says. So, another point of disagreement. I was attracted to definition #1 as I saw using that definition as a good lever to get people to move to newer version of specification because for most people dealing with all bytes would suck pretty bad and they would probably gladly want to use any new improved version. In the end I felt that the existing practice (almost defacto specification), of definition #3 for WSGI 1.0 on Python 3.X must just have to be lived with now.<br /><br />The danger in using definition #3 as I saw it is coming out in PJE&#39;s belief that should jump straight from that to WSGI 2.0 and not bother with a WSGI 1.1 as per definition #4. Am not convinced at this point of skipping WSGI 1.1 even if people agree now that WSGI 2.0 would be definition #4 with start_response() dropped.<br /><br />My concern here is that some number of packages are still dependent on the write() function returned from start_response(). If you go to WSGI 2.0 and drop that, they will be stuck at WSGI 1.0 until they can make major changes to their code to do it the other way. Alternatively, they need to be shown how to use greenlets to get a write() type interface on top of WSGI 2.0. There has been some talk about using greenlets to allow a WSGI 2.0 to WSGI 1.0 bridge, but I don&#39;t believe I have ever actually seen an implementation offered up by anyone. If some one actually comes out with that example bridge, and a description of the general technique, maybe I will not be so concerned about skipping WSGI 1.1 and going direct to WSGI 2.0.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253257509785#c4736657606673068033' title='comment permalink'>
+September 18, 2009 at 5:05&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4736657606673068033' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c7086671233170049858'>
+<a name='c7086671233170049858'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7086671233170049858-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7086671233170049858'>
+<p>
+BTW, I should have said that as much as I rant about this stuff, I don&#39;t know that much about using it in actual applications. Instead, I just write the WSGI adapter for the server. So, don&#39;t trust a word I say. See me as the stupid moderator who is just trying to get people to agree to something. Frankly I don&#39;t care what it is, as long as everyone agrees. When they agree, then I&#39;ll implement it.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253275507852#c7086671233170049858' title='comment permalink'>
+September 18, 2009 at 10:05&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7086671233170049858' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c4700850977474493926'>
+<a name='c4700850977474493926'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/04688223805457202941" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4700850977474493926-04688223805457202941"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="PJE">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/04688223805457202941' rel='nofollow'>PJE</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4700850977474493926'>
+<p>
+Just for the heck of it, I sketched a 2-to-1 adapter using greenlets in about 20 minutes just now, about 40 lines of code.  No error-handling, though; it just assumes the WSGI 1 app is well-behaved, and that the only difference between WSGI 1 and 2 is the calling convention.  (Technically, it should also change the wsgi.version key and a few other odds and ends.)  But the basic idea seems quite sound, and straightforward to write.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253302511115#c4700850977474493926' title='comment permalink'>
+September 19, 2009 at 5:35&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1207128175'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4700850977474493926' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c5495157627874049529'>
+<a name='c5495157627874049529'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/12100140919727858844" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5495157627874049529-12100140919727858844"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="fumanchu">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/12100140919727858844' rel='nofollow'>fumanchu</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5495157627874049529'>
+<p>
+Graham; yes you&#39;re right. CherryPy 3.2 beta uses your definition #1 for WSGI 1.0 for both py2 (str) and py3 (bytes). And it uses your definition #4 for WSGI 1.1 for py3 (str), but unicode everywhere for py2. So to align completely with your definition #4, we&#39;d have to switch Python 2/WSGI 1.1 to primarily byte strings.<br /><br />We can do that fairly easily, but note that for Python 2:<br /><br />Definition #1<br />env keys: bytes<br />wsgi.url_scheme: bytes<br />REQUEST_URI: bytes<br />SCRIPT_NAME/PATH_INFO/QUERY_STRING: unicode<br />other cgi vars: bytes<br />wsgi.input: bytes<br />response status/headers/body: bytes<br /><br />Definition #4:<br />env keys: bytes<br />wsgi.url_scheme: bytes<br />REQUEST_URI: bytes<br />SCRIPT_NAME/PATH_INFO/QUERY_STRING: unicode<br />other cgi vars: bytes<br />wsgi.input: bytes<br />response status/headers/body: bytes<br /><br />So the upshot is that, for CPython 2, WSGI 1.1 will only differ from WSGI 1.0 by using unicode for SCRIPT_NAME, PATH_INFO, and QUERY_STRING. Not a very compelling reason to upgrade. In fact, CherryPy-the-framework would most likely just change these back to bytes (using wsgi.uri_encoding) to minimize confusion.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253380095875#c5495157627874049529' title='comment permalink'>
+September 20, 2009 at 3:08&#8239;AM
+</a>
+<span class='item-control blog-admin pid-961240191'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5495157627874049529' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c3249537471940013550'>
+<a name='c3249537471940013550'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-3249537471940013550-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-3249537471940013550'>
+<p>
+Robert, more confusion.<br /><br />You say &#39;CherryPy 3.2 beta uses your definition #1 for WSGI 1.0 for both py2 (str) and py3 (bytes)&#39;. I actually thought you were using definition #3 for WSGI 1.0 on Python 3.X. That is why in the end I thought that definition #3 may have to be used for WSGI 1.0 on Python 3.X rather than pushing the strict WSGI PEP interpretation I felt was correct.<br /><br />In other words thought that wsgiref, mod_wsgi and CherryPy using definition #3 for Python 3.X and seemed to me too much precedence and possibly code already dependent on that.<br /><br />As I said, pushing definition #1 for Python 3.X may actually have been a good thing in my mind as I had a nagging suspicion it would be horrible to work with and so would hurry people along to come up with something better.<br /><br />Armin wanted definition #1, but is now interesting in that based on his looking further at bytes in Python 3.X, he is stepping back a bit from that now. Will be interesting now to see what happens.<br /><br />As to definition #4 not being much different on Python 2.X, that is true if you only look at those core definitions. More important to me is the clarifications detailed in (11) through (16) that I was adding on top.<br /><br />Although I raised the issue of a WSGI 2.0/WSGI 1.0 bridge in response to PJE, of more concern to me in PJE&#39;s preference for skipping WSGI 1.1 and going straight to WSGI 2.0, is that those clarifications would then never come to any WSGI 1.X version. That sort of sucks and means we are going to be stuck with WSGI implementations that due to use of cgi.FieldStorage etc, are actually violating the WSGI specification. It isn&#39;t just about readline() though, I am seeing more and more cases where people are needing to support chunked request content in streaming manner and WSGI as is doesn&#39;t support that.<br /><br />I could live with deferring any significant change around REQUEST_URI, SCRIPT_NAME etc until WSGI 2.0 so long as a WSGI 1.1 came out for Python 2.X which added those clarifications. That would give people more to work with in WSGI implementations for Python 2.X that are going to still stick around for a long time to come.<br /><br />As to WSGI 1.X on Python 3.X. So long as least WSGI 1.1 came out for Python 2.X, could live with there never being a WSGI 1.X for Python 3.X. In fact I argued for this back at start of 2008, but promptly got chastised by people on the basis that I was saying this because felt that since people were going to have to change their code when moving to Python 3.X, they could live with an API change as well. The 2to3 crowd thought this was sacrilege and that there tool was in part infallible. They didn&#39;t understand at the time that WSGI wasn&#39;t necessarily just going to work fine as is on Python 3.X without change anyway. The ongoing discussions are proving that last point out and that it isn&#39;t going to be a simple transition for WSGI.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253418897402#c3249537471940013550' title='comment permalink'>
+September 20, 2009 at 1:54&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/3249537471940013550' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c6179842789746130822'>
+<a name='c6179842789746130822'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6179842789746130822-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6179842789746130822'>
+<p>
+Robert, BTW, I don&#39;t think you mean:<br /><br />SCRIPT_NAME/PATH_INFO/QUERY_STRING: unicode<br /><br />in your summary of definition #1 on Python 2.X. Presume you meant bytes, else they are exactly the same.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253419091153#c6179842789746130822' title='comment permalink'>
+September 20, 2009 at 1:58&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6179842789746130822' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c5705301292108832816'>
+<a name='c5705301292108832816'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/12100140919727858844" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5705301292108832816-12100140919727858844"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="fumanchu">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/12100140919727858844' rel='nofollow'>fumanchu</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5705301292108832816'>
+<p>
+Yes, I meant bytes. My mistake due to too much copy/paste while commenting.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253430503194#c5705301292108832816' title='comment permalink'>
+September 20, 2009 at 5:08&#8239;PM
+</a>
+<span class='item-control blog-admin pid-961240191'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5705301292108832816' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c4644260450492454931'>
+<a name='c4644260450492454931'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/12100140919727858844" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4644260450492454931-12100140919727858844"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="fumanchu">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/12100140919727858844' rel='nofollow'>fumanchu</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4644260450492454931'>
+<p>
+I guess I spelled out the facts but didn&#39;t ask the question: why not make SCRIPT_NAME/PATH_INFO/QUERY_STRING native (instead of unicode) for WSGI 1.1?
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253430680107#c4644260450492454931' title='comment permalink'>
+September 20, 2009 at 5:11&#8239;PM
+</a>
+<span class='item-control blog-admin pid-961240191'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4644260450492454931' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c7734971516232155789'>
+<a name='c7734971516232155789'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7734971516232155789-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7734971516232155789'>
+<p>
+What I was trying to avoid was having a WSGI definition which was specific to Python 3.X and have no relevance to Python 2.X. That is, if SCRIPT_NAME etc are native, then for Python 2.X wsgi.uri_encoding is meaningless. I thought that having some correspondence between the two would have been a good idea.<br /><br />I have been trying to draft a followup message to the WEB-SIG about the higher level goals of what we think we want to achieve and get people to agree on that high level plan, separate from the low level details, but trip to take baby to park intruded.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253431370687#c7734971516232155789' title='comment permalink'>
+September 20, 2009 at 5:22&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7734971516232155789' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c2769317914116817987'>
+<a name='c2769317914116817987'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/17592751713675895474" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-2769317914116817987-17592751713675895474"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="J">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/17592751713675895474' rel='nofollow'>J</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-2769317914116817987'>
+<p>
+Hi there.  I&#39;m a user of mod_wsgi and appreciate the work you&#39;ve put into it and also into discussing the WSGI specification.  All the specification arcana to me is a little difficult, but I had a couple of comments.<br /><br />1) I&#39;m not sure what you mean by this: <br /><br />&quot;Further, because ISO-8859-1 is the predominant language on the Internet, they may not care therefore about implementing full unicode support.&quot;<br /><br />This can&#39;t be true, at least not anymore.  The predominant language of the Internet is now UTF-8.  That&#39;s what urls are (with that percent encoding, but it&#39;s not Latin-1 percent encoded is my point).  That&#39;s what query parameters are supposed to be (though some use the encoding of the originating page, but since...) All the major websites are using utf-8.  Google, Yahoo, Blogger, Wordpress, Twitter, Facebook... emails, I think it still varies somewhat, but moving towards UTF-8.  Firefox, IE, Chrome, Safari assume UTF-8 for the urls and in my experiments, it respects it in the header too (ie for redirects).  Regardless of what is underlying, the web interfaces are all UTF-8.<br /><br />2) I did a brief scan of some discussion on the Python WEB-SIG mailing list.  I understand there are a lot of complex issues for dealing with different versions of Python, WSGI, backwards compatibility, RFCs, etc.  But here&#39;s an important principle when it comes to encoding:<br /><br />When dealing with multiple encodings, make everything unicode first, then re-encode to whatever you want.<br /><br />If you have a case where you are afraid of the user giving you input that can&#39;t be coerced to another encoding easily without them telling you what the original encoding was, then force them to give you unicode.  Once you have unicode, you can encode to whatever you want.  Everything goes to unicode, then you get out whatever you want (say, UTF-8).  You don&#39;t have to worry about invalid ____ because you already made sure it was valid in the original -&gt; unicode conversion.  So even if your input isn&#39;t unicode and your output isn&#39;t unicode, using unicode is quite desirable because it forces for the conversion to be right.<br /><br />My two cents.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253804731408#c2769317914116817987' title='comment permalink'>
+September 25, 2009 at 1:05&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1715940754'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/2769317914116817987' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c3389577265310902816'>
+<a name='c3389577265310902816'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-3389577265310902816-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-3389577265310902816'>
+<p>
+James.<br /><br />In relation to (1), rather than ISO-8859-1, I perhaps should have said English. What I was trying to get across is that the characters people actually use would fit within ISO-8859-1.<br /><br />In relation to (2), yes you can go to unicode, but given you may not be 100% sure about what encoding is used, you are restricted to assuming a single character encoding such as ISO-8859-1 to be able to reverse it and transcode to another encoding. In other words, you couldn&#39;t decode as UTF-8 as not all ISO-8859-1 bytes strings are decodable as UTF-8 and would fail.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1253834302873#c3389577265310902816' title='comment permalink'>
+September 25, 2009 at 9:18&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/3389577265310902816' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c6843937920785844079'>
+<a name='c6843937920785844079'></a>
+<div class="avatar-image-container vcard"><span dir="ltr"><a href="https://www.blogger.com/profile/09451273963482095781" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6843937920785844079-09451273963482095781"><img src="https://resources.blogblog.com/img/blank.gif" width="35" height="35" class="delayLoad" style="display: none;" longdesc="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh2PVSpW4alLoEI0feunWTajqUvUqHZOJxTvWH1p8h8je-QXrZFENY9n3zKnT6wcuh12lAH48qAVdfpXg7JNIk-1yc2T1-I43EMi9Cx6J8t9mJaXMcXVGz6qcN2Udeswg/s45-c/65e43f9d887c6cd56dcece012f8f165b%3Fs%3D128%26d%3Didenticon%26r%3DPG" alt="" title="mrts">
+
+<noscript><img src="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh2PVSpW4alLoEI0feunWTajqUvUqHZOJxTvWH1p8h8je-QXrZFENY9n3zKnT6wcuh12lAH48qAVdfpXg7JNIk-1yc2T1-I43EMi9Cx6J8t9mJaXMcXVGz6qcN2Udeswg/s45-c/65e43f9d887c6cd56dcece012f8f165b%3Fs%3D128%26d%3Didenticon%26r%3DPG" width="35" height="35" class="photo" alt=""></noscript></a></span></div>
+<a href='https://www.blogger.com/profile/09451273963482095781' rel='nofollow'>mrts</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6843937920785844079'>
+<p>
+<i>In relation to (1), rather than ISO-8859-1, I perhaps should have said English. What I was trying to get across is that the characters people actually use would fit within ISO-8859-1.</i><br /><br />Being a native speaker of a language that doesn&#39;t fit into ISO-8859-1 that well (Estonian), I&#39;m quite convinced this assumption will cause lots and lots of grief later on.<br /><br />Let me outline some use cases for you.<br /><br />1. I&#39;m a Greek web developer who has registered the domain http://ουτοπία.eu (IDNs will become more and more common and EU is just right now opening up IDNs in .eu, see http://www.eurid.eu/en/content/december-date-internationalised-eu-domain-names ). I want the domain name to be spelled out as-is in my headers and URLs (instead of relying on the clunky Punycode http://tools.ietf.org/html/rfc3492 or any other hacks)<br /><br />2. I&#39;m also a professional blogger blogging in Greek. Knowing that search engines give credit to meaningful URLs that match content, I want my URLs match my blog post titles. When I write a blog post about UTF-8 in URLs titled &quot;UTF-8 σε URLs&quot;, then I want to link to it as http://ουτοπία.eu/ιστολόγιο/UTF-8 σε URLs/.<br /><br />3. I also want to use the <i>Location: http://ουτοπία.eu/ιστολόγιο/UTF-8 σε URLs/</i> header to redirect to that post from my legacy non-Unicode-aware blog.<br /><br />3. I often attach pictures to my blog post. The filenames are descriptive and also in greek. When I upload &quot;όμορφη κυρία.jpg&quot; I expect it to be saved under the same name to my filesystem (that uses UTF-8 encoding) and served under that filename. I&#39;m either using the <i>X-Sendfile</i> header for serving files to offload the work from my web application to my web server or the wsgi.file_wrapper mechanism.<br /><br />(My apologies for Greek speakers in the audience for the clunky examples.)
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1255030686529#c6843937920785844079' title='comment permalink'>
+October 9, 2009 at 6:38&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1157379953'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6843937920785844079' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c1064561922480217933'>
+<a name='c1064561922480217933'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1064561922480217933-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1064561922480217933'>
+<p>
+mrts. All that can still be achieved. The reason ISO-8859-1 is used for request variables is purely because it preserves the byte stream and so can be converted back to bytes and then decoded to a different encoding with out loss of information if your application needs to use a different encoding. For the response, you should be converting stuff like Location back to bytes yourself anyway so you still control the encoding so again, no loss of functional ability.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1255040066687#c1064561922480217933' title='comment permalink'>
+October 9, 2009 at 9:14&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1064561922480217933' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c6547601286218508604'>
+<a name='c6547601286218508604'></a>
+<div class="avatar-image-container vcard"><span dir="ltr"><a href="https://www.blogger.com/profile/00753839787765152120" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6547601286218508604-00753839787765152120"><img src="https://resources.blogblog.com/img/blank.gif" width="35" height="35" class="delayLoad" style="display: none;" longdesc="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEizyapljlmCsoQu4KEiVBxPRv2WCtyHq1qBhclDBSgBHC7C0W1X1yWoK1LjdTOnJCbYGQ786VDYKBeSxt2IuamcgidPNR55bZ2-GgQzUPI0qKl6HgXTrhc8sl6nhJ5NAjU/s45-c/glowka_z_jerzmanowic_100_2945_100x100.png" alt="" title="Mekk">
+
+<noscript><img src="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEizyapljlmCsoQu4KEiVBxPRv2WCtyHq1qBhclDBSgBHC7C0W1X1yWoK1LjdTOnJCbYGQ786VDYKBeSxt2IuamcgidPNR55bZ2-GgQzUPI0qKl6HgXTrhc8sl6nhJ5NAjU/s45-c/glowka_z_jerzmanowic_100_2945_100x100.png" width="35" height="35" class="photo" alt=""></noscript></a></span></div>
+<a href='https://www.blogger.com/profile/00753839787765152120' rel='nofollow'>Mekk</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6547601286218508604'>
+<p>
+1) If you said a) and accept setting the default encoding, maybe it would make sense to say b) and let the application stack provide <i>callable(s)</i> responsible for input decoding (and maybe output encoding, the latter used to handle all unicode strings which reached that far). Then utf-8 could be used as default but it would be easy to replace it with anything, from iso-8859-1 decoding to sophisticated dictionary based encoding detection function.<br /><br />2) I&#39;d also like to join mrts. Being Polish I fairly often face problems with libraries which assume iso-8859-1 here or there (for example not that long ago WebError used to crash if debugged source code contained Polish accented characters in comments). The main risk area here is that of reusable wsgi middlewares. I&#39;d prefer their autors not to rely on native iso-8859-1 strings...<br /><br />3) Finally: I have more and more doubts whether <i>WSGI - the interface between the webserver and the python code</i> and <i>WSGI - the API used for middleware and application writing</i> - should be the same. For &quot;hello world&quot; app, for &quot;fill error messages&quot; or &quot;inject CSRF protection&quot; middlewares it is natural to use unicode. For the request parsing code, but also some middlewares (gzip/gunzip, external cache interaction, ...) bytes are natural. And the best moment to en/decode lies usually somewhere in the middle of the stack (yes, I know, it contradicts suggestion 1)). &quot;Byte interface&quot; + reference de/encoding middleware + &quot;unicode interface&quot;?<br /><br />Well, all those are vague remarks and feel free to ignore them for now. I&#39;d like to see <i>any</i> version released. Your proposals (especially #3) are well thought out, keep things working without ruining anything, and are implementable now.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1258156868769#c6547601286218508604' title='comment permalink'>
+November 14, 2009 at 11:01&#8239;AM
+</a>
+<span class='item-control blog-admin pid-513261795'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6547601286218508604' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c3979060148566363470'>
+<a name='c3979060148566363470'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/17592751713675895474" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-3979060148566363470-17592751713675895474"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="J">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/17592751713675895474' rel='nofollow'>J</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-3979060148566363470'>
+<p>
+<b>&quot;(2), yes you can go to unicode, but given you may not be 100% sure about what encoding is used, you are restricted to assuming a single character encoding such as ISO-8859-1 to be able to reverse it and transcode to another encoding. In other words, you couldn&#39;t decode as UTF-8 as not all ISO-8859-1 bytes strings are decodable as UTF-8 and would fail.&quot;</b><br /><br />But the situation is symmetric!  If the original data was encoded as UTF-8, trying to decode using ISO-8859-1 would fail as well!<br /><br />ISO-8859-1 is used for some Western European languages, not English, which does fine with just ASCII (<i>American</i> Standard Code for Information Interchange), and ISO-8859-1 actually is NOT a common encoding.  ASCII is, and these days, the move is towards UTF-8.  If you are going to assume an encoding, you should be assuming UTF-8, which will correctly decode all ASCII as well.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1258962680364#c3979060148566363470' title='comment permalink'>
+November 23, 2009 at 6:51&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1715940754'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/3979060148566363470' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c1778045498977429431'>
+<a name='c1778045498977429431'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/12100140919727858844" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1778045498977429431-12100140919727858844"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="fumanchu">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/12100140919727858844' rel='nofollow'>fumanchu</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1778045498977429431'>
+<p>
+@James: unlike many other charsets, decoding with ISO-8859-1 cannot fail for any sequence of bytes--each byte is mapped directly to its corresponding code point. It may not be *correct*, but it won&#39;t error; that makes it perfectly reversible. Other charsets don&#39;t have that property.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1259003237651#c1778045498977429431' title='comment permalink'>
+November 24, 2009 at 6:07&#8239;AM
+</a>
+<span class='item-control blog-admin pid-961240191'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1778045498977429431' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c8871911922675008458'>
+<a name='c8871911922675008458'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-8871911922675008458-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-8871911922675008458'>
+<p>
+@fumanchu: Hmmm, I thought any of ISO-8859-X would have been okay since they are all single byte charsets. So, could just have readily used ISO-8859-16 although it would have cheesed off people even more.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html?showComment=1259013476789#c8871911922675008458' title='comment permalink'>
+November 24, 2009 at 8:57&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/8871911922675008458' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+</dl>
+</div>
+<p class='comment-footer'>
+<a href='https://www.blogger.com/comment/fullpage/post/2363643920942057324/6796371828982948720' onclick=''>Post a Comment</a>
+</p>
+</div>
+</div>
+
+        </div></div>
+      
+</div>
+<div class='blog-pager' id='blog-pager'>
+<span id='blog-pager-newer-link'>
+<a class='blog-pager-newer-link' href='http://blog.dscpl.com.au/2009/10/details-on-wsgi-10-amendmentsclarificat.html' id='Blog1_blog-pager-newer-link' title='Newer Post'>Newer Post</a>
+</span>
+<span id='blog-pager-older-link'>
+<a class='blog-pager-older-link' href='http://blog.dscpl.com.au/2009/08/more-on-those-problems-with-example.html' id='Blog1_blog-pager-older-link' title='Older Post'>Older Post</a>
+</span>
+<a class='home-link' href='http://blog.dscpl.com.au/'>Home</a>
+</div>
+<div class='clear'></div>
+<div class='post-feeds'>
+<div class='feed-links'>
+Subscribe to:
+<a class='feed-link' href='http://blog.dscpl.com.au/feeds/6796371828982948720/comments/default' target='_blank' type='application/atom+xml'>Post Comments (Atom)</a>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='column-left-outer'>
+<div class='column-left-inner'>
+<aside>
+</aside>
+</div>
+</div>
+<div class='column-right-outer'>
+<div class='column-right-inner'>
+<aside>
+<div class='sidebar section' id='sidebar-right-1'><div class='widget Profile' data-version='1' id='Profile1'>
+<h2>About Me</h2>
+<div class='widget-content'>
+<dl class='profile-datablock'>
+<dt class='profile-data'>
+<a class='profile-name-link g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' style='background-image: url(//www.blogger.com/img/logo-16.png);'>
+Graham Dumpleton
+</a>
+</dt>
+</dl>
+<a class='profile-link' href='https://www.blogger.com/profile/13609779138164842374' rel='author'>View my complete profile</a>
+<div class='clear'></div>
+</div>
+</div><div class='widget PageList' data-version='1' id='PageList1'>
+<h2>Quick Links</h2>
+<div class='widget-content'>
+<ul>
+<li>
+<a href='http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html'>Decorators and monkey patching.</a>
+</li>
+<li>
+<a href='http://blog.dscpl.com.au/p/using-python-with-docker.html'>Using Python with Docker.</a>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div><div class='widget BlogArchive' data-version='1' id='BlogArchive1'>
+<h2>Blog Archive</h2>
+<div class='widget-content'>
+<div id='ArchiveList'>
+<div id='BlogArchive1_ArchiveList'>
+<select id='BlogArchive1_ArchiveMenu'>
+<option value=''>Blog Archive</option>
+<option value='http://blog.dscpl.com.au/2019/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2018/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2018/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2018/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2018/01/'>January (1)</option>
+<option value='http://blog.dscpl.com.au/2017/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2016/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2016/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2016/07/'>July (1)</option>
+<option value='http://blog.dscpl.com.au/2016/04/'>April (2)</option>
+<option value='http://blog.dscpl.com.au/2016/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2016/02/'>February (2)</option>
+<option value='http://blog.dscpl.com.au/2016/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2015/12/'>December (6)</option>
+<option value='http://blog.dscpl.com.au/2015/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2015/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2015/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2015/06/'>June (5)</option>
+<option value='http://blog.dscpl.com.au/2015/05/'>May (7)</option>
+<option value='http://blog.dscpl.com.au/2015/04/'>April (4)</option>
+<option value='http://blog.dscpl.com.au/2015/03/'>March (4)</option>
+<option value='http://blog.dscpl.com.au/2015/01/'>January (2)</option>
+<option value='http://blog.dscpl.com.au/2014/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2014/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2014/09/'>September (7)</option>
+<option value='http://blog.dscpl.com.au/2014/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2014/05/'>May (1)</option>
+<option value='http://blog.dscpl.com.au/2014/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2014/02/'>February (4)</option>
+<option value='http://blog.dscpl.com.au/2014/01/'>January (8)</option>
+<option value='http://blog.dscpl.com.au/2013/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/10/'>October (4)</option>
+<option value='http://blog.dscpl.com.au/2012/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2011/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2011/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2011/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2011/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2011/01/'>January (5)</option>
+<option value='http://blog.dscpl.com.au/2010/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2010/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2010/08/'>August (2)</option>
+<option value='http://blog.dscpl.com.au/2010/06/'>June (2)</option>
+<option value='http://blog.dscpl.com.au/2010/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2010/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2010/03/'>March (3)</option>
+<option value='http://blog.dscpl.com.au/2009/11/'>November (4)</option>
+<option value='http://blog.dscpl.com.au/2009/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2009/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2009/08/'>August (3)</option>
+<option value='http://blog.dscpl.com.au/2009/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2009/04/'>April (5)</option>
+<option value='http://blog.dscpl.com.au/2009/03/'>March (5)</option>
+<option value='http://blog.dscpl.com.au/2009/02/'>February (1)</option>
+<option value='http://blog.dscpl.com.au/2008/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2008/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2008/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2007/11/'>November (2)</option>
+<option value='http://blog.dscpl.com.au/2007/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2007/09/'>September (3)</option>
+<option value='http://blog.dscpl.com.au/2007/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2007/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2007/03/'>March (2)</option>
+</select>
+</div>
+</div>
+<div class='clear'></div>
+</div>
+</div><div class='widget Label' data-version='1' id='Label1'>
+<h2>Labels</h2>
+<div class='widget-content list-label-widget-content'>
+<ul>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/python'>python</a>
+<span dir='ltr'>(111)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_wsgi'>mod_wsgi</a>
+<span dir='ltr'>(86)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wsgi'>wsgi</a>
+<span dir='ltr'>(58)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/apache'>apache</a>
+<span dir='ltr'>(35)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/docker'>docker</a>
+<span dir='ltr'>(34)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/openshift'>openshift</a>
+<span dir='ltr'>(26)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/decorators'>decorators</a>
+<span dir='ltr'>(15)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/django'>django</a>
+<span dir='ltr'>(13)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/kubernetes'>kubernetes</a>
+<span dir='ltr'>(12)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_python'>mod_python</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/red%20hat'>red hat</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/ipython'>ipython</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyterhub'>jupyterhub</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/new%20relic'>new relic</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wrapt'>wrapt</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/pycon'>pycon</a>
+<span dir='ltr'>(5)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/s2i'>s2i</a>
+<span dir='ltr'>(4)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/gunicorn'>gunicorn</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/uWSGI'>uWSGI</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/datadog'>datadog</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/nginx'>nginx</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/statsd'>statsd</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/web2py'>web2py</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/async'>async</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/dyndns53'>dyndns53</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/fastcgi'>fastcgi</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/heroku'>heroku</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyter'>jupyter</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/lektor'>lektor</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/php'>php</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/shiv'>shiv</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/testing'>testing</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/tornado'>tornado</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/warpdrive'>warpdrive</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/zipapp'>zipapp</a>
+<span dir='ltr'>(1)</span>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div></div>
+</aside>
+</div>
+</div>
+</div>
+<div style='clear: both'></div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+<div class='main-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<footer>
+<div class='footer-outer'>
+<div class='footer-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left footer-fauxborder-left'>
+<div class='fauxborder-right footer-fauxborder-right'></div>
+<div class='region-inner footer-inner'>
+<div class='foot section' id='footer-1'><div class='widget AdSense' data-version='1' id='AdSense1'>
+<div class='widget-content'>
+<script type="text/javascript"><!--
+google_ad_client="pub-6433235630058377";
+google_ad_host="pub-1556223355139109";
+google_ad_width=120;
+google_ad_height=600;
+google_ad_format="120x600_as";
+google_ad_type="text";
+google_ad_host_channel="0001";
+google_color_border="FFFFFF";
+google_color_bg="FFFFFF";
+google_color_link="999999";
+google_color_url="5588AA";
+google_color_text="666666";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<div class='clear'></div>
+</div>
+</div></div>
+<table border='0' cellpadding='0' cellspacing='0' class='section-columns columns-2'>
+<tbody>
+<tr>
+<td class='first columns-cell'>
+<div class='foot no-items section' id='footer-2-1'></div>
+</td>
+<td class='columns-cell'>
+<div class='foot no-items section' id='footer-2-2'></div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- outside of the include in order to lock Attribution widget -->
+<div class='foot section' id='footer-3' name='Footer'><div class='widget Attribution' data-version='1' id='Attribution1'>
+<div class='widget-content' style='text-align: center;'>
+Simple theme. Powered by <a href='https://www.blogger.com' target='_blank'>Blogger</a>.
+</div>
+<div class='clear'></div>
+</div></div>
+</div>
+</div>
+<div class='footer-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</footer>
+<!-- content -->
+</div>
+</div>
+<div class='content-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<script type='text/javascript'>
+    window.setTimeout(function() {
+        document.body.className = document.body.className.replace('loading', '');
+      }, 10);
+  </script>
+
+<script type="text/javascript" src="https://www.blogger.com/static/v1/widgets/552934507-widgets.js"></script>
+<script type='text/javascript'>
+window['__wavt'] = 'AOuZoY4cT6SE9UugY04yYGsYNgxR3laxVg:1757388499852';_WidgetManager._Init('//www.blogger.com/rearrange?blogID\x3d2363643920942057324','//blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html','2363643920942057324');
+_WidgetManager._SetDataContext([{'name': 'blog', 'data': {'blogId': '2363643920942057324', 'title': 'Graham Dumpleton', 'url': 'http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html', 'canonicalUrl': 'http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html', 'homepageUrl': 'http://blog.dscpl.com.au/', 'searchUrl': 'http://blog.dscpl.com.au/search', 'canonicalHomepageUrl': 'http://blog.dscpl.com.au/', 'blogspotFaviconUrl': 'http://blog.dscpl.com.au/favicon.ico', 'bloggerUrl': 'https://www.blogger.com', 'hasCustomDomain': true, 'httpsEnabled': false, 'enabledCommentProfileImages': true, 'gPlusViewType': 'FILTERED_POSTMOD', 'adultContent': false, 'analyticsAccountNumber': '', 'encoding': 'UTF-8', 'locale': 'en', 'localeUnderscoreDelimited': 'en', 'languageDirection': 'ltr', 'isPrivate': false, 'isMobile': false, 'isMobileRequest': false, 'mobileClass': '', 'isPrivateBlog': false, 'isDynamicViewsAvailable': true, 'feedLinks': '\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default\x22 /\x3e\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/rss+xml\x22 title\x3d\x22Graham Dumpleton - RSS\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default?alt\x3drss\x22 /\x3e\n\x3clink rel\x3d\x22service.post\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22https://www.blogger.com/feeds/2363643920942057324/posts/default\x22 /\x3e\n\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/6796371828982948720/comments/default\x22 /\x3e\n', 'meTag': '', 'adsenseClientId': 'ca-pub-6433235630058377', 'adsenseHostId': 'ca-host-pub-1556223355139109', 'adsenseHasAds': true, 'adsenseAutoAds': false, 'boqCommentIframeForm': true, 'loginRedirectParam': '', 'view': '', 'dynamicViewsCommentsSrc': '//www.blogblog.com/dynamicviews/4224c15c4e7c9321/js/comments.js', 'dynamicViewsScriptSrc': '//www.blogblog.com/dynamicviews/b4594f574ba3c273', 'plusOneApiSrc': 'https://apis.google.com/js/platform.js', 'disableGComments': true, 'interstitialAccepted': false, 'sharing': {'platforms': [{'name': 'Get link', 'key': 'link', 'shareMessage': 'Get link', 'target': ''}, {'name': 'Facebook', 'key': 'facebook', 'shareMessage': 'Share to Facebook', 'target': 'facebook'}, {'name': 'BlogThis!', 'key': 'blogThis', 'shareMessage': 'BlogThis!', 'target': 'blog'}, {'name': 'X', 'key': 'twitter', 'shareMessage': 'Share to X', 'target': 'twitter'}, {'name': 'Pinterest', 'key': 'pinterest', 'shareMessage': 'Share to Pinterest', 'target': 'pinterest'}, {'name': 'Email', 'key': 'email', 'shareMessage': 'Email', 'target': 'email'}], 'disableGooglePlus': true, 'googlePlusShareButtonWidth': 0, 'googlePlusBootstrap': '\x3cscript type\x3d\x22text/javascript\x22\x3ewindow.___gcfg \x3d {\x27lang\x27: \x27en\x27};\x3c/script\x3e'}, 'hasCustomJumpLinkMessage': false, 'jumpLinkMessage': 'Read more', 'pageType': 'item', 'postId': '6796371828982948720', 'pageName': 'A roadmap for the Python WSGI specification.', 'pageTitle': 'Graham Dumpleton: A roadmap for the Python WSGI specification.'}}, {'name': 'features', 'data': {}}, {'name': 'messages', 'data': {'edit': 'Edit', 'linkCopiedToClipboard': 'Link copied to clipboard!', 'ok': 'Ok', 'postLink': 'Post Link'}}, {'name': 'template', 'data': {'name': 'Simple', 'localizedName': 'Simple', 'isResponsive': false, 'isAlternateRendering': false, 'isCustom': false, 'variant': 'pale', 'variantId': 'pale'}}, {'name': 'view', 'data': {'classic': {'name': 'classic', 'url': '?view\x3dclassic'}, 'flipcard': {'name': 'flipcard', 'url': '?view\x3dflipcard'}, 'magazine': {'name': 'magazine', 'url': '?view\x3dmagazine'}, 'mosaic': {'name': 'mosaic', 'url': '?view\x3dmosaic'}, 'sidebar': {'name': 'sidebar', 'url': '?view\x3dsidebar'}, 'snapshot': {'name': 'snapshot', 'url': '?view\x3dsnapshot'}, 'timeslide': {'name': 'timeslide', 'url': '?view\x3dtimeslide'}, 'isMobile': false, 'title': 'A roadmap for the Python WSGI specification.', 'description': 'EDIT: Note that the discussion around this on the Python WEB-SIG went round in many circles and died. Thus nothing much here came into being...', 'url': 'http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html', 'type': 'item', 'isSingleItem': true, 'isMultipleItems': false, 'isError': false, 'isPage': false, 'isPost': true, 'isHomepage': false, 'isArchive': false, 'isLabelSearch': false, 'postId': 6796371828982948720}}]);
+_WidgetManager._RegisterWidget('_NavbarView', new _WidgetInfo('Navbar1', 'navbar', document.getElementById('Navbar1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_HeaderView', new _WidgetInfo('Header1', 'header', document.getElementById('Header1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogView', new _WidgetInfo('Blog1', 'main', document.getElementById('Blog1'), {'cmtInteractionsEnabled': false, 'lightboxEnabled': true, 'lightboxModuleUrl': 'https://www.blogger.com/static/v1/jsbin/3842676126-lbx.js', 'lightboxCssUrl': 'https://www.blogger.com/static/v1/v-css/828616780-lightbox_bundle.css'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_ProfileView', new _WidgetInfo('Profile1', 'sidebar-right-1', document.getElementById('Profile1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_PageListView', new _WidgetInfo('PageList1', 'sidebar-right-1', document.getElementById('PageList1'), {'title': 'Quick Links', 'links': [{'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html', 'id': '3350721465154129789', 'title': 'Decorators and monkey patching.'}, {'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/using-python-with-docker.html', 'id': '5591286857776935907', 'title': 'Using Python with Docker.'}], 'mobile': false, 'showPlaceholder': true, 'hasCurrentPage': false}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogArchiveView', new _WidgetInfo('BlogArchive1', 'sidebar-right-1', document.getElementById('BlogArchive1'), {'languageDirection': 'ltr', 'loadingMessage': 'Loading\x26hellip;'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_LabelView', new _WidgetInfo('Label1', 'sidebar-right-1', document.getElementById('Label1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AdSenseView', new _WidgetInfo('AdSense1', 'footer-1', document.getElementById('AdSense1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AttributionView', new _WidgetInfo('Attribution1', 'footer-3', document.getElementById('Attribution1'), {}, 'displayModeFull'));
+</script>
+</body>
+</html>

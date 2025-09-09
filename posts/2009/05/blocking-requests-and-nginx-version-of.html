@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html class='v2' dir='ltr' lang='en'>
+<head>
+<link href='https://www.blogger.com/static/v1/widgets/2508126174-css_bundle_v2.css' rel='stylesheet' type='text/css'/>
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='blogger' name='generator'/>
+<link href='http://blog.dscpl.com.au/favicon.ico' rel='icon' type='image/x-icon'/>
+<link href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html' rel='canonical'/>
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Graham Dumpleton - RSS" href="http://blog.dscpl.com.au/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Graham Dumpleton - Atom" href="https://www.blogger.com/feeds/2363643920942057324/posts/default" />
+
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/5990274690108767033/comments/default" />
+<!--Can't find substitution for tag [blog.ieCssRetrofitLinks]-->
+<meta content='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html' property='og:url'/>
+<meta content='Blocking requests and nginx version of mod_wsgi.' property='og:title'/>
+<meta content='My own mod_wsgi module for Apache  has been available in one form or another now for over two years. What many people don&#39;t know is that the...' property='og:description'/>
+<title>Graham Dumpleton: Blocking requests and nginx version of mod_wsgi.</title>
+<style id='page-skin-1' type='text/css'><!--
+/*
+-----------------------------------------------
+Blogger Template Style
+Name:     Simple
+Designer: Blogger
+URL:      www.blogger.com
+----------------------------------------------- */
+/* Content
+----------------------------------------------- */
+body {
+font: normal normal 12px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #222222;
+background: #66bbdd none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 {
+font-size: 22px;
+}
+a:link {
+text-decoration:none;
+color: #2187bb;
+}
+a:visited {
+text-decoration:none;
+color: #888888;
+}
+a:hover {
+text-decoration:underline;
+color: #32aaff;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #ffffff;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #3299bb;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #3299bb;
+}
+.Header .description {
+font-size: 140%;
+color: #777777;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #eeeeee;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #eeeeee;
+border-left: 0 solid #eeeeee;
+border-right: 0 solid #eeeeee;
+}
+.tabs-inner .widget ul {
+background: #f5f5f5 url(https://resources.blogblog.com/blogblog/data/1kt/simple/gradients_light.png) repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #eeeeee;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 14px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #ffffff;
+border-right: 1px solid #eeeeee;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #000000;
+background-color: #eeeeee;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #eeeeee;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #eeeeee;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #eeeeee;
+}
+/* Headings
+----------------------------------------------- */
+div.widget > h2,
+div.widget h2.title {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #000000;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+h2.date-header {
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+}
+.date-header span {
+background-color: transparent;
+color: #222222;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 22px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 2px;
+background: #ffffff;
+border: 1px solid #eeeeee;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 5px;
+}
+.post-body .tr-caption-container {
+color: #222222;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #666666;
+background-color: #f9f9f9;
+border-bottom: 1px solid #eeeeee;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #eeeeee;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #eeeeee;
+}
+/* Comments
+----------------------------------------------- */
+.comments .comments-content .icon.blog-author {
+background-repeat: no-repeat;
+background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9sLFwMeCjjhcOMAAAD+SURBVDjLtZSvTgNBEIe/WRRnm3U8RC1neQdsm1zSBIU9VVF1FkUguQQsD9ITmD7ECZIJSE4OZo9stoVjC/zc7ky+zH9hXwVwDpTAWWLrgS3QAe8AZgaAJI5zYAmc8r0G4AHYHQKVwII8PZrZFsBFkeRCABYiMh9BRUhnSkPTNCtVXYXURi1FpBDgArj8QU1eVXUzfnjv7yP7kwu1mYrkWlU33vs1QNu2qU8pwN0UpKoqokjWwCztrMuBhEhmh8bD5UDqur75asbcX0BGUB9/HAMB+r32hznJgXy2v0sGLBcyAJ1EK3LFcbo1s91JeLwAbwGYu7TP/3ZGfnXYPgAVNngtqatUNgAAAABJRU5ErkJggg==);
+}
+.comments .comments-content .loadmore a {
+border-top: 1px solid #999999;
+border-bottom: 1px solid #999999;
+}
+.comments .comment-thread.inline-thread {
+background-color: #f9f9f9;
+}
+.comments .continue {
+border-top: 2px solid #999999;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #eeeeee;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #ffffff;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #ffffff;
+}
+.mobile-index-contents {
+color: #222222;
+}
+.mobile-link-button {
+background-color: #2187bb;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #eeeeee;
+color: #000000;
+border-top: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #eeeeee;
+}
+
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 1020px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 1020px;
+max-width: 1020px;
+_width: 1020px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 200px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 200px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("200px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 200px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 200px;
+margin-right: -200px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+body#layout div.add_widget {
+padding: 8px;
+}
+body#layout div.add_widget a {
+margin-left: 32px;
+}
+--></style>
+<link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' media='none' onload='if(media!=&#39;all&#39;)media=&#39;all&#39;' rel='stylesheet'/><noscript><link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' rel='stylesheet'/></noscript>
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+
+<!-- data-ad-client=ca-pub-6433235630058377 -->
+
+</head>
+<body class='loading variant-pale'>
+<div class='navbar section' id='navbar' name='Navbar'><div class='widget Navbar' data-version='1' id='Navbar1'><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/2363643920942057324?po\x3d5990274690108767033\x26origin\x3dhttp://blog.dscpl.com.au',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script><script type="text/javascript">
+(function() {
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = '//pagead2.googlesyndication.com/pagead/js/google_top_exp.js';
+var head = document.getElementsByTagName('head')[0];
+if (head) {
+head.appendChild(script);
+}})();
+</script>
+</div></div>
+<div class='body-fauxcolumns'>
+<div class='fauxcolumn-outer body-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content'>
+<div class='content-fauxcolumns'>
+<div class='fauxcolumn-outer content-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content-outer'>
+<div class='content-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='fauxborder-right content-fauxborder-right'></div>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='header-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='fauxborder-right header-fauxborder-right'></div>
+<div class='region-inner header-inner'>
+<div class='header section' id='header' name='Header'><div class='widget Header' data-version='1' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://blog.dscpl.com.au/'>
+Graham Dumpleton
+</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>
+</span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='header-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</header>
+<div class='tabs-outer'>
+<div class='tabs-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left tabs-fauxborder-left'>
+<div class='fauxborder-right tabs-fauxborder-right'></div>
+<div class='region-inner tabs-inner'>
+<div class='tabs no-items section' id='crosscol' name='Cross-Column'></div>
+<div class='tabs no-items section' id='crosscol-overflow' name='Cross-Column 2'></div>
+</div>
+</div>
+<div class='tabs-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='main-outer'>
+<div class='main-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='fauxborder-right main-fauxborder-right'></div>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<div class='fauxcolumn-outer fauxcolumn-center-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-left-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-right-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main' name='Main'><div class='widget Blog' data-version='1' id='Blog1'>
+<div class='blog-posts hfeed'>
+
+          <div class="date-outer">
+        
+<h2 class='date-header'><span>Friday, May 8, 2009</span></h2>
+
+          <div class="date-posts">
+        
+<div class='post-outer'>
+<div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<meta content='2363643920942057324' itemprop='blogId'/>
+<meta content='5990274690108767033' itemprop='postId'/>
+<a name='5990274690108767033'></a>
+<h3 class='post-title entry-title' itemprop='name'>
+Blocking requests and nginx version of mod_wsgi.
+</h3>
+<div class='post-header'>
+<div class='post-header-line-1'></div>
+</div>
+<div class='post-body entry-content' id='post-body-5990274690108767033' itemprop='description articleBody'>
+My own <a href="http://www.modwsgi.org/">mod_wsgi module for Apache</a> has been available in one form or another now for over two years. What many people don't know is that there is also a <a href="http://hg.mperillo.ath.cx/nginx/mod_wsgi/file/tip/README">mod_wsgi module for nginx</a>, although development on it has appeared to have stalled with no changes having been made for quite some time.<div><br /></div><div>The nginx version of mod_wsgi borrows some code from my original Apache version, but obviously since the internals of Apache and nginx are very different, the main parts of the code which interface with the web server are unique. Although I condoned use of the source code, I do wish I had insisted from the outset that it not be called mod_wsgi due to the confusion that has at times arisen.</div><div><br /></div><div>Although development on the nginx version of mod_wsgi appears to no longer be happening, this isn't stopping people from using it and many are quite happy with it. The question is whether they really understand anything about how nginx works and the shortcomings in how nginx and mod_wsgi work together.</div><div><br /></div><div>Admittedly the author of the mod_wsgi module for nginx has been up front in pointing out that because nginx is asynchronous, and with WSGI not designed for such a system, that once the WSGI application is entered all other activity by the web server is blocked. The recommendation resulting from this is that static files should not be served from the same web server. Use of multiple nginx worker processes is also suggested as a way of mitigating the problem.</div><div><br /></div><div>All well and good, but unfortunately there is a bit more to it than that and although people may think that by using nginx underneath they are going to get the fastest system possible, it is debatable as to whether for real world applications that is going to be the case.</div><div><br /></div><div>To understand the problems with the mod_wsgi module for nginx it is helpful to first look at how Apache works.</div><div><br /></div><div>When using Apache on UNIX systems there is a choice of multiprocessing modules (MPM). The two main options are the&#160;<a href="http://httpd.apache.org/docs/2.2/mod/prefork.html">prefork</a> and <a href="http://httpd.apache.org/docs/2.2/mod/worker.html">worker</a>&#160;MPM. In both cases multiple processes are used to handle requests, but where as prefork is single threaded, worker uses multiple threads within each process to handle requests. On Windows the <a href="http://httpd.apache.org/docs/2.2/mod/mpm_winnt.html">winnt</a> MPM is the only option. It is multithreaded as well, but only a single process is used.</div><div><br /></div><div>The important thing about Apache, no matter which MPM is used, is that a connection is not accepted from a client until a process or thread is available to actually process and handle the request. This means that if a prefork MPM process is busy, or if all threads in a worker MPM process are busy, then that process will not accept any new connections until it is ready to. This ensures that any new connections will always be handled by another free process and you will not end up with a situation where a connection is accepted by a process, but it isn't actually able to process it at that time.</div><div><br /></div><div>Because nginx is an asynchronous system based on an event driven system model, things work a bit differently. What would normally occur is that connections would be accepted regardless, although nginx does enforce an upper limit as defined by 'worker_connections' setting. The work on processing all those concurrent requests would then be interleaved with each other by virtue of work being stopped on one and changed to another when the first would otherwise block waiting on network activity or some other event.</div><div><br /></div><div>For serving of static files an asynchronous system is a good model, allowing more concurrent requests to be handled with less resources. As to mod_wsgi for nginx however, the picture isn't so rosy.</div><div><br /></div><div>The basic problem is that you are embedding within an asynchronous system a component with is synchronous. That is, the WSGI application doesn't cooperate by giving up control when it would block on waiting for some event to occur. Instead it will only hand back control when the complete request is finished. This means for example that if a request takes one second to complete, for that one second, the web server will not be able to do any processing on behalf of the concurrent requests that the process has already accepted.</div><div><br /></div><div>The recommendation as mentioned above is thus to use multiple nginx worker processes by setting 'worker_processes' in configuration and push handling of static files onto a completely different server instance. In practice this is not enough however and you still risk having some percentage of requests being blocked while some other request is being handled.</div><div><br /></div><div>The reason this occurs, is that the synchronous nature of a WSGI application effectively means that mod_wsgi for nginx is not much different to using single threaded prefork MPM with Apache. The big difference though is that nginx will greedily accept new connections when it should only really accept one at a time&#160;commensurate&#160;with how many concurrent connections it can truly process through the WSGI application at the same time.</div><div><br /></div><div>End result is that all those connections which it greedily accepts between calls into the WSGI application will be processed serially and not concurrently. So, if you get a request which takes a long time, all those other requests will block.</div><div><br /></div><div>The use of multiple nginx worker processes is supposed to mediate this, but in practice it may not. This is because new connections aren't going to get distributed out to the worker processes evenly. Instead you may actually see a tendency for the last active process to get precedence, as that process will already been in a running state and thus is quicker to wake up and detect that a new connection is pending. As a consequence, most of the time the new connection will be accepted by the same worker process rather than being accepted by another.</div><div><br /></div><div>If you are running a finely tuned Python web application where all requests are well under one second you may not notice any delays as a result of individual requests blocking, but if the handling of some requests can take a long time, such as a large file transfer, then the effect could be quite dramatic with distinct users seeing quite noticeable delays in getting a response to their own unrelated requests.</div><div><br /></div><div>Now I am sure the author of mod_wsgi for nginx understood all this, but the very little documentation available for it doesn't really say much. In some respects one can get an impression from the documentation that only static file serving is affected by the problem, whereas any concurrent requests, including those for the WSGI application, are affected. Use of multiple nginx worker processes may help, particularly on a machine with multiple processors, but the benefit may be quite limited.</div><div><br /></div><div>Overall I am not sure I would want to trust a production application to mod_wsgi for nginx due to the unpredictability as to whether requests are going to be blocked or not. As much as Apache may have a larger memory footprint due to use of distinct processes and/or threads to handle requests, at least you are guaranteed that when a connection is accepted, that it will be processed promptly.</div><div><br /></div><div>In respect of the greater memory usage of Apache, it also needs to be reiterated that the additional memory overhead of Apache is usually going to be a relatively small percentage when viewed in respect of the overall memory usage of today's even fatter Python web applications. So, anyone who likes to disparage Apache by saying it is fat, is living in a bit of fantasy land when it comes to hosting Python web applications. It simply isn't the big deal they like to make out it is. It often actually just shows they don't know how to configure Apache properly.</div><div><br /></div><div>Finally, to those people searching for the elusive fastest web server in the world, I really suggest you give up. That isn't going to be where the bottleneck is in your application anyway. So, rather than wasting time trying to work out which system may be faster, just choose one, any one, and get on with actually optimising your application, database and caching systems instead. Work on those areas and you will see much more dramatic gains than the few piddly percent difference in request throughput you may get from using a different web hosting mechanism.</div>
+<div style='clear: both;'></div>
+</div>
+<div class='post-footer'>
+<div class='post-footer-line post-footer-line-1'>
+<span class='post-author vcard'>
+Posted by
+<span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
+<meta content='https://www.blogger.com/profile/13609779138164842374' itemprop='url'/>
+<a class='g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' title='author profile'>
+<span itemprop='name'>Graham Dumpleton</span>
+</a>
+</span>
+</span>
+<span class='post-timestamp'>
+at
+<meta content='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html' itemprop='url'/>
+<a class='timestamp-link' href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html' rel='bookmark' title='permanent link'><abbr class='published' itemprop='datePublished' title='2009-05-08T14:53:00+10:00'>2:53&#8239;PM</abbr></a>
+</span>
+<span class='post-comment-link'>
+</span>
+<span class='post-icons'>
+<span class='item-action'>
+<a href='https://www.blogger.com/email-post/2363643920942057324/5990274690108767033' title='Email Post'>
+<img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
+</a>
+</span>
+</span>
+<div class='post-share-buttons goog-inline-block'>
+<a class='goog-inline-block share-button sb-email' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=5990274690108767033&target=email' target='_blank' title='Email This'><span class='share-button-link-text'>Email This</span></a><a class='goog-inline-block share-button sb-blog' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=5990274690108767033&target=blog' onclick='window.open(this.href, "_blank", "height=270,width=475"); return false;' target='_blank' title='BlogThis!'><span class='share-button-link-text'>BlogThis!</span></a><a class='goog-inline-block share-button sb-twitter' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=5990274690108767033&target=twitter' target='_blank' title='Share to X'><span class='share-button-link-text'>Share to X</span></a><a class='goog-inline-block share-button sb-facebook' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=5990274690108767033&target=facebook' onclick='window.open(this.href, "_blank", "height=430,width=640"); return false;' target='_blank' title='Share to Facebook'><span class='share-button-link-text'>Share to Facebook</span></a><a class='goog-inline-block share-button sb-pinterest' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=5990274690108767033&target=pinterest' target='_blank' title='Share to Pinterest'><span class='share-button-link-text'>Share to Pinterest</span></a>
+</div>
+</div>
+<div class='post-footer-line post-footer-line-2'>
+<span class='post-labels'>
+Labels:
+<a href='http://blog.dscpl.com.au/search/label/apache' rel='tag'>apache</a>,
+<a href='http://blog.dscpl.com.au/search/label/mod_wsgi' rel='tag'>mod_wsgi</a>,
+<a href='http://blog.dscpl.com.au/search/label/nginx' rel='tag'>nginx</a>,
+<a href='http://blog.dscpl.com.au/search/label/python' rel='tag'>python</a>,
+<a href='http://blog.dscpl.com.au/search/label/wsgi' rel='tag'>wsgi</a>
+</span>
+</div>
+<div class='post-footer-line post-footer-line-3'>
+<span class='post-location'>
+</span>
+</div>
+</div>
+</div>
+<div class='comments' id='comments'>
+<a name='comments'></a>
+<h4>14 comments:</h4>
+<div id='Blog1_comments-block-wrapper'>
+<dl class='avatar-comment-indent' id='comments-block'>
+<dt class='comment-author ' id='c3011325270988028658'>
+<a name='c3011325270988028658'></a>
+<div class="avatar-image-container vcard"><span dir="ltr"><a href="https://www.blogger.com/profile/06703251205556257197" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-3011325270988028658-06703251205556257197"><img src="https://resources.blogblog.com/img/blank.gif" width="35" height="35" class="delayLoad" style="display: none;" longdesc="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgP7tqzAvT1v2Fhxdvr8KQHZdJn8bA_6exrSMw9Bxst59ESb0vk_i1Ry9qrT830ZXD6Ts8t1xr-nV3nkA9R-SmLrAOFPF4Na-MZdrCZtYisnxg1Gry3UZknq0X2jG2EzKc/s45-c/DSC00204.JPG" alt="" title="mike barton">
+
+<noscript><img src="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgP7tqzAvT1v2Fhxdvr8KQHZdJn8bA_6exrSMw9Bxst59ESb0vk_i1Ry9qrT830ZXD6Ts8t1xr-nV3nkA9R-SmLrAOFPF4Na-MZdrCZtYisnxg1Gry3UZknq0X2jG2EzKc/s45-c/DSC00204.JPG" width="35" height="35" class="photo" alt=""></noscript></a></span></div>
+<a href='https://www.blogger.com/profile/06703251205556257197' rel='nofollow'>mike barton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-3011325270988028658'>
+<p>
+I can't figure out why anyone would use mod_wsgi on nginx.<br /><br />If you add in eventlet, the model becomes a little more interesting, but it's not all that mature and it adds a fair amount of administrative and development overhead.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1241768760000#c3011325270988028658' title='comment permalink'>
+May 8, 2009 at 5:46&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1901099626'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/3011325270988028658' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c6129154530913742218'>
+<a name='c6129154530913742218'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/01305660846056651039" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6129154530913742218-01305660846056651039"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="andy">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/01305660846056651039' rel='nofollow'>andy</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6129154530913742218'>
+<p>
+I'd be particularly interested in how you think Apache and mod_wsgi compares with a nginx and fcgi setup. <br /><br />In my case I'm trying to run multiple Django apps in a constrained memory shared environment so memory usage is critical. I was considering switching to the latter setup but I don't know how much difference it will make.<br /><br />Ironically there is a lot more info out there on fiddling with Web server configuration than there is on how to reduce Python or Django's memory usage.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1241775180000#c6129154530913742218' title='comment permalink'>
+May 8, 2009 at 7:33&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1601226419'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6129154530913742218' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c7801629617676619205'>
+<a name='c7801629617676619205'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><img src="//resources.blogblog.com/img/blank.gif" width="35" height="35" alt="" title="Anonymous">
+
+</span></div>
+Anonymous
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7801629617676619205'>
+<p>
+Presumably phusion passenger on nginx (which can apparently run WSGI Python applications as well, though it isn't well documented or supported yet) works around these issues by managing its own separate set of application processes and queuing up and distributing requests between them. Is there anything concerning about that approach?
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1241776380000#c7801629617676619205' title='comment permalink'>
+May 8, 2009 at 7:53&#8239;PM
+</a>
+<span class='item-control blog-admin pid-159164253'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7801629617676619205' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c2176623752338997389'>
+<a name='c2176623752338997389'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13744754235841309080" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-2176623752338997389-13744754235841309080"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="recordus">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13744754235841309080' rel='nofollow'>recordus</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-2176623752338997389'>
+<p>
+I am running WSGI apps with Nginx + mod_wsgi in testing environment now, It's great to know these things.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1241781120000#c2176623752338997389' title='comment permalink'>
+May 8, 2009 at 9:12&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1777052020'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/2176623752338997389' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c8618237653888777387'>
+<a name='c8618237653888777387'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/02754216642339658436" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-8618237653888777387-02754216642339658436"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Laurent Debacker">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/02754216642339658436' rel='nofollow'>Laurent Debacker</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-8618237653888777387'>
+<p>
+HTTP requests for dynamical content concerns only the main HTML page. The dozens or hundred of required files (images, CSS, JS, flash, etc) to display a web page will significantly faster to load using an efficient HTTP server. Every bit counts, and if a single bit is bad, the whole stuff will be slowed down.<br /><br />Regarding memory, my NGINX uses 8MB of RAM, and my Python app uses 10-14MB (thanks Werkzung), when idle.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1241965980000#c8618237653888777387' title='comment permalink'>
+May 11, 2009 at 12:33&#8239;AM
+</a>
+<span class='item-control blog-admin pid-2049500729'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/8618237653888777387' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c9219244872228951235'>
+<a name='c9219244872228951235'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-9219244872228951235-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-9219244872228951235'>
+<p>
+@andy: Apache/mod_wsgi daemon mode is like fastcgi in many respects. You aren't going to see a great deal of difference. As I said in the post, the web hosting mechanism isn't usually going to be the bottleneck.<br /><br />For reducing memory, one popular setup is to have nginx front end serving static files, proxying dynamic requests to Apache/mod_wsgi with WSGI applications running in daemon mode.<br /><br />@Simon: Phusion Passenger for WSGI applications is also not much different in some respects to Apache/mod_wsgi daemon mode in the area of process management. Also, I still need to look at the detail of Phusion Passenger, but to say it queues up requests is either marketing nonsense or they have gone and implemented it in an odd way.<br /><br />How such systems generally work is that all worker processes listen on the same socket. Accepting connections, if necessary, is mediated by a cross process accept mutex. This just ensures that only one process actually gets the next connection. What governs distribution across the process is merely which process manages to lock that mutex when it is given up by last process. As to the queue, this is just the fact that listener sockets have a backlog queue. That is, it is a feature of listener sockets in the operating system that pending connections will queue up until processes actually accepts connection. If this didn't occur, then most connections would get rejected as processes not likely to be ready at instant that a client connections.<br /><br />If Phusion Passenger has implemented some alternate queueing and load balancing system, then they would have to be implementing an extra level of proxying, which is going to act to slow down handling of new connections and potentially introduce an extra hop across which data has to be sent and received. Further investigation would need to be done, but would be surprised if they had not used the more traditional approach to this.<br /><br />So, a means of queueing connections isn't unique to Phusion Passenger, every hosting mechanism does it.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1241999100000#c9219244872228951235' title='comment permalink'>
+May 11, 2009 at 9:45&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/9219244872228951235' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c5432391801761474747'>
+<a name='c5432391801761474747'></a>
+<div class="avatar-image-container vcard"><span dir="ltr"><a href="https://www.blogger.com/profile/11251335463579376973" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5432391801761474747-11251335463579376973"><img src="https://resources.blogblog.com/img/blank.gif" width="35" height="35" class="delayLoad" style="display: none;" longdesc="//4.bp.blogspot.com/_pIKznqR-jXw/Sau4dIYmUfI/AAAAAAAAAFg/vMw2I45CXuM/S45-s35/optilude" alt="" title="Martin Aspeli">
+
+<noscript><img src="//4.bp.blogspot.com/_pIKznqR-jXw/Sau4dIYmUfI/AAAAAAAAAFg/vMw2I45CXuM/S45-s35/optilude" width="35" height="35" class="photo" alt=""></noscript></a></span></div>
+<a href='https://www.blogger.com/profile/11251335463579376973' rel='nofollow'>Martin Aspeli</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5432391801761474747'>
+<p>
+Hi Graham,<br /><br />I mainly want to use nginx because it is so much simpler to configure and deploy, not necessarily for raw speed.<br /><br />Right now, I use nginx for virtual hosting/proxying with a separate server hosting Plone. I'm not sure if that would have the same problems with blocking or not.<br /><br />I had hoped that as WSGI becomes a more mainstream deployment option for Plone, something like mod_wsgi would be a good option to simplify deployment (no need for a separate process), but this post made me realise that that probably is a false hope.<br /><br />Martin
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1242470160000#c5432391801761474747' title='comment permalink'>
+May 16, 2009 at 8:36&#8239;PM
+</a>
+<span class='item-control blog-admin pid-995218767'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5432391801761474747' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c1702863714759840595'>
+<a name='c1702863714759840595'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1702863714759840595-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1702863714759840595'>
+<p>
+@Martin: There is no issue with the front end nginx where it is acting as a proxy to a distinct HTTP server which runs your WSGI application. Same goes where nginx is proxying to a fastcgi process running your application.<br /><br />The only issue is where the distinct HTTP server is a nginx instance with nginx/mod_wsgi and that is where your application is running as an embedded application. The problem in this case is still not with the front end nginx, but with the backend nginx running nginx/mod_wsgi and your embedded application.<br /><br />Thus, using nginx as proxy front end to your application running in distinct Apache/mod_wsgi setup is fine, as would be using nginx to proxy to your application running on top of CherryPy HTTP/WSGI server or Paste HTTP/WSGI server.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1242471900000#c1702863714759840595' title='comment permalink'>
+May 16, 2009 at 9:05&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1702863714759840595' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c5218659118543636379'>
+<a name='c5218659118543636379'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13335235566497362811" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5218659118543636379-13335235566497362811"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Hongli">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13335235566497362811' rel='nofollow'>Hongli</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5218659118543636379'>
+<p>
+@Graham: Actually Phusion Passenger does have its own queue, independent of the OS's socket backlog. We use this fact to implement good load distribution between the workers.<br /><br />I'm not sure whether it counts as an "extra proxy" so far the performance penalty turns out to be minimal.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1242573300000#c5218659118543636379' title='comment permalink'>
+May 18, 2009 at 1:15&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1710532391'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5218659118543636379' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c5449090590464265214'>
+<a name='c5449090590464265214'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5449090590464265214-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5449090590464265214'>
+<p>
+@Hongli: Depends on how you have implemented it. Your use of 'queuing' just may not be the appropriate way of describing it because of the connotations of the term and really it is just a conventional load balancer and should be described as such, without a need to being up 'queuing'. I'll followup when I get a chance to look at your code and see how it is done.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1242609840000#c5449090590464265214' title='comment permalink'>
+May 18, 2009 at 11:24&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5449090590464265214' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c7482867234902579376'>
+<a name='c7482867234902579376'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/11430394594171525526" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7482867234902579376-11430394594171525526"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="babul">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/11430394594171525526' rel='nofollow'>babul</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7482867234902579376'>
+<p>
+Hi Graham,<br /><br />Firstly thank you for the many EXCELLENT wsgi-related articles and posts you put throughout the interwebs as one often comes across your insights when searching for wsgi info and given your the project lead it&#39;s often very well thought out.<br /><br />Anyway my question, what are your thoughts on the Cherokee webserver? Currently you argue against nginx due to its event model and recommend Apache as it is more determinable, especially for use with python web frameworks, but what about Cherokee? Also what about Cherokee+PHP instead of python (e.g. for running wordpress blogs), any issues you see?
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1252225428531#c7482867234902579376' title='comment permalink'>
+September 6, 2009 at 6:23&#8239;PM
+</a>
+<span class='item-control blog-admin pid-530574189'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7482867234902579376' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c4461307838794300050'>
+<a name='c4461307838794300050'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4461307838794300050-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4461307838794300050'>
+<p>
+Cherokee and nginx both support fastcgi. There is nothing wrong with using fastcgi support in those two servers. I was only pointing out the issues with trying to use an embedded solution as nginx/mod_wsgi uses, on top of an event driven system. The fastcgi model has applications run in a separate daemon process, so no issues.<br /><br />Only thing I would say to be careful of is grandiose claims that fastcgi on one platform or another is faster than anything else on the planet. Reality is that the web server layer is not where the bottleneck is and any difference between speeds of the base hosting mechanism is nearly always going to be swallowed up completely within the overheads of your own application, its rendering engine and any database access.<br /><br />So, choosing a web hosting solution based on perceived speed is stupid, you are better off just choosing whatever hosting mechanism you feel you understand best and which you find easiest to manage. By being easier to manage and configure, you can then spend your time on the real problem, which is making your application run better.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1252283608879#c4461307838794300050' title='comment permalink'>
+September 7, 2009 at 10:33&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4461307838794300050' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c9060460883800870424'>
+<a name='c9060460883800870424'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/02119773083711032362" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-9060460883800870424-02119773083711032362"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="jim">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/02119773083711032362' rel='nofollow'>jim</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-9060460883800870424'>
+<p>
+I wonder what you think of nginx + uwsgi? I have been impressed with the simplicity of config and ease of setup, can you comment on the internals of uwsgi? I admit that i haven&#39;t read the source.<br /><br />Cheers!
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1307434913931#c9060460883800870424' title='comment permalink'>
+June 7, 2011 at 6:21&#8239;PM
+</a>
+<span class='item-control blog-admin pid-415268548'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/9060460883800870424' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c1915059155235207272'>
+<a name='c1915059155235207272'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/11174835532460538205" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1915059155235207272-11174835532460538205"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Lincoln Bryant">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/11174835532460538205' rel='nofollow'>Lincoln Bryant</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1915059155235207272'>
+<p>
+Great article.  Like several of the commentors, I am switching over an Apache/mod_wsgi Django app to use nginx/fastcgi.  The reason for this is that the app&#39;s primary purpose is to accept file uploads, and nginx has modules to write uploaded files to disk and report there progress to the client, whereas Apache/mod_wsgi delegates this IO to Django and makes the expensive processes last far longer.  We have followed a model very similar to this excellent guide http://fightingrabbits.com/archives/210<br /><br />However, I prefer the familiarity of Apache and Django recommends it now.  I was wondering if you know of a way to delegate the writing of uploaded files away from the WSGI application to Apache.  While i greatly enjoy Django&#39;s uploaded file implementation from a code perspective, like you the bottleneck here is app-centric, and we need to prevent a memory hogging process from bring the one who writes these incoming files.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html?showComment=1314723929145#c1915059155235207272' title='comment permalink'>
+August 31, 2011 at 3:05&#8239;AM
+</a>
+<span class='item-control blog-admin pid-417517130'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1915059155235207272' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+</dl>
+</div>
+<p class='comment-footer'>
+<a href='https://www.blogger.com/comment/fullpage/post/2363643920942057324/5990274690108767033' onclick=''>Post a Comment</a>
+</p>
+</div>
+</div>
+
+        </div></div>
+      
+</div>
+<div class='blog-pager' id='blog-pager'>
+<span id='blog-pager-newer-link'>
+<a class='blog-pager-newer-link' href='http://blog.dscpl.com.au/2009/05/version-25-of-modwsgi-is-now-available.html' id='Blog1_blog-pager-newer-link' title='Newer Post'>Newer Post</a>
+</span>
+<span id='blog-pager-older-link'>
+<a class='blog-pager-older-link' href='http://blog.dscpl.com.au/2009/04/python-30-support-in-modwsgi-to-be.html' id='Blog1_blog-pager-older-link' title='Older Post'>Older Post</a>
+</span>
+<a class='home-link' href='http://blog.dscpl.com.au/'>Home</a>
+</div>
+<div class='clear'></div>
+<div class='post-feeds'>
+<div class='feed-links'>
+Subscribe to:
+<a class='feed-link' href='http://blog.dscpl.com.au/feeds/5990274690108767033/comments/default' target='_blank' type='application/atom+xml'>Post Comments (Atom)</a>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='column-left-outer'>
+<div class='column-left-inner'>
+<aside>
+</aside>
+</div>
+</div>
+<div class='column-right-outer'>
+<div class='column-right-inner'>
+<aside>
+<div class='sidebar section' id='sidebar-right-1'><div class='widget Profile' data-version='1' id='Profile1'>
+<h2>About Me</h2>
+<div class='widget-content'>
+<dl class='profile-datablock'>
+<dt class='profile-data'>
+<a class='profile-name-link g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' style='background-image: url(//www.blogger.com/img/logo-16.png);'>
+Graham Dumpleton
+</a>
+</dt>
+</dl>
+<a class='profile-link' href='https://www.blogger.com/profile/13609779138164842374' rel='author'>View my complete profile</a>
+<div class='clear'></div>
+</div>
+</div><div class='widget PageList' data-version='1' id='PageList1'>
+<h2>Quick Links</h2>
+<div class='widget-content'>
+<ul>
+<li>
+<a href='http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html'>Decorators and monkey patching.</a>
+</li>
+<li>
+<a href='http://blog.dscpl.com.au/p/using-python-with-docker.html'>Using Python with Docker.</a>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div><div class='widget BlogArchive' data-version='1' id='BlogArchive1'>
+<h2>Blog Archive</h2>
+<div class='widget-content'>
+<div id='ArchiveList'>
+<div id='BlogArchive1_ArchiveList'>
+<select id='BlogArchive1_ArchiveMenu'>
+<option value=''>Blog Archive</option>
+<option value='http://blog.dscpl.com.au/2019/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2018/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2018/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2018/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2018/01/'>January (1)</option>
+<option value='http://blog.dscpl.com.au/2017/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2016/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2016/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2016/07/'>July (1)</option>
+<option value='http://blog.dscpl.com.au/2016/04/'>April (2)</option>
+<option value='http://blog.dscpl.com.au/2016/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2016/02/'>February (2)</option>
+<option value='http://blog.dscpl.com.au/2016/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2015/12/'>December (6)</option>
+<option value='http://blog.dscpl.com.au/2015/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2015/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2015/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2015/06/'>June (5)</option>
+<option value='http://blog.dscpl.com.au/2015/05/'>May (7)</option>
+<option value='http://blog.dscpl.com.au/2015/04/'>April (4)</option>
+<option value='http://blog.dscpl.com.au/2015/03/'>March (4)</option>
+<option value='http://blog.dscpl.com.au/2015/01/'>January (2)</option>
+<option value='http://blog.dscpl.com.au/2014/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2014/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2014/09/'>September (7)</option>
+<option value='http://blog.dscpl.com.au/2014/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2014/05/'>May (1)</option>
+<option value='http://blog.dscpl.com.au/2014/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2014/02/'>February (4)</option>
+<option value='http://blog.dscpl.com.au/2014/01/'>January (8)</option>
+<option value='http://blog.dscpl.com.au/2013/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/10/'>October (4)</option>
+<option value='http://blog.dscpl.com.au/2012/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2011/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2011/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2011/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2011/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2011/01/'>January (5)</option>
+<option value='http://blog.dscpl.com.au/2010/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2010/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2010/08/'>August (2)</option>
+<option value='http://blog.dscpl.com.au/2010/06/'>June (2)</option>
+<option value='http://blog.dscpl.com.au/2010/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2010/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2010/03/'>March (3)</option>
+<option value='http://blog.dscpl.com.au/2009/11/'>November (4)</option>
+<option value='http://blog.dscpl.com.au/2009/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2009/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2009/08/'>August (3)</option>
+<option value='http://blog.dscpl.com.au/2009/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2009/04/'>April (5)</option>
+<option value='http://blog.dscpl.com.au/2009/03/'>March (5)</option>
+<option value='http://blog.dscpl.com.au/2009/02/'>February (1)</option>
+<option value='http://blog.dscpl.com.au/2008/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2008/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2008/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2007/11/'>November (2)</option>
+<option value='http://blog.dscpl.com.au/2007/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2007/09/'>September (3)</option>
+<option value='http://blog.dscpl.com.au/2007/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2007/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2007/03/'>March (2)</option>
+</select>
+</div>
+</div>
+<div class='clear'></div>
+</div>
+</div><div class='widget Label' data-version='1' id='Label1'>
+<h2>Labels</h2>
+<div class='widget-content list-label-widget-content'>
+<ul>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/python'>python</a>
+<span dir='ltr'>(111)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_wsgi'>mod_wsgi</a>
+<span dir='ltr'>(86)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wsgi'>wsgi</a>
+<span dir='ltr'>(58)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/apache'>apache</a>
+<span dir='ltr'>(35)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/docker'>docker</a>
+<span dir='ltr'>(34)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/openshift'>openshift</a>
+<span dir='ltr'>(26)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/decorators'>decorators</a>
+<span dir='ltr'>(15)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/django'>django</a>
+<span dir='ltr'>(13)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/kubernetes'>kubernetes</a>
+<span dir='ltr'>(12)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_python'>mod_python</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/red%20hat'>red hat</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/ipython'>ipython</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyterhub'>jupyterhub</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/new%20relic'>new relic</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wrapt'>wrapt</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/pycon'>pycon</a>
+<span dir='ltr'>(5)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/s2i'>s2i</a>
+<span dir='ltr'>(4)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/gunicorn'>gunicorn</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/uWSGI'>uWSGI</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/datadog'>datadog</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/nginx'>nginx</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/statsd'>statsd</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/web2py'>web2py</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/async'>async</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/dyndns53'>dyndns53</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/fastcgi'>fastcgi</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/heroku'>heroku</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyter'>jupyter</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/lektor'>lektor</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/php'>php</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/shiv'>shiv</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/testing'>testing</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/tornado'>tornado</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/warpdrive'>warpdrive</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/zipapp'>zipapp</a>
+<span dir='ltr'>(1)</span>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div></div>
+</aside>
+</div>
+</div>
+</div>
+<div style='clear: both'></div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+<div class='main-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<footer>
+<div class='footer-outer'>
+<div class='footer-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left footer-fauxborder-left'>
+<div class='fauxborder-right footer-fauxborder-right'></div>
+<div class='region-inner footer-inner'>
+<div class='foot section' id='footer-1'><div class='widget AdSense' data-version='1' id='AdSense1'>
+<div class='widget-content'>
+<script type="text/javascript"><!--
+google_ad_client="pub-6433235630058377";
+google_ad_host="pub-1556223355139109";
+google_ad_width=120;
+google_ad_height=600;
+google_ad_format="120x600_as";
+google_ad_type="text";
+google_ad_host_channel="0001";
+google_color_border="FFFFFF";
+google_color_bg="FFFFFF";
+google_color_link="999999";
+google_color_url="5588AA";
+google_color_text="666666";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<div class='clear'></div>
+</div>
+</div></div>
+<table border='0' cellpadding='0' cellspacing='0' class='section-columns columns-2'>
+<tbody>
+<tr>
+<td class='first columns-cell'>
+<div class='foot no-items section' id='footer-2-1'></div>
+</td>
+<td class='columns-cell'>
+<div class='foot no-items section' id='footer-2-2'></div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- outside of the include in order to lock Attribution widget -->
+<div class='foot section' id='footer-3' name='Footer'><div class='widget Attribution' data-version='1' id='Attribution1'>
+<div class='widget-content' style='text-align: center;'>
+Simple theme. Powered by <a href='https://www.blogger.com' target='_blank'>Blogger</a>.
+</div>
+<div class='clear'></div>
+</div></div>
+</div>
+</div>
+<div class='footer-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</footer>
+<!-- content -->
+</div>
+</div>
+<div class='content-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<script type='text/javascript'>
+    window.setTimeout(function() {
+        document.body.className = document.body.className.replace('loading', '');
+      }, 10);
+  </script>
+
+<script type="text/javascript" src="https://www.blogger.com/static/v1/widgets/552934507-widgets.js"></script>
+<script type='text/javascript'>
+window['__wavt'] = 'AOuZoY59quDMBcuQSQzxy-CHBz6NmFLHpQ:1757388493609';_WidgetManager._Init('//www.blogger.com/rearrange?blogID\x3d2363643920942057324','//blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html','2363643920942057324');
+_WidgetManager._SetDataContext([{'name': 'blog', 'data': {'blogId': '2363643920942057324', 'title': 'Graham Dumpleton', 'url': 'http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html', 'canonicalUrl': 'http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html', 'homepageUrl': 'http://blog.dscpl.com.au/', 'searchUrl': 'http://blog.dscpl.com.au/search', 'canonicalHomepageUrl': 'http://blog.dscpl.com.au/', 'blogspotFaviconUrl': 'http://blog.dscpl.com.au/favicon.ico', 'bloggerUrl': 'https://www.blogger.com', 'hasCustomDomain': true, 'httpsEnabled': false, 'enabledCommentProfileImages': true, 'gPlusViewType': 'FILTERED_POSTMOD', 'adultContent': false, 'analyticsAccountNumber': '', 'encoding': 'UTF-8', 'locale': 'en', 'localeUnderscoreDelimited': 'en', 'languageDirection': 'ltr', 'isPrivate': false, 'isMobile': false, 'isMobileRequest': false, 'mobileClass': '', 'isPrivateBlog': false, 'isDynamicViewsAvailable': true, 'feedLinks': '\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default\x22 /\x3e\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/rss+xml\x22 title\x3d\x22Graham Dumpleton - RSS\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default?alt\x3drss\x22 /\x3e\n\x3clink rel\x3d\x22service.post\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22https://www.blogger.com/feeds/2363643920942057324/posts/default\x22 /\x3e\n\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/5990274690108767033/comments/default\x22 /\x3e\n', 'meTag': '', 'adsenseClientId': 'ca-pub-6433235630058377', 'adsenseHostId': 'ca-host-pub-1556223355139109', 'adsenseHasAds': true, 'adsenseAutoAds': false, 'boqCommentIframeForm': true, 'loginRedirectParam': '', 'view': '', 'dynamicViewsCommentsSrc': '//www.blogblog.com/dynamicviews/4224c15c4e7c9321/js/comments.js', 'dynamicViewsScriptSrc': '//www.blogblog.com/dynamicviews/b4594f574ba3c273', 'plusOneApiSrc': 'https://apis.google.com/js/platform.js', 'disableGComments': true, 'interstitialAccepted': false, 'sharing': {'platforms': [{'name': 'Get link', 'key': 'link', 'shareMessage': 'Get link', 'target': ''}, {'name': 'Facebook', 'key': 'facebook', 'shareMessage': 'Share to Facebook', 'target': 'facebook'}, {'name': 'BlogThis!', 'key': 'blogThis', 'shareMessage': 'BlogThis!', 'target': 'blog'}, {'name': 'X', 'key': 'twitter', 'shareMessage': 'Share to X', 'target': 'twitter'}, {'name': 'Pinterest', 'key': 'pinterest', 'shareMessage': 'Share to Pinterest', 'target': 'pinterest'}, {'name': 'Email', 'key': 'email', 'shareMessage': 'Email', 'target': 'email'}], 'disableGooglePlus': true, 'googlePlusShareButtonWidth': 0, 'googlePlusBootstrap': '\x3cscript type\x3d\x22text/javascript\x22\x3ewindow.___gcfg \x3d {\x27lang\x27: \x27en\x27};\x3c/script\x3e'}, 'hasCustomJumpLinkMessage': false, 'jumpLinkMessage': 'Read more', 'pageType': 'item', 'postId': '5990274690108767033', 'pageName': 'Blocking requests and nginx version of mod_wsgi.', 'pageTitle': 'Graham Dumpleton: Blocking requests and nginx version of mod_wsgi.'}}, {'name': 'features', 'data': {}}, {'name': 'messages', 'data': {'edit': 'Edit', 'linkCopiedToClipboard': 'Link copied to clipboard!', 'ok': 'Ok', 'postLink': 'Post Link'}}, {'name': 'template', 'data': {'name': 'Simple', 'localizedName': 'Simple', 'isResponsive': false, 'isAlternateRendering': false, 'isCustom': false, 'variant': 'pale', 'variantId': 'pale'}}, {'name': 'view', 'data': {'classic': {'name': 'classic', 'url': '?view\x3dclassic'}, 'flipcard': {'name': 'flipcard', 'url': '?view\x3dflipcard'}, 'magazine': {'name': 'magazine', 'url': '?view\x3dmagazine'}, 'mosaic': {'name': 'mosaic', 'url': '?view\x3dmosaic'}, 'sidebar': {'name': 'sidebar', 'url': '?view\x3dsidebar'}, 'snapshot': {'name': 'snapshot', 'url': '?view\x3dsnapshot'}, 'timeslide': {'name': 'timeslide', 'url': '?view\x3dtimeslide'}, 'isMobile': false, 'title': 'Blocking requests and nginx version of mod_wsgi.', 'description': 'My own mod_wsgi module for Apache  has been available in one form or another now for over two years. What many people don\x27t know is that the...', 'url': 'http://blog.dscpl.com.au/2009/05/blocking-requests-and-nginx-version-of.html', 'type': 'item', 'isSingleItem': true, 'isMultipleItems': false, 'isError': false, 'isPage': false, 'isPost': true, 'isHomepage': false, 'isArchive': false, 'isLabelSearch': false, 'postId': 5990274690108767033}}]);
+_WidgetManager._RegisterWidget('_NavbarView', new _WidgetInfo('Navbar1', 'navbar', document.getElementById('Navbar1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_HeaderView', new _WidgetInfo('Header1', 'header', document.getElementById('Header1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogView', new _WidgetInfo('Blog1', 'main', document.getElementById('Blog1'), {'cmtInteractionsEnabled': false, 'lightboxEnabled': true, 'lightboxModuleUrl': 'https://www.blogger.com/static/v1/jsbin/3842676126-lbx.js', 'lightboxCssUrl': 'https://www.blogger.com/static/v1/v-css/828616780-lightbox_bundle.css'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_ProfileView', new _WidgetInfo('Profile1', 'sidebar-right-1', document.getElementById('Profile1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_PageListView', new _WidgetInfo('PageList1', 'sidebar-right-1', document.getElementById('PageList1'), {'title': 'Quick Links', 'links': [{'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html', 'id': '3350721465154129789', 'title': 'Decorators and monkey patching.'}, {'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/using-python-with-docker.html', 'id': '5591286857776935907', 'title': 'Using Python with Docker.'}], 'mobile': false, 'showPlaceholder': true, 'hasCurrentPage': false}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogArchiveView', new _WidgetInfo('BlogArchive1', 'sidebar-right-1', document.getElementById('BlogArchive1'), {'languageDirection': 'ltr', 'loadingMessage': 'Loading\x26hellip;'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_LabelView', new _WidgetInfo('Label1', 'sidebar-right-1', document.getElementById('Label1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AdSenseView', new _WidgetInfo('AdSense1', 'footer-1', document.getElementById('AdSense1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AttributionView', new _WidgetInfo('Attribution1', 'footer-3', document.getElementById('Attribution1'), {}, 'displayModeFull'));
+</script>
+</body>
+</html>

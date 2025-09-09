@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html class='v2' dir='ltr' lang='en'>
+<head>
+<link href='https://www.blogger.com/static/v1/widgets/2508126174-css_bundle_v2.css' rel='stylesheet' type='text/css'/>
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='blogger' name='generator'/>
+<link href='http://blog.dscpl.com.au/favicon.ico' rel='icon' type='image/x-icon'/>
+<link href='http://blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.html' rel='canonical'/>
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Graham Dumpleton - RSS" href="http://blog.dscpl.com.au/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Graham Dumpleton - Atom" href="https://www.blogger.com/feeds/2363643920942057324/posts/default" />
+
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/3084268953823503186/comments/default" />
+<!--Can't find substitution for tag [blog.ieCssRetrofitLinks]-->
+<link href='https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhIYu12cW7iOiERMBWsnGClsaHM2-JaeOonfaQcUAfjMkkfAc1S3NzjUDTZGi7_LQPKs7X6dQ5bHJHLkTGCR9WO8wGNVvG6lSz0IQkYLZ4Anph8MhyphenhyphensEKbJvUkl_bIxRsQw1ZaKogGx8N1R/?imgmax=800' rel='image_src'/>
+<meta content='http://blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.html' property='og:url'/>
+<meta content='Issues with running as PID 1 in a Docker container.' property='og:title'/>
+<meta content='We are getting close to the end of this initial  series of posts  on getting IPython to work with Docker and OpenShift. In the last post  we...' property='og:description'/>
+<meta content='https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhIYu12cW7iOiERMBWsnGClsaHM2-JaeOonfaQcUAfjMkkfAc1S3NzjUDTZGi7_LQPKs7X6dQ5bHJHLkTGCR9WO8wGNVvG6lSz0IQkYLZ4Anph8MhyphenhyphensEKbJvUkl_bIxRsQw1ZaKogGx8N1R/w1200-h630-p-k-no-nu/?imgmax=800' property='og:image'/>
+<title>Graham Dumpleton: Issues with running as PID 1 in a Docker container.</title>
+<style id='page-skin-1' type='text/css'><!--
+/*
+-----------------------------------------------
+Blogger Template Style
+Name:     Simple
+Designer: Blogger
+URL:      www.blogger.com
+----------------------------------------------- */
+/* Content
+----------------------------------------------- */
+body {
+font: normal normal 12px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #222222;
+background: #66bbdd none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 {
+font-size: 22px;
+}
+a:link {
+text-decoration:none;
+color: #2187bb;
+}
+a:visited {
+text-decoration:none;
+color: #888888;
+}
+a:hover {
+text-decoration:underline;
+color: #32aaff;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #ffffff;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #3299bb;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #3299bb;
+}
+.Header .description {
+font-size: 140%;
+color: #777777;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #eeeeee;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #eeeeee;
+border-left: 0 solid #eeeeee;
+border-right: 0 solid #eeeeee;
+}
+.tabs-inner .widget ul {
+background: #f5f5f5 url(https://resources.blogblog.com/blogblog/data/1kt/simple/gradients_light.png) repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #eeeeee;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 14px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #ffffff;
+border-right: 1px solid #eeeeee;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #000000;
+background-color: #eeeeee;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #eeeeee;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #eeeeee;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #eeeeee;
+}
+/* Headings
+----------------------------------------------- */
+div.widget > h2,
+div.widget h2.title {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #000000;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+h2.date-header {
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+}
+.date-header span {
+background-color: transparent;
+color: #222222;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 22px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 2px;
+background: #ffffff;
+border: 1px solid #eeeeee;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 5px;
+}
+.post-body .tr-caption-container {
+color: #222222;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #666666;
+background-color: #f9f9f9;
+border-bottom: 1px solid #eeeeee;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #eeeeee;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #eeeeee;
+}
+/* Comments
+----------------------------------------------- */
+.comments .comments-content .icon.blog-author {
+background-repeat: no-repeat;
+background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9sLFwMeCjjhcOMAAAD+SURBVDjLtZSvTgNBEIe/WRRnm3U8RC1neQdsm1zSBIU9VVF1FkUguQQsD9ITmD7ECZIJSE4OZo9stoVjC/zc7ky+zH9hXwVwDpTAWWLrgS3QAe8AZgaAJI5zYAmc8r0G4AHYHQKVwII8PZrZFsBFkeRCABYiMh9BRUhnSkPTNCtVXYXURi1FpBDgArj8QU1eVXUzfnjv7yP7kwu1mYrkWlU33vs1QNu2qU8pwN0UpKoqokjWwCztrMuBhEhmh8bD5UDqur75asbcX0BGUB9/HAMB+r32hznJgXy2v0sGLBcyAJ1EK3LFcbo1s91JeLwAbwGYu7TP/3ZGfnXYPgAVNngtqatUNgAAAABJRU5ErkJggg==);
+}
+.comments .comments-content .loadmore a {
+border-top: 1px solid #999999;
+border-bottom: 1px solid #999999;
+}
+.comments .comment-thread.inline-thread {
+background-color: #f9f9f9;
+}
+.comments .continue {
+border-top: 2px solid #999999;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #eeeeee;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #ffffff;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #ffffff;
+}
+.mobile-index-contents {
+color: #222222;
+}
+.mobile-link-button {
+background-color: #2187bb;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #eeeeee;
+color: #000000;
+border-top: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #eeeeee;
+}
+
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 1020px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 1020px;
+max-width: 1020px;
+_width: 1020px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 200px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 200px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("200px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 200px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 200px;
+margin-right: -200px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+body#layout div.add_widget {
+padding: 8px;
+}
+body#layout div.add_widget a {
+margin-left: 32px;
+}
+--></style>
+<link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' media='none' onload='if(media!=&#39;all&#39;)media=&#39;all&#39;' rel='stylesheet'/><noscript><link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' rel='stylesheet'/></noscript>
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+
+<!-- data-ad-client=ca-pub-6433235630058377 -->
+
+</head>
+<body class='loading variant-pale'>
+<div class='navbar section' id='navbar' name='Navbar'><div class='widget Navbar' data-version='1' id='Navbar1'><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/2363643920942057324?po\x3d3084268953823503186\x26origin\x3dhttp://blog.dscpl.com.au',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script><script type="text/javascript">
+(function() {
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = '//pagead2.googlesyndication.com/pagead/js/google_top_exp.js';
+var head = document.getElementsByTagName('head')[0];
+if (head) {
+head.appendChild(script);
+}})();
+</script>
+</div></div>
+<div class='body-fauxcolumns'>
+<div class='fauxcolumn-outer body-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content'>
+<div class='content-fauxcolumns'>
+<div class='fauxcolumn-outer content-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content-outer'>
+<div class='content-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='fauxborder-right content-fauxborder-right'></div>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='header-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='fauxborder-right header-fauxborder-right'></div>
+<div class='region-inner header-inner'>
+<div class='header section' id='header' name='Header'><div class='widget Header' data-version='1' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://blog.dscpl.com.au/'>
+Graham Dumpleton
+</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>
+</span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='header-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</header>
+<div class='tabs-outer'>
+<div class='tabs-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left tabs-fauxborder-left'>
+<div class='fauxborder-right tabs-fauxborder-right'></div>
+<div class='region-inner tabs-inner'>
+<div class='tabs no-items section' id='crosscol' name='Cross-Column'></div>
+<div class='tabs no-items section' id='crosscol-overflow' name='Cross-Column 2'></div>
+</div>
+</div>
+<div class='tabs-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='main-outer'>
+<div class='main-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='fauxborder-right main-fauxborder-right'></div>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<div class='fauxcolumn-outer fauxcolumn-center-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-left-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-right-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main' name='Main'><div class='widget Blog' data-version='1' id='Blog1'>
+<div class='blog-posts hfeed'>
+
+          <div class="date-outer">
+        
+<h2 class='date-header'><span>Tuesday, December 29, 2015</span></h2>
+
+          <div class="date-posts">
+        
+<div class='post-outer'>
+<div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<meta content='https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhIYu12cW7iOiERMBWsnGClsaHM2-JaeOonfaQcUAfjMkkfAc1S3NzjUDTZGi7_LQPKs7X6dQ5bHJHLkTGCR9WO8wGNVvG6lSz0IQkYLZ4Anph8MhyphenhyphensEKbJvUkl_bIxRsQw1ZaKogGx8N1R/?imgmax=800' itemprop='image_url'/>
+<meta content='2363643920942057324' itemprop='blogId'/>
+<meta content='3084268953823503186' itemprop='postId'/>
+<a name='3084268953823503186'></a>
+<h3 class='post-title entry-title' itemprop='name'>
+Issues with running as PID 1 in a Docker container.
+</h3>
+<div class='post-header'>
+<div class='post-header-line-1'></div>
+</div>
+<div class='post-body entry-content' id='post-body-3084268953823503186' itemprop='description articleBody'>
+<p>We are getting close to the end of this initial&#160;<a href="http://blog.dscpl.com.au/2015/12/running-ipython-as-docker-container.html">series of posts</a> on getting IPython to work with Docker and OpenShift. In the <a href="http://blog.dscpl.com.au/2015/12/unknown-user-when-running-docker.html">last post</a> we finally got everything working in plain Docker when a random user ID was used and consequently also under OpenShift.</p>
+<p>Although we covered various issues and had to make changes to the existing &#8216;Dockerfile&#8217; used with the &#8216;jupyter/notebook&#8217; image to get it all working correctly, there was one issue that the Docker image for &#8216;jupyter/notebook&#8217; had already addressed which needs a bit of explanation. This related to the existing &#8216;ENTRYPOINT&#8217; statement used in the &#8216;Dockerfile&#8217; for &#8216;jupyter/notebook&#8217;.</p>
+<blockquote>
+<pre>ENTRYPOINT ["tini", "--"]<br />CMD ["jupyter", "notebook"]</pre>
+</blockquote>
+<p>Specifically, the &#8216;Dockerfile&#8217; was wrapping the running of the &#8216;jupyter notebook&#8217; command with the &#8216;tini&#8217; command.</p>
+<h1>Orphaned child processes</h1>
+<p>For a broader discussion on the problem that the use of &#8216;tini&#8217; is trying to solve you can read the post &#8216;<a href="https://blog.phusion.nl/2015/01/20/docker-and-the-pid-1-zombie-reaping-problem/">Docker and the PID 1 zombie reaping problem</a>&#8217;.</p>
+<p>In short though, process ID 1, which is normally the UNIX &#8216;init&#8217; process, has a special role in the operating system. That is that when the parent of a process exits prior to its child processes, and the child processes therefore become orphans, those orphaned child processes have their parent process remapped to be process ID 1. When those orphaned processes then finally exit and their exit status is available, it is the job of the process with process ID of 1, to acknowledge the exit of the child processes so that their process state can be correctly cleaned up and removed from the system kernel process table.</p>
+<p>If this cleanup of orphaned processes does not occur, then the system kernel process table will over time fill up with entries corresponding to the orphaned processes which have exited. Any processes which persist in the system kernel process table in this way are what are called zombie processes. They will remain there so long as no process performs the equivalent of a system &#8216;waitpid()&#8217; call on that specific process to retrieve its exit status and so acknowledge that the process has terminated.</p>
+<h1>Process ID 1 under Docker</h1>
+<p>Now you may be thinking, what does this have to do with Docker, after all, aren&#8217;t processes running in a Docker container just ordinary processes in the operating system, but simply walled off from the rest of the operating system.</p>
+<p>This is true, and if you were to run a Docker container which executed a simple single process Python web server, if you look at the process tree on the Docker host using &#8216;top&#8217; you will see:</p>
+<p><img alt="Docker host top wsgiref idle" border="0" height="76" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhIYu12cW7iOiERMBWsnGClsaHM2-JaeOonfaQcUAfjMkkfAc1S3NzjUDTZGi7_LQPKs7X6dQ5bHJHLkTGCR9WO8wGNVvG6lSz0IQkYLZ4Anph8MhyphenhyphensEKbJvUkl_bIxRsQw1ZaKogGx8N1R/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="docker_host_top_wsgiref_idle.jpg" width="700" /></p>
+<p>Process ID &#8216;26196&#8217; here actually corresponds to the process created from the command that we used as the &#8216;CMD&#8217; in the &#8216;Dockerfile&#8217; for the Docker image.</p>
+<p>Our process isn&#8217;t therefore running as process ID 1, so why is the way that orphaned processes are handled even an issue?</p>
+<p>The reason is that if we were to instead look at what processes are running inside of our container, we can only see those which are actually started within the context of the container.</p>
+<p>Further, rather than those processes using the same process ID as they are really running as when viewed from outside of the container, the process IDs have been remapped. In particular, processes created inside of the container, when viewed from within the container, have process IDs starting at 1.</p>
+<p><img alt="Docker container top wsgiref idle" border="0" height="41" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhu1LpbkAr-u6uZCR7XJqpmgxKQiIcen1nfhKIgfZEhRIMvyutWW209yO3vhEGTu6T6oApu9Od95SHtz5azobgVa19u6y-N-kBa2ql5yxnmJfSiBIDIpuR0Nq1fNgnYn6kpnxGw3kYPoFw2/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="docker_container_top_wsgiref_idle.jpg" width="700" /></p>
+<p>Thus the very first process created due to the execution of what is given by &#8216;CMD&#8217; will be identified as having process ID 1. This process is still though the same as identified by process ID &#8216;26196&#8217; when viewed from the Docker host.</p>
+<p>More importantly, what you cannot see from with inside of the container is what was the original process with the process ID of &#8216;1&#8217; outside of the container. That is, you cannot see the system wide &#8216;init&#8217; process.</p>
+<p>Logically it isn&#8217;t therefore possible to reparent an orphaned process created within the container to a process not even visible inside of the container. As such, orphaned processes are reparented to the process with process ID of &#8216;1&#8217; within the container. The obligation of reaping the resulting zombie processes therefore falls to this process and not the system wide &#8216;init&#8217; process.</p>
+<h1>Testing for process reaping</h1>
+<p>In order to delve more into this issue and in particular its relevance to when running a Python web server, as a next step lets create a simple Python WSGI application which can be used to trigger orphan processes. Initially we will use the WSGI server implemented by the &#8216;wsgiref&#8217; module in the Python standard library, but we can also run it up with other WSGI servers to see how they behave as well.</p>
+<blockquote>
+<pre>from __future__ import print_function</pre>
+<pre>import os</pre>
+<pre>def orphan():<br />    print('orphan: %d' % os.getpid())<br />    os._exit(0)</pre>
+<pre>def child():<br />    print('child: %d' % os.getpid())<br />    newpid = os.fork()<br />    pids = (os.getpid(), newpid)<br />    if newpid == 0:<br />        orphan()<br />    else:<br />        pids = (os.getpid(), newpid)<br />        print("child: %d, orphan: %d" % pids)<br />        os._exit(0)</pre>
+<pre>def parent():<br />     newpid = os.fork()<br />     if newpid == 0:<br />         child()<br />     else:<br />         pids = (os.getpid(), newpid)<br />         print("parent: %d, child: %d" % pids)<br />         os.waitpid(newpid, 0)<br /><br />def application(environ, start_response):<br />    status = '200 OK'<br />    output = b'Hello World!'<br />    response_headers = [('Content-type', 'text/plain'),<br />                        ('Content-Length', str(len(output)))]</pre>
+<pre>    start_response(status, response_headers)</pre>
+<pre>    parent()</pre>
+<pre>    return [output]<br /><br />from wsgiref.simple_server import make_server</pre>
+<pre>httpd = make_server('', 8000, application)<br />httpd.serve_forever()</pre>
+</blockquote>
+<p>The way the test runs is that each time a web request is received, the web application process will fork twice. The web application process itself will be made to wait on the exit of the child process it created. That child process though will not wait on the further child process it had created, thus creating an orphaned process as a result.</p>
+<p>Building this test application into a Docker image, with no &#8216;ENTRYPOINT&#8217; defined and only a &#8216;CMD&#8217; which runs the Python test file application, when we hit it with half a dozen requests, what we then see from inside of the Docker container is:</p>
+<p><img alt="Docker container top wsgiref multi" border="0" height="151" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgYpbbOD20GKFzMgAw2eYMsQAO58Nj-oPnZmn6FI3a5utGu7ZBnTUP5AXK8YaMjpwmmlOFXWK1SCXzKNsDsf1XJdGJHfJy3LPo8fCpdRXOLEmsgwhU41j79M1Ixjxvm9eQ6li8ZyAdpiEZs/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="docker_container_top_wsgiref_multi.jpg" width="700" /></p>
+<p>For a WSGI server implemented using the &#8216;wsgiref&#8217; module from the Python standard library, this indicates that no reaping of the zombie process is occurring. Specifically, you can see how our web application process running as process ID &#8216;1&#8217; now has various child processes associated with it where the status of each process is &#8216;Z&#8217; indicating it is a zombie process waiting to be reaped. Even if we wait some time, these zombie processes never go away.</p>
+<p>If we look at the processes from the Docker host we see the same thing.</p>
+<p><img alt="Docker host top wsgiref multi" border="0" height="182" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg9Kw83kHX7h6BqSViDhQrgwdgpo51RN_-9GTeFF3wkCWUeJcpkFr4M69Y_-zw8Py_yyH29uLwUOVdaL_XUZyeATTP7SnuHmBFuvSqJRi_wLoh1L-jMwmGVOZI0mvZMqQC7c0SXZ-ony0WK/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="docker_host_top_wsgiref_multi.jpg" width="700" /></p>
+<p>This therefore confirms what was described, which is that the orphaned processes will be reparented against what is process ID &#8216;1&#8217; within the container, rather than what is process ID &#8216;1&#8217; outside of the container.</p>
+<p>One thing that is hopefully obvious is that a WSGI server based off the &#8216;wsgiref&#8217; module sample server in the Python standard library doesn&#8217;t do the right thing, and running it as the initial process in a Docker container would not be recommended.</p>
+<h1>Behaviour of WSGI servers</h1>
+<p>If a WSGI server based on the &#8216;wsgiref&#8217; module sample server isn&#8217;t okay, what about other WSGI servers. Also, what about ASYNC web servers for Python such as Tornado.</p>
+<p>The outcome from running the test WSGI application on the most commonly used WSGI servers, and also equivalent tests specifically for the Tornado ASYNC web server, Django and Flask builtin servers, yields the following results.</p>
+<ul>
+<li>django (runserver) - <strong>FAIL</strong></li>
+<li>flask (builtin) - <strong>FAIL</strong></li>
+<li>gunicorn - <strong>PASS</strong></li>
+<li>Apache/mod_wsgi - <strong>PASS</strong></li>
+<li>tornado (async) - <strong>FAIL</strong></li>
+<li>tornado (wsgi) - <strong>FAIL</strong></li>
+<li>uWSGI - <strong>FAIL</strong></li>
+<li>uWSGI (master) - <strong>PASS</strong></li>
+<li>waitress - <strong>FAIL</strong></li>
+<li>wsgiref - <strong>FAIL</strong></li>
+</ul>
+<p>The general result here is that any Python web server that runs as a single process would usually not do what is required of a process running as process ID &#8216;1&#8217;. This is because they aren&#8217;t in any way designed to manage child processes. As a result, there isn&#8217;t even the chance that they may look for exiting zombie processes and reap them.</p>
+<p>Of note though, uWSGI when used with its default options, although it can run in a multi process configuration has a process management model with is arguably broken. The philosophy with uWSGI though is seemingly to never correct what it gets wrong, but to instead add an option which enables the correct behaviour. Thus users have to opt into the correct or better behaviour. For the case of uWSGI, the more robust process management model is only enabled by using the &#8216;--master&#8217; option. If using uWSGI you should always use that option, regardless of whether you are running it in Docker or not.</p>
+<p>Both uWSGI in master mode and mod_wsgi, although they pass and will reap zombie processes when run as process ID &#8216;1&#8217;, work in a way that can be surprising.</p>
+<p>The issue with uWSGI in master mode and mod_wsgi, is that each only look for exiting child processes on a periodic basis. That is, they will wake up about once a second and then look for any child processes that have exited, collecting their exit status and so for zombie processes cause them to be reaped.</p>
+<p>This means that during the one second interval, some number of zombie processes still could accumulate, the number depending on request throughput and how often a specific request does something that would trigger the creation of a zombie process. The number of zombie processes will therefore build up and then be brought back to zero each second.</p>
+<p>Although this occurs for uWSGI in master mode and mod_wsgi, it shouldn&#8217;t in general cause an issue as no other significant code runs in the parent or master process which is managing all the child processes. Thus the presence of the zombie process as a child for a period will not cause any confusion. Further, zombie processes should still be reaped at an adequate rate, so temporary increases shouldn&#8217;t matter.</p>
+<h1>Problems which can arise</h1>
+<p>As to what problems can actually arise due to this issue, there are a few at least.</p>
+<p>The first is that if the process running as process ID &#8216;1&#8217; does not reap zombie processes, then they will accumulate over time. If the container is for a long running service, then eventually the available slots in the system kernel process table could be used up. If this were to occur, the system as a whole would be unable to create any new processes.</p>
+<p>How this plays out in practice within a Docker container I am not sure. If it were the case that the upper bound of the number of such zombie processes that could be created within a Docker container were bounded by the system kernel process table size, then technically the creation of zombie processes could be used as an attack vector against the Docker host. I sort of expect therefore that Docker containers likely have some lower limit on the number of process that can be created within the container, although things get complicated if a specific user has multiple containers. Hopefully someone can clarify this specific point for me.</p>
+<p>The second issue is that the reparenting of processes against the application process running as process ID &#8216;1&#8217; could confuse any process management mechanism running within that process. This could cause issues in a couple of ways.</p>
+<p>For example, if the application process were using the &#8216;wait()&#8217; system call to wait for any child process exiting, but the reported process ID wasn&#8217;t one that it was expecting and it didn&#8217;t handle that gracefully, it could cause the application process to fail in some way. Especially in the case where the &#8216;wait()&#8217; call indicated that an exiting zombie process had a non zero status, it may cause the application process to think its directly managed child processes were having problems and failing in some way. Alternatively, if the orphaned processes weren't themselves exiting straight away, and the now parent process operated in some way by monitoring the set of child processes it had, then this itself could be confusing the parent process.</p>
+<p>Finally getting back to the IPython example we have been working with, it has been found that when running the &#8216;jupyter notebook&#8217; application as process ID &#8216;1&#8217;, it fails to start up properly kernel processes for running of individual notebook instances. The logged messages in this case are:</p>
+<blockquote>
+<pre>[I 10:19:33.566 NotebookApp] Kernel started: 1ac58cd9-c717-44ef-b0bd-80a377177918<br />[I 10:19:36.566 NotebookApp] KernelRestarter: restarting kernel (1/5)<br />[I 10:19:39.573 NotebookApp] KernelRestarter: restarting kernel (2/5)<br />[I 10:19:42.582 NotebookApp] KernelRestarter: restarting kernel (3/5)<br />[W 10:19:43.578 NotebookApp] Timeout waiting for kernel_info reply from 1ac58cd9-c717-44ef-b0bd-80a377177918<br />[I 10:19:45.589 NotebookApp] KernelRestarter: restarting kernel (4/5)<br />WARNING:root:kernel 1ac58cd9-c717-44ef-b0bd-80a377177918 restarted<br />[W 10:19:48.596 NotebookApp] KernelRestarter: restart failed<br />[W 10:19:48.597 NotebookApp] Kernel 1ac58cd9-c717-44ef-b0bd-80a377177918 died, removing from map.<br />ERROR:root:kernel 1ac58cd9-c717-44ef-b0bd-80a377177918 restarted failed!<br />[W 10:19:48.610 NotebookApp] Kernel deleted before session</pre>
+</blockquote>
+<p>I have been unable to find that anyone has been able to work out the specific cause, but I suspect it is falling foul of the second issue above. That is, the exit statuses from those orphaned processes are confusing the code managing the startup of the kernel processes, making it think the kernel processes are in fact failing, causing it to attempt to restart them repeatedly.</p>
+<p>Whatever the specific reason, not running the &#8216;jupyter notebook&#8217; as process ID &#8216;1&#8217; avoids the problem, so it does at least appear to be related to the orphaned processes being reparented against the main &#8216;jupyter notebook&#8217; process.</p>
+<p>Now although for IPython it seems to relate to the second issue whereby process management mechanisms are failing, as shown above, even generic Python WSGI servers or web servers don&#8217;t necessarily do the right thing either. So even though they might not have process management issues, since they don&#8217;t perform any such management of processes for implementing a multi process configuration for the server itself, the accumulation of zombie process could still eventually cause the maximum number of allowed processes to be exceeded.</p>
+<h1>Shell as parent process</h1>
+<p>Ultimately the solution is not to run any application process not designed to also perform reaping of child processes as process ID &#8216;1&#8217; inside of the container.</p>
+<p>There are two ways to avoid this. The first is a quick hack and one which is often seen used in Docker containers, although perhaps not intentionally. Although it avoids the zombie reaping problem, it causes its own issues.</p>
+<p>The second way is to run as process ID &#8216;1&#8217; a minimal process whose only role is to execute as a child process the real application process and then subsequently reap the zombie processes.</p>
+<p>This minimal init process of the second approach has one other important role as well though and it is this role where the quick hack solution fails.</p>
+<p>As to the quick or inadvertent hack that some rely on, lets look at how a &#8216;CMD&#8217; in a &#8216;Dockerfile&#8217; is specified.</p>
+<p>The recommended way of using &#8216;CMD&#8217; in a &#8216;Dockerfile&#8217; would be to write:</p>
+<blockquote>
+<pre>CMD [ "python", "server_wsgiref.py" ]</pre>
+</blockquote>
+<p>This is what was used above where we saw within the Docker container.</p>
+<p><img alt="Docker container top wsgiref idle" border="0" height="41" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhu1LpbkAr-u6uZCR7XJqpmgxKQiIcen1nfhKIgfZEhRIMvyutWW209yO3vhEGTu6T6oApu9Od95SHtz5azobgVa19u6y-N-kBa2ql5yxnmJfSiBIDIpuR0Nq1fNgnYn6kpnxGw3kYPoFw2/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="docker_container_top_wsgiref_idle.jpg" width="700" /></p>
+<p>As has already been explained, this results in our application running as process ID &#8216;1&#8217;.</p>
+<p>Another way of using &#8216;CMD&#8217; in a &#8216;Dockerfile&#8217; is to write:</p>
+<blockquote>
+<pre>CMD python server_wsgiref.py</pre>
+</blockquote>
+<p>Our application still runs, but this isn&#8217;t doing the same thing as when we supplied a list of arguments to &#8216;CMD&#8217;.</p>
+<p>The result in this case is:</p>
+<p><img alt="Docker container top wsgiref shell" border="0" height="54" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgolbxfEZy_ilJkQ3mrBTgvNspqQt5Z-QCnJ4oiHP8YUm1wpgU5fCql1T6KIxFFgra-HrzCZ5Jlp_vQqjhajyFURYXrtEz3qxP-vYMox1f4_Go2AHtTAs3k0r3LGzuCtZO9KWDvMogQBUXf/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="docker_container_top_wsgiref_shell.jpg" width="700" /></p>
+<p>With this way of specifying the &#8216;CMD&#8217; our application is no longer running as process ID &#8216;1&#8217;. Instead process ID &#8216;1&#8217; is occupied by an instance of &#8216;/bin/sh&#8217;.</p>
+<p>This has occurred because supplying the plain command line to &#8216;CMD&#8217; actually results in the equivalent of:</p>
+<blockquote>
+<pre>CMD [ "sh", "-c", "python server_wsgiref.py" ]</pre>
+</blockquote>
+<p>Thus the reason for a shell process being introduced into the process hierarchy as process ID &#8216;1&#8217;.</p>
+<p>With our application now no longer running as process ID &#8216;1&#8217;, the responsibility of reaping zombie processes falls instead to the instance of &#8216;/bin/sh&#8217; running as process ID &#8216;1&#8217;.</p>
+<p>As it turns out, &#8216;/bin/sh&#8217; will reap any child processes associated with it, so we do not have the problem of zombie processes accumulating.</p>
+<p>Now this isn&#8217;t the only way you might end up with an instance of &#8216;/bin/sh&#8217; being process ID &#8216;1&#8217;.</p>
+<p>Another common scenario where this ends up occurring is where someone using Docker uses a shell script with the &#8216;CMD&#8217; statement so that they can do special setup prior to actually running their application. You thus can often find something like:</p>
+<blockquote>
+<pre>CMD [ "/app/start.sh" ]</pre>
+</blockquote>
+<p>The contents of the &#8217;start.sh&#8217; script might then be:</p>
+<blockquote>
+<pre>#!/bin/sh</pre>
+<pre>python server_wsgiref.py</pre>
+</blockquote>
+<p>Using this approach, what we end up with is:</p>
+<p><img alt="Docker container top wsgiref entrypoint" border="0" height="58" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjecHw0fGxK_Mik_qu7zWz_xw3j1ovLNfv6KLYJyICKSsmFC_gBd1oWQngI_u3AmqA8JoaUS6Xp1nnY9qoRyTkQLBcAe7TrrZjX9ZKvPtWMsKQ77HkL3S-OOHOuUrfU1rK5oYBKKJx97t1M/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="docker_container_top_wsgiref_entrypoint.jpg" width="700" /></p>
+<p>Our script is listed as process ID &#8216;1&#8217;, although it is in reality still an instance of &#8216;/bin/sh&#8217;.</p>
+<p>The reason our application didn&#8217;t end up as process ID &#8216;1&#8217; in this case is that the final line of the script simply said &#8216;python server_wsgiref.py&#8217;.</p>
+<p>Whenever using a shell script as a &#8216;CMD&#8217; like this, you should always ensure that when running your actual application from the shell script, that you do so using &#8216;exec&#8217;. That is:</p>
+<blockquote>
+<pre>#!/bin/sh</pre>
+<pre>exec python server_wsgiref.py</pre>
+</blockquote>
+<p>By using &#8216;exec&#8217; you ensure that your application process takes over and replaces the script process, thus resulting in it running as process ID &#8216;1&#8217;.</p>
+<p>But wait, if having process ID &#8216;1&#8217; be an instance of &#8216;/bin/sh&#8217;, with our application being a child process of it solves the zombie reaping problem, why not always do that then.</p>
+<p>The reason for this is that although &#8216;/bin/sh&#8217; will reap zombie processes for us, it will not propagate signals properly.</p>
+<p>For our example, what this is means is that with &#8216;/bin/sh&#8217; as process ID &#8216;1&#8217;, if we were using the command &#8216;docker stop&#8217;, the application process will not actually shutdown. Instead the default timeout for &#8216;docker stop&#8217; will expire and it will then do the equivalent of &#8216;docker kill&#8217; which will force kill the application and the container.</p>
+<p>This occurs because although the instance of &#8216;/bin/sh&#8217; will receive the signal to terminate the application which is sent by &#8216;docker stop', it ignores it and doesn&#8217;t pass it on to the actual application.</p>
+<p>This in turn means that your application is denied the ability to be notified properly that the container is being shutdown and so ensure that it performs any required finalisation of in progress operations. For some applications, this lack of an ability to perform a clean shutdown could leave any persistent data in an inconsistent state, causing problems when the application is restarted.</p>
+<p>It is therefore important that signals always be received by the main application process in a Docker container, but an intermediary shell process will not ensure that.</p>
+<p>One can attempt to catch signals in the shell script and forward them on, but this does get a bit tricky as you also have to ensure that you wait for the wrapped application process to shutdown properly when it is passed a signal that would cause it to exit. As I have previously shown in an <a href="http://blog.dscpl.com.au/2015/01/using-alternative-wsgi-servers-with.html">earlier post</a>&#160;for other reasons, you might be able to use in such circumstances the&#160;shell script:</p>
+<blockquote>
+<pre>#!/bin/sh</pre>
+<pre>trap 'kill -TERM $PID' TERM INT</pre>
+<pre>python server_wsgiref.py &amp;</pre>
+<pre>PID=$!<br />wait $PID<br />trap - TERM INT<br />wait $PID<br />STATUS=$?</pre>
+<pre>exit $STATUS</pre>
+</blockquote>
+<p>To be frank though, rather than hoping this will work reliably, you are better off using a purpose built monitoring process for this particular task.</p>
+<h1>Minimal init process</h1>
+<p>Coming from the Python world, one solution that Python developers like to use for managing processes is &#8216;supervisord&#8217;. This should work, but is a relatively heavy weight solution. At this time, &#8216;supervisord&#8217; is also still only usable with Python 2. If you were wanting to run an application using Python 3, this means you wouldn&#8217;t be able to use it, unless you were okay with having to also add Python 2 to your image, resulting in a much fatter Docker image.</p>
+<p>The folks at Phusion in that <a href="https://blog.phusion.nl/2015/01/20/docker-and-the-pid-1-zombie-reaping-problem/">blog post</a> I referenced earlier do provide a minimal &#8216;init&#8217; like process which is implemented as a Python script, but if not using Python at all in your image, that means pulling in Python 2 once again when you perhaps don&#8217;t want that.</p>
+<p>Because of the overheads of bringing in additional packages where you don&#8217;t necessarily want them, my preferred solution for a minimal &#8216;init&#8217; process for handling reaping of zombies and the propagation of signals to the managed process is the &#8216;<a href="https://github.com/krallin/tini">tini</a>&#8217; program. This is the same program that the &#8216;jupyter/notebook&#8217; also makes use of and we saw mentioned in the &#8216;ENTRYPOINT&#8217; statement of the &#8216;Dockerfile&#8217;.</p>
+<blockquote>
+<pre>ENTRYPOINT ["tini", "--"]</pre>
+</blockquote>
+<p>All &#8217;tini' does is spawn your application and wait for it to exit, all the while reaping zombies and performing signal forwarding. In other words, it is specifically built for this task, relieving you of worrying about whether your own application is going to do the correct thing in relation to reaping of zombie processes.</p>
+<p>Even if you believe your application may handle this task okay, I would still recommend that a tool like &#8216;tini&#8217; be used as it gives you one less thing to worry about.</p>
+<p>If you are using a shell script with &#8216;CMD&#8217; in a &#8216;Dockerfile&#8217; and subsequently running your application from it, you can still do that, but remember to use &#8216;exec&#8217; when running your application to ensure that signals will get to your application. Don&#8217;t use &#8216;exec&#8217; and your shell script will still swallow them up.</p>
+<h1>IPython and cloud services</h1>
+<p>We are finally done with improving on how IPython can be run with Docker so that it will work with cloud services using Docker. The main issue here we faced was the additional security restrictions that can be in place in cloud services for running Docker images in such a service.</p>
+<p>In short, running Docker images as &#8216;root&#8217; is a bad idea. Even if you are running your own Docker service it is something you should avoid if at all possible. Because of the increased risk you can understand why a hosting service is not going to allow you to do it.</p>
+<p>With the introduction of user namespace support in Docker the restriction on what user a Docker image can run as should hopefully be able to be relaxed, but in the interim you would be wise to design Docker images so that they can run as an unprivileged user.</p>
+<p>Now since there was actually a few things we needed to change to achieve this and a description of the changes were spread over multiple blog posts, I will summarise the changes in the next post. I will also start to outline what else I believe could be done to make the use of IPython with Docker, and especially cloud services, even better.</p>
+<div style='clear: both;'></div>
+</div>
+<div class='post-footer'>
+<div class='post-footer-line post-footer-line-1'>
+<span class='post-author vcard'>
+Posted by
+<span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
+<meta content='https://www.blogger.com/profile/13609779138164842374' itemprop='url'/>
+<a class='g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' title='author profile'>
+<span itemprop='name'>Graham Dumpleton</span>
+</a>
+</span>
+</span>
+<span class='post-timestamp'>
+at
+<meta content='http://blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.html' itemprop='url'/>
+<a class='timestamp-link' href='http://blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.html' rel='bookmark' title='permanent link'><abbr class='published' itemprop='datePublished' title='2015-12-29T12:44:00+11:00'>12:44&#8239;PM</abbr></a>
+</span>
+<span class='post-comment-link'>
+</span>
+<span class='post-icons'>
+<span class='item-action'>
+<a href='https://www.blogger.com/email-post/2363643920942057324/3084268953823503186' title='Email Post'>
+<img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
+</a>
+</span>
+</span>
+<div class='post-share-buttons goog-inline-block'>
+<a class='goog-inline-block share-button sb-email' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=3084268953823503186&target=email' target='_blank' title='Email This'><span class='share-button-link-text'>Email This</span></a><a class='goog-inline-block share-button sb-blog' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=3084268953823503186&target=blog' onclick='window.open(this.href, "_blank", "height=270,width=475"); return false;' target='_blank' title='BlogThis!'><span class='share-button-link-text'>BlogThis!</span></a><a class='goog-inline-block share-button sb-twitter' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=3084268953823503186&target=twitter' target='_blank' title='Share to X'><span class='share-button-link-text'>Share to X</span></a><a class='goog-inline-block share-button sb-facebook' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=3084268953823503186&target=facebook' onclick='window.open(this.href, "_blank", "height=430,width=640"); return false;' target='_blank' title='Share to Facebook'><span class='share-button-link-text'>Share to Facebook</span></a><a class='goog-inline-block share-button sb-pinterest' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=3084268953823503186&target=pinterest' target='_blank' title='Share to Pinterest'><span class='share-button-link-text'>Share to Pinterest</span></a>
+</div>
+</div>
+<div class='post-footer-line post-footer-line-2'>
+<span class='post-labels'>
+Labels:
+<a href='http://blog.dscpl.com.au/search/label/docker' rel='tag'>docker</a>,
+<a href='http://blog.dscpl.com.au/search/label/gunicorn' rel='tag'>gunicorn</a>,
+<a href='http://blog.dscpl.com.au/search/label/ipython' rel='tag'>ipython</a>,
+<a href='http://blog.dscpl.com.au/search/label/mod_wsgi' rel='tag'>mod_wsgi</a>,
+<a href='http://blog.dscpl.com.au/search/label/openshift' rel='tag'>openshift</a>,
+<a href='http://blog.dscpl.com.au/search/label/python' rel='tag'>python</a>,
+<a href='http://blog.dscpl.com.au/search/label/uWSGI' rel='tag'>uWSGI</a>,
+<a href='http://blog.dscpl.com.au/search/label/wsgi' rel='tag'>wsgi</a>
+</span>
+</div>
+<div class='post-footer-line post-footer-line-3'>
+<span class='post-location'>
+</span>
+</div>
+</div>
+</div>
+<div class='comments' id='comments'>
+<a name='comments'></a>
+<h4>No comments:</h4>
+<div id='Blog1_comments-block-wrapper'>
+<dl class='avatar-comment-indent' id='comments-block'>
+</dl>
+</div>
+<p class='comment-footer'>
+<a href='https://www.blogger.com/comment/fullpage/post/2363643920942057324/3084268953823503186' onclick=''>Post a Comment</a>
+</p>
+</div>
+</div>
+
+        </div></div>
+      
+</div>
+<div class='blog-pager' id='blog-pager'>
+<span id='blog-pager-newer-link'>
+<a class='blog-pager-newer-link' href='http://blog.dscpl.com.au/2016/01/roundup-of-docker-issues-when-hosting.html' id='Blog1_blog-pager-newer-link' title='Newer Post'>Newer Post</a>
+</span>
+<span id='blog-pager-older-link'>
+<a class='blog-pager-older-link' href='http://blog.dscpl.com.au/2015/12/unknown-user-when-running-docker.html' id='Blog1_blog-pager-older-link' title='Older Post'>Older Post</a>
+</span>
+<a class='home-link' href='http://blog.dscpl.com.au/'>Home</a>
+</div>
+<div class='clear'></div>
+<div class='post-feeds'>
+<div class='feed-links'>
+Subscribe to:
+<a class='feed-link' href='http://blog.dscpl.com.au/feeds/3084268953823503186/comments/default' target='_blank' type='application/atom+xml'>Post Comments (Atom)</a>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='column-left-outer'>
+<div class='column-left-inner'>
+<aside>
+</aside>
+</div>
+</div>
+<div class='column-right-outer'>
+<div class='column-right-inner'>
+<aside>
+<div class='sidebar section' id='sidebar-right-1'><div class='widget Profile' data-version='1' id='Profile1'>
+<h2>About Me</h2>
+<div class='widget-content'>
+<dl class='profile-datablock'>
+<dt class='profile-data'>
+<a class='profile-name-link g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' style='background-image: url(//www.blogger.com/img/logo-16.png);'>
+Graham Dumpleton
+</a>
+</dt>
+</dl>
+<a class='profile-link' href='https://www.blogger.com/profile/13609779138164842374' rel='author'>View my complete profile</a>
+<div class='clear'></div>
+</div>
+</div><div class='widget PageList' data-version='1' id='PageList1'>
+<h2>Quick Links</h2>
+<div class='widget-content'>
+<ul>
+<li>
+<a href='http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html'>Decorators and monkey patching.</a>
+</li>
+<li>
+<a href='http://blog.dscpl.com.au/p/using-python-with-docker.html'>Using Python with Docker.</a>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div><div class='widget BlogArchive' data-version='1' id='BlogArchive1'>
+<h2>Blog Archive</h2>
+<div class='widget-content'>
+<div id='ArchiveList'>
+<div id='BlogArchive1_ArchiveList'>
+<select id='BlogArchive1_ArchiveMenu'>
+<option value=''>Blog Archive</option>
+<option value='http://blog.dscpl.com.au/2019/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2018/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2018/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2018/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2018/01/'>January (1)</option>
+<option value='http://blog.dscpl.com.au/2017/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2016/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2016/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2016/07/'>July (1)</option>
+<option value='http://blog.dscpl.com.au/2016/04/'>April (2)</option>
+<option value='http://blog.dscpl.com.au/2016/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2016/02/'>February (2)</option>
+<option value='http://blog.dscpl.com.au/2016/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2015/12/'>December (6)</option>
+<option value='http://blog.dscpl.com.au/2015/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2015/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2015/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2015/06/'>June (5)</option>
+<option value='http://blog.dscpl.com.au/2015/05/'>May (7)</option>
+<option value='http://blog.dscpl.com.au/2015/04/'>April (4)</option>
+<option value='http://blog.dscpl.com.au/2015/03/'>March (4)</option>
+<option value='http://blog.dscpl.com.au/2015/01/'>January (2)</option>
+<option value='http://blog.dscpl.com.au/2014/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2014/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2014/09/'>September (7)</option>
+<option value='http://blog.dscpl.com.au/2014/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2014/05/'>May (1)</option>
+<option value='http://blog.dscpl.com.au/2014/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2014/02/'>February (4)</option>
+<option value='http://blog.dscpl.com.au/2014/01/'>January (8)</option>
+<option value='http://blog.dscpl.com.au/2013/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/10/'>October (4)</option>
+<option value='http://blog.dscpl.com.au/2012/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2011/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2011/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2011/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2011/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2011/01/'>January (5)</option>
+<option value='http://blog.dscpl.com.au/2010/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2010/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2010/08/'>August (2)</option>
+<option value='http://blog.dscpl.com.au/2010/06/'>June (2)</option>
+<option value='http://blog.dscpl.com.au/2010/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2010/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2010/03/'>March (3)</option>
+<option value='http://blog.dscpl.com.au/2009/11/'>November (4)</option>
+<option value='http://blog.dscpl.com.au/2009/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2009/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2009/08/'>August (3)</option>
+<option value='http://blog.dscpl.com.au/2009/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2009/04/'>April (5)</option>
+<option value='http://blog.dscpl.com.au/2009/03/'>March (5)</option>
+<option value='http://blog.dscpl.com.au/2009/02/'>February (1)</option>
+<option value='http://blog.dscpl.com.au/2008/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2008/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2008/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2007/11/'>November (2)</option>
+<option value='http://blog.dscpl.com.au/2007/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2007/09/'>September (3)</option>
+<option value='http://blog.dscpl.com.au/2007/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2007/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2007/03/'>March (2)</option>
+</select>
+</div>
+</div>
+<div class='clear'></div>
+</div>
+</div><div class='widget Label' data-version='1' id='Label1'>
+<h2>Labels</h2>
+<div class='widget-content list-label-widget-content'>
+<ul>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/python'>python</a>
+<span dir='ltr'>(111)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_wsgi'>mod_wsgi</a>
+<span dir='ltr'>(86)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wsgi'>wsgi</a>
+<span dir='ltr'>(58)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/apache'>apache</a>
+<span dir='ltr'>(35)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/docker'>docker</a>
+<span dir='ltr'>(34)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/openshift'>openshift</a>
+<span dir='ltr'>(26)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/decorators'>decorators</a>
+<span dir='ltr'>(15)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/django'>django</a>
+<span dir='ltr'>(13)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/kubernetes'>kubernetes</a>
+<span dir='ltr'>(12)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_python'>mod_python</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/red%20hat'>red hat</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/ipython'>ipython</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyterhub'>jupyterhub</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/new%20relic'>new relic</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wrapt'>wrapt</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/pycon'>pycon</a>
+<span dir='ltr'>(5)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/s2i'>s2i</a>
+<span dir='ltr'>(4)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/gunicorn'>gunicorn</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/uWSGI'>uWSGI</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/datadog'>datadog</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/nginx'>nginx</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/statsd'>statsd</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/web2py'>web2py</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/async'>async</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/dyndns53'>dyndns53</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/fastcgi'>fastcgi</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/heroku'>heroku</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyter'>jupyter</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/lektor'>lektor</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/php'>php</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/shiv'>shiv</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/testing'>testing</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/tornado'>tornado</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/warpdrive'>warpdrive</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/zipapp'>zipapp</a>
+<span dir='ltr'>(1)</span>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div></div>
+</aside>
+</div>
+</div>
+</div>
+<div style='clear: both'></div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+<div class='main-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<footer>
+<div class='footer-outer'>
+<div class='footer-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left footer-fauxborder-left'>
+<div class='fauxborder-right footer-fauxborder-right'></div>
+<div class='region-inner footer-inner'>
+<div class='foot section' id='footer-1'><div class='widget AdSense' data-version='1' id='AdSense1'>
+<div class='widget-content'>
+<script type="text/javascript"><!--
+google_ad_client="pub-6433235630058377";
+google_ad_host="pub-1556223355139109";
+google_ad_width=120;
+google_ad_height=600;
+google_ad_format="120x600_as";
+google_ad_type="text";
+google_ad_host_channel="0001";
+google_color_border="FFFFFF";
+google_color_bg="FFFFFF";
+google_color_link="999999";
+google_color_url="5588AA";
+google_color_text="666666";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<div class='clear'></div>
+</div>
+</div></div>
+<table border='0' cellpadding='0' cellspacing='0' class='section-columns columns-2'>
+<tbody>
+<tr>
+<td class='first columns-cell'>
+<div class='foot no-items section' id='footer-2-1'></div>
+</td>
+<td class='columns-cell'>
+<div class='foot no-items section' id='footer-2-2'></div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- outside of the include in order to lock Attribution widget -->
+<div class='foot section' id='footer-3' name='Footer'><div class='widget Attribution' data-version='1' id='Attribution1'>
+<div class='widget-content' style='text-align: center;'>
+Simple theme. Powered by <a href='https://www.blogger.com' target='_blank'>Blogger</a>.
+</div>
+<div class='clear'></div>
+</div></div>
+</div>
+</div>
+<div class='footer-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</footer>
+<!-- content -->
+</div>
+</div>
+<div class='content-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<script type='text/javascript'>
+    window.setTimeout(function() {
+        document.body.className = document.body.className.replace('loading', '');
+      }, 10);
+  </script>
+
+<script type="text/javascript" src="https://www.blogger.com/static/v1/widgets/552934507-widgets.js"></script>
+<script type='text/javascript'>
+window['__wavt'] = 'AOuZoY60R028XSx6KUmDwpphYiNwHoEKaw:1757388608392';_WidgetManager._Init('//www.blogger.com/rearrange?blogID\x3d2363643920942057324','//blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.html','2363643920942057324');
+_WidgetManager._SetDataContext([{'name': 'blog', 'data': {'blogId': '2363643920942057324', 'title': 'Graham Dumpleton', 'url': 'http://blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.html', 'canonicalUrl': 'http://blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.html', 'homepageUrl': 'http://blog.dscpl.com.au/', 'searchUrl': 'http://blog.dscpl.com.au/search', 'canonicalHomepageUrl': 'http://blog.dscpl.com.au/', 'blogspotFaviconUrl': 'http://blog.dscpl.com.au/favicon.ico', 'bloggerUrl': 'https://www.blogger.com', 'hasCustomDomain': true, 'httpsEnabled': false, 'enabledCommentProfileImages': true, 'gPlusViewType': 'FILTERED_POSTMOD', 'adultContent': false, 'analyticsAccountNumber': '', 'encoding': 'UTF-8', 'locale': 'en', 'localeUnderscoreDelimited': 'en', 'languageDirection': 'ltr', 'isPrivate': false, 'isMobile': false, 'isMobileRequest': false, 'mobileClass': '', 'isPrivateBlog': false, 'isDynamicViewsAvailable': true, 'feedLinks': '\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default\x22 /\x3e\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/rss+xml\x22 title\x3d\x22Graham Dumpleton - RSS\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default?alt\x3drss\x22 /\x3e\n\x3clink rel\x3d\x22service.post\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22https://www.blogger.com/feeds/2363643920942057324/posts/default\x22 /\x3e\n\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/3084268953823503186/comments/default\x22 /\x3e\n', 'meTag': '', 'adsenseClientId': 'ca-pub-6433235630058377', 'adsenseHostId': 'ca-host-pub-1556223355139109', 'adsenseHasAds': true, 'adsenseAutoAds': false, 'boqCommentIframeForm': true, 'loginRedirectParam': '', 'view': '', 'dynamicViewsCommentsSrc': '//www.blogblog.com/dynamicviews/4224c15c4e7c9321/js/comments.js', 'dynamicViewsScriptSrc': '//www.blogblog.com/dynamicviews/b4594f574ba3c273', 'plusOneApiSrc': 'https://apis.google.com/js/platform.js', 'disableGComments': true, 'interstitialAccepted': false, 'sharing': {'platforms': [{'name': 'Get link', 'key': 'link', 'shareMessage': 'Get link', 'target': ''}, {'name': 'Facebook', 'key': 'facebook', 'shareMessage': 'Share to Facebook', 'target': 'facebook'}, {'name': 'BlogThis!', 'key': 'blogThis', 'shareMessage': 'BlogThis!', 'target': 'blog'}, {'name': 'X', 'key': 'twitter', 'shareMessage': 'Share to X', 'target': 'twitter'}, {'name': 'Pinterest', 'key': 'pinterest', 'shareMessage': 'Share to Pinterest', 'target': 'pinterest'}, {'name': 'Email', 'key': 'email', 'shareMessage': 'Email', 'target': 'email'}], 'disableGooglePlus': true, 'googlePlusShareButtonWidth': 0, 'googlePlusBootstrap': '\x3cscript type\x3d\x22text/javascript\x22\x3ewindow.___gcfg \x3d {\x27lang\x27: \x27en\x27};\x3c/script\x3e'}, 'hasCustomJumpLinkMessage': false, 'jumpLinkMessage': 'Read more', 'pageType': 'item', 'postId': '3084268953823503186', 'postImageThumbnailUrl': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhIYu12cW7iOiERMBWsnGClsaHM2-JaeOonfaQcUAfjMkkfAc1S3NzjUDTZGi7_LQPKs7X6dQ5bHJHLkTGCR9WO8wGNVvG6lSz0IQkYLZ4Anph8MhyphenhyphensEKbJvUkl_bIxRsQw1ZaKogGx8N1R/s72-c/?imgmax\x3d800', 'postImageUrl': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhIYu12cW7iOiERMBWsnGClsaHM2-JaeOonfaQcUAfjMkkfAc1S3NzjUDTZGi7_LQPKs7X6dQ5bHJHLkTGCR9WO8wGNVvG6lSz0IQkYLZ4Anph8MhyphenhyphensEKbJvUkl_bIxRsQw1ZaKogGx8N1R/?imgmax\x3d800', 'pageName': 'Issues with running as PID 1 in a Docker container.', 'pageTitle': 'Graham Dumpleton: Issues with running as PID 1 in a Docker container.'}}, {'name': 'features', 'data': {}}, {'name': 'messages', 'data': {'edit': 'Edit', 'linkCopiedToClipboard': 'Link copied to clipboard!', 'ok': 'Ok', 'postLink': 'Post Link'}}, {'name': 'template', 'data': {'name': 'Simple', 'localizedName': 'Simple', 'isResponsive': false, 'isAlternateRendering': false, 'isCustom': false, 'variant': 'pale', 'variantId': 'pale'}}, {'name': 'view', 'data': {'classic': {'name': 'classic', 'url': '?view\x3dclassic'}, 'flipcard': {'name': 'flipcard', 'url': '?view\x3dflipcard'}, 'magazine': {'name': 'magazine', 'url': '?view\x3dmagazine'}, 'mosaic': {'name': 'mosaic', 'url': '?view\x3dmosaic'}, 'sidebar': {'name': 'sidebar', 'url': '?view\x3dsidebar'}, 'snapshot': {'name': 'snapshot', 'url': '?view\x3dsnapshot'}, 'timeslide': {'name': 'timeslide', 'url': '?view\x3dtimeslide'}, 'isMobile': false, 'title': 'Issues with running as PID 1 in a Docker container.', 'description': 'We are getting close to the end of this initial\xa0 series of posts  on getting IPython to work with Docker and OpenShift. In the last post  we...', 'featuredImage': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhIYu12cW7iOiERMBWsnGClsaHM2-JaeOonfaQcUAfjMkkfAc1S3NzjUDTZGi7_LQPKs7X6dQ5bHJHLkTGCR9WO8wGNVvG6lSz0IQkYLZ4Anph8MhyphenhyphensEKbJvUkl_bIxRsQw1ZaKogGx8N1R/?imgmax\x3d800', 'url': 'http://blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.html', 'type': 'item', 'isSingleItem': true, 'isMultipleItems': false, 'isError': false, 'isPage': false, 'isPost': true, 'isHomepage': false, 'isArchive': false, 'isLabelSearch': false, 'postId': 3084268953823503186}}]);
+_WidgetManager._RegisterWidget('_NavbarView', new _WidgetInfo('Navbar1', 'navbar', document.getElementById('Navbar1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_HeaderView', new _WidgetInfo('Header1', 'header', document.getElementById('Header1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogView', new _WidgetInfo('Blog1', 'main', document.getElementById('Blog1'), {'cmtInteractionsEnabled': false, 'lightboxEnabled': true, 'lightboxModuleUrl': 'https://www.blogger.com/static/v1/jsbin/3842676126-lbx.js', 'lightboxCssUrl': 'https://www.blogger.com/static/v1/v-css/828616780-lightbox_bundle.css'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_ProfileView', new _WidgetInfo('Profile1', 'sidebar-right-1', document.getElementById('Profile1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_PageListView', new _WidgetInfo('PageList1', 'sidebar-right-1', document.getElementById('PageList1'), {'title': 'Quick Links', 'links': [{'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html', 'id': '3350721465154129789', 'title': 'Decorators and monkey patching.'}, {'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/using-python-with-docker.html', 'id': '5591286857776935907', 'title': 'Using Python with Docker.'}], 'mobile': false, 'showPlaceholder': true, 'hasCurrentPage': false}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogArchiveView', new _WidgetInfo('BlogArchive1', 'sidebar-right-1', document.getElementById('BlogArchive1'), {'languageDirection': 'ltr', 'loadingMessage': 'Loading\x26hellip;'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_LabelView', new _WidgetInfo('Label1', 'sidebar-right-1', document.getElementById('Label1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AdSenseView', new _WidgetInfo('AdSense1', 'footer-1', document.getElementById('AdSense1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AttributionView', new _WidgetInfo('Attribution1', 'footer-3', document.getElementById('Attribution1'), {}, 'displayModeFull'));
+</script>
+</body>
+</html>

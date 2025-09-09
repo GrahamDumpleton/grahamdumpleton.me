@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html class='v2' dir='ltr' lang='en'>
+<head>
+<link href='https://www.blogger.com/static/v1/widgets/2508126174-css_bundle_v2.css' rel='stylesheet' type='text/css'/>
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='blogger' name='generator'/>
+<link href='http://blog.dscpl.com.au/favicon.ico' rel='icon' type='image/x-icon'/>
+<link href='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html' rel='canonical'/>
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Graham Dumpleton - RSS" href="http://blog.dscpl.com.au/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Graham Dumpleton - Atom" href="https://www.blogger.com/feeds/2363643920942057324/posts/default" />
+
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/9079528338602022459/comments/default" />
+<!--Can't find substitution for tag [blog.ieCssRetrofitLinks]-->
+<meta content='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html' property='og:url'/>
+<meta content='Why is WSGI deployment under FASTCGI so painful?' property='og:title'/>
+<meta content='Out of all the deployment methods for Python WSGI applications, the one which seems to generate the most trouble is FASTCGI deployment. So m...' property='og:description'/>
+<title>Graham Dumpleton: Why is WSGI deployment under FASTCGI so painful?</title>
+<style id='page-skin-1' type='text/css'><!--
+/*
+-----------------------------------------------
+Blogger Template Style
+Name:     Simple
+Designer: Blogger
+URL:      www.blogger.com
+----------------------------------------------- */
+/* Content
+----------------------------------------------- */
+body {
+font: normal normal 12px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #222222;
+background: #66bbdd none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 {
+font-size: 22px;
+}
+a:link {
+text-decoration:none;
+color: #2187bb;
+}
+a:visited {
+text-decoration:none;
+color: #888888;
+}
+a:hover {
+text-decoration:underline;
+color: #32aaff;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #ffffff;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #3299bb;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #3299bb;
+}
+.Header .description {
+font-size: 140%;
+color: #777777;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #eeeeee;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #eeeeee;
+border-left: 0 solid #eeeeee;
+border-right: 0 solid #eeeeee;
+}
+.tabs-inner .widget ul {
+background: #f5f5f5 url(https://resources.blogblog.com/blogblog/data/1kt/simple/gradients_light.png) repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #eeeeee;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 14px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #ffffff;
+border-right: 1px solid #eeeeee;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #000000;
+background-color: #eeeeee;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #eeeeee;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #eeeeee;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #eeeeee;
+}
+/* Headings
+----------------------------------------------- */
+div.widget > h2,
+div.widget h2.title {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #000000;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+h2.date-header {
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+}
+.date-header span {
+background-color: transparent;
+color: #222222;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 22px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 2px;
+background: #ffffff;
+border: 1px solid #eeeeee;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 5px;
+}
+.post-body .tr-caption-container {
+color: #222222;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #666666;
+background-color: #f9f9f9;
+border-bottom: 1px solid #eeeeee;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #eeeeee;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #eeeeee;
+}
+/* Comments
+----------------------------------------------- */
+.comments .comments-content .icon.blog-author {
+background-repeat: no-repeat;
+background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9sLFwMeCjjhcOMAAAD+SURBVDjLtZSvTgNBEIe/WRRnm3U8RC1neQdsm1zSBIU9VVF1FkUguQQsD9ITmD7ECZIJSE4OZo9stoVjC/zc7ky+zH9hXwVwDpTAWWLrgS3QAe8AZgaAJI5zYAmc8r0G4AHYHQKVwII8PZrZFsBFkeRCABYiMh9BRUhnSkPTNCtVXYXURi1FpBDgArj8QU1eVXUzfnjv7yP7kwu1mYrkWlU33vs1QNu2qU8pwN0UpKoqokjWwCztrMuBhEhmh8bD5UDqur75asbcX0BGUB9/HAMB+r32hznJgXy2v0sGLBcyAJ1EK3LFcbo1s91JeLwAbwGYu7TP/3ZGfnXYPgAVNngtqatUNgAAAABJRU5ErkJggg==);
+}
+.comments .comments-content .loadmore a {
+border-top: 1px solid #999999;
+border-bottom: 1px solid #999999;
+}
+.comments .comment-thread.inline-thread {
+background-color: #f9f9f9;
+}
+.comments .continue {
+border-top: 2px solid #999999;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #eeeeee;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #ffffff;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #ffffff;
+}
+.mobile-index-contents {
+color: #222222;
+}
+.mobile-link-button {
+background-color: #2187bb;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #eeeeee;
+color: #000000;
+border-top: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #eeeeee;
+}
+
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 1020px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 1020px;
+max-width: 1020px;
+_width: 1020px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 200px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 200px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("200px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 200px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 200px;
+margin-right: -200px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+body#layout div.add_widget {
+padding: 8px;
+}
+body#layout div.add_widget a {
+margin-left: 32px;
+}
+--></style>
+<link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' media='none' onload='if(media!=&#39;all&#39;)media=&#39;all&#39;' rel='stylesheet'/><noscript><link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' rel='stylesheet'/></noscript>
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+
+<!-- data-ad-client=ca-pub-6433235630058377 -->
+
+</head>
+<body class='loading variant-pale'>
+<div class='navbar section' id='navbar' name='Navbar'><div class='widget Navbar' data-version='1' id='Navbar1'><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/2363643920942057324?po\x3d9079528338602022459\x26origin\x3dhttp://blog.dscpl.com.au',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script><script type="text/javascript">
+(function() {
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = '//pagead2.googlesyndication.com/pagead/js/google_top_exp.js';
+var head = document.getElementsByTagName('head')[0];
+if (head) {
+head.appendChild(script);
+}})();
+</script>
+</div></div>
+<div class='body-fauxcolumns'>
+<div class='fauxcolumn-outer body-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content'>
+<div class='content-fauxcolumns'>
+<div class='fauxcolumn-outer content-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content-outer'>
+<div class='content-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='fauxborder-right content-fauxborder-right'></div>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='header-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='fauxborder-right header-fauxborder-right'></div>
+<div class='region-inner header-inner'>
+<div class='header section' id='header' name='Header'><div class='widget Header' data-version='1' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://blog.dscpl.com.au/'>
+Graham Dumpleton
+</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>
+</span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='header-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</header>
+<div class='tabs-outer'>
+<div class='tabs-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left tabs-fauxborder-left'>
+<div class='fauxborder-right tabs-fauxborder-right'></div>
+<div class='region-inner tabs-inner'>
+<div class='tabs no-items section' id='crosscol' name='Cross-Column'></div>
+<div class='tabs no-items section' id='crosscol-overflow' name='Cross-Column 2'></div>
+</div>
+</div>
+<div class='tabs-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='main-outer'>
+<div class='main-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='fauxborder-right main-fauxborder-right'></div>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<div class='fauxcolumn-outer fauxcolumn-center-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-left-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-right-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main' name='Main'><div class='widget Blog' data-version='1' id='Blog1'>
+<div class='blog-posts hfeed'>
+
+          <div class="date-outer">
+        
+<h2 class='date-header'><span>Tuesday, September 20, 2011</span></h2>
+
+          <div class="date-posts">
+        
+<div class='post-outer'>
+<div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<meta content='2363643920942057324' itemprop='blogId'/>
+<meta content='9079528338602022459' itemprop='postId'/>
+<a name='9079528338602022459'></a>
+<h3 class='post-title entry-title' itemprop='name'>
+Why is WSGI deployment under FASTCGI so painful?
+</h3>
+<div class='post-header'>
+<div class='post-header-line-1'></div>
+</div>
+<div class='post-body entry-content' id='post-body-9079528338602022459' itemprop='description articleBody'>
+Out of all the deployment methods for Python WSGI applications, the one which seems to generate the most trouble is FASTCGI deployment. So much so that the general advice one often sees in relation to FASTCGI is that one should simply avoid it. In some cases people will go as far as justifying this by saying that FASTCGI is old technology and the cool kids aren't using it so you shouldn't either.<br />
+<br />
+What is reality here. Well, FASTCGI may be old technology but it does work. If it didn't work the bulk of the PHP web sites out there, which there are many many more of than Python web sites, would be falling over left, right and centre. They don't though, so the issue isn't FASTCGI but for Python at least it is the deployment experience. Put simply, PHP provides a simple deployment path where as no one has really gone out of there way to provide a pre canned FASTCGI integration for WSGI which service providers can set up easily and make the users life better.<br />
+<br />
+To try and understand where the problems lie I will go through the setup required for running a Python WSGI script under mod_fcgid, these days the preferred FASTCGI hosting solution for Apache. Unlike other blogs out there I am not just going to present the final recipe, but actually explain the pain points which people seem to encounter and why they arise.<br />
+<br />
+<span class="Apple-style-span" style="font-size: large;">The FASTCGI Script</span><br />
+<br />
+In the case of Apache/mod_wsgi, all a user need do is drop a WSGI script file into a directory and either map a URL to it using the <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">WSGIScriptAlias</span> directive, or have it automatically mapped to based on its file system location and extension mapping provided by the <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">AddHandler</span> directive. A simple hello world WSGI script file suitable for Apache/mod_wsgi would be as follows.<br />
+<div style="font-family: 'Courier New', Courier, monospace;">
+<br /></div>
+<div style="font-family: 'Courier New', Courier, monospace;">
+def application(environ, start_response):</div>
+<div style="font-family: 'Courier New', Courier, monospace;">
+&nbsp; &nbsp; status = '200 OK'</div>
+<div style="font-family: 'Courier New', Courier, monospace;">
+&nbsp; &nbsp; output = 'Hello World!'</div>
+<div style="font-family: 'Courier New', Courier, monospace;">
+&nbsp; &nbsp; response_headers = [('Content-type', 'text/plain'),</div>
+<div style="font-family: 'Courier New', Courier, monospace;">
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ('Content-Length', str(len(output)))]</div>
+<div style="font-family: 'Courier New', Courier, monospace;">
+&nbsp; &nbsp; start_response(status, response_headers)</div>
+<div style="font-family: 'Courier New', Courier, monospace;">
+&nbsp; &nbsp; return [output]</div>
+<div style="font-family: 'Courier New', Courier, monospace;">
+<br /></div>
+Important to note here is that the WSGI script file only contains the WSGI application entry point which defines the programmatic API for communicating with the WSGI application. The WSGI script file does not say anything about how the WSGI application gets started or how requests are then passed off to it, this is the job of the hosting container (mod_wsgi) to manage.<br />
+<br />
+In contrast, for mod_fcgid, instead of a WSGI script file like above, it is necessary to provide an executable program. This program must start itself up and must have knowledge of how to communicate back to mod_fcgid across a socket using the FASTCGI wire protocol.<br />
+<br />
+Now it would indeed be really painful if users had to implement this wire protocol themselves from scratch, but luckily they don't. There are actually a few Python packages available which implement an adapter bridging between the FASTCGI socket wire protocol and the programmatic WSGI application interface. The only one of these WSGI adapters for FASTCGI that seems to be used these days is <a href="http://trac.saddi.com/flup">flup</a>. Using flup, the above WSGI script file would be replaced with the following FASTCGI program.<br />
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"></span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">
+<div>
+#!/usr/bin/env python</div>
+<div>
+<br /></div>
+<div>
+def application(environ, start_response):</div>
+<div>
+&nbsp; &nbsp; status = '200 OK'</div>
+<div>
+&nbsp; &nbsp; output = 'Hello World!'</div>
+<div>
+&nbsp; &nbsp; response_headers = [('Content-type', 'text/plain'),</div>
+<div>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ('Content-Length', str(len(output)))]</div>
+<div>
+&nbsp; &nbsp; start_response(status, response_headers)</div>
+<div>
+&nbsp; &nbsp; return [output]</div>
+<div>
+<br /></div>
+<div>
+if __name__ == '__main__':</div>
+<div>
+&nbsp; &nbsp; from flup.server.fcgi import WSGIServer</div>
+<div>
+&nbsp; &nbsp; WSGIServer(application).run()</div>
+<div>
+<br /></div>
+</span>
+When this is executed as a program, <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">__name__</span> will equate to '<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">__main__</span>' and so the flup WSGI server will be imported and started. The process will then stay persistent and handle the request which triggered it to be started and any subsequent requests.<br />
+<div>
+<br /></div>
+<div>
+Seems simple enough, what can possibly go wrong.</div>
+<br />
+<span class="Apple-style-span" style="font-size: large;">Configuration And Startup</span><br />
+<br />
+Having loaded mod_fcgid into Apache using:<br />
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"></span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></span></div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">
+</span><span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">LoadModule fcgid_module modules/mod_fcgid.so</span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span>you still need to tell Apache that the program must be processed by mod_fcgid. This can be done in number of different ways. The most often used is to specify that any resource ending with a '<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">.fcgi</span>' extension should be handled by mod_fcgid. This would be done using the <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">AddHandler</span> directive.<br />
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"></span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></span></div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">
+</span><span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">&lt;Directory /usr/local/www/htdocs&gt;</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Order deny, allow</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Allow from All</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">AddHandler fcgid-script .fcgi</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">&lt;/Directory&gt;</span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span>So access control has been defined and the mapping for the extension is defined. Presuming that the directory corresponded to the <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">DocumentRoot</span> for the server and the FASTCGI program was called '<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">hello.fcgi</span>', we would use the URL:<br />
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"></span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></span></div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">
+</span><span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">http://localhost/hello.fcgi</span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span>It fails though with the error in the browser of:<br />
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"></span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></span></div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">
+</span><span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Forbidden</span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">You don't have permission to access /hello.fcgi on this server.</span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span>But we set access control so what can it be? In this case the problem is that being a script it is necessary to tell Apache that it is okay to be able to execute scripts out of that directory. To do this we need to turn on the <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">ExecCGI</span> option.<br />
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"></span><br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></span></div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">
+</span><span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">&lt;Directory /usr/local/www/htdocs&gt;</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Order deny, allow</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Allow from All</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Options ExecCGI</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">AddHandler fcgid-script .fcgi</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">&lt;/Directory&gt;</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span> This sort of setup would be done by the Apache administrator and for a shared hosting service they should know what is required and just get it right in the first place. So try again.<br />
+<br />
+<div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Internal Server Error</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">The server encountered an internal error or misconfiguration and was unable to complete your request.</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Please contact the server administrator, you@example.com and inform them of the time the error occurred, and anything you might have done that may have caused the error.</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">More information about this error may be available in the server error log.</span></div>
+</div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+At least this time we get an error in the Apache error logs.</div>
+<div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">[info] mod_fcgid: server example.com:/usr/local/www/htdocs/hello.fcgi(30887) started</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">[info] mod_fcgid: process /usr/local/www/htdocs/hello.fcgi(30887) exit(communication error), terminated by calling exit(), return code: 255</span></div>
+</div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+<br />
+You have to remember though that on a shared hosting service a user isn't going to have access to the Apache error logs, all they will see is the message in the browser. It is possible they may have access to the error log for their own virtual host, but mod_fcgid has a tendency to push such error messages to the main Apache error log and not that for the virtual host. Even then, if they do manage to get some one handling support for the hosting service to try and dig the message out of the Apache error logs, it is almost as unhelpful as that displayed in the browser.</div>
+<div>
+<br />
+One can start to see the frustration that people can experience.<br />
+<br />
+The cause of this cryptic error message in this case was the permissions on our actual FASTCGI program.<br />
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span><br />
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">8 -rw-r--r-- &nbsp;1 graham &nbsp;admin &nbsp;430 20 Sep 21:10 hello.fcgi</span><br />
+<br />
+Because it is going to be executed as a program, we need to ensure that it is executable. So we need to do:<br />
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span><br />
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">chmod +x hello.fcgi</span><br />
+<br />
+<br />
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+to yield:</div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">8 -rwxr-xr-x &nbsp;1 graham &nbsp;admin &nbsp;430 20 Sep 21:10 hello.fcgi</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+Note here that I at least have made the file readable to others and the directories this is contained in is also readable to others. If this was not the case and the directory and/or files were not accessible/readable to the user that Apache runs as then you encounter even more errors. Lets quickly go back and revisit them.</div>
+<div>
+<br /></div>
+<div>
+If the directory the file is in isn't accessible to the user that Apache runs as, then you will get '<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Forbidden</span>' in the browser and in the Apache error logs you will get:</div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">[error] [client 127.0.0.1] (13)Permission denied: access to /hello.fcgi denied</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+If instead the directory was accessible and the file was not readable to the Apache user, you will instead get '<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Internal Server Error</span>' in the browser and in the Apache error logs you will get:</div>
+<div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">[warn] [client 127.0.0.1] mod_fcgid: error reading data, FastCGI server closed connection</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">[error] [client 127.0.0.1] Premature end of script headers: hello.fcgi</span></div>
+</div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+Is your head starting to hurt yet? And we haven't finished yet with all the things that can go wrong.</div>
+<div>
+<br /></div>
+<div>
+Anyway if you manage to get past all that, the '<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">python</span>' executable was actually in the <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">PATH</span> and flup was actually installed into your Python installation then it will hopefully have worked.</div>
+<div>
+<br /></div>
+<div>
+<span class="Apple-style-span" style="font-size: large;">The WSGI Adapter</span></div>
+<div>
+<br /></div>
+<div>
+As stated above, success will actually have depended on the flup package having been installed into the Python installation. What if it isn't? You will get '<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Internal Server Error</span>' in the browser and in the Apache error log you will get:</div>
+<div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">[info] mod_fcgid: server fcgid-1.example.com:/usr/local/www/htdocs/hello.fcgi(31130) started</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">Traceback (most recent call last):</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">&nbsp; File "/usr/local/www/htdocs/hello.fcgi", line 19, in &lt;module&gt;</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">&nbsp; &nbsp; from flup.server.fcgi import WSGIServer</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">ImportError: No module named flup.server.fcgi</span></div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">[info] mod_fcgid: process /usr/local/www/hello.fcgi(31130) exit(communication error), terminated by calling exit(), return code: 1</span></div>
+</div>
+<div>
+<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;"><br /></span></div>
+<div>
+I guess we at least got a traceback out of Python. Remember though, this is still in the Apache error log file and on a shared hosting service you are likely always going to have to go knock on the door of the support staff to get it. This will be the case even if flup was installed and you made the slightest syntactical error in the file which caused it not to run.</div>
+<div>
+<br /></div>
+<div>
+<span class="Apple-style-span" style="font-size: large;">Input And Outputs</span></div>
+<div>
+<br /></div>
+<div>
+Now we did manage to get an error message above, even so, you are probably lucky to even get that message. This is because the FASTCGI specification says:</div>
+<blockquote>
+The initial state of a FastCGI process is more spartan than the initial state of a CGI/1.1 process, because the FastCGI process doesn't begin life connected to anything. It doesn't have the conventional open files stdin, stdout, and stderr, and it doesn't receive much information through environment variables. The key piece of initial state in a FastCGI process is a listening socket, through which it accepts connections from a Web server.</blockquote>
+<blockquote>
+After a FastCGI process accepts a connection on its listening socket, the process executes a simple protocol to receive and send data. The protocol serves two purposes. First, the protocol multiplexes a single transport connection between several independent FastCGI requests. This supports applications that are able to process concurrent requests using event-driven or multi-threaded programming techniques. Second, within each request the protocol provides several independent data streams in each direction. This way, for instance, both stdout and stderr data pass over a single transport connection from the application to the Web server, rather than requiring separate pipes as with CGI/1.1.</blockquote>
+<div>
+Technically this means that prior to the point that you actually manage to start up the FASTCGI communications channel, there is no <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stderr</span> or <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stdout</span>. If a FASTCGI server sticks to the specification that error message likely wouldn't have any where to go and behaviour would be completely unpredictable. Most likely the process would just crash. Luckily mod_fcgid preserves <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stderr</span>, with <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stderr</span> mapping into the Apache error log file.</div>
+<div>
+<br /></div>
+<div>
+What about <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stdout</span>?</div>
+<div>
+<br /></div>
+<div>
+As it happens, mod_fcgid also ignores the specification for <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stdout</span> and it also maps to the Apache error log. There is a catch though in that <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stdout</span> is buffered. If you therefore were to add '<span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">print</span>' statements into your code to try and generate debugging output to find out what is going on, they will appear not to even be written to the Apache error logs. For the messages to appear, <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stdout</span> has to either be explicitly flushed, the buffer fill up, or the process cleanly exited.</div>
+<div>
+<br /></div>
+<div>
+So, if you are going to use print statements for debugging, then make sure you direct them to stderr and not the default of stdout. Better still, use the logging module and set up a logging handler to direct it to you own log file, one you can actually access and not be dependent on someone else to get stuff out of.</div>
+<div>
+<br /></div>
+<div>
+Finally there is <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stdin</span>. &nbsp;Here the relevant part of the FASTCGI specification is:</div>
+<div>
+<blockquote>
+The Web server leaves a single file descriptor, FCGI_LISTENSOCK_FILENO, open when the application begins execution. This descriptor refers to a listening socket created by the Web server.&nbsp;</blockquote>
+<blockquote>
+FCGI_LISTENSOCK_FILENO equals STDIN_FILENO. The standard descriptors STDOUT_FILENO and STDERR_FILENO are closed when the application begins execution. A reliable method for an application to determine whether it was invoked using CGI or FastCGI is to call getpeername(FCGI_LISTENSOCK_FILENO), which returns -1 with errno set to ENOTCONN for a FastCGI application.</blockquote>
+</div>
+<div>
+Remember above how it says that <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stdin</span> doesn't exist, well guess what the file descriptor got replaced with. Yes, the socket over which FASTCGI communication occurs.</div>
+<div>
+<br /></div>
+<div>
+Okay, so you don't think you are touching <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stdin</span>, so it isn't a problem. Think again. Various third party Python modules will actually perform checks on <span class="Apple-style-span" style="font-family: 'Courier New', Courier, monospace;">stdin</span> to see whether it is a tty or has some other properties. Based on that the code may change its behaviour. You just want to hope those packages don't prod too deep, or are at least resilient to errors if they occur due to the underlying file descriptor actually being a socket connection and not a normal file object.</div>
+<div>
+<br /></div>
+<div>
+<span class="Apple-style-span" style="font-size: large;">Is It A Lost Cause?</span></div>
+<div>
+<br /></div>
+<div>
+As you can see it isn't the most user friendly deployment system out there. Yet, PHP quite successfully makes use of FASTCGI for many deployments and they don't see to have to deal with these low level issues.</div>
+<div>
+<br /></div>
+<div>
+Part of the reason why PHP doesn't come to grief is the way it is packaged up such that all the important stuff is handled by the system administrators. The user therefore just needs to dump stuff in a directory and it works. If there are errors there are means of easily getting the details back in the browser or via their own log.</div>
+<div>
+<br /></div>
+<div>
+In contrast, with Python and trying to deploy a WSGI application, it is the user who has to worry about getting the FASTCGI process up and running with flup inside to bridge between the FASTCGI protocol and the WSGI application entry point.</div>
+<div>
+<br /></div>
+<div>
+FASTCGI environments though are what newbies or users who know nothing about setting this stuff up encounter due to chasing the cheapest hosting they can find. So the people who are least able to likely cope with it, are given what can be the worst thing to deal with if things go wrong.</div>
+<div>
+<br /></div>
+<div>
+Can it be done better? Sure it could. I have though had enough of fighting with bloggers handling of vertical whitespace for now, so that will have to wait until the next instalment.</div>
+<div>
+<br /></div>
+<div>
+<br /></div>
+<div>
+<br /></div>
+<div>
+<br /></div>
+<div>
+<br /></div>
+<div>
+<br /></div>
+<div>
+<br /></div>
+<div>
+<br /></div>
+<div>
+<br /></div>
+<br />
+<div>
+<br /></div>
+<br />
+<br />
+<br />
+<br /></div>
+</div>
+</div>
+</div>
+</div>
+<div style='clear: both;'></div>
+</div>
+<div class='post-footer'>
+<div class='post-footer-line post-footer-line-1'>
+<span class='post-author vcard'>
+Posted by
+<span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
+<meta content='https://www.blogger.com/profile/13609779138164842374' itemprop='url'/>
+<a class='g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' title='author profile'>
+<span itemprop='name'>Graham Dumpleton</span>
+</a>
+</span>
+</span>
+<span class='post-timestamp'>
+at
+<meta content='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html' itemprop='url'/>
+<a class='timestamp-link' href='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html' rel='bookmark' title='permanent link'><abbr class='published' itemprop='datePublished' title='2011-09-20T22:36:00+10:00'>10:36&#8239;PM</abbr></a>
+</span>
+<span class='post-comment-link'>
+</span>
+<span class='post-icons'>
+<span class='item-action'>
+<a href='https://www.blogger.com/email-post/2363643920942057324/9079528338602022459' title='Email Post'>
+<img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
+</a>
+</span>
+</span>
+<div class='post-share-buttons goog-inline-block'>
+<a class='goog-inline-block share-button sb-email' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=9079528338602022459&target=email' target='_blank' title='Email This'><span class='share-button-link-text'>Email This</span></a><a class='goog-inline-block share-button sb-blog' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=9079528338602022459&target=blog' onclick='window.open(this.href, "_blank", "height=270,width=475"); return false;' target='_blank' title='BlogThis!'><span class='share-button-link-text'>BlogThis!</span></a><a class='goog-inline-block share-button sb-twitter' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=9079528338602022459&target=twitter' target='_blank' title='Share to X'><span class='share-button-link-text'>Share to X</span></a><a class='goog-inline-block share-button sb-facebook' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=9079528338602022459&target=facebook' onclick='window.open(this.href, "_blank", "height=430,width=640"); return false;' target='_blank' title='Share to Facebook'><span class='share-button-link-text'>Share to Facebook</span></a><a class='goog-inline-block share-button sb-pinterest' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=9079528338602022459&target=pinterest' target='_blank' title='Share to Pinterest'><span class='share-button-link-text'>Share to Pinterest</span></a>
+</div>
+</div>
+<div class='post-footer-line post-footer-line-2'>
+<span class='post-labels'>
+Labels:
+<a href='http://blog.dscpl.com.au/search/label/apache' rel='tag'>apache</a>,
+<a href='http://blog.dscpl.com.au/search/label/fastcgi' rel='tag'>fastcgi</a>,
+<a href='http://blog.dscpl.com.au/search/label/wsgi' rel='tag'>wsgi</a>
+</span>
+</div>
+<div class='post-footer-line post-footer-line-3'>
+<span class='post-location'>
+</span>
+</div>
+</div>
+</div>
+<div class='comments' id='comments'>
+<a name='comments'></a>
+<h4>7 comments:</h4>
+<div id='Blog1_comments-block-wrapper'>
+<dl class='avatar-comment-indent' id='comments-block'>
+<dt class='comment-author ' id='c2930062818195406207'>
+<a name='c2930062818195406207'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/04530745611634767785" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-2930062818195406207-04530745611634767785"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Brandon Rhodes">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/04530745611634767785' rel='nofollow'>Brandon Rhodes</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-2930062818195406207'>
+<p>
+Once I figure out a recipe for deploying something, I often forget all of the errors and missteps that can occur along the way. Thanks for exactly the kind of reminder I often need: of the kinds of confusion, friction, and failure that make people reluctant to ever try deploying Python again if they are used to another environment and get into a series of problems like the ones you outline here.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html?showComment=1317592318980#c2930062818195406207' title='comment permalink'>
+October 3, 2011 at 8:51&#8239;AM
+</a>
+<span class='item-control blog-admin pid-151330569'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/2930062818195406207' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c7332560226592410683'>
+<a name='c7332560226592410683'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/17784721565426980860" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7332560226592410683-17784721565426980860"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Ochoto">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/17784721565426980860' rel='nofollow'>Ochoto</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7332560226592410683'>
+<p>
+You should check out uWSGI http://projects.unbit.it/uwsgi/ , it solves most, if not all, of these issues.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html?showComment=1327328741848#c7332560226592410683' title='comment permalink'>
+January 24, 2012 at 1:25&#8239;AM
+</a>
+<span class='item-control blog-admin pid-842470874'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7332560226592410683' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c6603520950331683267'>
+<a name='c6603520950331683267'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6603520950331683267-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6603520950331683267'>
+<p>
+uWSGI is not the solution you may think it is. Existing web hosting companies have a lot invested in FASTCGI. They cannot just dump FASTCGI and replace it with uWSGI for all their existing use cases, ie., PHP. So,  uWSGI may be a solution if starting from green fields, but trying to run it in parallel with an existing FASTCGI solution is likely just going to cause more problems than it worth and so unlikely to be adopted.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html?showComment=1327383401626#c6603520950331683267' title='comment permalink'>
+January 24, 2012 at 4:36&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6603520950331683267' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c5501493174193913958'>
+<a name='c5501493174193913958'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/17784721565426980860" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5501493174193913958-17784721565426980860"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Ochoto">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/17784721565426980860' rel='nofollow'>Ochoto</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5501493174193913958'>
+<p>
+Graham, 3rd line from the uWSGI homepage says:<br /><br />&quot;It uses the uwsgi (all lowercase, already included by default in the Nginx and Cherokee releases) protocol for all the networking/interprocess communications, but it can speak other protocols as well (http, <b>fastcgi</b>, mongrel2...)&quot;<br /><br />I propose uWSGI as a fastcgi adapter, I find it more effective and simple to use in combination with Nginx which only needs a socket to talk to the fastcgi (uWSGI) process .
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html?showComment=1327488653775#c5501493174193913958' title='comment permalink'>
+January 25, 2012 at 9:50&#8239;PM
+</a>
+<span class='item-control blog-admin pid-842470874'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5501493174193913958' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c7521753458149066095'>
+<a name='c7521753458149066095'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7521753458149066095-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7521753458149066095'>
+<p>
+Large scale web hosting services do not use nginx or Cherokee but use Apache. They have huge amounts invested in Apache and the existing ways they run PHP with Apache. They are also dependent on modules like mod_fcgid for handling FASTCGI process creation. So it is more than just being able to speak the FASTCGI protocol, automatic process management that ties in with Apache and its security mechanisms is also important.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html?showComment=1327496525035#c7521753458149066095' title='comment permalink'>
+January 26, 2012 at 12:02&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7521753458149066095' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c6616116252561587360'>
+<a name='c6616116252561587360'></a>
+<div class="avatar-image-container vcard"><span dir="ltr"><a href="https://www.blogger.com/profile/06402741748076510065" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6616116252561587360-06402741748076510065"><img src="https://resources.blogblog.com/img/blank.gif" width="35" height="35" class="delayLoad" style="display: none;" longdesc="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgwWXzaw3Jb7ex9wCEM6RPCJKMEEC8IByDYsmO3Fz90Wz4SkrnYd7Qc7LT9WDpkkvApR46VVrn-DIGt9jZywbp2usSei1hyF2slA7B9r62AUPb-Z1BM_PSEL7IaOLvvT7E/s45-c/8494883_orig.jpg" alt="" title="chort">
+
+<noscript><img src="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgwWXzaw3Jb7ex9wCEM6RPCJKMEEC8IByDYsmO3Fz90Wz4SkrnYd7Qc7LT9WDpkkvApR46VVrn-DIGt9jZywbp2usSei1hyF2slA7B9r62AUPb-Z1BM_PSEL7IaOLvvT7E/s45-c/8494883_orig.jpg" width="35" height="35" class="photo" alt=""></noscript></a></span></div>
+<a href='https://www.blogger.com/profile/06402741748076510065' rel='nofollow'>chort</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6616116252561587360'>
+<span class='deleted-comment'>This comment has been removed by the author.</span>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html?showComment=1329122335625#c6616116252561587360' title='comment permalink'>
+February 13, 2012 at 7:38&#8239;PM
+</a>
+<span class='item-control blog-admin '>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6616116252561587360' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c7593106609123977333'>
+<a name='c7593106609123977333'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7593106609123977333-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7593106609123977333'>
+<p>
+Sasha, I am not having a go at Python or WSGI, more the reliance of a specific old technology that hosting providers continue to use because of history. You might want to look at the bigger picture of my contribution to Python and WSGI hosting and my attempts to improve them to see that I definitely not against them. If I was I wouldn&#39;t be doing as much as I am. :-)
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html?showComment=1329125329754#c7593106609123977333' title='comment permalink'>
+February 13, 2012 at 8:28&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7593106609123977333' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+</dl>
+</div>
+<p class='comment-footer'>
+<a href='https://www.blogger.com/comment/fullpage/post/2363643920942057324/9079528338602022459' onclick=''>Post a Comment</a>
+</p>
+</div>
+</div>
+
+        </div></div>
+      
+</div>
+<div class='blog-pager' id='blog-pager'>
+<span id='blog-pager-newer-link'>
+<a class='blog-pager-newer-link' href='http://blog.dscpl.com.au/2011/10/what-excited-me-about-new-relic.html' id='Blog1_blog-pager-newer-link' title='Newer Post'>Newer Post</a>
+</span>
+<span id='blog-pager-older-link'>
+<a class='blog-pager-older-link' href='http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html' id='Blog1_blog-pager-older-link' title='Older Post'>Older Post</a>
+</span>
+<a class='home-link' href='http://blog.dscpl.com.au/'>Home</a>
+</div>
+<div class='clear'></div>
+<div class='post-feeds'>
+<div class='feed-links'>
+Subscribe to:
+<a class='feed-link' href='http://blog.dscpl.com.au/feeds/9079528338602022459/comments/default' target='_blank' type='application/atom+xml'>Post Comments (Atom)</a>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='column-left-outer'>
+<div class='column-left-inner'>
+<aside>
+</aside>
+</div>
+</div>
+<div class='column-right-outer'>
+<div class='column-right-inner'>
+<aside>
+<div class='sidebar section' id='sidebar-right-1'><div class='widget Profile' data-version='1' id='Profile1'>
+<h2>About Me</h2>
+<div class='widget-content'>
+<dl class='profile-datablock'>
+<dt class='profile-data'>
+<a class='profile-name-link g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' style='background-image: url(//www.blogger.com/img/logo-16.png);'>
+Graham Dumpleton
+</a>
+</dt>
+</dl>
+<a class='profile-link' href='https://www.blogger.com/profile/13609779138164842374' rel='author'>View my complete profile</a>
+<div class='clear'></div>
+</div>
+</div><div class='widget PageList' data-version='1' id='PageList1'>
+<h2>Quick Links</h2>
+<div class='widget-content'>
+<ul>
+<li>
+<a href='http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html'>Decorators and monkey patching.</a>
+</li>
+<li>
+<a href='http://blog.dscpl.com.au/p/using-python-with-docker.html'>Using Python with Docker.</a>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div><div class='widget BlogArchive' data-version='1' id='BlogArchive1'>
+<h2>Blog Archive</h2>
+<div class='widget-content'>
+<div id='ArchiveList'>
+<div id='BlogArchive1_ArchiveList'>
+<select id='BlogArchive1_ArchiveMenu'>
+<option value=''>Blog Archive</option>
+<option value='http://blog.dscpl.com.au/2019/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2018/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2018/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2018/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2018/01/'>January (1)</option>
+<option value='http://blog.dscpl.com.au/2017/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2016/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2016/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2016/07/'>July (1)</option>
+<option value='http://blog.dscpl.com.au/2016/04/'>April (2)</option>
+<option value='http://blog.dscpl.com.au/2016/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2016/02/'>February (2)</option>
+<option value='http://blog.dscpl.com.au/2016/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2015/12/'>December (6)</option>
+<option value='http://blog.dscpl.com.au/2015/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2015/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2015/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2015/06/'>June (5)</option>
+<option value='http://blog.dscpl.com.au/2015/05/'>May (7)</option>
+<option value='http://blog.dscpl.com.au/2015/04/'>April (4)</option>
+<option value='http://blog.dscpl.com.au/2015/03/'>March (4)</option>
+<option value='http://blog.dscpl.com.au/2015/01/'>January (2)</option>
+<option value='http://blog.dscpl.com.au/2014/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2014/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2014/09/'>September (7)</option>
+<option value='http://blog.dscpl.com.au/2014/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2014/05/'>May (1)</option>
+<option value='http://blog.dscpl.com.au/2014/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2014/02/'>February (4)</option>
+<option value='http://blog.dscpl.com.au/2014/01/'>January (8)</option>
+<option value='http://blog.dscpl.com.au/2013/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/10/'>October (4)</option>
+<option value='http://blog.dscpl.com.au/2012/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2011/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2011/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2011/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2011/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2011/01/'>January (5)</option>
+<option value='http://blog.dscpl.com.au/2010/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2010/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2010/08/'>August (2)</option>
+<option value='http://blog.dscpl.com.au/2010/06/'>June (2)</option>
+<option value='http://blog.dscpl.com.au/2010/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2010/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2010/03/'>March (3)</option>
+<option value='http://blog.dscpl.com.au/2009/11/'>November (4)</option>
+<option value='http://blog.dscpl.com.au/2009/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2009/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2009/08/'>August (3)</option>
+<option value='http://blog.dscpl.com.au/2009/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2009/04/'>April (5)</option>
+<option value='http://blog.dscpl.com.au/2009/03/'>March (5)</option>
+<option value='http://blog.dscpl.com.au/2009/02/'>February (1)</option>
+<option value='http://blog.dscpl.com.au/2008/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2008/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2008/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2007/11/'>November (2)</option>
+<option value='http://blog.dscpl.com.au/2007/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2007/09/'>September (3)</option>
+<option value='http://blog.dscpl.com.au/2007/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2007/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2007/03/'>March (2)</option>
+</select>
+</div>
+</div>
+<div class='clear'></div>
+</div>
+</div><div class='widget Label' data-version='1' id='Label1'>
+<h2>Labels</h2>
+<div class='widget-content list-label-widget-content'>
+<ul>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/python'>python</a>
+<span dir='ltr'>(111)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_wsgi'>mod_wsgi</a>
+<span dir='ltr'>(86)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wsgi'>wsgi</a>
+<span dir='ltr'>(58)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/apache'>apache</a>
+<span dir='ltr'>(35)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/docker'>docker</a>
+<span dir='ltr'>(34)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/openshift'>openshift</a>
+<span dir='ltr'>(26)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/decorators'>decorators</a>
+<span dir='ltr'>(15)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/django'>django</a>
+<span dir='ltr'>(13)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/kubernetes'>kubernetes</a>
+<span dir='ltr'>(12)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_python'>mod_python</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/red%20hat'>red hat</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/ipython'>ipython</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyterhub'>jupyterhub</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/new%20relic'>new relic</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wrapt'>wrapt</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/pycon'>pycon</a>
+<span dir='ltr'>(5)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/s2i'>s2i</a>
+<span dir='ltr'>(4)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/gunicorn'>gunicorn</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/uWSGI'>uWSGI</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/datadog'>datadog</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/nginx'>nginx</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/statsd'>statsd</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/web2py'>web2py</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/async'>async</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/dyndns53'>dyndns53</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/fastcgi'>fastcgi</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/heroku'>heroku</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyter'>jupyter</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/lektor'>lektor</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/php'>php</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/shiv'>shiv</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/testing'>testing</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/tornado'>tornado</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/warpdrive'>warpdrive</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/zipapp'>zipapp</a>
+<span dir='ltr'>(1)</span>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div></div>
+</aside>
+</div>
+</div>
+</div>
+<div style='clear: both'></div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+<div class='main-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<footer>
+<div class='footer-outer'>
+<div class='footer-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left footer-fauxborder-left'>
+<div class='fauxborder-right footer-fauxborder-right'></div>
+<div class='region-inner footer-inner'>
+<div class='foot section' id='footer-1'><div class='widget AdSense' data-version='1' id='AdSense1'>
+<div class='widget-content'>
+<script type="text/javascript"><!--
+google_ad_client="pub-6433235630058377";
+google_ad_host="pub-1556223355139109";
+google_ad_width=120;
+google_ad_height=600;
+google_ad_format="120x600_as";
+google_ad_type="text";
+google_ad_host_channel="0001";
+google_color_border="FFFFFF";
+google_color_bg="FFFFFF";
+google_color_link="999999";
+google_color_url="5588AA";
+google_color_text="666666";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<div class='clear'></div>
+</div>
+</div></div>
+<table border='0' cellpadding='0' cellspacing='0' class='section-columns columns-2'>
+<tbody>
+<tr>
+<td class='first columns-cell'>
+<div class='foot no-items section' id='footer-2-1'></div>
+</td>
+<td class='columns-cell'>
+<div class='foot no-items section' id='footer-2-2'></div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- outside of the include in order to lock Attribution widget -->
+<div class='foot section' id='footer-3' name='Footer'><div class='widget Attribution' data-version='1' id='Attribution1'>
+<div class='widget-content' style='text-align: center;'>
+Simple theme. Powered by <a href='https://www.blogger.com' target='_blank'>Blogger</a>.
+</div>
+<div class='clear'></div>
+</div></div>
+</div>
+</div>
+<div class='footer-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</footer>
+<!-- content -->
+</div>
+</div>
+<div class='content-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<script type='text/javascript'>
+    window.setTimeout(function() {
+        document.body.className = document.body.className.replace('loading', '');
+      }, 10);
+  </script>
+
+<script type="text/javascript" src="https://www.blogger.com/static/v1/widgets/552934507-widgets.js"></script>
+<script type='text/javascript'>
+window['__wavt'] = 'AOuZoY6CNnyqz7CiPNOhHv1uiKMvrR-SYw:1757388529356';_WidgetManager._Init('//www.blogger.com/rearrange?blogID\x3d2363643920942057324','//blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html','2363643920942057324');
+_WidgetManager._SetDataContext([{'name': 'blog', 'data': {'blogId': '2363643920942057324', 'title': 'Graham Dumpleton', 'url': 'http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html', 'canonicalUrl': 'http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html', 'homepageUrl': 'http://blog.dscpl.com.au/', 'searchUrl': 'http://blog.dscpl.com.au/search', 'canonicalHomepageUrl': 'http://blog.dscpl.com.au/', 'blogspotFaviconUrl': 'http://blog.dscpl.com.au/favicon.ico', 'bloggerUrl': 'https://www.blogger.com', 'hasCustomDomain': true, 'httpsEnabled': false, 'enabledCommentProfileImages': true, 'gPlusViewType': 'FILTERED_POSTMOD', 'adultContent': false, 'analyticsAccountNumber': '', 'encoding': 'UTF-8', 'locale': 'en', 'localeUnderscoreDelimited': 'en', 'languageDirection': 'ltr', 'isPrivate': false, 'isMobile': false, 'isMobileRequest': false, 'mobileClass': '', 'isPrivateBlog': false, 'isDynamicViewsAvailable': true, 'feedLinks': '\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default\x22 /\x3e\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/rss+xml\x22 title\x3d\x22Graham Dumpleton - RSS\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default?alt\x3drss\x22 /\x3e\n\x3clink rel\x3d\x22service.post\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22https://www.blogger.com/feeds/2363643920942057324/posts/default\x22 /\x3e\n\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/9079528338602022459/comments/default\x22 /\x3e\n', 'meTag': '', 'adsenseClientId': 'ca-pub-6433235630058377', 'adsenseHostId': 'ca-host-pub-1556223355139109', 'adsenseHasAds': true, 'adsenseAutoAds': false, 'boqCommentIframeForm': true, 'loginRedirectParam': '', 'view': '', 'dynamicViewsCommentsSrc': '//www.blogblog.com/dynamicviews/4224c15c4e7c9321/js/comments.js', 'dynamicViewsScriptSrc': '//www.blogblog.com/dynamicviews/b4594f574ba3c273', 'plusOneApiSrc': 'https://apis.google.com/js/platform.js', 'disableGComments': true, 'interstitialAccepted': false, 'sharing': {'platforms': [{'name': 'Get link', 'key': 'link', 'shareMessage': 'Get link', 'target': ''}, {'name': 'Facebook', 'key': 'facebook', 'shareMessage': 'Share to Facebook', 'target': 'facebook'}, {'name': 'BlogThis!', 'key': 'blogThis', 'shareMessage': 'BlogThis!', 'target': 'blog'}, {'name': 'X', 'key': 'twitter', 'shareMessage': 'Share to X', 'target': 'twitter'}, {'name': 'Pinterest', 'key': 'pinterest', 'shareMessage': 'Share to Pinterest', 'target': 'pinterest'}, {'name': 'Email', 'key': 'email', 'shareMessage': 'Email', 'target': 'email'}], 'disableGooglePlus': true, 'googlePlusShareButtonWidth': 0, 'googlePlusBootstrap': '\x3cscript type\x3d\x22text/javascript\x22\x3ewindow.___gcfg \x3d {\x27lang\x27: \x27en\x27};\x3c/script\x3e'}, 'hasCustomJumpLinkMessage': false, 'jumpLinkMessage': 'Read more', 'pageType': 'item', 'postId': '9079528338602022459', 'pageName': 'Why is WSGI deployment under FASTCGI so painful?', 'pageTitle': 'Graham Dumpleton: Why is WSGI deployment under FASTCGI so painful?'}}, {'name': 'features', 'data': {}}, {'name': 'messages', 'data': {'edit': 'Edit', 'linkCopiedToClipboard': 'Link copied to clipboard!', 'ok': 'Ok', 'postLink': 'Post Link'}}, {'name': 'template', 'data': {'name': 'Simple', 'localizedName': 'Simple', 'isResponsive': false, 'isAlternateRendering': false, 'isCustom': false, 'variant': 'pale', 'variantId': 'pale'}}, {'name': 'view', 'data': {'classic': {'name': 'classic', 'url': '?view\x3dclassic'}, 'flipcard': {'name': 'flipcard', 'url': '?view\x3dflipcard'}, 'magazine': {'name': 'magazine', 'url': '?view\x3dmagazine'}, 'mosaic': {'name': 'mosaic', 'url': '?view\x3dmosaic'}, 'sidebar': {'name': 'sidebar', 'url': '?view\x3dsidebar'}, 'snapshot': {'name': 'snapshot', 'url': '?view\x3dsnapshot'}, 'timeslide': {'name': 'timeslide', 'url': '?view\x3dtimeslide'}, 'isMobile': false, 'title': 'Why is WSGI deployment under FASTCGI so painful?', 'description': 'Out of all the deployment methods for Python WSGI applications, the one which seems to generate the most trouble is FASTCGI deployment. So m...', 'url': 'http://blog.dscpl.com.au/2011/09/why-is-wsgi-deployment-under-fastcgi-so.html', 'type': 'item', 'isSingleItem': true, 'isMultipleItems': false, 'isError': false, 'isPage': false, 'isPost': true, 'isHomepage': false, 'isArchive': false, 'isLabelSearch': false, 'postId': 9079528338602022459}}]);
+_WidgetManager._RegisterWidget('_NavbarView', new _WidgetInfo('Navbar1', 'navbar', document.getElementById('Navbar1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_HeaderView', new _WidgetInfo('Header1', 'header', document.getElementById('Header1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogView', new _WidgetInfo('Blog1', 'main', document.getElementById('Blog1'), {'cmtInteractionsEnabled': false, 'lightboxEnabled': true, 'lightboxModuleUrl': 'https://www.blogger.com/static/v1/jsbin/3842676126-lbx.js', 'lightboxCssUrl': 'https://www.blogger.com/static/v1/v-css/828616780-lightbox_bundle.css'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_ProfileView', new _WidgetInfo('Profile1', 'sidebar-right-1', document.getElementById('Profile1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_PageListView', new _WidgetInfo('PageList1', 'sidebar-right-1', document.getElementById('PageList1'), {'title': 'Quick Links', 'links': [{'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html', 'id': '3350721465154129789', 'title': 'Decorators and monkey patching.'}, {'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/using-python-with-docker.html', 'id': '5591286857776935907', 'title': 'Using Python with Docker.'}], 'mobile': false, 'showPlaceholder': true, 'hasCurrentPage': false}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogArchiveView', new _WidgetInfo('BlogArchive1', 'sidebar-right-1', document.getElementById('BlogArchive1'), {'languageDirection': 'ltr', 'loadingMessage': 'Loading\x26hellip;'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_LabelView', new _WidgetInfo('Label1', 'sidebar-right-1', document.getElementById('Label1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AdSenseView', new _WidgetInfo('AdSense1', 'footer-1', document.getElementById('AdSense1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AttributionView', new _WidgetInfo('Attribution1', 'footer-3', document.getElementById('Attribution1'), {}, 'displayModeFull'));
+</script>
+</body>
+</html>

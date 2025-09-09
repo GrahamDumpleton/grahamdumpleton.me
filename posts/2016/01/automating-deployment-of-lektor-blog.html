@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html class='v2' dir='ltr' lang='en'>
+<head>
+<link href='https://www.blogger.com/static/v1/widgets/2508126174-css_bundle_v2.css' rel='stylesheet' type='text/css'/>
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='blogger' name='generator'/>
+<link href='http://blog.dscpl.com.au/favicon.ico' rel='icon' type='image/x-icon'/>
+<link href='http://blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html' rel='canonical'/>
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Graham Dumpleton - RSS" href="http://blog.dscpl.com.au/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Graham Dumpleton - Atom" href="https://www.blogger.com/feeds/2363643920942057324/posts/default" />
+
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/2613290079143671376/comments/default" />
+<!--Can't find substitution for tag [blog.ieCssRetrofitLinks]-->
+<link href='https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiTBornUa-lmUdF7yyEswxT0xOOgNcWm_4Gusf0oOpl9zjTvP2fz8VvEjExFTIRtMx_JR2TXIF6gKpzdeaelORolwy3AbZmIgDOQv_9qYIKCXT1RAlsRR96sNuU0CrwTZ78pNg3AmuFHPPW/?imgmax=800' rel='image_src'/>
+<meta content='http://blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html' property='og:url'/>
+<meta content='Automating deployment of Lektor blog sites.' property='og:title'/>
+<meta content='Towards the end of last year,  Armin Ronacher  formally announced  a new project of his called Lektor . Armin is one of those developers who...' property='og:description'/>
+<meta content='https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiTBornUa-lmUdF7yyEswxT0xOOgNcWm_4Gusf0oOpl9zjTvP2fz8VvEjExFTIRtMx_JR2TXIF6gKpzdeaelORolwy3AbZmIgDOQv_9qYIKCXT1RAlsRR96sNuU0CrwTZ78pNg3AmuFHPPW/w1200-h630-p-k-no-nu/?imgmax=800' property='og:image'/>
+<title>Graham Dumpleton: Automating deployment of Lektor blog sites.</title>
+<style id='page-skin-1' type='text/css'><!--
+/*
+-----------------------------------------------
+Blogger Template Style
+Name:     Simple
+Designer: Blogger
+URL:      www.blogger.com
+----------------------------------------------- */
+/* Content
+----------------------------------------------- */
+body {
+font: normal normal 12px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #222222;
+background: #66bbdd none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 {
+font-size: 22px;
+}
+a:link {
+text-decoration:none;
+color: #2187bb;
+}
+a:visited {
+text-decoration:none;
+color: #888888;
+}
+a:hover {
+text-decoration:underline;
+color: #32aaff;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #ffffff;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #3299bb;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #3299bb;
+}
+.Header .description {
+font-size: 140%;
+color: #777777;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #eeeeee;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #eeeeee;
+border-left: 0 solid #eeeeee;
+border-right: 0 solid #eeeeee;
+}
+.tabs-inner .widget ul {
+background: #f5f5f5 url(https://resources.blogblog.com/blogblog/data/1kt/simple/gradients_light.png) repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #eeeeee;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 14px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #ffffff;
+border-right: 1px solid #eeeeee;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #000000;
+background-color: #eeeeee;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #eeeeee;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #eeeeee;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #eeeeee;
+}
+/* Headings
+----------------------------------------------- */
+div.widget > h2,
+div.widget h2.title {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #000000;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+h2.date-header {
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+}
+.date-header span {
+background-color: transparent;
+color: #222222;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 22px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 2px;
+background: #ffffff;
+border: 1px solid #eeeeee;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 5px;
+}
+.post-body .tr-caption-container {
+color: #222222;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #666666;
+background-color: #f9f9f9;
+border-bottom: 1px solid #eeeeee;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #eeeeee;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #eeeeee;
+}
+/* Comments
+----------------------------------------------- */
+.comments .comments-content .icon.blog-author {
+background-repeat: no-repeat;
+background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9sLFwMeCjjhcOMAAAD+SURBVDjLtZSvTgNBEIe/WRRnm3U8RC1neQdsm1zSBIU9VVF1FkUguQQsD9ITmD7ECZIJSE4OZo9stoVjC/zc7ky+zH9hXwVwDpTAWWLrgS3QAe8AZgaAJI5zYAmc8r0G4AHYHQKVwII8PZrZFsBFkeRCABYiMh9BRUhnSkPTNCtVXYXURi1FpBDgArj8QU1eVXUzfnjv7yP7kwu1mYrkWlU33vs1QNu2qU8pwN0UpKoqokjWwCztrMuBhEhmh8bD5UDqur75asbcX0BGUB9/HAMB+r32hznJgXy2v0sGLBcyAJ1EK3LFcbo1s91JeLwAbwGYu7TP/3ZGfnXYPgAVNngtqatUNgAAAABJRU5ErkJggg==);
+}
+.comments .comments-content .loadmore a {
+border-top: 1px solid #999999;
+border-bottom: 1px solid #999999;
+}
+.comments .comment-thread.inline-thread {
+background-color: #f9f9f9;
+}
+.comments .continue {
+border-top: 2px solid #999999;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #eeeeee;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #ffffff;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #ffffff;
+}
+.mobile-index-contents {
+color: #222222;
+}
+.mobile-link-button {
+background-color: #2187bb;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #eeeeee;
+color: #000000;
+border-top: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #eeeeee;
+}
+
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 1020px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 1020px;
+max-width: 1020px;
+_width: 1020px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 200px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 200px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("200px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 200px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 200px;
+margin-right: -200px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+body#layout div.add_widget {
+padding: 8px;
+}
+body#layout div.add_widget a {
+margin-left: 32px;
+}
+--></style>
+<link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' media='none' onload='if(media!=&#39;all&#39;)media=&#39;all&#39;' rel='stylesheet'/><noscript><link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' rel='stylesheet'/></noscript>
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+
+<!-- data-ad-client=ca-pub-6433235630058377 -->
+
+</head>
+<body class='loading variant-pale'>
+<div class='navbar section' id='navbar' name='Navbar'><div class='widget Navbar' data-version='1' id='Navbar1'><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/2363643920942057324?po\x3d2613290079143671376\x26origin\x3dhttp://blog.dscpl.com.au',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script><script type="text/javascript">
+(function() {
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = '//pagead2.googlesyndication.com/pagead/js/google_top_exp.js';
+var head = document.getElementsByTagName('head')[0];
+if (head) {
+head.appendChild(script);
+}})();
+</script>
+</div></div>
+<div class='body-fauxcolumns'>
+<div class='fauxcolumn-outer body-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content'>
+<div class='content-fauxcolumns'>
+<div class='fauxcolumn-outer content-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content-outer'>
+<div class='content-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='fauxborder-right content-fauxborder-right'></div>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='header-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='fauxborder-right header-fauxborder-right'></div>
+<div class='region-inner header-inner'>
+<div class='header section' id='header' name='Header'><div class='widget Header' data-version='1' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://blog.dscpl.com.au/'>
+Graham Dumpleton
+</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>
+</span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='header-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</header>
+<div class='tabs-outer'>
+<div class='tabs-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left tabs-fauxborder-left'>
+<div class='fauxborder-right tabs-fauxborder-right'></div>
+<div class='region-inner tabs-inner'>
+<div class='tabs no-items section' id='crosscol' name='Cross-Column'></div>
+<div class='tabs no-items section' id='crosscol-overflow' name='Cross-Column 2'></div>
+</div>
+</div>
+<div class='tabs-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='main-outer'>
+<div class='main-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='fauxborder-right main-fauxborder-right'></div>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<div class='fauxcolumn-outer fauxcolumn-center-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-left-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-right-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main' name='Main'><div class='widget Blog' data-version='1' id='Blog1'>
+<div class='blog-posts hfeed'>
+
+          <div class="date-outer">
+        
+<h2 class='date-header'><span>Monday, January 18, 2016</span></h2>
+
+          <div class="date-posts">
+        
+<div class='post-outer'>
+<div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<meta content='https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiTBornUa-lmUdF7yyEswxT0xOOgNcWm_4Gusf0oOpl9zjTvP2fz8VvEjExFTIRtMx_JR2TXIF6gKpzdeaelORolwy3AbZmIgDOQv_9qYIKCXT1RAlsRR96sNuU0CrwTZ78pNg3AmuFHPPW/?imgmax=800' itemprop='image_url'/>
+<meta content='2363643920942057324' itemprop='blogId'/>
+<meta content='2613290079143671376' itemprop='postId'/>
+<a name='2613290079143671376'></a>
+<h3 class='post-title entry-title' itemprop='name'>
+Automating deployment of Lektor blog sites.
+</h3>
+<div class='post-header'>
+<div class='post-header-line-1'></div>
+</div>
+<div class='post-body entry-content' id='post-body-2613290079143671376' itemprop='description articleBody'>
+<p>Towards the end of last year,&#160;<a href="http://lucumr.pocoo.org/about/">Armin Ronacher</a>&#160;formally <a href="http://lucumr.pocoo.org/2015/12/21/introducing-lektor/">announced</a> a new project of his called <a href="https://www.getlektor.com">Lektor</a>. Armin is one of those developers who when he creates some new piece of software, or publishes a <a href="http://lucumr.pocoo.org">blog post</a>, you should alway pay attention. His knowledge and attention to detail is something everyone should aspire to. So ever since he announced Lektor I have been aiming to put aside some time to have a play with it. I am hoping one day I can stop using Blogger for my own blog site and use something like Lektor instead. That isn&#8217;t to say Lektor is only for blog sites, it can be used for any sites where ultimately you could host them as a plain static web site and don&#8217;t need to run a full on dynamic web site framework.</p>
+<p>Although Lektor itself handles well the task of generating the static content for a web site and has some support for deploying the generated files, I am not too keen on any of the deployment options currently provided. I thought therefore I would have a bit of a play with automated deployment of a Lektor blog using the Open Source&#160;<a href="https://github.com/openshift/source-to-image">Source to Image</a>&#160;project for Docker and also <a href="https://www.openshift.org">OpenShift</a>. The goal I initially wanted to achieve was that simply by pushing completed changes to my blog site to a GitHub repository that my web site would be automatically updated. If that worked out okay, then the next step would be to work out how I could transition my existing blog posts off Blogger, including how to implement redirects if necessary so existing URLs would still work and map into any new URL naming convention for the new design.</p>
+<h1>Creating an initial site template</h1>
+<p>Lektor more than adequately covers the creation of an initial empty site template in its <a href="https://www.getlektor.com/docs/quickstart/">quick start guide</a>&#160;so I will not cover that here.</p>
+<p>My only grumble with that process was that it doesn&#8217;t like to have the directory you want to use in existence already. If you try and use an existing directory you get an error like:</p>
+<blockquote>
+<pre>Error: Could not create target folder: [Errno 17] File exists: &#8216;/Users/graham/Projects/lektor-empty-site'<br />Aborted!</pre>
+</blockquote>
+<p>For me this came about because I created a repository on GitHub first, made a local checkout and then tried to populate it such that everything was at the top level of the repository rather than in a sub directory. Lektor doesn&#8217;t like this. You therefore either have to create the project in a subdirectory and then move everything manually to the top level, or create the project first and then only do &#8216;git init&#8217; and link it to the remote GitHub repository. If there is a way of using Lektor such that I could have populated the current directory rather than having to use a new directory, then do please let me know.</p>
+<p>Having created the initial site template, we can then go in and make our modifications, using &#8216;lektor server&#8217; on our local machine to view our updates as we make them.</p>
+<h1>Deploying static site content</h1>
+<p>When it comes to deploying a site created using Lektor, that is where you need to move beyond the inbuilt server it provides. Because Lektor generates purely static content, you don&#8217;t need a fancy dynamic web application server and any web server capable of hosting static files will do.</p>
+<p>There are certainly any number of hosting services still around who will host a static web site for you, or you could use S3 or GitHub pages, but I wanted something which I had a bit more control over and visibility into when there is an issue. I also don&#8217;t really want to be pushing from my local machine direct to the hosting service either. I like the idea of a workflow where things go via the Git repository where the original files for the site are located. This would allow me to coordinate with others working on a site as well, using all the same sorts of workflows one would use for normal software development, such as branching, to handle working on and finally release of the content for the site.</p>
+<p>For hosting of minimal hand crafted static sites I have in the past used the free tiers of some of the more popular platform as a service offerings (PaaS), but because these services have traditionally been biased towards dynamic web applications, that meant wrapping up the static content within a custom Python web application, using something like the <a href="https://pypi.python.org/pypi/whitenoise">WhiteNoise</a> WSGI middleware to handle serving the static file content.</p>
+<p>This works, but you aren&#8217;t using a proper web server designed for static file hosting, so it isn&#8217;t the best option for a more significant site which needs to handle a lot of traffic.</p>
+<p>What could I do then if I want to use a proper web server such as Apache and nginx?</p>
+<p>The problem in using a traditional PaaS is that in general they do not provide either Apache or nginx as part of their standard environment and they can make it very difficult to actually install it. Alternatively, they might use Apache, but because of a fixed configuration and no ability to change it, you can&#8217;t just drop static files in and have them appear at the URL you would prefer to have them.</p>
+<h1>Using a Docker based PaaS</h1>
+<p>Now these days, because of my work with Red Hat, I get a lot of opportunity to play with Docker and Red Hat&#8217;s newest incarnation of their PaaS offering. This is OpenShift 3 and it is a complete rewrite of the prior version of OpenShift as most would know it. In OpenShift 3 Docker is used, instead of a custom container solution, with Kubernetes handling scheduling of those containers.</p>
+<p>Because OpenShift 3 is Docker based, this means one has much greater control over what you can deploy to a container. So where as with a traditional PaaS your options may have been limited, with OpenShift 3 and Docker, you can pretty well do what ever you want in the container and use whatever software or web server you want to use.</p>
+<p>Given the ability to use Docker, I could therefore consider setting up a traditional Apache or nginx web server. If I were to go down that path there are even existing Docker images for both Apache and nginx on the Docker Hub registry for hosting static web sites.</p>
+<p>The problem with using such existing Docker images though is that when using Lektor, you need to trigger a build step to generate the static files from the original source files. This requires having Lektor installed to run the build step, which also means having a working Python installation as well. These base images for Apache and nginx aren&#8217;t general purpose images though and are not going to have Python installed. As a result, the generation of the static files would need to be done using a separate system first before then somehow being combined with the base image.</p>
+<p>The alternative is to start out with one of the web server images and create a new base image based on it which adds Python and Lektor. Conversely, you could start out with a base image for Python and then install Lektor and either Apache or nginx.</p>
+<p>With a base image which then incorporated both the web server and Lektor, and a default &#8216;RUN&#8217; action to start the web server, you could within the Lektor project for your blog site add a &#8216;Dockerfile&#8217; which ran the &#8216;lektor build&#8217; to generate the static content as part of the build for the Docker image.</p>
+<p>No matter what route you take here, they all seem a bit fiddly and would still entail a fair bit of work to get some sort of automated workflow going around them.</p>
+<h1>Builds using Source to Image</h1>
+<p>As it turns out, an OpenSource project already exists which has done a lot of the work to build that workflow. It is the project called <a href="https://github.com/openshift/source-to-image">Source to Image</a> (S2I).</p>
+<p>If you are familiar with the concept of build packs or cartridges as they existed for traditional PaaS offerings, think of S2I as the Docker replacement for those.</p>
+<p>The idea behind S2I is that you have a Docker image which defines what is called a builder. This is effectively a Docker base image that combines all the common stuff that would be required for deploying software for a given problem domain, for example Python web applications, along with a special &#8216;assemble&#8217; script which takes your source files and combines them with the base image to create a new Docker image to be run as the actual application.</p>
+<p>When combining the source files with the base image, if they are actual application code files, they might be compiled into an application executable, or if using a scripting language simply copied into place to be executed by an application web server. Alternatively, the source files could be some sort of data input files that are to be used directly by an application, or after some translation process has been done. In other words, you aren&#8217;t restricted to using S2I builders just to create a new application. Instead an S2I builder could be used to combine a SaaS (Software as a Service) like application with the data it needs to run.</p>
+<p>What ever the purpose of the builder and the resulting application, a further key component supplied by the S2I builder is a &#8216;run&#8217; script. It is this script which is executed when the Docker image is run and which starts up the actual application.</p>
+<p>So an S2I builder contains all the base software components that would be required for an application, plus the &#8216;assemble&#8217; and &#8216;run&#8217; scripts defining how the source code is combined with the builder image and then subsequently how to start the application.</p>
+<p>What isn&#8217;t obvious is how our source files gets copied in as part of this process. This is where the &#8216;s2i&#8217; program from the Source to Image package comes into play. It is this which takes the source code, injects it into our running S2I builder, triggers the &#8216;assemble&#8217; script and then snapshots the container to create a new Docker image.</p>
+<p>To make things a little clearer, lets try an example.</p>
+<p>For this I am going to use an S2I builder which has been created for use with OpenShift for deploying Python web applications. This S2I builder can be found on the Docker Hub registry and is called &#8216;openshift/python-27-centos7&#8217;.</p>
+<p>In using the &#8216;s2i&#8217; program there are two ways that you can supply your source files. The first is to point at a remote Git repository hosted somewhere like GitHub. The second is to point at a local file system directory containing the source files.</p>
+<p>In this case I am going to use the repository on GitHub located at:</p>
+<ul>
+<li>https://github.com/GrahamDumpleton/wsgi-hello-world</li>
+</ul>
+<p>The &#8216;s2i&#8217; program is now run, supplying it the location of the source files, the name of the S2I builder image on the Docker Hub registry and the name to be given to the Docker image produced and which will contain our final application.</p>
+<blockquote>
+<pre>$ s2i build https://github.com/GrahamDumpleton/wsgi-hello-world.git openshift/python-27-centos7 my-python-app<br />---&gt; Copying application source ...<br />---&gt; Installing dependencies ...<br />Downloading/unpacking gunicorn (from -r requirements.txt (line 1))<br />Installing collected packages: gunicorn<br />...<br />Successfully installed gunicorn<br />Cleaning up...<br /><br /></pre>
+<pre>$ docker images<br />REPOSITORY TAG IMAGE ID CREATED VIRTUAL SIZE<br />my-python-app latest beda88ceb3ad 14 minutes ago 444.1 MB</pre>
+</blockquote>
+<p>With the build complete, we can now run our application.</p>
+<blockquote>
+<pre>$ docker run --rm -p 8080:8080 my-python-app<br />---&gt; Serving application with gunicorn (wsgi) ...<br />[2016-01-17 10:49:58 +0000] [1] [INFO] Starting gunicorn 19.4.5<br />[2016-01-17 10:49:58 +0000] [1] [INFO] Listening at: http://0.0.0.0:8080 (1)<br />[2016-01-17 10:49:58 +0000] [1] [INFO] Using worker: sync<br />[2016-01-17 10:49:58 +0000] [30] [INFO] Booting worker with pid: 30</pre>
+</blockquote>
+<p>and access it using &#8216;curl&#8217; to validate it works.</p>
+<blockquote>
+<pre>$ curl $(docker-machine ip default):8080<br />Hello World!</pre>
+</blockquote>
+<p>Important here to understand is that it wasn&#8217;t necessary to define how to create the Docker image. That is, all the WSGI 'Hello World&#8217; Git repository contained was:</p>
+<blockquote>
+<pre>$ ls -las<br />total 40<br />0 drwxr-xr-x    8 graham staff   272  7 Jan 19:21 .<br />0 drwxr-xr-x   71 graham staff  2414 17 Jan 14:05 ..<br />0 drwxr-xr-x   15 graham staff   510 17 Jan 15:18 .git<br />8 -rw-r--r--    1 graham staff   702  6 Jan 17:07 .gitignore<br />8 -rw-r--r--    1 graham staff  1300  6 Jan 17:07 LICENSE<br />8 -rw-r--r--    1 graham staff   163  6 Jan 17:09 README.rst<br />8 -rw-r--r--    1 graham staff     9  6 Jan 21:05 requirements.txt<br />8 -rw-r--r&#8212;     1 graham staff   278  6 Jan 17:09 wsgi.py</pre>
+</blockquote>
+<p>There was no &#8216;Dockerfile&#8217;. It is the &#8216;s2i&#8217; program in combination with the S2I builder image which does all this for you.</p>
+<h1>An S2I builder for static hosting</h1>
+<p>As you can see from above, the S2I concept already solves some of our problems of how to manage the workflow for creating a Docker image which contains our web site built using Lektor.</p>
+<p>The part of the puzzle we still need though is a Docker base image which combines both a web server and Python runtime and which we can add in the &#8216;assemble&#8217; and &#8216;run&#8217; scripts to create a S2I builder image.</p>
+<p>This is where I am going to cheat a little bit.</p>
+<p>This is because although I demonstrated an S2I builder for Python above, I actually have my own separate S2I builder for Python web applications. My own S2I builder is more flexible in its design than the OpenShift S2I builder. One of the things it supports is the use of Apache/mod_wsgi for hosting a Python web application. To do this it is using &#8216;mod_wsgi-express&#8217;.</p>
+<p>One of features that &#8216;mod_wsgi-express&#8217; so happens to have is an easy ability to host static files using Apache in conjunction with your Python web application. It even has a mode whereby you can say that you are only hosting static files and don&#8217;t actually have a primary Python web application.</p>
+<p>So although primarily designed for hosting Python web applications, my existing S2I builder for Python web applications provides exactly what we need in this case. That is, it combines in one base image a Python runtime, along with Apache, as well as an easy way to start Apache against static file content.</p>
+<p>If we were running on our normal machine at this point and not using Docker, the steps required to build our static files from our Lektor project and host it using &#8216;mod_wsgi-express&#8217; would be as simple as:</p>
+<blockquote>
+<pre>$ lektor build --output-path /tmp/data<br />Started build<br />U index.html<br />U about/index.html<br />U projects/index.html<br />U blog/index.html<br />U static/style.css<br />U blog/first-post/index.html<br />Finished build in 0.07 sec<br />Started prune<br />Finished prune in 0.00 sec<br />&#160;</pre>
+<pre>$ mod_wsgi-express start-server --application-type static --document-root /tmp/data<br />Server URL : http://localhost:8000/<br />Server Root : /tmp/mod_wsgi-localhost:8000:502<br />Server Conf : /tmp/mod_wsgi-localhost:8000:502/httpd.conf<br />Error Log File : /tmp/mod_wsgi-localhost:8000:502/error_log (warn)<br />Request Capacity : 5 (1 process * 5 threads)<br />Request Timeout : 60 (seconds)<br />Queue Backlog : 100 (connections)<br />Queue Timeout : 45 (seconds)<br />Server Capacity : 20 (event/worker), 20 (prefork)<br />Server Backlog : 500 (connections)<br />Locale Setting : en_AU.UTF-8</pre>
+</blockquote>
+<p>We could then access our web site created by Lektor at the URL &#8216;http://localhost:8000/'.</p>
+<p>Even though this appears so simple, it is actually running a complete instance of Apache. It is this easy because &#8216;mod_wsgi-express&#8217; does all the hard work of automatically generating the Apache configuration files to use for this specific site based only on the command line arguments provided. The configuration files for this instance are all generated totally independent of any existing Apache configuration you may have for the main Apache instance on your machine and so will not interfere with it.</p>
+<h1>An S2I builder for Lektor</h1>
+<p>In order to now create our S2I builder for Lektor, we are going to build on my existing S2I builder base image for Python web applications. I don&#8217;t believe I have specifically blogged about my S2I builder for Python before, although I have mentioned before some of the work I have been doing on Docker base images for Python web applications.</p>
+<p>The existing Docker base image for Python web applications is on the Docker Hub registry as &#8216;grahamdumpleton/mod-wsgi-docker&#8217;. As to the S2I builder support I have been working on, this has been rolled into that same image, although if wishing to use it as an S2I builder you will need to instead use &#8216;grahamdumpleton/mod-wsgi-docker-s2i&#8217;. This latter image is pretty minimal and just sets the exposed &#8216;PORT&#8217; and &#8216;USER&#8217;.&#160;</p>
+<blockquote>
+<pre># grahamdumpleton/mod-wsgi-docker-s2i:python-2.7<br /><br />FROM grahamdumpleton/mod-wsgi-docker:python-2.7</pre>
+<pre>USER 1001</pre>
+<pre>EXPOSE 80</pre>
+<pre>CMD [ "/usr/local/s2i/bin/usage" ]</pre>
+</blockquote>
+<p>For our Lektor S2I builder image, what we are now going to use is the following &#8216;Dockerfile&#8217;.</p>
+<blockquote>
+<pre># grahamdumpleton/s2i-lektor:1.1<br /><br />FROM grahamdumpleton/mod-wsgi-docker-s2i:python-2.7</pre>
+<pre>RUN pip install Lektor==1.1</pre>
+<pre>COPY .whiskey /app/.whiskey/</pre>
+</blockquote>
+<p>This &#8216;Dockerfile&#8217; only does two additional things on top of the underlying S2I builder for Python. The first is to install Lektor and the second is to copy in some extra files into the Docker image. Those extra files are:</p>
+<blockquote>
+<pre>.whiskey/server_args<br />.whiskey/action_hooks/build</pre>
+</blockquote>
+<p>What you will note is that we aren&#8217;t actually adding any &#8216;assemble&#8217; or &#8216;run&#8217; scripts as we have talked about. This is because these already exist in the base image and already do everything we need to prepare the image and then start up a web server for us.</p>
+<p>Different to how the OpenShift S2I Python builder is designed, the &#8216;assemble&#8217; and &#8216;run&#8217; scripts here are designed with a means for application specific hooks to be supplied to perform additional steps at the time of building the image or deploying the application. This is what these two files are about that we copied into the image.</p>
+<p>Of these, the &#8216;.whiskey/action_hooks/build&#8217; file is a shell script which is invoked by the &#8216;assemble&#8217; script during the build of the Docker image. What it contains is:</p>
+<blockquote>
+<pre>#!/usr/bin/env bash<br /><br />lektor build --output-path /data</pre>
+</blockquote>
+<p>This will be run by the &#8216;assemble&#8217; script in the same directory as the source files that were copied into the image from either the local source directory or the remote Git repository.</p>
+<p>This script therefore is what is going to trigger Lektor to generate the static files for our site. The files will be generated into the &#8216;/data&#8217; directory.</p>
+<p>The second file called &#8216;.whiskey/server_args&#8217; contains:</p>
+<blockquote>
+<pre>--application-type static --document-root /data</pre>
+</blockquote>
+<p>With the way that the base image is setup, and &#8216;run&#8217; called when the Docker image is started, it will by default automatically run up &#8216;mod_wsgi-express&#8217;. It will do this with a number of default options which are required when running &#8216;mod_wsgi-express&#8217; in a Docker container, such as directing logging to the terminal so that Docker can capture it. What the &#8216;server_args&#8217; file does is allow us to supply any additional options to &#8216;mod_wsgi-express&#8217;. In this case we are giving it options to specify that it is to host static files with no primary Python WSGI application being present, where the static files are located in the &#8216;/data&#8217; directory.</p>
+<p>And that is all there is to it. Because the base image is already doing lots of magic, we only had to provide the absolute minimum necessary, taking advantage of the fact that the base image is already employing all necessary best practices and smarts to make things work.</p>
+<p>For the complete source code for this S2I builder image for Lektor you can see:</p>
+<ul>
+<li>https://github.com/GrahamDumpleton/s2i-lektor</li>
+</ul>
+<p>A Docker image corresponding to Lektor 1.1 is also already up on the Docker Hub registry as &#8216;grahamdumpleton/s2i-lektor:1.1&#8217;. As such, we can now run &#8216;s2i&#8217; as:</p>
+<blockquote>
+<pre>$ s2i build https://github.com/GrahamDumpleton/lektor-empty-site.git grahamdumpleton/s2i-lektor:1.1 my-lektor-site<br />---&gt; Installing application source<br />---&gt; Building application from source<br />-----&gt; Running .whiskey/action_hooks/build<br />Started build<br />U index.html<br />U about/index.html<br />U projects/index.html<br />U blog/index.html<br />U static/style.css<br />U blog/first-post/index.html<br />Finished build in 0.08 sec<br />Started prune<br />Finished prune in 0.00 sec</pre>
+<pre>$ docker run --rm -p 8080:80 my-lektor-site<br />---&gt; Executing the start up script<br />[Sun Jan 17 12:28:03.698888 2016] [mpm_event:notice] [pid 17:tid 140541365122816] AH00489: Apache/2.4.18 (Unix) mod_wsgi/4.4.21 Python/2.7.11 configured -- resuming normal operations<br />[Sun Jan 17 12:28:03.699328 2016] [core:notice] [pid 17:tid 140541365122816] AH00094: Command line: 'httpd (mod_wsgi-express) -f /tmp/mod_wsgi-localhost:80:1001/httpd.conf -E /dev/stderr -D MOD_WSGI_STATIC_ONLY -D MOD_WSGI_MPM_ENABLE_EVENT_MODULE -D MOD_WSGI_MPM_EXISTS_EVENT_MODULE -D MOD_WSGI_MPM_EXISTS_WORKER_MODULE -D MOD_WSGI_MPM_EXISTS_PREFORK_MODULE -D FOREGROUND'</pre>
+</blockquote>
+<p>Testing our site with &#8216;curl&#8217; we get:</p>
+<blockquote>
+<pre>$ curl $(docker-machine ip default):8080<br />&lt;!doctype html&gt;<br />&lt;meta charset="utf-8"&gt;<br />&lt;link rel="stylesheet" href="./static/style.css"&gt;<br />&lt;title&gt;Welcome to Empty Site! &#8212; Empty Site&lt;/title&gt;<br />&lt;body&gt;<br /> &lt;header&gt;<br /> &lt;h1&gt;Empty Site&lt;/h1&gt;<br /> &lt;nav&gt;<br /> &lt;ul class="nav navbar-nav"&gt;<br /> &lt;li class="active"&gt;&lt;a href="./"&gt;Welcome&lt;/a&gt;&lt;/li&gt;</pre>
+<pre>&lt;li&gt;&lt;a href="./blog/"&gt;Blog&lt;/a&gt;&lt;/li&gt;</pre>
+<pre>&lt;li&gt;&lt;a href="./projects/"&gt;Projects&lt;/a&gt;&lt;/li&gt;</pre>
+<pre>&lt;li&gt;&lt;a href="./about/"&gt;About&lt;/a&gt;&lt;/li&gt;</pre>
+<pre>&lt;/ul&gt;<br /> &lt;/nav&gt;<br /> &lt;/header&gt;<br /> &lt;div class="page"&gt;</pre>
+<pre>&lt;h2&gt;Welcome to Empty Site!&lt;/h2&gt;<br /> &lt;p&gt;This is a basic demo website that shows how to use Lektor for a basic<br />website with some pages and a blog.&lt;/p&gt;</pre>
+<pre><br /> &lt;/div&gt;<br /> &lt;footer&gt;<br /> &amp;copy; Copyright 2016 by Graham Dumpleton.<br /> &lt;/footer&gt;<br />&lt;/body&gt;</pre>
+</blockquote>
+<h1>Integration with OpenShift</h1>
+<p>As seen, the S2I system gives us a really easy way to produce a Docker image, not only for your own custom Python web application where you provide the source code, but also scenarios where you might be simply using existing data with an existing application. We did something like the latter with Lektor, although we actually also generated the required data to be hosted by the web server as part of the build process.</p>
+<p>When running the &#8216;s2i&#8217; program we were also able to use source files in a local directory, or from a remote Git repository. Even so, this still only gives us a Docker image and we would need to host that somewhere.</p>
+<p>For most Docker based deployment systems, this would entail needing to push your Docker image from your own system, or a CI/CD system, to a Docker registry. The hosting service would then need to pull that image from the Docker registry in order to deploy it as a live web application.</p>
+<p>If however using the latest OpenShift things are even simpler. This is because OpenShift integrates support for S2I.</p>
+<p>Under OpenShift, all I need to do to deploy my Lektor based blog site is:</p>
+<blockquote>
+<pre>$ oc new-app grahamdumpleton/s2i-lektor:1.1~https://github.com/GrahamDumpleton/lektor-empty-site.git --name blog<br />--&gt; Found Docker image a95cedc (17 hours old) from Docker Hub for "grahamdumpleton/s2i-lektor:1.1"<br /> * An image stream will be created as "s2i-lektor:1.1" that will track this image<br /> * A source build using source code from https://github.com/GrahamDumpleton/lektor-empty-site.git will be created<br /> * The resulting image will be pushed to image stream "blog:latest"<br /> * Every time "s2i-lektor:1.1" changes a new build will be triggered<br /> * This image will be deployed in deployment config "blog"<br /> * Port 80/tcp will be load balanced by service "blog"<br />--&gt; Creating resources with label app=blog ...<br /> ImageStream "s2i-lektor" created<br /> ImageStream "blog" created<br /> BuildConfig "blog" created<br /> DeploymentConfig "blog" created<br /> Service "blog" created<br />--&gt; Success<br /> Build scheduled for "blog" - use the logs command to track its progress.<br /> Run 'oc status' to view your app.<br /><br /></pre>
+<pre>$ oc expose service blog<br />route "blog" exposed</pre>
+</blockquote>
+<p>I can then access the blog site at the host name which OpenShift has assigned it. If I have my own host name, then I just need to edit the route which was created to make the blog site public to add in my own host name instead.</p>
+<p>In this case I needed to use the OpenShift command line tool to create my blog site, but we can also load up a definition into our OpenShift project which will allow us to build our blog site direct from the OpenShift UI.</p>
+<p>This definition is provided as part of the &#8216;s2i-lektor&#8217; project on GitHub and so to load it we just run:</p>
+<blockquote>
+<pre>$ oc create -f https://raw.githubusercontent.com/GrahamDumpleton/s2i-lektor/master/lektor.json<br />imagestream "lektor" created</pre>
+</blockquote>
+<p>If we now go to the OpenShift UI for our project we have the option of adding a Lektor based site.</p>
+<p><img alt="Openshift add to project lektor" border="0" height="329" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiTBornUa-lmUdF7yyEswxT0xOOgNcWm_4Gusf0oOpl9zjTvP2fz8VvEjExFTIRtMx_JR2TXIF6gKpzdeaelORolwy3AbZmIgDOQv_9qYIKCXT1RAlsRR96sNuU0CrwTZ78pNg3AmuFHPPW/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="openshift-add-to-project-lektor.jpg" width="480" /></p>
+<p>Clicking through on the &#8216;lektor:1.1&#8217; entry we can now fill out the details for the label to be given to our site and the location of the Git repository which contains the source files.</p>
+<p><img alt="Openshift lektor parameters" border="0" height="389" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj7zKsd86XRnczGOAQ_aneavN-nnHFZ-wjiWQvqNUifCUz0XZpzDaPyfU8DVB8t_KXKGI4iegHBoKez9N0rUythJqXxWLpM2kJfktzJoE8iOe1NrnttUZNhQ-W7Pzn3XKRk209IVE15Nnym/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="openshift-lektor-parameters.jpg" width="700" /></p>
+<p>Upon clicking on &#8216;Create&#8217; it will then go off and build our Lektor site, including making it publicly accessible.</p>
+<p><img alt="Openshift lektor service" border="0" height="357" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhhC1UdWe8qcKvFxAlbbJjwGnvZszhDMMfRK7m-R7D33tSGh9aOLy1ucD5kWnfAGQOhYyAAFD_T_B_XnYgGz1scZtzUTZgSgdUKTZsMqfRpqSnT8zpD9LtTWgkbbVgrUITCC0msXqvof1gD/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="openshift-lektor-service.jpg" width="584" /></p>
+<p>By default only a single instance of our site will be created, but if it were an extremely popular site, then to handle all the traffic we would just increase the number of pods (instances) running. When a web application is scaled in this way, OpenShift will automatically handle all the load balancing of traffic across the multiple instances. We do not need to worry ourselves about needing to set up any front end router or deal with registration of the back end instances with the router.</p>
+<p>When it comes to making changes to our site and redeploying it we have a few options.</p>
+<p><img alt="Openshift lektor build" border="0" height="370" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjqpHeYq08GRbHxqGr63jvL8QUAkU5TsC6iLx_Y4xEzw0IO6aNMMDtSUDc50AOIULJdKsVwUvuC28JlQO_RtyaKivGLdmyVEiEYwCARHDH77S6THvVun2eu4KRxvi3u4XIB5langl-b2rEO/?imgmax=800" style="display: block; margin-left: auto; margin-right: auto;" title="openshift-lektor-build.jpg" width="600" /></p>
+<p>We could manually trigger a rebuild of the site through the UI or the command line after we have pushed up our changes to GitHub, or we could instead link the application in OpenShift with our GitHub repository. To do the latter we would configure a web hook into our repository on GitHub. What will happen then is that every time a change is made and pushed up to the Git repository, the application on OpenShift will be automatically rebuilt and redeployed for us.</p>
+<p>We have now achieved the goal I was after and have a complete workflow in place. All that I would have to worry about is updating the content of the blog site and pushing up the changes to my Git repository when I am happy for them to be published.</p>
+<h1>Trying out OpenShift yourself</h1>
+<p>Although I showed a full end to end workflow combining Docker, S2I and OpenShift, if you aren&#8217;t interested in the OpenShift part you can definitely still use S2I with a basic Docker service. You would just need to incorporate it into an existing CI/CD pipeline.</p>
+<p>If you are interested in the new OpenShift based on Docker and Kubernetes and want to experiment with it, then you have a few options. These are:</p>
+<ul>
+<li><a href="https://www.openshift.org">OpenShift Origin</a> - This is the Open Source upstream project for the OpenShift products by Red Hat.</li>
+<li><a href="https://aws.amazon.com/testdrive/redhat/">AWS Test Drive</a> - This is an instance of OpenShift Enterprise which you can spin up and try on Amazon Web Services.</li>
+<li><a href="https://www.openshift.org/vm/">All In One VM</a> - This is a self contained VM which you can spin up with VirtualBox on your own machine.</li>
+</ul>
+<p>If you do decide to try OpenShift and my Lektor S2I builder do let me know. I also have an S2I builder for creating IPython notebook server instances as well. The IPython S2I builder can pull your notebooks and any files it needs from a Git repository just like how the Lektor S2I builder does for a Lektor site. It is also possible with the IPython images to spin up a backend IPython cluster with as many engines as you need if wishing to play around with parallel computing with &#8216;ipyparallel&#8217;.</p>
+<p>Unfortunately right now the existing <a href="https://www.openshift.com">OpenShift Online</a> PaaS offering from Red Hat is still the older OpenShift version so is not based around Docker and Kubernetes. Hopefully it will not be too much longer before a version of OpenShift Online using Docker and Kubernetes is available. That should make it a lot easier to experiment with the features of the new OpenShift and how easy it can be to get a web site hosted, like by Lektor example shown here.</p>
+<div style='clear: both;'></div>
+</div>
+<div class='post-footer'>
+<div class='post-footer-line post-footer-line-1'>
+<span class='post-author vcard'>
+Posted by
+<span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
+<meta content='https://www.blogger.com/profile/13609779138164842374' itemprop='url'/>
+<a class='g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' title='author profile'>
+<span itemprop='name'>Graham Dumpleton</span>
+</a>
+</span>
+</span>
+<span class='post-timestamp'>
+at
+<meta content='http://blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html' itemprop='url'/>
+<a class='timestamp-link' href='http://blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html' rel='bookmark' title='permanent link'><abbr class='published' itemprop='datePublished' title='2016-01-18T09:54:00+11:00'>9:54&#8239;AM</abbr></a>
+</span>
+<span class='post-comment-link'>
+</span>
+<span class='post-icons'>
+<span class='item-action'>
+<a href='https://www.blogger.com/email-post/2363643920942057324/2613290079143671376' title='Email Post'>
+<img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
+</a>
+</span>
+</span>
+<div class='post-share-buttons goog-inline-block'>
+<a class='goog-inline-block share-button sb-email' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=2613290079143671376&target=email' target='_blank' title='Email This'><span class='share-button-link-text'>Email This</span></a><a class='goog-inline-block share-button sb-blog' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=2613290079143671376&target=blog' onclick='window.open(this.href, "_blank", "height=270,width=475"); return false;' target='_blank' title='BlogThis!'><span class='share-button-link-text'>BlogThis!</span></a><a class='goog-inline-block share-button sb-twitter' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=2613290079143671376&target=twitter' target='_blank' title='Share to X'><span class='share-button-link-text'>Share to X</span></a><a class='goog-inline-block share-button sb-facebook' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=2613290079143671376&target=facebook' onclick='window.open(this.href, "_blank", "height=430,width=640"); return false;' target='_blank' title='Share to Facebook'><span class='share-button-link-text'>Share to Facebook</span></a><a class='goog-inline-block share-button sb-pinterest' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=2613290079143671376&target=pinterest' target='_blank' title='Share to Pinterest'><span class='share-button-link-text'>Share to Pinterest</span></a>
+</div>
+</div>
+<div class='post-footer-line post-footer-line-2'>
+<span class='post-labels'>
+Labels:
+<a href='http://blog.dscpl.com.au/search/label/apache' rel='tag'>apache</a>,
+<a href='http://blog.dscpl.com.au/search/label/docker' rel='tag'>docker</a>,
+<a href='http://blog.dscpl.com.au/search/label/lektor' rel='tag'>lektor</a>,
+<a href='http://blog.dscpl.com.au/search/label/mod_wsgi' rel='tag'>mod_wsgi</a>,
+<a href='http://blog.dscpl.com.au/search/label/openshift' rel='tag'>openshift</a>,
+<a href='http://blog.dscpl.com.au/search/label/python' rel='tag'>python</a>,
+<a href='http://blog.dscpl.com.au/search/label/s2i' rel='tag'>s2i</a>
+</span>
+</div>
+<div class='post-footer-line post-footer-line-3'>
+<span class='post-location'>
+</span>
+</div>
+</div>
+</div>
+<div class='comments' id='comments'>
+<a name='comments'></a>
+<h4>No comments:</h4>
+<div id='Blog1_comments-block-wrapper'>
+<dl class='avatar-comment-indent' id='comments-block'>
+</dl>
+</div>
+<p class='comment-footer'>
+<a href='https://www.blogger.com/comment/fullpage/post/2363643920942057324/2613290079143671376' onclick=''>Post a Comment</a>
+</p>
+</div>
+</div>
+
+        </div></div>
+      
+</div>
+<div class='blog-pager' id='blog-pager'>
+<span id='blog-pager-newer-link'>
+<a class='blog-pager-newer-link' href='http://blog.dscpl.com.au/2016/02/building-better-user-experience-for.html' id='Blog1_blog-pager-newer-link' title='Newer Post'>Newer Post</a>
+</span>
+<span id='blog-pager-older-link'>
+<a class='blog-pager-older-link' href='http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html' id='Blog1_blog-pager-older-link' title='Older Post'>Older Post</a>
+</span>
+<a class='home-link' href='http://blog.dscpl.com.au/'>Home</a>
+</div>
+<div class='clear'></div>
+<div class='post-feeds'>
+<div class='feed-links'>
+Subscribe to:
+<a class='feed-link' href='http://blog.dscpl.com.au/feeds/2613290079143671376/comments/default' target='_blank' type='application/atom+xml'>Post Comments (Atom)</a>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='column-left-outer'>
+<div class='column-left-inner'>
+<aside>
+</aside>
+</div>
+</div>
+<div class='column-right-outer'>
+<div class='column-right-inner'>
+<aside>
+<div class='sidebar section' id='sidebar-right-1'><div class='widget Profile' data-version='1' id='Profile1'>
+<h2>About Me</h2>
+<div class='widget-content'>
+<dl class='profile-datablock'>
+<dt class='profile-data'>
+<a class='profile-name-link g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' style='background-image: url(//www.blogger.com/img/logo-16.png);'>
+Graham Dumpleton
+</a>
+</dt>
+</dl>
+<a class='profile-link' href='https://www.blogger.com/profile/13609779138164842374' rel='author'>View my complete profile</a>
+<div class='clear'></div>
+</div>
+</div><div class='widget PageList' data-version='1' id='PageList1'>
+<h2>Quick Links</h2>
+<div class='widget-content'>
+<ul>
+<li>
+<a href='http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html'>Decorators and monkey patching.</a>
+</li>
+<li>
+<a href='http://blog.dscpl.com.au/p/using-python-with-docker.html'>Using Python with Docker.</a>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div><div class='widget BlogArchive' data-version='1' id='BlogArchive1'>
+<h2>Blog Archive</h2>
+<div class='widget-content'>
+<div id='ArchiveList'>
+<div id='BlogArchive1_ArchiveList'>
+<select id='BlogArchive1_ArchiveMenu'>
+<option value=''>Blog Archive</option>
+<option value='http://blog.dscpl.com.au/2019/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2018/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2018/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2018/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2018/01/'>January (1)</option>
+<option value='http://blog.dscpl.com.au/2017/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2016/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2016/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2016/07/'>July (1)</option>
+<option value='http://blog.dscpl.com.au/2016/04/'>April (2)</option>
+<option value='http://blog.dscpl.com.au/2016/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2016/02/'>February (2)</option>
+<option value='http://blog.dscpl.com.au/2016/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2015/12/'>December (6)</option>
+<option value='http://blog.dscpl.com.au/2015/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2015/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2015/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2015/06/'>June (5)</option>
+<option value='http://blog.dscpl.com.au/2015/05/'>May (7)</option>
+<option value='http://blog.dscpl.com.au/2015/04/'>April (4)</option>
+<option value='http://blog.dscpl.com.au/2015/03/'>March (4)</option>
+<option value='http://blog.dscpl.com.au/2015/01/'>January (2)</option>
+<option value='http://blog.dscpl.com.au/2014/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2014/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2014/09/'>September (7)</option>
+<option value='http://blog.dscpl.com.au/2014/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2014/05/'>May (1)</option>
+<option value='http://blog.dscpl.com.au/2014/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2014/02/'>February (4)</option>
+<option value='http://blog.dscpl.com.au/2014/01/'>January (8)</option>
+<option value='http://blog.dscpl.com.au/2013/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/10/'>October (4)</option>
+<option value='http://blog.dscpl.com.au/2012/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2011/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2011/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2011/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2011/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2011/01/'>January (5)</option>
+<option value='http://blog.dscpl.com.au/2010/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2010/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2010/08/'>August (2)</option>
+<option value='http://blog.dscpl.com.au/2010/06/'>June (2)</option>
+<option value='http://blog.dscpl.com.au/2010/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2010/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2010/03/'>March (3)</option>
+<option value='http://blog.dscpl.com.au/2009/11/'>November (4)</option>
+<option value='http://blog.dscpl.com.au/2009/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2009/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2009/08/'>August (3)</option>
+<option value='http://blog.dscpl.com.au/2009/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2009/04/'>April (5)</option>
+<option value='http://blog.dscpl.com.au/2009/03/'>March (5)</option>
+<option value='http://blog.dscpl.com.au/2009/02/'>February (1)</option>
+<option value='http://blog.dscpl.com.au/2008/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2008/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2008/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2007/11/'>November (2)</option>
+<option value='http://blog.dscpl.com.au/2007/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2007/09/'>September (3)</option>
+<option value='http://blog.dscpl.com.au/2007/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2007/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2007/03/'>March (2)</option>
+</select>
+</div>
+</div>
+<div class='clear'></div>
+</div>
+</div><div class='widget Label' data-version='1' id='Label1'>
+<h2>Labels</h2>
+<div class='widget-content list-label-widget-content'>
+<ul>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/python'>python</a>
+<span dir='ltr'>(111)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_wsgi'>mod_wsgi</a>
+<span dir='ltr'>(86)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wsgi'>wsgi</a>
+<span dir='ltr'>(58)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/apache'>apache</a>
+<span dir='ltr'>(35)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/docker'>docker</a>
+<span dir='ltr'>(34)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/openshift'>openshift</a>
+<span dir='ltr'>(26)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/decorators'>decorators</a>
+<span dir='ltr'>(15)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/django'>django</a>
+<span dir='ltr'>(13)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/kubernetes'>kubernetes</a>
+<span dir='ltr'>(12)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_python'>mod_python</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/red%20hat'>red hat</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/ipython'>ipython</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyterhub'>jupyterhub</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/new%20relic'>new relic</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wrapt'>wrapt</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/pycon'>pycon</a>
+<span dir='ltr'>(5)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/s2i'>s2i</a>
+<span dir='ltr'>(4)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/gunicorn'>gunicorn</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/uWSGI'>uWSGI</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/datadog'>datadog</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/nginx'>nginx</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/statsd'>statsd</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/web2py'>web2py</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/async'>async</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/dyndns53'>dyndns53</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/fastcgi'>fastcgi</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/heroku'>heroku</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyter'>jupyter</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/lektor'>lektor</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/php'>php</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/shiv'>shiv</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/testing'>testing</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/tornado'>tornado</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/warpdrive'>warpdrive</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/zipapp'>zipapp</a>
+<span dir='ltr'>(1)</span>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div></div>
+</aside>
+</div>
+</div>
+</div>
+<div style='clear: both'></div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+<div class='main-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<footer>
+<div class='footer-outer'>
+<div class='footer-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left footer-fauxborder-left'>
+<div class='fauxborder-right footer-fauxborder-right'></div>
+<div class='region-inner footer-inner'>
+<div class='foot section' id='footer-1'><div class='widget AdSense' data-version='1' id='AdSense1'>
+<div class='widget-content'>
+<script type="text/javascript"><!--
+google_ad_client="pub-6433235630058377";
+google_ad_host="pub-1556223355139109";
+google_ad_width=120;
+google_ad_height=600;
+google_ad_format="120x600_as";
+google_ad_type="text";
+google_ad_host_channel="0001";
+google_color_border="FFFFFF";
+google_color_bg="FFFFFF";
+google_color_link="999999";
+google_color_url="5588AA";
+google_color_text="666666";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<div class='clear'></div>
+</div>
+</div></div>
+<table border='0' cellpadding='0' cellspacing='0' class='section-columns columns-2'>
+<tbody>
+<tr>
+<td class='first columns-cell'>
+<div class='foot no-items section' id='footer-2-1'></div>
+</td>
+<td class='columns-cell'>
+<div class='foot no-items section' id='footer-2-2'></div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- outside of the include in order to lock Attribution widget -->
+<div class='foot section' id='footer-3' name='Footer'><div class='widget Attribution' data-version='1' id='Attribution1'>
+<div class='widget-content' style='text-align: center;'>
+Simple theme. Powered by <a href='https://www.blogger.com' target='_blank'>Blogger</a>.
+</div>
+<div class='clear'></div>
+</div></div>
+</div>
+</div>
+<div class='footer-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</footer>
+<!-- content -->
+</div>
+</div>
+<div class='content-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<script type='text/javascript'>
+    window.setTimeout(function() {
+        document.body.className = document.body.className.replace('loading', '');
+      }, 10);
+  </script>
+
+<script type="text/javascript" src="https://www.blogger.com/static/v1/widgets/552934507-widgets.js"></script>
+<script type='text/javascript'>
+window['__wavt'] = 'AOuZoY7mLjByW-T0UQkTpmbF3KcAVOm2Yw:1757388612273';_WidgetManager._Init('//www.blogger.com/rearrange?blogID\x3d2363643920942057324','//blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html','2363643920942057324');
+_WidgetManager._SetDataContext([{'name': 'blog', 'data': {'blogId': '2363643920942057324', 'title': 'Graham Dumpleton', 'url': 'http://blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html', 'canonicalUrl': 'http://blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html', 'homepageUrl': 'http://blog.dscpl.com.au/', 'searchUrl': 'http://blog.dscpl.com.au/search', 'canonicalHomepageUrl': 'http://blog.dscpl.com.au/', 'blogspotFaviconUrl': 'http://blog.dscpl.com.au/favicon.ico', 'bloggerUrl': 'https://www.blogger.com', 'hasCustomDomain': true, 'httpsEnabled': false, 'enabledCommentProfileImages': true, 'gPlusViewType': 'FILTERED_POSTMOD', 'adultContent': false, 'analyticsAccountNumber': '', 'encoding': 'UTF-8', 'locale': 'en', 'localeUnderscoreDelimited': 'en', 'languageDirection': 'ltr', 'isPrivate': false, 'isMobile': false, 'isMobileRequest': false, 'mobileClass': '', 'isPrivateBlog': false, 'isDynamicViewsAvailable': true, 'feedLinks': '\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default\x22 /\x3e\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/rss+xml\x22 title\x3d\x22Graham Dumpleton - RSS\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default?alt\x3drss\x22 /\x3e\n\x3clink rel\x3d\x22service.post\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22https://www.blogger.com/feeds/2363643920942057324/posts/default\x22 /\x3e\n\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/2613290079143671376/comments/default\x22 /\x3e\n', 'meTag': '', 'adsenseClientId': 'ca-pub-6433235630058377', 'adsenseHostId': 'ca-host-pub-1556223355139109', 'adsenseHasAds': true, 'adsenseAutoAds': false, 'boqCommentIframeForm': true, 'loginRedirectParam': '', 'view': '', 'dynamicViewsCommentsSrc': '//www.blogblog.com/dynamicviews/4224c15c4e7c9321/js/comments.js', 'dynamicViewsScriptSrc': '//www.blogblog.com/dynamicviews/b4594f574ba3c273', 'plusOneApiSrc': 'https://apis.google.com/js/platform.js', 'disableGComments': true, 'interstitialAccepted': false, 'sharing': {'platforms': [{'name': 'Get link', 'key': 'link', 'shareMessage': 'Get link', 'target': ''}, {'name': 'Facebook', 'key': 'facebook', 'shareMessage': 'Share to Facebook', 'target': 'facebook'}, {'name': 'BlogThis!', 'key': 'blogThis', 'shareMessage': 'BlogThis!', 'target': 'blog'}, {'name': 'X', 'key': 'twitter', 'shareMessage': 'Share to X', 'target': 'twitter'}, {'name': 'Pinterest', 'key': 'pinterest', 'shareMessage': 'Share to Pinterest', 'target': 'pinterest'}, {'name': 'Email', 'key': 'email', 'shareMessage': 'Email', 'target': 'email'}], 'disableGooglePlus': true, 'googlePlusShareButtonWidth': 0, 'googlePlusBootstrap': '\x3cscript type\x3d\x22text/javascript\x22\x3ewindow.___gcfg \x3d {\x27lang\x27: \x27en\x27};\x3c/script\x3e'}, 'hasCustomJumpLinkMessage': false, 'jumpLinkMessage': 'Read more', 'pageType': 'item', 'postId': '2613290079143671376', 'postImageThumbnailUrl': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiTBornUa-lmUdF7yyEswxT0xOOgNcWm_4Gusf0oOpl9zjTvP2fz8VvEjExFTIRtMx_JR2TXIF6gKpzdeaelORolwy3AbZmIgDOQv_9qYIKCXT1RAlsRR96sNuU0CrwTZ78pNg3AmuFHPPW/s72-c/?imgmax\x3d800', 'postImageUrl': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiTBornUa-lmUdF7yyEswxT0xOOgNcWm_4Gusf0oOpl9zjTvP2fz8VvEjExFTIRtMx_JR2TXIF6gKpzdeaelORolwy3AbZmIgDOQv_9qYIKCXT1RAlsRR96sNuU0CrwTZ78pNg3AmuFHPPW/?imgmax\x3d800', 'pageName': 'Automating deployment of Lektor blog sites.', 'pageTitle': 'Graham Dumpleton: Automating deployment of Lektor blog sites.'}}, {'name': 'features', 'data': {}}, {'name': 'messages', 'data': {'edit': 'Edit', 'linkCopiedToClipboard': 'Link copied to clipboard!', 'ok': 'Ok', 'postLink': 'Post Link'}}, {'name': 'template', 'data': {'name': 'Simple', 'localizedName': 'Simple', 'isResponsive': false, 'isAlternateRendering': false, 'isCustom': false, 'variant': 'pale', 'variantId': 'pale'}}, {'name': 'view', 'data': {'classic': {'name': 'classic', 'url': '?view\x3dclassic'}, 'flipcard': {'name': 'flipcard', 'url': '?view\x3dflipcard'}, 'magazine': {'name': 'magazine', 'url': '?view\x3dmagazine'}, 'mosaic': {'name': 'mosaic', 'url': '?view\x3dmosaic'}, 'sidebar': {'name': 'sidebar', 'url': '?view\x3dsidebar'}, 'snapshot': {'name': 'snapshot', 'url': '?view\x3dsnapshot'}, 'timeslide': {'name': 'timeslide', 'url': '?view\x3dtimeslide'}, 'isMobile': false, 'title': 'Automating deployment of Lektor blog sites.', 'description': 'Towards the end of last year,\xa0 Armin Ronacher \xa0formally announced  a new project of his called Lektor . Armin is one of those developers who...', 'featuredImage': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiTBornUa-lmUdF7yyEswxT0xOOgNcWm_4Gusf0oOpl9zjTvP2fz8VvEjExFTIRtMx_JR2TXIF6gKpzdeaelORolwy3AbZmIgDOQv_9qYIKCXT1RAlsRR96sNuU0CrwTZ78pNg3AmuFHPPW/?imgmax\x3d800', 'url': 'http://blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html', 'type': 'item', 'isSingleItem': true, 'isMultipleItems': false, 'isError': false, 'isPage': false, 'isPost': true, 'isHomepage': false, 'isArchive': false, 'isLabelSearch': false, 'postId': 2613290079143671376}}]);
+_WidgetManager._RegisterWidget('_NavbarView', new _WidgetInfo('Navbar1', 'navbar', document.getElementById('Navbar1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_HeaderView', new _WidgetInfo('Header1', 'header', document.getElementById('Header1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogView', new _WidgetInfo('Blog1', 'main', document.getElementById('Blog1'), {'cmtInteractionsEnabled': false, 'lightboxEnabled': true, 'lightboxModuleUrl': 'https://www.blogger.com/static/v1/jsbin/3842676126-lbx.js', 'lightboxCssUrl': 'https://www.blogger.com/static/v1/v-css/828616780-lightbox_bundle.css'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_ProfileView', new _WidgetInfo('Profile1', 'sidebar-right-1', document.getElementById('Profile1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_PageListView', new _WidgetInfo('PageList1', 'sidebar-right-1', document.getElementById('PageList1'), {'title': 'Quick Links', 'links': [{'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html', 'id': '3350721465154129789', 'title': 'Decorators and monkey patching.'}, {'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/using-python-with-docker.html', 'id': '5591286857776935907', 'title': 'Using Python with Docker.'}], 'mobile': false, 'showPlaceholder': true, 'hasCurrentPage': false}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogArchiveView', new _WidgetInfo('BlogArchive1', 'sidebar-right-1', document.getElementById('BlogArchive1'), {'languageDirection': 'ltr', 'loadingMessage': 'Loading\x26hellip;'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_LabelView', new _WidgetInfo('Label1', 'sidebar-right-1', document.getElementById('Label1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AdSenseView', new _WidgetInfo('AdSense1', 'footer-1', document.getElementById('AdSense1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AttributionView', new _WidgetInfo('Attribution1', 'footer-3', document.getElementById('Attribution1'), {}, 'displayModeFull'));
+</script>
+</body>
+</html>

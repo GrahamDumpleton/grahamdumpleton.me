@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html class='v2' dir='ltr' lang='en'>
+<head>
+<link href='https://www.blogger.com/static/v1/widgets/2508126174-css_bundle_v2.css' rel='stylesheet' type='text/css'/>
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='blogger' name='generator'/>
+<link href='http://blog.dscpl.com.au/favicon.ico' rel='icon' type='image/x-icon'/>
+<link href='http://blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html' rel='canonical'/>
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Graham Dumpleton - RSS" href="http://blog.dscpl.com.au/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Graham Dumpleton - Atom" href="https://www.blogger.com/feeds/2363643920942057324/posts/default" />
+
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/2831100265299827336/comments/default" />
+<!--Can't find substitution for tag [blog.ieCssRetrofitLinks]-->
+<meta content='http://blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html' property='og:url'/>
+<meta content='Overriding the user Docker containers run as.' property='og:title'/>
+<meta content='In the first post  of this series looking at how to get IPython running on OpenShift I showed how taking the ‘jupyter/notebook’ Docker image...' property='og:description'/>
+<title>Graham Dumpleton: Overriding the user Docker containers run as.</title>
+<style id='page-skin-1' type='text/css'><!--
+/*
+-----------------------------------------------
+Blogger Template Style
+Name:     Simple
+Designer: Blogger
+URL:      www.blogger.com
+----------------------------------------------- */
+/* Content
+----------------------------------------------- */
+body {
+font: normal normal 12px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #222222;
+background: #66bbdd none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 {
+font-size: 22px;
+}
+a:link {
+text-decoration:none;
+color: #2187bb;
+}
+a:visited {
+text-decoration:none;
+color: #888888;
+}
+a:hover {
+text-decoration:underline;
+color: #32aaff;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #ffffff;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #3299bb;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #3299bb;
+}
+.Header .description {
+font-size: 140%;
+color: #777777;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #eeeeee;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #eeeeee;
+border-left: 0 solid #eeeeee;
+border-right: 0 solid #eeeeee;
+}
+.tabs-inner .widget ul {
+background: #f5f5f5 url(https://resources.blogblog.com/blogblog/data/1kt/simple/gradients_light.png) repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #eeeeee;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 14px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #ffffff;
+border-right: 1px solid #eeeeee;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #000000;
+background-color: #eeeeee;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #eeeeee;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #eeeeee;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #eeeeee;
+}
+/* Headings
+----------------------------------------------- */
+div.widget > h2,
+div.widget h2.title {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #000000;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+h2.date-header {
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+}
+.date-header span {
+background-color: transparent;
+color: #222222;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 22px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 2px;
+background: #ffffff;
+border: 1px solid #eeeeee;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 5px;
+}
+.post-body .tr-caption-container {
+color: #222222;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #666666;
+background-color: #f9f9f9;
+border-bottom: 1px solid #eeeeee;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #eeeeee;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #eeeeee;
+}
+/* Comments
+----------------------------------------------- */
+.comments .comments-content .icon.blog-author {
+background-repeat: no-repeat;
+background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9sLFwMeCjjhcOMAAAD+SURBVDjLtZSvTgNBEIe/WRRnm3U8RC1neQdsm1zSBIU9VVF1FkUguQQsD9ITmD7ECZIJSE4OZo9stoVjC/zc7ky+zH9hXwVwDpTAWWLrgS3QAe8AZgaAJI5zYAmc8r0G4AHYHQKVwII8PZrZFsBFkeRCABYiMh9BRUhnSkPTNCtVXYXURi1FpBDgArj8QU1eVXUzfnjv7yP7kwu1mYrkWlU33vs1QNu2qU8pwN0UpKoqokjWwCztrMuBhEhmh8bD5UDqur75asbcX0BGUB9/HAMB+r32hznJgXy2v0sGLBcyAJ1EK3LFcbo1s91JeLwAbwGYu7TP/3ZGfnXYPgAVNngtqatUNgAAAABJRU5ErkJggg==);
+}
+.comments .comments-content .loadmore a {
+border-top: 1px solid #999999;
+border-bottom: 1px solid #999999;
+}
+.comments .comment-thread.inline-thread {
+background-color: #f9f9f9;
+}
+.comments .continue {
+border-top: 2px solid #999999;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #eeeeee;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #ffffff;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #ffffff;
+}
+.mobile-index-contents {
+color: #222222;
+}
+.mobile-link-button {
+background-color: #2187bb;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #eeeeee;
+color: #000000;
+border-top: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #eeeeee;
+}
+
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 1020px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 1020px;
+max-width: 1020px;
+_width: 1020px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 200px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 200px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("200px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 200px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 200px;
+margin-right: -200px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+body#layout div.add_widget {
+padding: 8px;
+}
+body#layout div.add_widget a {
+margin-left: 32px;
+}
+--></style>
+<link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' media='none' onload='if(media!=&#39;all&#39;)media=&#39;all&#39;' rel='stylesheet'/><noscript><link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' rel='stylesheet'/></noscript>
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+
+<!-- data-ad-client=ca-pub-6433235630058377 -->
+
+</head>
+<body class='loading variant-pale'>
+<div class='navbar section' id='navbar' name='Navbar'><div class='widget Navbar' data-version='1' id='Navbar1'><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/2363643920942057324?po\x3d2831100265299827336\x26origin\x3dhttp://blog.dscpl.com.au',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script><script type="text/javascript">
+(function() {
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = '//pagead2.googlesyndication.com/pagead/js/google_top_exp.js';
+var head = document.getElementsByTagName('head')[0];
+if (head) {
+head.appendChild(script);
+}})();
+</script>
+</div></div>
+<div class='body-fauxcolumns'>
+<div class='fauxcolumn-outer body-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content'>
+<div class='content-fauxcolumns'>
+<div class='fauxcolumn-outer content-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content-outer'>
+<div class='content-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='fauxborder-right content-fauxborder-right'></div>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='header-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='fauxborder-right header-fauxborder-right'></div>
+<div class='region-inner header-inner'>
+<div class='header section' id='header' name='Header'><div class='widget Header' data-version='1' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://blog.dscpl.com.au/'>
+Graham Dumpleton
+</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>
+</span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='header-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</header>
+<div class='tabs-outer'>
+<div class='tabs-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left tabs-fauxborder-left'>
+<div class='fauxborder-right tabs-fauxborder-right'></div>
+<div class='region-inner tabs-inner'>
+<div class='tabs no-items section' id='crosscol' name='Cross-Column'></div>
+<div class='tabs no-items section' id='crosscol-overflow' name='Cross-Column 2'></div>
+</div>
+</div>
+<div class='tabs-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='main-outer'>
+<div class='main-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='fauxborder-right main-fauxborder-right'></div>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<div class='fauxcolumn-outer fauxcolumn-center-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-left-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-right-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main' name='Main'><div class='widget Blog' data-version='1' id='Blog1'>
+<div class='blog-posts hfeed'>
+
+          <div class="date-outer">
+        
+<h2 class='date-header'><span>Tuesday, December 22, 2015</span></h2>
+
+          <div class="date-posts">
+        
+<div class='post-outer'>
+<div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<meta content='2363643920942057324' itemprop='blogId'/>
+<meta content='2831100265299827336' itemprop='postId'/>
+<a name='2831100265299827336'></a>
+<h3 class='post-title entry-title' itemprop='name'>
+Overriding the user Docker containers run as.
+</h3>
+<div class='post-header'>
+<div class='post-header-line-1'></div>
+</div>
+<div class='post-body entry-content' id='post-body-2831100265299827336' itemprop='description articleBody'>
+<p>In the <a href="http://blog.dscpl.com.au/2015/12/running-ipython-as-docker-container.html">first post</a> of this series looking at how to get IPython running on OpenShift I showed how taking the &#8216;jupyter/notebook&#8217; Docker image and trying to use it results in failure. The error we encountered was:</p>
+<blockquote>
+<pre>$ oc logs --previous notebook-1-718ce<br />/usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/' is not a writable location, using a temp directory.<br /> " using a temp directory.".format(parent))<br />Traceback (most recent call last):<br />&#160; ...</pre>
+<pre>File "/usr/lib/python3.4/os.py", line 237, in makedirs<br /> mkdir(name, mode)<br />PermissionError: [Errno 13] Permission denied: '/.jupyter'</pre>
+</blockquote>
+<p>The problem occurred because the &#8216;jupyter/notebook&#8217; expects to run as the &#8216;root&#8217; user, but OpenShift doesn&#8217;t permit that by default due to the increased security risks from allowing that with how Docker currently works.</p>
+<p>Changes are supposedly coming for Docker, in the way of support for user namespaces, which would reduce the security risks, but right now, and perhaps even when support for user namespaces is available, it is simply better that you <a href="http://blog.dscpl.com.au/2015/12/don-run-as-root-inside-of-docker.html">do not run Docker containers as &#8216;root&#8217;</a>.</p>
+<p>Lets now dig more into the ways that a Docker container can be made to not run as the &#8216;root&#8217; user.</p>
+<h1>Specifying the user in the Dockerfile</h1>
+<p>If you are building a Docker image yourself, you can specify that it should run as a particular user by including the &#8216;USER&#8217; statement in the &#8216;Dockerfile&#8217;. Normally you would place this towards the end of the &#8216;Dockerfile&#8217; so that prior &#8216;RUN&#8217; steps within the &#8216;Dockerfile' can still run with the default &#8216;root&#8217; privileges.&#160;</p>
+<p>Unfortunately many images do not close out the &#8216;Dockerfile&#8217; by specifying a &#8216;USER&#8217; statement for a non &#8216;root&#8217; user. This is either done through ignorance that one shouldn&#8217;t really run Docker containers as &#8216;root&#8217; unless you genuinely have a need to, or because they anticipate that the Docker image may later possibly be used as a base image and so perhaps don&#8217;t want to make it too difficult for it to be used in that way.</p>
+<p>Specifically, if the base image were finished up with a &#8216;USER&#8217; statement for a non &#8216;root&#8217; user, when creating a derived image the first thing that anyone would need to do if they wanted to make system changes would be to use &#8216;USER root&#8217; to switch back to being the &#8216;root&#8217; user.</p>
+<p>One can easily see how people might think this is annoying though and so not specify the &#8216;USER&#8217; in the base image. Problem is that your typical users of the base image are even less likely to understand the consequences of running as &#8216;root&#8217; and why you shouldn&#8217;t and so aren&#8217;t going to revert to a non &#8216;root&#8217; user in their derived image either if you haven&#8217;t provided some pointer to what best practice is.</p>
+<h1>What user to run a container as</h1>
+<p>So if it is better to run as a non &#8216;root&#8217; user, what user should that be?</p>
+<p>The simplest course one might choose is to look at what system users an operating system pre defines in the &#8216;/etc/passwd&#8217; file.</p>
+<p>On the &#8216;busybox&#8217; image, if we do that we find:</p>
+<blockquote>
+<pre>root:x:0:0:root:/root:/bin/sh<br />daemon:x:1:1:daemon:/usr/sbin:/bin/false<br />bin:x:2:2:bin:/bin:/bin/false<br />sys:x:3:3:sys:/dev:/bin/false<br />sync:x:4:100:sync:/bin:/bin/sync<br />mail:x:8:8:mail:/var/spool/mail:/bin/false<br />www-data:x:33:33:www-data:/var/www:/bin/false<br />operator:x:37:37:Operator:/var:/bin/false<br />ftp:x:83:83:ftp:/home/ftp:/bin/false<br />nobody:x:99:99:nobody:/home:/bin/false</pre>
+</blockquote>
+<p>Of these the &#8216;www-data&#8217; user looks like a good candidate, this being the user that would normally be used by a web server such as Apache. The &#8216;www-data&#8217; user is also typically present on all Linux operating system variants.</p>
+<p>The problem with the &#8216;www-data&#8217; user is that although the &#8216;/etc/passwd&#8217; file usually defines a home directory, that home directory, depending on the Linux operating system variant, may not actually exist.</p>
+<p>For example, on &#8216;busybox&#8217; the home directory of &#8216;/var/www&#8217; does exist, but on a Debian based image it may not.</p>
+<blockquote>
+<pre>$ docker run --rm -it busybox sh<br />/ # echo ~www-data<br />/var/www<br />/ # touch ~www-data/magic<br />/ # exit</pre>
+<pre>$ docker run --rm -it debian:jessie sh<br /># echo ~www-data<br />/var/www<br /># touch ~www-data/magic<br />touch: cannot touch '/var/www/magic': No such file or directory</pre>
+</blockquote>
+<p>The lack of a home directory means that even if we update the IPython Docker image to run as the &#8216;www-data&#8217; user, it will still fail on startup.</p>
+<blockquote>
+<pre>/usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/var/www' is not a writable location, using a temp directory.<br /> " using a temp directory.".format(parent))<br />Traceback (most recent call last):<br /> ...<br /> File "/usr/lib/python3.4/os.py", line 237, in makedirs<br /> mkdir(name, mode)<br />PermissionError: [Errno 13] Permission denied: '/var/www'</pre>
+</blockquote>
+<p>What happened this time is that since the home directory didn&#8217;t even exist, the Python code for the application tried to create it. The user &#8216;www-data&#8217; didn&#8217;t though have permissions to create a directory under &#8216;/var&#8217;.</p>
+<p>More typically application code trying to write files to a home directory would assume that the home directory at least would exist, so instead it would fail when trying to create a file or subdirectory under the non existent home directory. It is unusual that the application code in this case tried to create the home directory first.</p>
+<h1>Adding of a new user account</h1>
+<p>One could with the &#8216;www-data&#8217; account simply ensure that a home directory does exist and create it with the appropriate permissions, but at that point it is probably easier and better to add a new user account to the system specifically to be used by the container when it is run.</p>
+<p>The exact command you use to add a new user account is going to depend on the Linux operating system variant being used. If using a Debian based system you would use &#8216;adduser&#8217;. If using Red Hat you would use &#8216;useradd&#8217;.</p>
+<p>The IPython Docker image for &#8216;jupyter/notebook&#8217; is derived from Ubuntu and so is Debian based. To create a special user account called &#8216;ipython&#8217; we would therefore use:</p>
+<blockquote>
+<pre>adduser --disabled-password --gecos "IPython" ipython</pre>
+</blockquote>
+<p>The &#8216;--disabled-password&#8217; option ensures that the &#8216;adduser&#8217; command doesn&#8217;t attempt to prompt for a user password.</p>
+<p>Having added our own user account, what changes would we need to make to the &#8216;Dockerfile&#8217; for the &#8216;jupyter/notebook&#8217; Docker image to have it use this?</p>
+<p>Looking through it the bulk of the commands in the &#8216;Dockerfile&#8217; relate to installing system or Python packages. It is only where we get to the end of the &#8216;Dockerfile&#8217; that we come across anything that potentially needs to change.</p>
+<blockquote>
+<pre># Add a notebook profile.<br />RUN mkdir -p -m 700 /root/.jupyter/ &amp;&amp; \<br /> echo "c.NotebookApp.ip = '*'" &gt;&gt; /root/.jupyter/jupyter_notebook_config.py</pre>
+<pre>VOLUME /notebooks<br />WORKDIR /notebooks</pre>
+<pre>EXPOSE 8888</pre>
+<pre>ENTRYPOINT ["tini", "--"]<br />CMD ["jupyter", "notebook"]</pre>
+</blockquote>
+<p>The first command here is creating a &#8216;.jupyter&#8217; sub directory in what would be the home directory for the user, and adding to it a user configuration file for the Jupyter Notebook application. As it stands here, it is assuming that the user will be &#8216;root&#8217;, but we don&#8217;t want it to run as &#8216;root&#8217; but the &#8216;ipython&#8217; user we have created.</p>
+<p>When we used the &#8216;adduser&#8217; command it automatically created a home directory for the &#8216;ipython&#8217; user at &#8216;/home/ipython&#8217;. We therefore need to use the home directory for the &#8216;ipython&#8217; user instead of &#8216;/root&#8217;, which was the home directory for the &#8216;root&#8217; user.</p>
+<blockquote>
+<pre># Add a notebook profile.<br />RUN mkdir -p -m 700 ~ipython/.jupyter/ &amp;&amp; \<br /> echo "c.NotebookApp.ip = '*'" &gt;&gt; ~ipython/.jupyter/jupyter_notebook_config.py &amp;&amp; \<br /> chown -R ipython:ipython ~ipython/.jupyter</pre>
+</blockquote>
+<p>Also note that since commands are being run as root at this point in the &#8216;Dockerfile&#8217;, we also need to change the ownership on the &#8216;.jupyter&#8217; subdirectory and the file created inside so they are owned by the &#8216;ipython&#8217; user. If we do not do this and the IPython Notebook application wants to create additional files in that directory, it will fail, as the directory and files would still be owned by the &#8216;root&#8217; user.</p>
+<p>For good measure and to be consistent with normal permissions one would find on directories and files created by a user, we also ensure that the group is updated to also be that corresponding to the &#8216;ipython&#8217; user.</p>
+<p>Directory permissions also become an issue with the &#8216;/notebooks&#8217; directory. This is the directory which is setup as the working directory for the IPython Notebook application and which will be where any IPython notebooks will be created.</p>
+<p>The &#8216;/notebooks&#8217; directory is actually created as a side effect of the &#8216;VOLUME &#8216; statement. A directory created in that way will also be created with &#8216;root&#8217; as the owner. We therefore need to manually create the &#8216;/notebooks&#8217; directory ourselves and set the permissions appropriately, before marking it as being a volume mount point.</p>
+<blockquote>
+<pre>RUN mkdir /notebooks &amp;&amp; chown ipython:ipython /notebooks</pre>
+</blockquote>
+<p>Finally, we can use the &#8216;USER&#8217; statement to mark that the Docker container when run should be run as the &#8216;ipython&#8217; user. The final result we end up with is:</p>
+<blockquote>
+<pre># Add a notebook profile.<br />RUN mkdir -p -m 700 ~ipython/.jupyter/ &amp;&amp; \<br /> echo "c.NotebookApp.ip = '*'" &gt;&gt; ~ipython/.jupyter/jupyter_notebook_config.py &amp;&amp; \<br /> chown -R ipython:ipython ~ipython/.jupyter</pre>
+<pre>RUN mkdir /notebooks &amp;&amp; chown ipython:ipython /notebooks</pre>
+<pre>VOLUME /notebooks<br />WORKDIR /notebooks</pre>
+<pre>EXPOSE 8888</pre>
+<pre>USER ipython</pre>
+<pre>ENTRYPOINT ["tini", "--"]<br />CMD ["jupyter", "notebook"]</pre>
+</blockquote>
+<p>Running the Docker image after having made these changes and executing an interactive shell within the container, we can check the environment to see if it is what we expect.</p>
+<blockquote>
+<pre>ipython@f4665e7d63b7:/notebooks$ whoami<br />ipython<br />ipython@f4665e7d63b7:/notebooks$ id<br />uid=1000(ipython) gid=1000(ipython) groups=1000(ipython)<br />ipython@f4665e7d63b7:/notebooks$ pwd<br />/notebooks<br />ipython@f4665e7d63b7:/notebooks$ env | grep HOME<br />HOME=/home/ipython<br />ipython@f4665e7d63b7:/notebooks$ ls -las<br />total 8<br />4 drwxr-xr-x 2 ipython ipython 4096 Dec 21 03:54 .<br />4 drwxr-xr-x 58 root root 4096 Dec 21 03:54 ..</pre>
+</blockquote>
+<p>All looks good and from the web interface for the IPython Notebook application we can create and save notebooks.</p>
+<p>Alas, even though we have now converted the IPython Docker image to not run as &#8216;root', it still will not run on OpenShift, again yielding an error message in the log output.</p>
+<blockquote>
+<pre>$ oc logs --previous ipython-2-yo557<br />/usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/' is not a writable location, using a temp directory.<br /> " using a temp directory.".format(parent))<br />Traceback (most recent call last):<br /> ...<br /> File "/usr/lib/python3.4/os.py", line 237, in makedirs<br /> mkdir(name, mode)<br />PermissionError: [Errno 13] Permission denied: '/.jupyter'</pre>
+</blockquote>
+<h1>Why the user ID is overridden</h1>
+<p>The reason that the updated Docker image failed on OpenShift is that even though a &#8216;USER&#8217; statement was included to indicate that a specific non &#8216;root&#8217; user should be used to run the Docker image, this was still ignored.</p>
+<p>When we look at a hosting service which wants to prohibit Docker images from running as &#8216;root&#8217;, there are a couple of issues that come into play in respect of what user ID a Docker image is allowed to run as, or forced to run as.</p>
+<p>The first issue is what the &#8216;USER&#8217; was actually set to, which any hosting service can determine by inspecting the Docker image to be deployed.</p>
+<blockquote>
+<pre>$ docker inspect --format='{{.ContainerConfig.User}}&#8217; jupyter/notebook<br />ipython</pre>
+</blockquote>
+<p>In our updated Docker image you can see that when inspecting the image it has been setup to run as the &#8216;ipython&#8217; user.</p>
+<p>The problem with this is that because a user name was supplied, it is not actually possible for the hosting service to readily determine what user ID that user name maps to.</p>
+<p>Although you might think that so long as it doesn&#8217;t have &#8216;root&#8217; you are good, that isn&#8217;t the case. This is because there is nothing to stop someone constructing a Docker image which has a &#8216;/etc/passwd&#8217; file containing:</p>
+<blockquote>
+<pre>ipython:x:0:0:root:/root:/bin/sh</pre>
+</blockquote>
+<p>In short, a hosting service cannot trust the user configured into a Docker image if it is not an integer user ID.</p>
+<p>In order to try and ensure that a hosting service will actually run a Docker image as the &#8216;USER&#8217; you defined, at the least, you need to provide an integer user ID for &#8216;USER&#8217; and not a user name.</p>
+<p>Unfortunately, this will probably still only work for a hosting service which only supports 12 factor applications and does not offer any persistent storage.</p>
+<p>The second issue here now as to why the &#8216;USER&#8217; would be ignored being around whether persistent storage is being offered.</p>
+<p>The problem here is that for extra security, when providing persistent data storage volumes to applications, you do not really want the storage volumes for every user using the same user ID. As a result, where persistent storage is being offered, a separate user ID will generally be given to each user, or possibly to each project.</p>
+<p>This is the case with OpenShift, where applications running under distinct projects, even for the same OpenShift user, are allocated different user IDs that any Docker images are then run as.</p>
+<p>As a result, no matter what you set &#8216;USER&#8217; to in the &#8216;Dockerfile&#8217;, OpenShift will instead force the Docker container to run as the user ID that was allocated to the project the Docker container is run in, this being to allow for better security when persistent volumes or other external resources are being used.</p>
+<p>Now before you start thinking this is a limitation with just OpenShift, it isn&#8217;t. Any hosting service that wants to use best practice, including not running Docker images as &#8216;root&#8217; and of providing applications running in different contexts with different user identities for when accessing external resources will be in the same boat.</p>
+<p>This situation will likely only change when user namespace support is added to Docker and hosting services can transparently map any user ID within the container, to a distinct user ID outside of the container, of the hosting services choosing.</p>
+<h1>How the user ID is overridden</h1>
+<p>So how does OpenShift override the &#8216;USER&#8217; which a Docker image is configured with?</p>
+<p>Overriding of the user that a Docker container is marked to run as, can be done by using the &#8216;-u&#8217; option to &#8216;docker run&#8217;.</p>
+<p>Without even using OpenShift we can therefore very quickly see if a Docker image might fail to start up where the user is being overridden by any hosting service. All we need to do is pick some random user ID which doesn&#8217;t have a corresponding user account inside of the Docker container.</p>
+<p>Doing this for our IPython Docker image we get as we did before:</p>
+<blockquote>
+<pre>$ docker run --rm -u 100000 -p 8888:8888 jupyter-notebook<br />/usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/' is not a writable location, using a temp directory.<br /> " using a temp directory.".format(parent))<br />Traceback (most recent call last):<br /> ...<br /> File "/usr/lib/python3.4/os.py", line 237, in makedirs<br /> mkdir(name, mode)<br />PermissionError: [Errno 13] Permission denied: '/.jupyter'</pre>
+</blockquote>
+<h1>Randomly assigned user ID</h1>
+<p>So the fact that the IPython Docker image was setup to run as &#8216;root&#8217; wasn&#8217;t the only problem. As shown, even when we change the &#8216;Dockerfile&#8217; to have the Jupyter Notebook application run as a non &#8216;root&#8217; user, it would still fail to start up.</p>
+<p>This was because even when configured to run as a non &#8216;root&#8217; user, that was ignored and a random user ID was being allocated and used to run the Docker container.</p>
+<p>The primary issue that arises from this is that there is not going to be a user account defined within the container corresponding to the user ID which is used. Further, because the user ID which is used is not going to be known in advance, it isn&#8217;t possible to add into the image at the time it is built a user account with that user ID.</p>
+<p>The flow on consequences of this were that the &#8216;HOME&#8217; directory environment variable is going to default back to being &#8216;/&#8216;. The application wants to be able to write files to the home directory though and since that wasn&#8217;t the directory it was expected to be, it failed.</p>
+<p>In addition, if our Docker image had been constructed such that the intended &#8216;USER&#8217; the Docker image were to run as had special access to write to other parts of the file system, the random user ID wouldn&#8217;t be able to right to those either.</p>
+<p>This can be seen when we override the command that is run when starting the Docker container to get access to an interactive shell and running some manual checks.</p>
+<blockquote>
+<pre>$ docker run --rm -it -u 100000 -p 8888:8888 jupyter-notebook bash<br />I have no name!@78bdfa8dba92:/notebooks$ whoami<br />whoami: cannot find name for user ID 100000<br />I have no name!@78bdfa8dba92:/notebooks$ id<br />uid=100000 gid=0(root)<br />I have no name!@78bdfa8dba92:/notebooks$ pwd<br />/notebooks<br />I have no name!@78bdfa8dba92:/notebooks$ env | grep HOME<br />HOME=/<br />I have no name!@78bdfa8dba92:/notebooks$ touch $HOME/magic<br />touch: cannot touch &#8216;//magic&#8217;: Permission denied<br />I have no name!@78bdfa8dba92:/notebooks$ touch /notebooks/magic<br />touch: cannot touch &#8216;/notebooks/magic&#8217;: Permission denied</pre>
+</blockquote>
+<p>We still therefore have some work to do before we can get this working.</p>
+<p>In the next post I will start going into how to accomodate a Docker container running as a random user ID which you aren&#8217;t going to know of in advance.&#160;</p>
+<div style='clear: both;'></div>
+</div>
+<div class='post-footer'>
+<div class='post-footer-line post-footer-line-1'>
+<span class='post-author vcard'>
+Posted by
+<span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
+<meta content='https://www.blogger.com/profile/13609779138164842374' itemprop='url'/>
+<a class='g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' title='author profile'>
+<span itemprop='name'>Graham Dumpleton</span>
+</a>
+</span>
+</span>
+<span class='post-timestamp'>
+at
+<meta content='http://blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html' itemprop='url'/>
+<a class='timestamp-link' href='http://blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html' rel='bookmark' title='permanent link'><abbr class='published' itemprop='datePublished' title='2015-12-22T07:11:00+11:00'>7:11&#8239;AM</abbr></a>
+</span>
+<span class='post-comment-link'>
+</span>
+<span class='post-icons'>
+<span class='item-action'>
+<a href='https://www.blogger.com/email-post/2363643920942057324/2831100265299827336' title='Email Post'>
+<img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
+</a>
+</span>
+</span>
+<div class='post-share-buttons goog-inline-block'>
+<a class='goog-inline-block share-button sb-email' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=2831100265299827336&target=email' target='_blank' title='Email This'><span class='share-button-link-text'>Email This</span></a><a class='goog-inline-block share-button sb-blog' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=2831100265299827336&target=blog' onclick='window.open(this.href, "_blank", "height=270,width=475"); return false;' target='_blank' title='BlogThis!'><span class='share-button-link-text'>BlogThis!</span></a><a class='goog-inline-block share-button sb-twitter' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=2831100265299827336&target=twitter' target='_blank' title='Share to X'><span class='share-button-link-text'>Share to X</span></a><a class='goog-inline-block share-button sb-facebook' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=2831100265299827336&target=facebook' onclick='window.open(this.href, "_blank", "height=430,width=640"); return false;' target='_blank' title='Share to Facebook'><span class='share-button-link-text'>Share to Facebook</span></a><a class='goog-inline-block share-button sb-pinterest' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=2831100265299827336&target=pinterest' target='_blank' title='Share to Pinterest'><span class='share-button-link-text'>Share to Pinterest</span></a>
+</div>
+</div>
+<div class='post-footer-line post-footer-line-2'>
+<span class='post-labels'>
+Labels:
+<a href='http://blog.dscpl.com.au/search/label/docker' rel='tag'>docker</a>,
+<a href='http://blog.dscpl.com.au/search/label/ipython' rel='tag'>ipython</a>,
+<a href='http://blog.dscpl.com.au/search/label/openshift' rel='tag'>openshift</a>,
+<a href='http://blog.dscpl.com.au/search/label/python' rel='tag'>python</a>
+</span>
+</div>
+<div class='post-footer-line post-footer-line-3'>
+<span class='post-location'>
+</span>
+</div>
+</div>
+</div>
+<div class='comments' id='comments'>
+<a name='comments'></a>
+<h4>No comments:</h4>
+<div id='Blog1_comments-block-wrapper'>
+<dl class='avatar-comment-indent' id='comments-block'>
+</dl>
+</div>
+<p class='comment-footer'>
+<a href='https://www.blogger.com/comment/fullpage/post/2363643920942057324/2831100265299827336' onclick=''>Post a Comment</a>
+</p>
+</div>
+</div>
+
+        </div></div>
+      
+</div>
+<div class='blog-pager' id='blog-pager'>
+<span id='blog-pager-newer-link'>
+<a class='blog-pager-newer-link' href='http://blog.dscpl.com.au/2015/12/random-user-ids-when-running-docker.html' id='Blog1_blog-pager-newer-link' title='Newer Post'>Newer Post</a>
+</span>
+<span id='blog-pager-older-link'>
+<a class='blog-pager-older-link' href='http://blog.dscpl.com.au/2015/12/don-run-as-root-inside-of-docker.html' id='Blog1_blog-pager-older-link' title='Older Post'>Older Post</a>
+</span>
+<a class='home-link' href='http://blog.dscpl.com.au/'>Home</a>
+</div>
+<div class='clear'></div>
+<div class='post-feeds'>
+<div class='feed-links'>
+Subscribe to:
+<a class='feed-link' href='http://blog.dscpl.com.au/feeds/2831100265299827336/comments/default' target='_blank' type='application/atom+xml'>Post Comments (Atom)</a>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='column-left-outer'>
+<div class='column-left-inner'>
+<aside>
+</aside>
+</div>
+</div>
+<div class='column-right-outer'>
+<div class='column-right-inner'>
+<aside>
+<div class='sidebar section' id='sidebar-right-1'><div class='widget Profile' data-version='1' id='Profile1'>
+<h2>About Me</h2>
+<div class='widget-content'>
+<dl class='profile-datablock'>
+<dt class='profile-data'>
+<a class='profile-name-link g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' style='background-image: url(//www.blogger.com/img/logo-16.png);'>
+Graham Dumpleton
+</a>
+</dt>
+</dl>
+<a class='profile-link' href='https://www.blogger.com/profile/13609779138164842374' rel='author'>View my complete profile</a>
+<div class='clear'></div>
+</div>
+</div><div class='widget PageList' data-version='1' id='PageList1'>
+<h2>Quick Links</h2>
+<div class='widget-content'>
+<ul>
+<li>
+<a href='http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html'>Decorators and monkey patching.</a>
+</li>
+<li>
+<a href='http://blog.dscpl.com.au/p/using-python-with-docker.html'>Using Python with Docker.</a>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div><div class='widget BlogArchive' data-version='1' id='BlogArchive1'>
+<h2>Blog Archive</h2>
+<div class='widget-content'>
+<div id='ArchiveList'>
+<div id='BlogArchive1_ArchiveList'>
+<select id='BlogArchive1_ArchiveMenu'>
+<option value=''>Blog Archive</option>
+<option value='http://blog.dscpl.com.au/2019/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2018/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2018/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2018/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2018/01/'>January (1)</option>
+<option value='http://blog.dscpl.com.au/2017/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2016/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2016/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2016/07/'>July (1)</option>
+<option value='http://blog.dscpl.com.au/2016/04/'>April (2)</option>
+<option value='http://blog.dscpl.com.au/2016/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2016/02/'>February (2)</option>
+<option value='http://blog.dscpl.com.au/2016/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2015/12/'>December (6)</option>
+<option value='http://blog.dscpl.com.au/2015/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2015/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2015/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2015/06/'>June (5)</option>
+<option value='http://blog.dscpl.com.au/2015/05/'>May (7)</option>
+<option value='http://blog.dscpl.com.au/2015/04/'>April (4)</option>
+<option value='http://blog.dscpl.com.au/2015/03/'>March (4)</option>
+<option value='http://blog.dscpl.com.au/2015/01/'>January (2)</option>
+<option value='http://blog.dscpl.com.au/2014/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2014/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2014/09/'>September (7)</option>
+<option value='http://blog.dscpl.com.au/2014/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2014/05/'>May (1)</option>
+<option value='http://blog.dscpl.com.au/2014/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2014/02/'>February (4)</option>
+<option value='http://blog.dscpl.com.au/2014/01/'>January (8)</option>
+<option value='http://blog.dscpl.com.au/2013/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/10/'>October (4)</option>
+<option value='http://blog.dscpl.com.au/2012/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2011/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2011/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2011/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2011/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2011/01/'>January (5)</option>
+<option value='http://blog.dscpl.com.au/2010/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2010/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2010/08/'>August (2)</option>
+<option value='http://blog.dscpl.com.au/2010/06/'>June (2)</option>
+<option value='http://blog.dscpl.com.au/2010/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2010/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2010/03/'>March (3)</option>
+<option value='http://blog.dscpl.com.au/2009/11/'>November (4)</option>
+<option value='http://blog.dscpl.com.au/2009/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2009/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2009/08/'>August (3)</option>
+<option value='http://blog.dscpl.com.au/2009/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2009/04/'>April (5)</option>
+<option value='http://blog.dscpl.com.au/2009/03/'>March (5)</option>
+<option value='http://blog.dscpl.com.au/2009/02/'>February (1)</option>
+<option value='http://blog.dscpl.com.au/2008/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2008/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2008/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2007/11/'>November (2)</option>
+<option value='http://blog.dscpl.com.au/2007/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2007/09/'>September (3)</option>
+<option value='http://blog.dscpl.com.au/2007/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2007/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2007/03/'>March (2)</option>
+</select>
+</div>
+</div>
+<div class='clear'></div>
+</div>
+</div><div class='widget Label' data-version='1' id='Label1'>
+<h2>Labels</h2>
+<div class='widget-content list-label-widget-content'>
+<ul>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/python'>python</a>
+<span dir='ltr'>(111)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_wsgi'>mod_wsgi</a>
+<span dir='ltr'>(86)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wsgi'>wsgi</a>
+<span dir='ltr'>(58)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/apache'>apache</a>
+<span dir='ltr'>(35)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/docker'>docker</a>
+<span dir='ltr'>(34)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/openshift'>openshift</a>
+<span dir='ltr'>(26)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/decorators'>decorators</a>
+<span dir='ltr'>(15)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/django'>django</a>
+<span dir='ltr'>(13)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/kubernetes'>kubernetes</a>
+<span dir='ltr'>(12)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_python'>mod_python</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/red%20hat'>red hat</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/ipython'>ipython</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyterhub'>jupyterhub</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/new%20relic'>new relic</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wrapt'>wrapt</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/pycon'>pycon</a>
+<span dir='ltr'>(5)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/s2i'>s2i</a>
+<span dir='ltr'>(4)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/gunicorn'>gunicorn</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/uWSGI'>uWSGI</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/datadog'>datadog</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/nginx'>nginx</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/statsd'>statsd</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/web2py'>web2py</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/async'>async</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/dyndns53'>dyndns53</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/fastcgi'>fastcgi</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/heroku'>heroku</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyter'>jupyter</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/lektor'>lektor</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/php'>php</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/shiv'>shiv</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/testing'>testing</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/tornado'>tornado</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/warpdrive'>warpdrive</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/zipapp'>zipapp</a>
+<span dir='ltr'>(1)</span>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div></div>
+</aside>
+</div>
+</div>
+</div>
+<div style='clear: both'></div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+<div class='main-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<footer>
+<div class='footer-outer'>
+<div class='footer-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left footer-fauxborder-left'>
+<div class='fauxborder-right footer-fauxborder-right'></div>
+<div class='region-inner footer-inner'>
+<div class='foot section' id='footer-1'><div class='widget AdSense' data-version='1' id='AdSense1'>
+<div class='widget-content'>
+<script type="text/javascript"><!--
+google_ad_client="pub-6433235630058377";
+google_ad_host="pub-1556223355139109";
+google_ad_width=120;
+google_ad_height=600;
+google_ad_format="120x600_as";
+google_ad_type="text";
+google_ad_host_channel="0001";
+google_color_border="FFFFFF";
+google_color_bg="FFFFFF";
+google_color_link="999999";
+google_color_url="5588AA";
+google_color_text="666666";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<div class='clear'></div>
+</div>
+</div></div>
+<table border='0' cellpadding='0' cellspacing='0' class='section-columns columns-2'>
+<tbody>
+<tr>
+<td class='first columns-cell'>
+<div class='foot no-items section' id='footer-2-1'></div>
+</td>
+<td class='columns-cell'>
+<div class='foot no-items section' id='footer-2-2'></div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- outside of the include in order to lock Attribution widget -->
+<div class='foot section' id='footer-3' name='Footer'><div class='widget Attribution' data-version='1' id='Attribution1'>
+<div class='widget-content' style='text-align: center;'>
+Simple theme. Powered by <a href='https://www.blogger.com' target='_blank'>Blogger</a>.
+</div>
+<div class='clear'></div>
+</div></div>
+</div>
+</div>
+<div class='footer-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</footer>
+<!-- content -->
+</div>
+</div>
+<div class='content-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<script type='text/javascript'>
+    window.setTimeout(function() {
+        document.body.className = document.body.className.replace('loading', '');
+      }, 10);
+  </script>
+
+<script type="text/javascript" src="https://www.blogger.com/static/v1/widgets/552934507-widgets.js"></script>
+<script type='text/javascript'>
+window['__wavt'] = 'AOuZoY4u4uo1DV40g4HhbCVEagFJNRa7UA:1757388602932';_WidgetManager._Init('//www.blogger.com/rearrange?blogID\x3d2363643920942057324','//blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html','2363643920942057324');
+_WidgetManager._SetDataContext([{'name': 'blog', 'data': {'blogId': '2363643920942057324', 'title': 'Graham Dumpleton', 'url': 'http://blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html', 'canonicalUrl': 'http://blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html', 'homepageUrl': 'http://blog.dscpl.com.au/', 'searchUrl': 'http://blog.dscpl.com.au/search', 'canonicalHomepageUrl': 'http://blog.dscpl.com.au/', 'blogspotFaviconUrl': 'http://blog.dscpl.com.au/favicon.ico', 'bloggerUrl': 'https://www.blogger.com', 'hasCustomDomain': true, 'httpsEnabled': false, 'enabledCommentProfileImages': true, 'gPlusViewType': 'FILTERED_POSTMOD', 'adultContent': false, 'analyticsAccountNumber': '', 'encoding': 'UTF-8', 'locale': 'en', 'localeUnderscoreDelimited': 'en', 'languageDirection': 'ltr', 'isPrivate': false, 'isMobile': false, 'isMobileRequest': false, 'mobileClass': '', 'isPrivateBlog': false, 'isDynamicViewsAvailable': true, 'feedLinks': '\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default\x22 /\x3e\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/rss+xml\x22 title\x3d\x22Graham Dumpleton - RSS\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default?alt\x3drss\x22 /\x3e\n\x3clink rel\x3d\x22service.post\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22https://www.blogger.com/feeds/2363643920942057324/posts/default\x22 /\x3e\n\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/2831100265299827336/comments/default\x22 /\x3e\n', 'meTag': '', 'adsenseClientId': 'ca-pub-6433235630058377', 'adsenseHostId': 'ca-host-pub-1556223355139109', 'adsenseHasAds': true, 'adsenseAutoAds': false, 'boqCommentIframeForm': true, 'loginRedirectParam': '', 'view': '', 'dynamicViewsCommentsSrc': '//www.blogblog.com/dynamicviews/4224c15c4e7c9321/js/comments.js', 'dynamicViewsScriptSrc': '//www.blogblog.com/dynamicviews/b4594f574ba3c273', 'plusOneApiSrc': 'https://apis.google.com/js/platform.js', 'disableGComments': true, 'interstitialAccepted': false, 'sharing': {'platforms': [{'name': 'Get link', 'key': 'link', 'shareMessage': 'Get link', 'target': ''}, {'name': 'Facebook', 'key': 'facebook', 'shareMessage': 'Share to Facebook', 'target': 'facebook'}, {'name': 'BlogThis!', 'key': 'blogThis', 'shareMessage': 'BlogThis!', 'target': 'blog'}, {'name': 'X', 'key': 'twitter', 'shareMessage': 'Share to X', 'target': 'twitter'}, {'name': 'Pinterest', 'key': 'pinterest', 'shareMessage': 'Share to Pinterest', 'target': 'pinterest'}, {'name': 'Email', 'key': 'email', 'shareMessage': 'Email', 'target': 'email'}], 'disableGooglePlus': true, 'googlePlusShareButtonWidth': 0, 'googlePlusBootstrap': '\x3cscript type\x3d\x22text/javascript\x22\x3ewindow.___gcfg \x3d {\x27lang\x27: \x27en\x27};\x3c/script\x3e'}, 'hasCustomJumpLinkMessage': false, 'jumpLinkMessage': 'Read more', 'pageType': 'item', 'postId': '2831100265299827336', 'pageName': 'Overriding the user Docker containers run as.', 'pageTitle': 'Graham Dumpleton: Overriding the user Docker containers run as.'}}, {'name': 'features', 'data': {}}, {'name': 'messages', 'data': {'edit': 'Edit', 'linkCopiedToClipboard': 'Link copied to clipboard!', 'ok': 'Ok', 'postLink': 'Post Link'}}, {'name': 'template', 'data': {'name': 'Simple', 'localizedName': 'Simple', 'isResponsive': false, 'isAlternateRendering': false, 'isCustom': false, 'variant': 'pale', 'variantId': 'pale'}}, {'name': 'view', 'data': {'classic': {'name': 'classic', 'url': '?view\x3dclassic'}, 'flipcard': {'name': 'flipcard', 'url': '?view\x3dflipcard'}, 'magazine': {'name': 'magazine', 'url': '?view\x3dmagazine'}, 'mosaic': {'name': 'mosaic', 'url': '?view\x3dmosaic'}, 'sidebar': {'name': 'sidebar', 'url': '?view\x3dsidebar'}, 'snapshot': {'name': 'snapshot', 'url': '?view\x3dsnapshot'}, 'timeslide': {'name': 'timeslide', 'url': '?view\x3dtimeslide'}, 'isMobile': false, 'title': 'Overriding the user Docker containers run as.', 'description': 'In the first post  of this series looking at how to get IPython running on OpenShift I showed how taking the \u2018jupyter/notebook\u2019 Docker image...', 'url': 'http://blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html', 'type': 'item', 'isSingleItem': true, 'isMultipleItems': false, 'isError': false, 'isPage': false, 'isPost': true, 'isHomepage': false, 'isArchive': false, 'isLabelSearch': false, 'postId': 2831100265299827336}}]);
+_WidgetManager._RegisterWidget('_NavbarView', new _WidgetInfo('Navbar1', 'navbar', document.getElementById('Navbar1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_HeaderView', new _WidgetInfo('Header1', 'header', document.getElementById('Header1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogView', new _WidgetInfo('Blog1', 'main', document.getElementById('Blog1'), {'cmtInteractionsEnabled': false, 'lightboxEnabled': true, 'lightboxModuleUrl': 'https://www.blogger.com/static/v1/jsbin/3842676126-lbx.js', 'lightboxCssUrl': 'https://www.blogger.com/static/v1/v-css/828616780-lightbox_bundle.css'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_ProfileView', new _WidgetInfo('Profile1', 'sidebar-right-1', document.getElementById('Profile1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_PageListView', new _WidgetInfo('PageList1', 'sidebar-right-1', document.getElementById('PageList1'), {'title': 'Quick Links', 'links': [{'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html', 'id': '3350721465154129789', 'title': 'Decorators and monkey patching.'}, {'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/using-python-with-docker.html', 'id': '5591286857776935907', 'title': 'Using Python with Docker.'}], 'mobile': false, 'showPlaceholder': true, 'hasCurrentPage': false}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogArchiveView', new _WidgetInfo('BlogArchive1', 'sidebar-right-1', document.getElementById('BlogArchive1'), {'languageDirection': 'ltr', 'loadingMessage': 'Loading\x26hellip;'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_LabelView', new _WidgetInfo('Label1', 'sidebar-right-1', document.getElementById('Label1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AdSenseView', new _WidgetInfo('AdSense1', 'footer-1', document.getElementById('AdSense1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AttributionView', new _WidgetInfo('Attribution1', 'footer-3', document.getElementById('Attribution1'), {}, 'displayModeFull'));
+</script>
+</body>
+</html>

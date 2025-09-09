@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html class='v2' dir='ltr' lang='en'>
+<head>
+<link href='https://www.blogger.com/static/v1/widgets/2508126174-css_bundle_v2.css' rel='stylesheet' type='text/css'/>
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='blogger' name='generator'/>
+<link href='http://blog.dscpl.com.au/favicon.ico' rel='icon' type='image/x-icon'/>
+<link href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html' rel='canonical'/>
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Graham Dumpleton - RSS" href="http://blog.dscpl.com.au/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Graham Dumpleton - Atom" href="https://www.blogger.com/feeds/2363643920942057324/posts/default" />
+
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/8413796850426758491/comments/default" />
+<!--Can't find substitution for tag [blog.ieCssRetrofitLinks]-->
+<meta content='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html' property='og:url'/>
+<meta content='Improving Commercial Python/WSGI Hosting Options' property='og:title'/>
+<meta content='I&#39;d like to think that through my work with mod_python  and mod_wsgi  that Python web hosting options have improved, but truth is that neith...' property='og:description'/>
+<title>Graham Dumpleton: Improving Commercial Python/WSGI Hosting Options</title>
+<style id='page-skin-1' type='text/css'><!--
+/*
+-----------------------------------------------
+Blogger Template Style
+Name:     Simple
+Designer: Blogger
+URL:      www.blogger.com
+----------------------------------------------- */
+/* Content
+----------------------------------------------- */
+body {
+font: normal normal 12px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #222222;
+background: #66bbdd none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 {
+font-size: 22px;
+}
+a:link {
+text-decoration:none;
+color: #2187bb;
+}
+a:visited {
+text-decoration:none;
+color: #888888;
+}
+a:hover {
+text-decoration:underline;
+color: #32aaff;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #ffffff;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #3299bb;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #3299bb;
+}
+.Header .description {
+font-size: 140%;
+color: #777777;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #eeeeee;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #eeeeee;
+border-left: 0 solid #eeeeee;
+border-right: 0 solid #eeeeee;
+}
+.tabs-inner .widget ul {
+background: #f5f5f5 url(https://resources.blogblog.com/blogblog/data/1kt/simple/gradients_light.png) repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #eeeeee;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 14px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #ffffff;
+border-right: 1px solid #eeeeee;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #000000;
+background-color: #eeeeee;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #eeeeee;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #eeeeee;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #eeeeee;
+}
+/* Headings
+----------------------------------------------- */
+div.widget > h2,
+div.widget h2.title {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #000000;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+h2.date-header {
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+}
+.date-header span {
+background-color: transparent;
+color: #222222;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 22px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 2px;
+background: #ffffff;
+border: 1px solid #eeeeee;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 5px;
+}
+.post-body .tr-caption-container {
+color: #222222;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #666666;
+background-color: #f9f9f9;
+border-bottom: 1px solid #eeeeee;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #eeeeee;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #eeeeee;
+}
+/* Comments
+----------------------------------------------- */
+.comments .comments-content .icon.blog-author {
+background-repeat: no-repeat;
+background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9sLFwMeCjjhcOMAAAD+SURBVDjLtZSvTgNBEIe/WRRnm3U8RC1neQdsm1zSBIU9VVF1FkUguQQsD9ITmD7ECZIJSE4OZo9stoVjC/zc7ky+zH9hXwVwDpTAWWLrgS3QAe8AZgaAJI5zYAmc8r0G4AHYHQKVwII8PZrZFsBFkeRCABYiMh9BRUhnSkPTNCtVXYXURi1FpBDgArj8QU1eVXUzfnjv7yP7kwu1mYrkWlU33vs1QNu2qU8pwN0UpKoqokjWwCztrMuBhEhmh8bD5UDqur75asbcX0BGUB9/HAMB+r32hznJgXy2v0sGLBcyAJ1EK3LFcbo1s91JeLwAbwGYu7TP/3ZGfnXYPgAVNngtqatUNgAAAABJRU5ErkJggg==);
+}
+.comments .comments-content .loadmore a {
+border-top: 1px solid #999999;
+border-bottom: 1px solid #999999;
+}
+.comments .comment-thread.inline-thread {
+background-color: #f9f9f9;
+}
+.comments .continue {
+border-top: 2px solid #999999;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #eeeeee;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #ffffff;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #ffffff;
+}
+.mobile-index-contents {
+color: #222222;
+}
+.mobile-link-button {
+background-color: #2187bb;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #eeeeee;
+color: #000000;
+border-top: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #eeeeee;
+}
+
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 1020px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 1020px;
+max-width: 1020px;
+_width: 1020px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 200px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 200px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("200px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 200px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 200px;
+margin-right: -200px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+body#layout div.add_widget {
+padding: 8px;
+}
+body#layout div.add_widget a {
+margin-left: 32px;
+}
+--></style>
+<link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' media='none' onload='if(media!=&#39;all&#39;)media=&#39;all&#39;' rel='stylesheet'/><noscript><link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' rel='stylesheet'/></noscript>
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+
+<!-- data-ad-client=ca-pub-6433235630058377 -->
+
+</head>
+<body class='loading variant-pale'>
+<div class='navbar section' id='navbar' name='Navbar'><div class='widget Navbar' data-version='1' id='Navbar1'><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/2363643920942057324?po\x3d8413796850426758491\x26origin\x3dhttp://blog.dscpl.com.au',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script><script type="text/javascript">
+(function() {
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = '//pagead2.googlesyndication.com/pagead/js/google_top_exp.js';
+var head = document.getElementsByTagName('head')[0];
+if (head) {
+head.appendChild(script);
+}})();
+</script>
+</div></div>
+<div class='body-fauxcolumns'>
+<div class='fauxcolumn-outer body-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content'>
+<div class='content-fauxcolumns'>
+<div class='fauxcolumn-outer content-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content-outer'>
+<div class='content-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='fauxborder-right content-fauxborder-right'></div>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='header-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='fauxborder-right header-fauxborder-right'></div>
+<div class='region-inner header-inner'>
+<div class='header section' id='header' name='Header'><div class='widget Header' data-version='1' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://blog.dscpl.com.au/'>
+Graham Dumpleton
+</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>
+</span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='header-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</header>
+<div class='tabs-outer'>
+<div class='tabs-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left tabs-fauxborder-left'>
+<div class='fauxborder-right tabs-fauxborder-right'></div>
+<div class='region-inner tabs-inner'>
+<div class='tabs no-items section' id='crosscol' name='Cross-Column'></div>
+<div class='tabs no-items section' id='crosscol-overflow' name='Cross-Column 2'></div>
+</div>
+</div>
+<div class='tabs-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='main-outer'>
+<div class='main-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='fauxborder-right main-fauxborder-right'></div>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<div class='fauxcolumn-outer fauxcolumn-center-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-left-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-right-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main' name='Main'><div class='widget Blog' data-version='1' id='Blog1'>
+<div class='blog-posts hfeed'>
+
+          <div class="date-outer">
+        
+<h2 class='date-header'><span>Friday, April 17, 2009</span></h2>
+
+          <div class="date-posts">
+        
+<div class='post-outer'>
+<div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<meta content='2363643920942057324' itemprop='blogId'/>
+<meta content='8413796850426758491' itemprop='postId'/>
+<a name='8413796850426758491'></a>
+<h3 class='post-title entry-title' itemprop='name'>
+Improving Commercial Python/WSGI Hosting Options
+</h3>
+<div class='post-header'>
+<div class='post-header-line-1'></div>
+</div>
+<div class='post-body entry-content' id='post-body-8413796850426758491' itemprop='description articleBody'>
+I'd like to think that through my work with <a href="http://www.modpython.org">mod_python</a> and <a href="http://www.modwsgi.org">mod_wsgi</a> that Python web hosting options have improved, but truth is that neither mod_python&#160;nor mod_wsgi (at this stage) are really suitable for mass virtual hosting. As such, for low cost commodity Python web hosting the only real options are still CGI and <a href="http://www.fastcgi.com/">FASTCGI</a>.<div><br /></div><div>In the case of FASTCGI this usually means mod_fastcgi or mod_fcgid under Apache, and although many web hosting companies do use these modules and so can provide support for Python, they often don't, or the support provided is less than ideal.</div><div><br /></div><div>In taking the view that support for Python isn't very good, one does have to be careful however. This is because when you read support forums and irc channels, you obviously are only going to see the complaints and the calls for help to get things working. It may well be the case that this is an outspoken minority and the bulk of people are having no problem at all. Either way, there is still a perception that the Python community isn't being well serviced by web hosting companies and that something better is required.</div><div><br /></div><div>As I have previously described in the mod_wsgi <a href="http://blog.dscpl.com.au/2009/03/future-roadmap-for-modwsgi.html">roadmap</a>,&#160;the intention is to support features that would allow mod_wsgi to be used in mass virtual hosting, but there is a lot more to it than just providing yet another option that they might be able to use. In fact, there is no real reason why good Python web hosting couldn't be offered using FASTCGI right now.</div><div><br /></div><div>I tend to think that the real problem is in part one of education. That is, lack of good documentation on how to setup FASTCGI for running Python within a commercial web hosting operation, and a clear indication of what the Python communities expectations are as to what should be available.</div><div><br /></div><div>Some of the problems which arise are web hosting companies that provide only woefully out of date Python versions, no easy ability to install Python modules/packages, and in the case of FASTCGI, not even providing <a href="http://trac.saddi.com/flup">flup</a> or some other FASTCGI bridge. End result is that although one may be able to use Python, it isn't necessarily easy and a lot of the hard work is pushed onto the user, rather than the web hosting company providing an environment which is easy to use to begin with.</div><div><br /></div><div>With that in mind I am currently contemplating whether to start up a distinct uber project which has the specific goal of improving commercial Python/WSGI hosting options. This would not be done with the intent of just pushing my separate mod_wsgi software, but would look at all available software and come up with guidelines and other documentation on how best to use whatever is available, including CGI and FASTCGI.</div><div><br /></div><div>I can also see this going beyond just documentation, with it also producing code libraries and applications. For example, at the moment for someone to host a Python WSGI web application under CGI they need to know about what CGI/WSGI adapters are available. Similarly for FASTCGI you need to know about what FASTCGI/WSGI adapters are are available. That or you need for the Python web application being used to internally somehow support CGI or FASTCGI directly.</div><div><br /></div><div>Frankly, with WSGI, these days it is pretty stupid for Python web applications themselves to be worried about CGI or FASTCGI. At the same time, the user also should not have to need to know about them either. What would be much better is that no matter what underlying Python hosting mechanism is used, that the web hosting company provide a means of hosting WSGI applications themselves.</div><div><br /></div><div>As example, when using mod_wsgi all you need to do is provide a WSGI script file which contains an 'application' object as entry point for the WSGI application. That WSGI script can also include any other code required to set up the environment for the WSGI application. There is no reason why this couldn't also be applied to CGI and FASTCGI.</div><div><br /></div><div>So, instead of a user having to provide a .cgi or .fcgi file, they would provide a .wsgi file. It would then be up to the web hosting company to automatically ensure that the right thing happens.</div><div><br /></div><div>Obviously, web hosting companies are going to be clueless as how to make that work and this is where one product of the project would be to provide a small set of Python wrapper applications which perform that mapping along with the instructions on how a web hosting company would integrate that into their systems. This would therefore need to include guidelines on how to set up Apache, including how to integrate it into suexec or cgiwrap as appropriate.</div><div><br /></div><div>One of the problems that this wrapper application can solve is fixing up WSGI variables like SCRIPT_NAME and PATH_INFO. At the moment Python web applications often have hacks in them, or the user themselves are forced to have hacks in the WSGI script file, to adjust these variables where they aren't passed through correctly from the web server.</div><div><br /></div><div>Another problem than that can be solved here is ensuring that logging from Python web applications ends up somewhere where the user can actually see and make use of it. One often sees instances where people are having trouble with something like FASTCGI, but due to how the system is set up, any error messages output when the FASTCGI script is being started&#160;disappear, making it really hard to debug problems. Because the wrapper application is in control of loading the WSGI script file, it can ensure that any log files are setup properly. It could even provide a feature to capture the errors and return them in a error page to the browser rather than them going to the log only.</div><div><br /></div><div>So, that is the dream. In part I need to indirectly do some of the ground work for this in order to work out what features I need to add to make mod_wsgi more useful in a mass virtual hosting setup. It would be nice though if there are others out there who have some measure of passion for seeing Python web hosting options improved contribute as well. Most of all, I would dearly like to get the web hosting companies themselves directly involved.</div><div><br /></div><div>In respect of dealing with web hosting companies, to date my experiences in dealing with them have not been very inspiring. Where I have actively tried to contact them to try and learn how they run things, so I can work out what features mod_wsgi should provide to make it easy for them to use, they have been quite unwilling to give up any information. Even when web hosting companies have contacted me about mod_wsgi, it seems the contact is coming from managers or sales people and not the technical people. Even at the requests of these same people, their own technical people aren't necessarily forthcoming with the information I really need.&#160;Overall it has been quite frustrating to say the least.</div><div><br /></div><div>Hopefully then if this project were to get off the ground and were seen to have active backing from the Python community, we might be able to make some progress. We may even be able to make web hosting companies see that there is more than just PHP out there.</div><div><br /></div><div>Right now any feedback you may want to give on the whole idea and whether there is a need for it would be most helpful. Maybe I am barking up the wrong tree and all is actually wonderful after all. As much as I may believe there is a problem here needing to be solved, am sure that existing mod_wsgi users would prefer I concentrate on just mod_wsgi and not worry about all this other stuff. :-)</div>
+<div style='clear: both;'></div>
+</div>
+<div class='post-footer'>
+<div class='post-footer-line post-footer-line-1'>
+<span class='post-author vcard'>
+Posted by
+<span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
+<meta content='https://www.blogger.com/profile/13609779138164842374' itemprop='url'/>
+<a class='g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' title='author profile'>
+<span itemprop='name'>Graham Dumpleton</span>
+</a>
+</span>
+</span>
+<span class='post-timestamp'>
+at
+<meta content='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html' itemprop='url'/>
+<a class='timestamp-link' href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html' rel='bookmark' title='permanent link'><abbr class='published' itemprop='datePublished' title='2009-04-17T11:01:00+10:00'>11:01&#8239;AM</abbr></a>
+</span>
+<span class='post-comment-link'>
+</span>
+<span class='post-icons'>
+<span class='item-action'>
+<a href='https://www.blogger.com/email-post/2363643920942057324/8413796850426758491' title='Email Post'>
+<img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
+</a>
+</span>
+</span>
+<div class='post-share-buttons goog-inline-block'>
+<a class='goog-inline-block share-button sb-email' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=8413796850426758491&target=email' target='_blank' title='Email This'><span class='share-button-link-text'>Email This</span></a><a class='goog-inline-block share-button sb-blog' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=8413796850426758491&target=blog' onclick='window.open(this.href, "_blank", "height=270,width=475"); return false;' target='_blank' title='BlogThis!'><span class='share-button-link-text'>BlogThis!</span></a><a class='goog-inline-block share-button sb-twitter' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=8413796850426758491&target=twitter' target='_blank' title='Share to X'><span class='share-button-link-text'>Share to X</span></a><a class='goog-inline-block share-button sb-facebook' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=8413796850426758491&target=facebook' onclick='window.open(this.href, "_blank", "height=430,width=640"); return false;' target='_blank' title='Share to Facebook'><span class='share-button-link-text'>Share to Facebook</span></a><a class='goog-inline-block share-button sb-pinterest' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=8413796850426758491&target=pinterest' target='_blank' title='Share to Pinterest'><span class='share-button-link-text'>Share to Pinterest</span></a>
+</div>
+</div>
+<div class='post-footer-line post-footer-line-2'>
+<span class='post-labels'>
+Labels:
+<a href='http://blog.dscpl.com.au/search/label/mod_python' rel='tag'>mod_python</a>,
+<a href='http://blog.dscpl.com.au/search/label/mod_wsgi' rel='tag'>mod_wsgi</a>,
+<a href='http://blog.dscpl.com.au/search/label/python' rel='tag'>python</a>,
+<a href='http://blog.dscpl.com.au/search/label/wsgi' rel='tag'>wsgi</a>
+</span>
+</div>
+<div class='post-footer-line post-footer-line-3'>
+<span class='post-location'>
+</span>
+</div>
+</div>
+</div>
+<div class='comments' id='comments'>
+<a name='comments'></a>
+<h4>21 comments:</h4>
+<div id='Blog1_comments-block-wrapper'>
+<dl class='avatar-comment-indent' id='comments-block'>
+<dt class='comment-author ' id='c2233153239156877233'>
+<a name='c2233153239156877233'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/17762358075557755436" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-2233153239156877233-17762358075557755436"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Ren&eacute; Dudfield">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/17762358075557755436' rel='nofollow'>René Dudfield</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-2233153239156877233'>
+<p>
+I think the key is to work with Cpanel/whm, plex and other control panels to have them include good python support by default.<br /><br />Think of Cpanel as a platform like windows or linux, and you'll notice that python is not very portable for web host platforms.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1239948660000#c2233153239156877233' title='comment permalink'>
+April 17, 2009 at 4:11&#8239;PM
+</a>
+<span class='item-control blog-admin pid-708094000'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/2233153239156877233' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c6613627676057244921'>
+<a name='c6613627676057244921'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/07422297152178282002" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6613627676057244921-07422297152178282002"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Michael Watkins">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/07422297152178282002' rel='nofollow'>Michael Watkins</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6613627676057244921'>
+<p>
+Agreed. If the goal is to hit the mass market of "web hosters", a great many of whom are fairly clueless appliance operators - where CPanel/WHM is the appliance - then you've got to convince or work with those behind those tools to make things happen.<br /><br />Could take awhile.<br /><br />So I also agree with Graham's other thrust - coming up with well documented solutions. Get enough of those out there and eventually the CPanel-meisters will take note.<br /><br />Some firms - notably Webfaction - seem to have solved this problem by writing their own control code.<br /><br />PS: don't forget about SCGI!
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1239949440000#c6613627676057244921' title='comment permalink'>
+April 17, 2009 at 4:24&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1870783356'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6613627676057244921' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c5335575397210382273'>
+<a name='c5335575397210382273'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5335575397210382273-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5335575397210382273'>
+<p>
+Yes, agree that management interfaces such as Cpanel/WHM are important.<br /><br />Once you look at getting into that, and providing Cpanel scripts for easy upload of application, the whole issue of Python packaging systems rears its ugly heads, as does controlled restart of application processes and migration to new code base and database schemas.<br /><br />As to SCGI, I don't see that as a viable option of mass hosting as mod_scgi only has an external mode and doesn't have a dynamic mode like mod_fastcgi and mod_fcgid for Apache. To support SCGI means having to create a whole infrastructure behind the Apache instance for startup and management of the processes, ie., monit or supervisord. I believe this is getting too complicated for web hosting companies. They just want something that works with minimal configuration from Apache and no need for any sort of separate infrastructure for process management. For similar reasons, I don't think FASTCGI and SCGI is viable using lighttpd or nginx either, as they also only support an external mode. Same again with mod_proxy, they all require extra infrastructure.<br /><br />Also, WebFaction isn't commodity mass virtual hosting as they provide you your own Apache instance. I am very much talking about shared hosting on one Apache instance. WebFaction can already use mod_wsgi or mod_python because you each have your own server to play in.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1239949980000#c5335575397210382273' title='comment permalink'>
+April 17, 2009 at 4:33&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5335575397210382273' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c7115013664259461372'>
+<a name='c7115013664259461372'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/07422297152178282002" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7115013664259461372-07422297152178282002"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Michael Watkins">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/07422297152178282002' rel='nofollow'>Michael Watkins</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7115013664259461372'>
+<p>
+I think perhaps even more than the infrastructure concerns, most commodity web hosts don&#39;t want to touch Python because they don&#39;t understand it. They barely understand PHP. They&#39;ve been burned many times by insecure PHP installations, by their own insecure infrastructure, and by poorly written PHP applications, hence &quot;Hardened PHP&quot;, suhosin, suexec - and so on.<br /><br />Maybe the overall premise is wrong, that &quot;anyone&quot; can run a web application in a reasonable and secure manner, like plugging in a toaster. <br /><br />Or, maybe the environment has to change. With today&#39;s processors and disk it seems much more common for someone with a need to host an app to head for a &quot;virtual private server&quot; (which may or may not have a &quot;control panel&quot; driving it). You can get 512MB - 2GB of RAM in such a &quot;server&quot; for &lt; 35$ a month, often much less, even from reasonably reliable providers. <br /><br />Had that been available to me almost 10 years ago, I would not have invested in my own co-located equipment. One of the better shared hosts at the time (and still today), Pair Networks, had no ability to deal with Python (or Postgres then), even on their &quot;managed&quot; dedicated servers.<br /><br />Re Webfaction, its never been clear to me when they require you to have your own Apache instance (thus using some of your RAM allocation) vs being able to use the shared &quot;system&quot; Apache. I could be wrong but I believe they do allow for  use of the system Apache for the applications that they provide full (meaning their own control software and installers) for.<br /><br />RAM is a big issue for shared hosters. I suppose mod_php delivers an execution environment which is friendly to RAM even with a bunch o&#39; users all running different apps.<br /><br />That sort of execution model isn&#39;t common in Python land. <br /><br />Even though I find my needs well served by apache / lighttpd and SCGI with an obviously external Python process(s), I&#39;m trying to wrap my head around this problem again which is why your rant caught my attention.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1239954540000#c7115013664259461372' title='comment permalink'>
+April 17, 2009 at 5:49&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1870783356'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7115013664259461372' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c2045976157482958773'>
+<a name='c2045976157482958773'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-2045976157482958773-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-2045976157482958773'>
+<p>
+True, they probably don't understand and why it is in part an education process. I find that even people involved with Python web applications are sometimes quite clueless when it comes to Apache.<br /><br />There are a couple of forums in particular where I have given up trying to help people because some of the principles on the lists, either through arrogance or some religious zeal over alternatives to Apache, don't want to listen when you try and correct them about the misconceptions they have about how Apache works. End result is that they just keep telling people wrong information about how to set Apache up, or deliberately try and give people an impression that Apache is evil and that it shouldn't be used.<br /><br />So, like with those forums I have given up on, there is a risk that this idea will be a waste of time as well. In other words, you can document something to extreme detail, but if people don't want to read it and learn from it, there is nothing you can do.<br /><br />Sorry, I have dropped into rant mode now. Hopefully though you don't really see my main post as a rant. I do really want to try and improve things and aren't the sort to just complain about something and then expect someone else to fix it.<br /><br />Anyway, memory usage as you point out is another issue where one has to explain well how things work with Python and persistent processes. Any guidelines therefore need to cover how to setup things so that idle processes are killed off. One probably has to go as far as providing example scripts that can be periodically run to kill off processes which exceed some deemed maximum size.<br /><br />Same with security issues, all the issues need to be explained properly and it shown how to set things up properly. Personally I cringe when I see hosting companies who offer mod_python for $4 a month on what is obviously a shared hosting system. They obviously just mustn't understand the dangers of running mod_python in that sort of configuration.<br /><br />So, we try and explain what we know are the problems and what they have to look out for. At the same time we need to know their concerns and what limitations they have to work with. There is no point us saying do this or that if it isn't practical. For example, VPS systems would negate pretty well all the problems, but that doesn't help when they are trying to supports tens of thousands of sites on as minimal amount of hardware as possible. So, different solutions for different types of hosting types.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1239961200000#c2045976157482958773' title='comment permalink'>
+April 17, 2009 at 7:40&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/2045976157482958773' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c4955738753957754005'>
+<a name='c4955738753957754005'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/07422297152178282002" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4955738753957754005-07422297152178282002"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Michael Watkins">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/07422297152178282002' rel='nofollow'>Michael Watkins</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4955738753957754005'>
+<p>
+Graham, rest assured your comments are not being taken as a rant, although I would agree that some ranting is perfectly justified on this topic.<br /><br />I'm interested in this subject matter myself as recently I've had some reason to look beyond the comfy spot where my own applications reside and think about mass hosting, or at least "bulk" hosting, of Python apps.<br /><br />Are you aware of any fulsome examination  and discussion of the different execution models - the mod_php / mod_python (my knowledge of this is less than complete) as compared to the other approaches?
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1239981120000#c4955738753957754005' title='comment permalink'>
+April 18, 2009 at 1:12&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1870783356'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4955738753957754005' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c5685281297814076722'>
+<a name='c5685281297814076722'></a>
+<div class="avatar-image-container vcard"><span dir="ltr"><a href="https://www.blogger.com/profile/18167737911493104561" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5685281297814076722-18167737911493104561"><img src="https://resources.blogblog.com/img/blank.gif" width="35" height="35" class="delayLoad" style="display: none;" longdesc="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgWrO2MztVaHWP5qTW77C9FeGqKd7_VOkIASJWiKlx8QBKDYkJGSmBZrLkydiOlT46rtu50I17y6U8mKUJpSzIR3KMEwrxZFEksZ1FOgeKRkv9qr5GU-9rIloPw_BamjhA/s45-c/zvart.jpg" alt="" title="Chris">
+
+<noscript><img src="//blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgWrO2MztVaHWP5qTW77C9FeGqKd7_VOkIASJWiKlx8QBKDYkJGSmBZrLkydiOlT46rtu50I17y6U8mKUJpSzIR3KMEwrxZFEksZ1FOgeKRkv9qr5GU-9rIloPw_BamjhA/s45-c/zvart.jpg" width="35" height="35" class="photo" alt=""></noscript></a></span></div>
+<a href='https://www.blogger.com/profile/18167737911493104561' rel='nofollow'>Chris</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5685281297814076722'>
+<p>
+Just throwing this out, but perhaps in addition to pursuing "mass virtual hosting," a parallel effort with the ever-growing number of specialized, Ruby/RoR hosting companies might make sense? They've got Rack, understand their platforms and probably appreciate having stable, mature tools.  I've met "the masses" and they are going to keep doing PHP.  If something like Zine were to become a killer app, that would help too.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1239983280000#c5685281297814076722' title='comment permalink'>
+April 18, 2009 at 1:48&#8239;AM
+</a>
+<span class='item-control blog-admin pid-939061043'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5685281297814076722' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c1639069201597642789'>
+<a name='c1639069201597642789'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/10311421080197766290" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1639069201597642789-10311421080197766290"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="elarson">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/10311421080197766290' rel='nofollow'>elarson</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1639069201597642789'>
+<p>
+I definitely see the advantages of thinking in terms of FastCGI when thinking of how to create a PHP for Python type environment, but I wonder if the proxy method might be simpler. For example, if the webhost provides a simple interface for starting a python script on a specific port and then providing simple X headers for gathering any extra data not provided by the default proxy modules. The host could then effectively monitor the long running process and provide details regarding issues.<br /><br />I'm just thinking aloud here and am curious if this method might be a better avenue.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1239989580000#c1639069201597642789' title='comment permalink'>
+April 18, 2009 at 3:33&#8239;AM
+</a>
+<span class='item-control blog-admin pid-168452274'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1639069201597642789' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c1697663095297207601'>
+<a name='c1697663095297207601'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/07422297152178282002" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1697663095297207601-07422297152178282002"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Michael Watkins">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/07422297152178282002' rel='nofollow'>Michael Watkins</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1697663095297207601'>
+<p>
+I think the challenge here is to separate the issues. "Easy" and "Optimal" might mean different things to different *types* of web hosting firms.<br /><br />For example, a commodity firm that operates a cookie-cutter clone of CPanel/WHMCS install, with installation script managers like "Fantastico" and such - most of them (sorry folks) are clueless. Many are resellers of some other entity which provides them the cookie-cutter environment. It's multi-level marketing writ large.<br /><br />Anyway... for those folks "easy" probably means make it look like PHP, because "optimal" for them means having a Python interpreter process that resets on each and every request, in that way being able to serve up any site from any of their hundreds of served domains on a single box... with not very many instances of the Python process.<br /><br />That doesn't sound optimal in my view, mostly from a security perspective, but for the lowest-common denominator hoster, that is what they would like. <br /><br />Or at least that is what the CPanel authors would like, because its a model that they all (CPanel and their user-clients) understand well.<br /><br />"Easy" and "Optimal" for someone like me  will probably be different. Lets say my profile is this:<br /><br />- willing to provide hosting users with X amount of RAM and the ability to launch well behaved long-running processes <br /><br />- willing to support any scheme which makes it relatively easy to support this model either with scripting, or ideally through simple configuration of a front end web server<br /><br />Yes, a hoster like that might very well want to run CPanel or Plesk or HSphere etc so if the approach can work within the boundaries of what those folks already support, so much the better. Seems to me that the plumbing is not such a big challenge, but the monitoring of resources - i.e. ensure this user runs only X number of processes using no more than Y RAM average, YY burst and Z cpu cycles on average / and ZZ burst.<br /><br />Maybe as Graham as alluded to the perfect solution is a situation where through configuration of the HTTPD (ideally agnostic as to whether it is Apache or lighttpd or ...)  a Python application is launched, chrooted / privs dropped, run as the user. Somehow dealing with code-changes, hung processes and such happens.<br /><br />And it works for (most) all Python apps.<br /><br />"Easy" and "Almost optimal" would require some of the elements of the above but merely creates an easy way to hook up plumbing.<br /><br />I.e. you do the major configuration in a front end web server, expecting to deal with external processes. The plumbing is setting up a port or unix domain socket and choosing an integration type (fcgi, wsgi, scgi, etc).<br /><br />This is something I do now, partly automated. Monitoring of resources I have implemented at a very basic level but if we were to offer these services broadly we'd have to up the ante and dive in much deeper.<br /><br />I'm just thinking off the top of my head. Probably I should do that elsewhere and not pollute Graham's blog!
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1239991140000#c1697663095297207601' title='comment permalink'>
+April 18, 2009 at 3:59&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1870783356'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1697663095297207601' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c8435148908119206564'>
+<a name='c8435148908119206564'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/09235651080908874850" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-8435148908119206564-09235651080908874850"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Greg Whitescarver">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/09235651080908874850' rel='nofollow'>Greg Whitescarver</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-8435148908119206564'>
+<p>
+You can count me in 'the masses' as I have primarily been working on PHP applications since the late 90's.  That, however, might be a chicken/egg thing, since I have been dissuaded from adopting other languages like Ruby and Python largely because of convenience issues.  I do consider myself language-agnostic in theory, but it's not my cup of tea to really tear into the Apache documentation when what I really want to be doing is building software.<br /><br />To that end, I think your proposed project would have tremendous value for both hosting providers (even initially reluctant ones), Python newbs, and even 'the masses', some of whom merely stick with PHP because that is what Dreamhost supports best.<br /><br />Speaking of Dreamhost, I don't know if they are one of the commodity hosting providers that have put a bad taste in your mouth, but from the customer perspective, I have personally had a very good experience with them.  Indeed, you can run RoR and Django on Dreamhost without too much pain at this point.  They also have a wiki that is edited by both customers and staff, so the documentation is always evolving.<br /><br />What's missing from the world is exactly what you're proposing, a sort of enabling and encouragement of WSGI support that is not a burden on the hosting customer.  The more folks that feel it is not a problem to add a Python app to their $8/month Dreamhost account (where they already have 5 PHP sites running), the better.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1239992880000#c8435148908119206564' title='comment permalink'>
+April 18, 2009 at 4:28&#8239;AM
+</a>
+<span class='item-control blog-admin pid-2092523036'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/8435148908119206564' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c790115760092198523'>
+<a name='c790115760092198523'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-790115760092198523-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-790115760092198523'>
+<p>
+@Michael: You can see some discussion about PHP vs Python and mod_python/mod_wsgi in the following posts:<br /><br />http://blog.ianbicking.org/2008/01/12/what-php-deployment-gets-right/<br />http://blog.dscpl.com.au/2009/03/load-spikes-and-excessive-memory-usage.html<br /><br />@Chris: Yes the Ruby folks matter in as much as they have made good progress in getting web hosting companies to use Phusion Passenger. Not necessarily widely known and not well documented is that Phusion Passenger supports Python WSGI applications as well. Thus, if it satisfies all the criteria for what would be considered acceptable to web hosting companies, then it can be an option instead of using FASTCGI. I haven't looked enough at Phusion Passenger yet to know what it does about logging for different users applications nor what it does to keep users applications running as that user.<br /><br />@elarson: Web hosting companies aren't going to go and create themselves an infrastructure for handling management of back end processes access via proxy or fastcgi/scgi external modes. This is because it is likely going to be beyond most an only add complexity they perhaps don't want. If someone wants to separately develop such a solution and ensure it can work with web hosting companies systems, then that maybe, but otherwise don't think that is going to happen.<br /><br />@Greg: I have never dealt with DreamHost, although from memory have seen a poll where they were after feedback from customers as to whether to use more reliable mod_fcgid, or try and support mod_python or mod_wsgi somehow. So maybe questions are being asked internally there as to whether there is a better way of doing things as well.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1240015140000#c790115760092198523' title='comment permalink'>
+April 18, 2009 at 10:39&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/790115760092198523' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c4253245278474817070'>
+<a name='c4253245278474817070'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/03682928140340344602" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4253245278474817070-03682928140340344602"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="garylinux">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/03682928140340344602' rel='nofollow'>garylinux</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4253245278474817070'>
+<p>
+One of the draw backs to python hosting in virtual hosting setups is the long running process. Sysadmins don't like them on virtual domains hosts. That only leaves cgi and that is slow in python.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1240029420000#c4253245278474817070' title='comment permalink'>
+April 18, 2009 at 2:37&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1430446148'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4253245278474817070' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c6506986638067805158'>
+<a name='c6506986638067805158'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6506986638067805158-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6506986638067805158'>
+<p>
+@garylinux: When they use fastcgi in combination with PHP they are already using processes that survive beyond one request. How quickly they reap processes when idle, or whether they periodically restart them to ensure no creeping memory usage will depend on their configuration. So, they already use long running processes.<br /><br />Obviously Python web applications are different in that in PHP, the specific PHP application is thrown away at the end of the request. This doesn't mean though that the PHP application doesn't have a high transient memory requirement which then carries through with that process, albeit reusable, until process is terminated.<br /><br />They aren't therefore as different as they may seem, except for the fact that Python web applications are often a lot more memory hungary. Configure things properly though to ensure that idle process are shutdown and one can still carry a reasonable number of Python web applications, just not as many perhaps as with PHP.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1240116060000#c6506986638067805158' title='comment permalink'>
+April 19, 2009 at 2:41&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6506986638067805158' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c5718498619818622541'>
+<a name='c5718498619818622541'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/03682928140340344602" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5718498619818622541-03682928140340344602"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="garylinux">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/03682928140340344602' rel='nofollow'>garylinux</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5718498619818622541'>
+<p>
+I agree with almost all you are saying  except most virtual hosts (That I have seen) still use apache and mod_php<br /><br />And the last think you said<br />"can still carry a reasonable number of Python web applications, just not as many perhaps as with PHP" <br />is one of the kickers  not as much  as php means not as much profit per machine.<br /><br />I also just did a quick icq questioning of a few sysadmins 2 of them are at the 2nd largest porn web host and one is admin at the host my servers are at.<br />They gave the same answer. If you want python on virtual domain get rid of the long running process.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1240167540000#c5718498619818622541' title='comment permalink'>
+April 20, 2009 at 4:59&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1430446148'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5718498619818622541' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c3475497040825948651'>
+<a name='c3475497040825948651'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-3475497040825948651-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-3475497040825948651'>
+<p>
+@garylinux: If they are still running PHP embedded in Apache using mod_php then all users code is running as the Apache user. This is an insecure way of running web applications. These are not the sort of web hosting companies we would want to attract.<br /><br />What we want for Python web hosting is quality of service. We don't want web hosting companies who only want to pay lip service to Python by only offering CGI and whose only interest is profit, rather than offering good service, by cramming as many unsuspecting users into a small as machine as possible.<br /><br />So, I don't believe we will loose anything by not catering to those sorts of operations.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1240182720000#c3475497040825948651' title='comment permalink'>
+April 20, 2009 at 9:12&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/3475497040825948651' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c7810305108256056415'>
+<a name='c7810305108256056415'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/09235651080908874850" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7810305108256056415-09235651080908874850"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Greg Whitescarver">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/09235651080908874850' rel='nofollow'>Greg Whitescarver</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7810305108256056415'>
+<p>
+Dreamhost does appear to have 'unsupported' support ;-) for Passenger/WSGI which is better than nothing:<br />http://wiki.dreamhost.com/Passenger_WSGI
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1240199040000#c7810305108256056415' title='comment permalink'>
+April 20, 2009 at 1:44&#8239;PM
+</a>
+<span class='item-control blog-admin pid-2092523036'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7810305108256056415' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c1184055667949335934'>
+<a name='c1184055667949335934'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1184055667949335934-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1184055667949335934'>
+<p>
+@Greg: FWIW, I have talked to a couple of hosts who happened to be using Phusion Passenger for Rails and they didn't even know it could do WSGI as well.<br /><br />One problem am starting to see though with hosting mechanisms which are actually designed for another language, is that the requirements of the other language predominate and so the configuration settings, which are usually global and cannot be customised on individual language basis for dynamic mode, aren't suited to Python web hosting.<br /><br />I am suspecting this is even going to be the case with FASTCGI solutions. These are likely to be tuned for PHP. That is, equivalent of single threaded prefork with capacity to scale up to many processes. This is exactly the sort of configuration which is quite bad for fat Python web applications.<br /><br />If FASTCGI were the mechanism used, it may be necessary to modify the likes of mod_fcgid to allow process spawning parameters to be customised based on extension type of the FASTCGI application. At least I don't think this can be down at present.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1240199760000#c1184055667949335934' title='comment permalink'>
+April 20, 2009 at 1:56&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1184055667949335934' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c6668631390468803777'>
+<a name='c6668631390468803777'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/14576518665210361618" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6668631390468803777-14576518665210361618"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Cushag">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/14576518665210361618' rel='nofollow'>Cushag</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6668631390468803777'>
+<p>
+It strikes me that the ideal would be to have an easy to install Apache module which is suitable for shared hosting - mod_python mk2 if you like.<br /><br />An alternative tack might be to bypass the &#39;web hosters&#39; and use Virtual Python. It would seem possible to install this on shared hosting even if Python isn&#39;t provided and no SSH.  Having an easy to install Virtual Python optimised for shared hosting environments, with good security and performance might give the freedom to have Python almost anywhere.<br /><br />I also wonder if perhaps sometimes it is better to think &#39;outside the box&#39; when using Python with webhosting, especially with computationally intensive tasks. A couple of approaches I&#39;ve toyed with is using XMLRPC (and also sockets) to transfer the few kb of encrypted data to my own PC for intensive Python processing (and sending back the few kb of processed data).  It&#39;s a kind of crude DIY Python application server, but maybe a model for having python on optimised application servers rather than residing on webservers might be an alternative approach.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1245003510928#c6668631390468803777' title='comment permalink'>
+June 15, 2009 at 4:18&#8239;AM
+</a>
+<span class='item-control blog-admin pid-768895333'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6668631390468803777' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c4068889880226301088'>
+<a name='c4068889880226301088'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4068889880226301088-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4068889880226301088'>
+<p>
+@Cushag<br /><br />The point in part of mod_wsgi is that it be a better mk2 version of mod_python. If not familiar with mod_wsgi you perhaps should have a look at it and the roadmap the blog post referred to.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1245025498467#c4068889880226301088' title='comment permalink'>
+June 15, 2009 at 10:24&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4068889880226301088' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c2855915681861704457'>
+<a name='c2855915681861704457'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/14576518665210361618" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-2855915681861704457-14576518665210361618"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Cushag">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/14576518665210361618' rel='nofollow'>Cushag</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-2855915681861704457'>
+<p>
+Thanks for this, sorry to be dumb, but I got the impression mod_wsgi wouldn&#39;t be a substitute for mod_python as such. <br /><br />Just to clarify, if a web hoster who doesn&#39;t yet have mod_python and does not yet offer Python installs mod_wsgi, will this mean that one can then use the same CGI scripts etc. as one would have with mod_python without re-writing these?<br /><br />As I see it, a mk2 vsn of mod_python would let me run this without any re-writing: <br /><br />  #!/usr/bin/env python<br />  print &#39;Content-type: text/plain\n\n&#39;<br />  print &#39;Hello world!&#39;<br /><br /><br />Ideally this mk2 would be easy to install, and it wouldn&#39;t be necessary to install anything beyond this. Very ideally this would also offer all the advantages of mod_wsgi as well.<br /><br />IMO a key issue is whether the mk2 will be &#39;backwards compatible&#39;, so one can use CGI scripts etc. which work under mod_python.  (even if this only works with scripts in CGI or SCGI directories).
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1245055745615#c2855915681861704457' title='comment permalink'>
+June 15, 2009 at 6:49&#8239;PM
+</a>
+<span class='item-control blog-admin pid-768895333'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/2855915681861704457' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c5871779710040112152'>
+<a name='c5871779710040112152'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5871779710040112152-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5871779710040112152'>
+<p>
+The way that mod_python supports CGI scripts is a kludge and isn&#39;t always going to work.<br /><br />In respect of Python, CGI is superseded by WSGI. So no, there is no intention to offer direct support for CGI scripts implemented in Python, although you could always kludge together such a solution if you really want to on top of WSGI.<br /><br />So, you would be much better off porting any CGI applications implemented in Python to run on WSGI. If you still need to, you can then run that WSGI application on top of CGI using a CGI/WSGI bridge.<br /><br />If you don&#39;t understand what WSGI is, you perhaps should start doing some research on it. It is arguably the future for Python.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html?showComment=1245115581086#c5871779710040112152' title='comment permalink'>
+June 16, 2009 at 11:26&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5871779710040112152' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+</dl>
+</div>
+<p class='comment-footer'>
+<a href='https://www.blogger.com/comment/fullpage/post/2363643920942057324/8413796850426758491' onclick=''>Post a Comment</a>
+</p>
+</div>
+</div>
+
+        </div></div>
+      
+</div>
+<div class='blog-pager' id='blog-pager'>
+<span id='blog-pager-newer-link'>
+<a class='blog-pager-newer-link' href='http://blog.dscpl.com.au/2009/04/accreditation-for-python-web-hosting.html' id='Blog1_blog-pager-newer-link' title='Newer Post'>Newer Post</a>
+</span>
+<span id='blog-pager-older-link'>
+<a class='blog-pager-older-link' href='http://blog.dscpl.com.au/2009/04/version-24-of-modwsgi-is-now-available.html' id='Blog1_blog-pager-older-link' title='Older Post'>Older Post</a>
+</span>
+<a class='home-link' href='http://blog.dscpl.com.au/'>Home</a>
+</div>
+<div class='clear'></div>
+<div class='post-feeds'>
+<div class='feed-links'>
+Subscribe to:
+<a class='feed-link' href='http://blog.dscpl.com.au/feeds/8413796850426758491/comments/default' target='_blank' type='application/atom+xml'>Post Comments (Atom)</a>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='column-left-outer'>
+<div class='column-left-inner'>
+<aside>
+</aside>
+</div>
+</div>
+<div class='column-right-outer'>
+<div class='column-right-inner'>
+<aside>
+<div class='sidebar section' id='sidebar-right-1'><div class='widget Profile' data-version='1' id='Profile1'>
+<h2>About Me</h2>
+<div class='widget-content'>
+<dl class='profile-datablock'>
+<dt class='profile-data'>
+<a class='profile-name-link g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' style='background-image: url(//www.blogger.com/img/logo-16.png);'>
+Graham Dumpleton
+</a>
+</dt>
+</dl>
+<a class='profile-link' href='https://www.blogger.com/profile/13609779138164842374' rel='author'>View my complete profile</a>
+<div class='clear'></div>
+</div>
+</div><div class='widget PageList' data-version='1' id='PageList1'>
+<h2>Quick Links</h2>
+<div class='widget-content'>
+<ul>
+<li>
+<a href='http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html'>Decorators and monkey patching.</a>
+</li>
+<li>
+<a href='http://blog.dscpl.com.au/p/using-python-with-docker.html'>Using Python with Docker.</a>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div><div class='widget BlogArchive' data-version='1' id='BlogArchive1'>
+<h2>Blog Archive</h2>
+<div class='widget-content'>
+<div id='ArchiveList'>
+<div id='BlogArchive1_ArchiveList'>
+<select id='BlogArchive1_ArchiveMenu'>
+<option value=''>Blog Archive</option>
+<option value='http://blog.dscpl.com.au/2019/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2018/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2018/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2018/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2018/01/'>January (1)</option>
+<option value='http://blog.dscpl.com.au/2017/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2016/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2016/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2016/07/'>July (1)</option>
+<option value='http://blog.dscpl.com.au/2016/04/'>April (2)</option>
+<option value='http://blog.dscpl.com.au/2016/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2016/02/'>February (2)</option>
+<option value='http://blog.dscpl.com.au/2016/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2015/12/'>December (6)</option>
+<option value='http://blog.dscpl.com.au/2015/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2015/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2015/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2015/06/'>June (5)</option>
+<option value='http://blog.dscpl.com.au/2015/05/'>May (7)</option>
+<option value='http://blog.dscpl.com.au/2015/04/'>April (4)</option>
+<option value='http://blog.dscpl.com.au/2015/03/'>March (4)</option>
+<option value='http://blog.dscpl.com.au/2015/01/'>January (2)</option>
+<option value='http://blog.dscpl.com.au/2014/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2014/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2014/09/'>September (7)</option>
+<option value='http://blog.dscpl.com.au/2014/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2014/05/'>May (1)</option>
+<option value='http://blog.dscpl.com.au/2014/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2014/02/'>February (4)</option>
+<option value='http://blog.dscpl.com.au/2014/01/'>January (8)</option>
+<option value='http://blog.dscpl.com.au/2013/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/10/'>October (4)</option>
+<option value='http://blog.dscpl.com.au/2012/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2011/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2011/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2011/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2011/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2011/01/'>January (5)</option>
+<option value='http://blog.dscpl.com.au/2010/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2010/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2010/08/'>August (2)</option>
+<option value='http://blog.dscpl.com.au/2010/06/'>June (2)</option>
+<option value='http://blog.dscpl.com.au/2010/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2010/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2010/03/'>March (3)</option>
+<option value='http://blog.dscpl.com.au/2009/11/'>November (4)</option>
+<option value='http://blog.dscpl.com.au/2009/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2009/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2009/08/'>August (3)</option>
+<option value='http://blog.dscpl.com.au/2009/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2009/04/'>April (5)</option>
+<option value='http://blog.dscpl.com.au/2009/03/'>March (5)</option>
+<option value='http://blog.dscpl.com.au/2009/02/'>February (1)</option>
+<option value='http://blog.dscpl.com.au/2008/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2008/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2008/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2007/11/'>November (2)</option>
+<option value='http://blog.dscpl.com.au/2007/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2007/09/'>September (3)</option>
+<option value='http://blog.dscpl.com.au/2007/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2007/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2007/03/'>March (2)</option>
+</select>
+</div>
+</div>
+<div class='clear'></div>
+</div>
+</div><div class='widget Label' data-version='1' id='Label1'>
+<h2>Labels</h2>
+<div class='widget-content list-label-widget-content'>
+<ul>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/python'>python</a>
+<span dir='ltr'>(111)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_wsgi'>mod_wsgi</a>
+<span dir='ltr'>(86)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wsgi'>wsgi</a>
+<span dir='ltr'>(58)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/apache'>apache</a>
+<span dir='ltr'>(35)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/docker'>docker</a>
+<span dir='ltr'>(34)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/openshift'>openshift</a>
+<span dir='ltr'>(26)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/decorators'>decorators</a>
+<span dir='ltr'>(15)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/django'>django</a>
+<span dir='ltr'>(13)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/kubernetes'>kubernetes</a>
+<span dir='ltr'>(12)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_python'>mod_python</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/red%20hat'>red hat</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/ipython'>ipython</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyterhub'>jupyterhub</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/new%20relic'>new relic</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wrapt'>wrapt</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/pycon'>pycon</a>
+<span dir='ltr'>(5)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/s2i'>s2i</a>
+<span dir='ltr'>(4)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/gunicorn'>gunicorn</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/uWSGI'>uWSGI</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/datadog'>datadog</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/nginx'>nginx</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/statsd'>statsd</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/web2py'>web2py</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/async'>async</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/dyndns53'>dyndns53</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/fastcgi'>fastcgi</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/heroku'>heroku</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyter'>jupyter</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/lektor'>lektor</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/php'>php</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/shiv'>shiv</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/testing'>testing</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/tornado'>tornado</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/warpdrive'>warpdrive</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/zipapp'>zipapp</a>
+<span dir='ltr'>(1)</span>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div></div>
+</aside>
+</div>
+</div>
+</div>
+<div style='clear: both'></div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+<div class='main-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<footer>
+<div class='footer-outer'>
+<div class='footer-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left footer-fauxborder-left'>
+<div class='fauxborder-right footer-fauxborder-right'></div>
+<div class='region-inner footer-inner'>
+<div class='foot section' id='footer-1'><div class='widget AdSense' data-version='1' id='AdSense1'>
+<div class='widget-content'>
+<script type="text/javascript"><!--
+google_ad_client="pub-6433235630058377";
+google_ad_host="pub-1556223355139109";
+google_ad_width=120;
+google_ad_height=600;
+google_ad_format="120x600_as";
+google_ad_type="text";
+google_ad_host_channel="0001";
+google_color_border="FFFFFF";
+google_color_bg="FFFFFF";
+google_color_link="999999";
+google_color_url="5588AA";
+google_color_text="666666";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<div class='clear'></div>
+</div>
+</div></div>
+<table border='0' cellpadding='0' cellspacing='0' class='section-columns columns-2'>
+<tbody>
+<tr>
+<td class='first columns-cell'>
+<div class='foot no-items section' id='footer-2-1'></div>
+</td>
+<td class='columns-cell'>
+<div class='foot no-items section' id='footer-2-2'></div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- outside of the include in order to lock Attribution widget -->
+<div class='foot section' id='footer-3' name='Footer'><div class='widget Attribution' data-version='1' id='Attribution1'>
+<div class='widget-content' style='text-align: center;'>
+Simple theme. Powered by <a href='https://www.blogger.com' target='_blank'>Blogger</a>.
+</div>
+<div class='clear'></div>
+</div></div>
+</div>
+</div>
+<div class='footer-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</footer>
+<!-- content -->
+</div>
+</div>
+<div class='content-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<script type='text/javascript'>
+    window.setTimeout(function() {
+        document.body.className = document.body.className.replace('loading', '');
+      }, 10);
+  </script>
+
+<script type="text/javascript" src="https://www.blogger.com/static/v1/widgets/552934507-widgets.js"></script>
+<script type='text/javascript'>
+window['__wavt'] = 'AOuZoY73ng8g_4fZf5oau0SF1fW18zt3rQ:1757388489579';_WidgetManager._Init('//www.blogger.com/rearrange?blogID\x3d2363643920942057324','//blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html','2363643920942057324');
+_WidgetManager._SetDataContext([{'name': 'blog', 'data': {'blogId': '2363643920942057324', 'title': 'Graham Dumpleton', 'url': 'http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html', 'canonicalUrl': 'http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html', 'homepageUrl': 'http://blog.dscpl.com.au/', 'searchUrl': 'http://blog.dscpl.com.au/search', 'canonicalHomepageUrl': 'http://blog.dscpl.com.au/', 'blogspotFaviconUrl': 'http://blog.dscpl.com.au/favicon.ico', 'bloggerUrl': 'https://www.blogger.com', 'hasCustomDomain': true, 'httpsEnabled': false, 'enabledCommentProfileImages': true, 'gPlusViewType': 'FILTERED_POSTMOD', 'adultContent': false, 'analyticsAccountNumber': '', 'encoding': 'UTF-8', 'locale': 'en', 'localeUnderscoreDelimited': 'en', 'languageDirection': 'ltr', 'isPrivate': false, 'isMobile': false, 'isMobileRequest': false, 'mobileClass': '', 'isPrivateBlog': false, 'isDynamicViewsAvailable': true, 'feedLinks': '\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default\x22 /\x3e\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/rss+xml\x22 title\x3d\x22Graham Dumpleton - RSS\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default?alt\x3drss\x22 /\x3e\n\x3clink rel\x3d\x22service.post\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22https://www.blogger.com/feeds/2363643920942057324/posts/default\x22 /\x3e\n\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/8413796850426758491/comments/default\x22 /\x3e\n', 'meTag': '', 'adsenseClientId': 'ca-pub-6433235630058377', 'adsenseHostId': 'ca-host-pub-1556223355139109', 'adsenseHasAds': true, 'adsenseAutoAds': false, 'boqCommentIframeForm': true, 'loginRedirectParam': '', 'view': '', 'dynamicViewsCommentsSrc': '//www.blogblog.com/dynamicviews/4224c15c4e7c9321/js/comments.js', 'dynamicViewsScriptSrc': '//www.blogblog.com/dynamicviews/b4594f574ba3c273', 'plusOneApiSrc': 'https://apis.google.com/js/platform.js', 'disableGComments': true, 'interstitialAccepted': false, 'sharing': {'platforms': [{'name': 'Get link', 'key': 'link', 'shareMessage': 'Get link', 'target': ''}, {'name': 'Facebook', 'key': 'facebook', 'shareMessage': 'Share to Facebook', 'target': 'facebook'}, {'name': 'BlogThis!', 'key': 'blogThis', 'shareMessage': 'BlogThis!', 'target': 'blog'}, {'name': 'X', 'key': 'twitter', 'shareMessage': 'Share to X', 'target': 'twitter'}, {'name': 'Pinterest', 'key': 'pinterest', 'shareMessage': 'Share to Pinterest', 'target': 'pinterest'}, {'name': 'Email', 'key': 'email', 'shareMessage': 'Email', 'target': 'email'}], 'disableGooglePlus': true, 'googlePlusShareButtonWidth': 0, 'googlePlusBootstrap': '\x3cscript type\x3d\x22text/javascript\x22\x3ewindow.___gcfg \x3d {\x27lang\x27: \x27en\x27};\x3c/script\x3e'}, 'hasCustomJumpLinkMessage': false, 'jumpLinkMessage': 'Read more', 'pageType': 'item', 'postId': '8413796850426758491', 'pageName': 'Improving Commercial Python/WSGI Hosting Options', 'pageTitle': 'Graham Dumpleton: Improving Commercial Python/WSGI Hosting Options'}}, {'name': 'features', 'data': {}}, {'name': 'messages', 'data': {'edit': 'Edit', 'linkCopiedToClipboard': 'Link copied to clipboard!', 'ok': 'Ok', 'postLink': 'Post Link'}}, {'name': 'template', 'data': {'name': 'Simple', 'localizedName': 'Simple', 'isResponsive': false, 'isAlternateRendering': false, 'isCustom': false, 'variant': 'pale', 'variantId': 'pale'}}, {'name': 'view', 'data': {'classic': {'name': 'classic', 'url': '?view\x3dclassic'}, 'flipcard': {'name': 'flipcard', 'url': '?view\x3dflipcard'}, 'magazine': {'name': 'magazine', 'url': '?view\x3dmagazine'}, 'mosaic': {'name': 'mosaic', 'url': '?view\x3dmosaic'}, 'sidebar': {'name': 'sidebar', 'url': '?view\x3dsidebar'}, 'snapshot': {'name': 'snapshot', 'url': '?view\x3dsnapshot'}, 'timeslide': {'name': 'timeslide', 'url': '?view\x3dtimeslide'}, 'isMobile': false, 'title': 'Improving Commercial Python/WSGI Hosting Options', 'description': 'I\x27d like to think that through my work with mod_python  and mod_wsgi  that Python web hosting options have improved, but truth is that neith...', 'url': 'http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html', 'type': 'item', 'isSingleItem': true, 'isMultipleItems': false, 'isError': false, 'isPage': false, 'isPost': true, 'isHomepage': false, 'isArchive': false, 'isLabelSearch': false, 'postId': 8413796850426758491}}]);
+_WidgetManager._RegisterWidget('_NavbarView', new _WidgetInfo('Navbar1', 'navbar', document.getElementById('Navbar1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_HeaderView', new _WidgetInfo('Header1', 'header', document.getElementById('Header1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogView', new _WidgetInfo('Blog1', 'main', document.getElementById('Blog1'), {'cmtInteractionsEnabled': false, 'lightboxEnabled': true, 'lightboxModuleUrl': 'https://www.blogger.com/static/v1/jsbin/3842676126-lbx.js', 'lightboxCssUrl': 'https://www.blogger.com/static/v1/v-css/828616780-lightbox_bundle.css'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_ProfileView', new _WidgetInfo('Profile1', 'sidebar-right-1', document.getElementById('Profile1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_PageListView', new _WidgetInfo('PageList1', 'sidebar-right-1', document.getElementById('PageList1'), {'title': 'Quick Links', 'links': [{'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html', 'id': '3350721465154129789', 'title': 'Decorators and monkey patching.'}, {'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/using-python-with-docker.html', 'id': '5591286857776935907', 'title': 'Using Python with Docker.'}], 'mobile': false, 'showPlaceholder': true, 'hasCurrentPage': false}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogArchiveView', new _WidgetInfo('BlogArchive1', 'sidebar-right-1', document.getElementById('BlogArchive1'), {'languageDirection': 'ltr', 'loadingMessage': 'Loading\x26hellip;'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_LabelView', new _WidgetInfo('Label1', 'sidebar-right-1', document.getElementById('Label1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AdSenseView', new _WidgetInfo('AdSense1', 'footer-1', document.getElementById('AdSense1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AttributionView', new _WidgetInfo('Attribution1', 'footer-3', document.getElementById('Attribution1'), {}, 'displayModeFull'));
+</script>
+</body>
+</html>
