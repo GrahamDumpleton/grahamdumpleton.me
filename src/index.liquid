@@ -5,66 +5,36 @@ title: Home
 
 <!-- Hero Section -->
 <div class="hero-section">
-    <div class="hero-content text-center">
+    <div class="hero-content">
         <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <h1 class="display-3 fw-bold mb-4">
-                    Graham Dumpleton
-                </h1>
-                <p class="lead mb-4">
-                    Crafting tools and sharing knowledge that empowers developers.
-                </p>
-                <div class="d-flex flex-wrap justify-content-center gap-3">
-                    <a href="/posts/" class="btn btn-light btn-lg">
-                        <i class="bi bi-journal-text me-2"></i>Read My Posts
-                    </a>
-                    <a href="/about/" class="btn btn-outline-light btn-lg">
-                        <i class="bi bi-person me-2"></i>About Me
-                    </a>
+            <div class="col-lg-10">
+                <div class="hero-message">
+                    <p class="hero-greeting mb-3">
+                        Hi there 👋
+                    </p>
+                    <p class="hero-description mb-4">
+                        This is where I write about the open source software I build, the problems I solve, 
+                        and the things I learn along the way. Mostly Python, web development, and whatever 
+                        else catches my interest.
+                    </p>
+                    <p class="hero-invitation mb-4">
+                        Feel free to browse around, check out some posts, or reach out to me if you want to chat about code.
+                    </p>
+                    <div class="hero-signature mb-4">
+                        <p class="mb-0 text-center">
+                            - Graham
+                        </p>
+                    </div>
+                    <hr class="hero-divider mb-4">
+                    <div class="hero-actions d-flex flex-wrap justify-content-center gap-3">
+                        <a href="/posts/" class="btn btn-light">
+                            <i class="bi bi-journal-text me-2"></i>Browse Posts
+                        </a>
+                        <a href="/about/" class="btn btn-outline-light">
+                            <i class="bi bi-person me-2"></i>More About Me
+                        </a>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Featured Content -->
-<div class="row mb-5">
-    <div class="col-lg-4 mb-4">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body text-center p-4">
-                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                    <i class="bi bi-code-slash fs-3"></i>
-                </div>
-                <h3 class="h5 fw-bold mb-3">Software Development</h3>
-                <p class="text-muted mb-0">
-                    Expertise across Python, C/C++, JavaScript, TypeScript, Go, and modern development practices.
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-4">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body text-center p-4">
-                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                    <i class="bi bi-tools fs-3"></i>
-                </div>
-                <h3 class="h5 fw-bold mb-3">Open Source Creator</h3>
-                <p class="text-muted mb-0">
-                    Creator of mod_wsgi, wrapt, and contributor to various other open source projects.
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-4">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body text-center p-4">
-                <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                    <i class="bi bi-mortarboard fs-3"></i>
-                </div>
-                <h3 class="h5 fw-bold mb-3">Technical Education</h3>
-                <p class="text-muted mb-0">
-                    Creating interactive training platforms and sharing knowledge through hands-on learning experiences.
-                </p>
             </div>
         </div>
     </div>
@@ -77,9 +47,11 @@ title: Home
             <h2 class="h3 fw-bold mb-0">
                 <i class="bi bi-clock-history me-2"></i>Recent Posts
             </h2>
+            <!--
             <a href="/posts/" class="btn btn-outline-primary">
                 View All Posts <i class="bi bi-arrow-right ms-1"></i>
             </a>
+            -->
         </div>
     </div>
 </div>
@@ -142,7 +114,7 @@ title: Home
                 <p class="text-muted mb-4">
                     Follow my journey and get notified about new posts and projects.
                 </p>
-                <div class="d-flex flex-wrap justify-content-center gap-3">
+                <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
                     <a href="https://github.com/GrahamDumpleton" class="btn btn-dark" target="_blank" rel="noopener">
                         <i class="bi bi-github me-2"></i>Follow on GitHub
                     </a>
@@ -155,6 +127,17 @@ title: Home
                     <a href="https://linkedin.com/in/grahamdumpleton" class="btn btn-outline-secondary" target="_blank" rel="noopener">
                         <i class="bi bi-linkedin me-2"></i>Follow on LinkedIn
                     </a>
+                </div>
+                <div class="rss-info">
+                    <p class="text-muted mb-2">
+                        <i class="bi bi-rss me-2"></i>You can also follow this site via 
+                        <a href="/feed.xml" class="text-decoration-none">RSS feed</a>.
+                    </p>
+                    <p class="text-muted mb-0 small">
+                        If you're a Python developer, you might also want to check out 
+                        <a href="https://planetpython.org/" class="text-decoration-none" target="_blank" rel="noopener">planetpython.org</a> 
+                        for posts from various Python developers, including myself.
+                    </p>
                 </div>
             </div>
         </div>
