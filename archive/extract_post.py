@@ -386,8 +386,8 @@ def convert_quoted_sections_to_code_blocks(content):
     
     while i < len(lines):
         line = lines[i]
-        
-        if line.startswith('>'):
+
+        if line == "> ":
             # Found start of quoted section
             quoted_section = []
             

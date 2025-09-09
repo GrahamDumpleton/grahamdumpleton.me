@@ -180,9 +180,7 @@ When using the Tornado web server though there is a hidden trap which I don’t 
 
 The issue in this case is that when the Tornado web server receives a request which contains request content, it will by default read all that request content into memory before even passing the request to the handler for that request. This is noted in the Tornado [documentation](http://www.tornadoweb.org/en/stable/guide/structure.html#handling-request-input) by the statement:
 
-```
 > By default uploaded files are fully buffered in memory; if you need to handle files that are too large to comfortably keep in memory see the stream\_request\_body class decorator.
-```
 
 It is a little detail, but the potential impacts of it are significant. This is because of the fact that Tornado can in theory process so many requests at the same time and so those concurrent requests can each be buffering up to 100MB at the same time and so blowing out memory usage. In fact, I am not even sure if there is a hard limit.
 

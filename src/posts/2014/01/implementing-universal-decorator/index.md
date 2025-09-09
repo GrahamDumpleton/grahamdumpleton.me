@@ -31,134 +31,98 @@ In this post I will describe how we can accommodate the cases of a class method 
 The pattern for our universal decorator as described so far was as follows:  
 
 
-```
 > class bound\_function\_wrapper\(object\_proxy\): 
-```
 
-```
 > def \_\_init\_\_\(self, wrapped, instance, wrapper\):  
 >  super\(bound\_function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
 >  self.instance = instance  
 >  self.wrapper = wrapper 
-```
 
-```
 > def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
 >  if self.instance is None:  
 >  instance, args = args\[0\], args\[1:\]  
 >  wrapped = functools.partial\(self.wrapped, instance\)  
 >  return self.wrapper\(wrapped, instance, args, kwargs\)  
 >  return self.wrapper\(self.wrapped, self.instance, args, kwargs\) 
-```
 
-```
 > class function\_wrapper\(object\_proxy\): 
-```
 
-```
 > def \_\_init\_\_\(self, wrapped, wrapper\):  
 >  super\(function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
 >  self.wrapper = wrapper 
-```
 
-```
 > def \_\_get\_\_\(self, instance, owner\):  
 >  wrapped = self.wrapped.\_\_get\_\_\(instance, owner\)  
 >  return bound\_function\_wrapper\(wrapped, instance, self.wrapper\) 
-```
 
-```
 > def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
 >  return self.wrapper\(self.wrapped, None, args, kwargs\)
-```
 
 This was used in conjunction with our decorator factory:  
 
 
-```
 > def decorator\(wrapper\):  
 >  @functools.wraps\(wrapper\)  
 >  def \_decorator\(wrapped\):  
 >  return function\_wrapper\(wrapped, wrapper\)  
 >  return \_decorator
-```
 
 To test whether everything is working how we want we used our decorator factory to create a decorator which would dump out the values of any instance the wrapped function is bound to, and the arguments passed to the call when executed.  
 
 
-```
 > @decorator  
 >  def my\_function\_wrapper\(wrapped, instance, args, kwargs\):  
 >  print\('INSTANCE', instance\)  
 >  print\('ARGS', args\)  
 >  return wrapped\(\*args, \*\*kwargs\) 
-```
 
 This gave us the desired results for when the decorator was applied to a normal function and instance method, including when an instance method was called via the class and the instance passed in explicitly.  
 
 
-```
 > @my\_function\_wrapper  
 >  def function\(a, b\):  
 >  pass
-```
 
-```
 > >>> function\(1, 2\)  
 >  INSTANCE None  
 >  ARGS \(1, 2\) 
-```
 
-```
 > class Class\(object\):  
 >  @my\_function\_wrapper  
 >  def function\_im\(self, a, b\):  
 >  pass 
-```
 
 > c = Class\(\) 
 
-```
 > >>> c.function\_im\(1, 2\)  
 >  INSTANCE <\_\_main\_\_.Class object at 0x1085ca9d0>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_im\(c, 1, 2\)  
 >  INSTANCE <\_\_main\_\_.Class object at 0x1085ca9d0>  
 >  ARGS \(1, 2\) 
-```
 
 The change to support the latter however, broke things for the case of the decorator being applied to a class method. Similarly for a static method.  
 
 
-```
 > class Class\(object\):  
 >  @my\_function\_wrapper  
 >  @classmethod  
 >  def function\_cm\(self, a, b\):  
 >  pass 
-```
 
-```
 > @my\_function\_wrapper  
 >  @staticmethod  
 >  def function\_sm\(a, b\):  
 >  pass
-```
 
-```
 > >>> Class.function\_cm\(1, 2\)  
 >  INSTANCE 1  
 >  ARGS \(2,\) 
-```
 
-```
 > >>> Class.function\_sm\(1, 2\)  
 >  INSTANCE 1  
 >  ARGS \(2,\) 
-```
 
 ###  Class methods and static methods
 
@@ -175,52 +139,40 @@ The point we are at therefore, is that in the case where the instance is passed 
 One way this can be done is by looking at the \_\_self\_\_ attribute of the bound function. This attribute will provide information about the type of object which the function was bound to at that specific point in time. Lets first check this out for where a method is called via the class.  
 
 
-```
 > >>> print\(Class.function\_im.\_\_self\_\_\)  
 >  None 
-```
 
-```
 > >>> print\(Class.function\_cm.\_\_self\_\_\)  
 >  <class '\_\_main\_\_.Class'>
-```
 
-```
 > >>> print\(Class.function\_sm.\_\_self\_\_\)  
 >  Traceback \(most recent call last\):  
 >  File "<stdin>", line 1, in <module>  
 >  File "test.py", line 19, in \_\_getattr\_\_  
 >  return getattr\(self.wrapped, name\)  
 >  AttributeError: 'function' object has no attribute '\_\_self\_\_'
-```
 
 So for the case of calling an instance method via the class, \_\_self\_\_ will be None, for a class method it will be the class type and in the case of a static method, there will not even be a \_\_self\_\_ attribute. This would therefore appear to give us a way of detecting the different cases.  
   
 Before we code up a solution based on this though, lets check with Python 3 just to be sure we are okay there and that nothing has changed.  
 
 
-```
 > >>> print\(Class.function\_im.\_\_self\_\_\)  
 >  Traceback \(most recent call last\):  
 >  File "<stdin>", line 1, in <module>  
 >  File "dectest.py", line 19, in \_\_getattr\_\_  
 >  return getattr\(self.wrapped, name\)  
 >  AttributeError: 'function' object has no attribute '\_\_self\_\_' 
-```
 
-```
 > >>> print\(Class.function\_cm.\_\_self\_\_\)  
 >  <class '\_\_main\_\_.Class'>
-```
 
-```
 > >>> print\(Class.function\_sm.\_\_self\_\_\)  
 >  Traceback \(most recent call last\):  
 >  File "<stdin>", line 1, in <module>  
 >  File "test.py", line 19, in \_\_getattr\_\_  
 >  return getattr\(self.wrapped, name\)  
 >  AttributeError: 'function' object has no attribute '\_\_self\_\_'
-```
 
 That isn't good, Python 3 behaves differently to Python 2, meaning we aren't going to be able to use this approach. Why is this case?  
   
@@ -231,57 +183,41 @@ The lack of this ability therefore leaves us with a bit of a problem for Python 
 This alternative is in the constructor of the function wrapper, to look at the type of the wrapped object and determine if it is an instance of a class method or static method. This information can then be passed through to the bound function wrapper and checked.  
 
 
-```
 > class bound\_function\_wrapper\(object\_proxy\): 
-```
 
-```
 > def \_\_init\_\_\(self, wrapped, instance, wrapper, binding\):  
 >  super\(bound\_function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
 >  self.instance = instance  
 >  self.wrapper = wrapper  
 >  self.binding = binding 
-```
 
-```
 > def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
 >  if self.binding == 'function' and self.instance is None:  
 >  instance, args = args\[0\], args\[1:\]  
 >  wrapped = functools.partial\(self.wrapped, instance\)  
 >  return self.wrapper\(wrapped, instance, args, kwargs\) 
-```
 
 > return self.wrapper\(self.wrapped, self.instance, args, kwargs\) 
 
-```
 > class function\_wrapper\(object\_proxy\): 
-```
 
-```
 > def \_\_init\_\_\(self, wrapped, wrapper\):  
 >  super\(function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
 >  self.wrapper = wrapper 
-```
 
-```
 > if isinstance\(wrapped, classmethod\):  
 >  self.binding = 'classmethod'  
 >  elif isinstance\(wrapped, staticmethod\):  
 >  self.binding = 'staticmethod'  
 >  else:  
 >  self.binding = 'function' 
-```
 
-```
 > def \_\_get\_\_\(self, instance, owner\):  
 >  wrapped = self.wrapped.\_\_get\_\_\(instance, owner\)  
 >  return bound\_function\_wrapper\(wrapped, instance, self.wrapper, self.binding\) 
-```
 
-```
 > def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
 >  return self.wrapper\(self.wrapped, None, args, kwargs\)
-```
 
 Now this test is a bit fragile, but as I showed before though, the traditional way that a decorator is written will fail if wrapped around a class method or static method as it doesn't honour the descriptor protocol. As such it is a pretty safe bet right now that I will only ever find an actual class method or static method object because no one would be using decorators around them.  
   
@@ -290,41 +226,29 @@ If someone is actually implementing the descriptor protocol in their decorator, 
 Anyway, trying out our tests again with this change we get:  
 
 
-```
 > >>> c.function\_im\(1,2\)  
 >  INSTANCE <\_\_main\_\_.Class object at 0x101f973d0>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_im\(c, 1, 2\)  
 >  INSTANCE <\_\_main\_\_.Class object at 0x101f973d0>  
 >  ARGS \(1, 2\)
-```
 
-```
 > >>> c.function\_cm\(1,2\)  
 >  INSTANCE <\_\_main\_\_.Class object at 0x101f973d0>  
 >  ARGS \(1, 2\)
-```
 
-```
 > >>> Class.function\_cm\(1, 2\)  
 >  INSTANCE None  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> c.function\_sm\(1,2\)  
 >  INSTANCE <\_\_main\_\_.Class object at 0x101f973d0>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_sm\(1, 2\)  
 >  INSTANCE None  
 >  ARGS \(1, 2\)
-```
 
 Success, we have fixed the issue with the argument list when both a class method and a static method are called.  
   
@@ -341,16 +265,13 @@ What we can therefore do, is if the type of the wrapped object wasn't a function
 What we now therefore have is:  
 
 
-```
 > class bound\_function\_wrapper\(object\_proxy\):  
 >  def \_\_init\_\_\(self, wrapped, instance, wrapper, binding\):  
 >  super\(bound\_function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
 >  self.instance = instance  
 >  self.wrapper = wrapper  
 >  self.binding = binding 
-```
 
-```
 > def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
 >  if self.binding == 'function':  
 >  if self.instance is None:  
@@ -362,46 +283,33 @@ What we now therefore have is:
 >  else:  
 >  instance = getattr\(self.wrapped, '\_\_self\_\_', None\)  
 >  return self.wrapper\(self.wrapped, instance, args, kwargs\)
-```
 
 and if we run our tests one more time, we finally get the result we have been looking for:  
 
 
-```
 > >>> c.function\_im\(1,2\)  
 >  INSTANCE <\_\_main\_\_.Class object at 0x10c2c43d0>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_im\(c, 1, 2\)  
 >  INSTANCE <\_\_main\_\_.Class object at 0x10c2c43d0>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> c.function\_cm\(1,2\)  
 >  INSTANCE <class '\_\_main\_\_.Class'>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_cm\(1, 2\)  
 >  INSTANCE <class '\_\_main\_\_.Class'>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> c.function\_sm\(1,2\)  
 >  INSTANCE None  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_sm\(1, 2\)  
 >  INSTANCE None  
 >  ARGS \(1, 2\)
-```
 
 Are we able to celebrate yet? Unfortunately not.  
   
@@ -415,7 +323,6 @@ There is yet another obscure case we have yet to consider, one that I didn't eve
 This is when we take a reference to a method and reassign it back again as an attribute of a class, or even an instance of a class, and then call it via the alias so created. I only encountered this one due to some bizarre stuff a meta class was doing.  
 
 
-```
 > >>> Class.function\_rm = Class.function\_im  
 >  >>> c.function\_rm\(1, 2\)  
 >  INSTANCE 1  
@@ -427,21 +334,16 @@ This is when we take a reference to a method and reassign it back again as an at
 >  File "test.py", line 58, in my\_function\_wrapper  
 >  return wrapped\(\*args, \*\*kwargs\)  
 >  TypeError: unbound method function\_im\(\) must be called with Class instance as first argument \(got int instance instead\) 
-```
 
-```
 > >>> Class.function\_rm = Class.function\_cm  
 >  >>> c.function\_rm\(1, 2\)  
 >  INSTANCE <class '\_\_main\_\_.Class'>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_rm = Class.function\_sm  
 >  >>> c.function\_rm\(1, 2\)  
 >  INSTANCE None  
 >  ARGS \(1, 2\)
-```
 
 Things work fine for a class method or static method, but fails badly for an instance method.  
   
@@ -455,20 +357,15 @@ A further wrinkle is that we need to bind what was the original wrapped function
 bound function wrapper and reach back into that to get the original wrapped function.  
 
 
-```
 > class bound\_function\_wrapper\(object\_proxy\): 
-```
 
-```
 > def \_\_init\_\_\(self, wrapped, instance, wrapper, binding, parent\):  
 >  super\(bound\_function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
 >  self.instance = instance  
 >  self.wrapper = wrapper  
 >  self.binding = binding  
 >  self.parent = parent 
-```
 
-```
 > def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
 >  if self.binding == 'function':  
 >  if self.instance is None:  
@@ -480,22 +377,16 @@ bound function wrapper and reach back into that to get the original wrapped func
 >  else:  
 >  instance = getattr\(self.wrapped, '\_\_self\_\_', None\)  
 >  return self.wrapper\(self.wrapped, instance, args, kwargs\) 
-```
 
-```
 > def \_\_get\_\_\(self, instance, owner\):  
 >  if self.instance is None and self.binding == 'function':  
 >  descriptor = self.parent.wrapped.\_\_get\_\_\(instance, owner\)  
 >  return bound\_function\_wrapper\(descriptor, instance, self.wrapper,  
 >  self.binding, self.parent\)  
 >  return self 
-```
 
-```
 > class function\_wrapper\(object\_proxy\): 
-```
 
-```
 > def \_\_init\_\_\(self, wrapped, wrapper\):  
 >  super\(function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
 >  self.wrapper = wrapper  
@@ -505,43 +396,32 @@ bound function wrapper and reach back into that to get the original wrapped func
 >  self.binding = 'staticmethod'  
 >  else:  
 >  self.binding = 'function' 
-```
 
-```
 > def \_\_get\_\_\(self, instance, owner\):  
 >  wrapped = self.wrapped.\_\_get\_\_\(instance, owner\)  
 >  return bound\_function\_wrapper\(wrapped, instance, self.wrapper,  
 >  self.binding, self\) 
-```
 
-```
 > def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
 >  return self.wrapper\(self.wrapped, None, args, kwargs\)
-```
 
 Rerunning our most recent test once again we now get:  
 
 
-```
 > >>> Class.function\_rm = Class.function\_im  
 >  >>> c.function\_rm\(1, 2\)  
 >  INSTANCE <\_\_main\_\_.Class object at 0x105609790>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_rm = Class.function\_cm  
 >  >>> c.function\_rm\(1, 2\)  
 >  INSTANCE <class '\_\_main\_\_.Class'>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_rm = Class.function\_sm  
 >  >>> c.function\_rm\(1, 2\)  
 >  INSTANCE None  
 >  ARGS \(1, 2\)
-```
 
 ###  Order that decorators are applied
 
@@ -550,46 +430,34 @@ We must be getting close now. Everything appears to be working.
 If you had been paying close attention you would have noticed though that in all cases so far our decorator has always been placed outside of the existing decorators marking a method as either a class method or a static method. What happens if we reverse the order?  
 
 
-```
 > class Class\(object\):  
 >  @classmethod  
 >  @my\_function\_wrapper  
 >  def function\_cm\(self, a, b\):  
 >  pass 
-```
 
-```
 > @staticmethod  
 >  @my\_function\_wrapper  
 >  def function\_sm\(a, b\):  
 >  pass 
-```
 
 > c = Class\(\) 
 
-```
 > >>> c.function\_cm\(1,2\)  
 >  INSTANCE None  
 >  ARGS \(<class '\_\_main\_\_.Class'>, 1, 2\) 
-```
 
-```
 > >>> Class.function\_cm\(1, 2\)  
 >  INSTANCE None  
 >  ARGS \(<class '\_\_main\_\_.Class'>, 1, 2\) 
-```
 
-```
 > >>> c.function\_sm\(1,2\)  
 >  INSTANCE None  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_sm\(1, 2\)  
 >  INSTANCE None  
 >  ARGS \(1, 2\)
-```
 
 So it works as we would expect for a static method but not for a class method.  
   
@@ -611,46 +479,35 @@ Excluding that one case related to ordering of decorators for class methods, our
 I did mention though in the last post that the goal was that we could also distinguish when a decorator was applied to a class. So lets check that.  
 
 
-```
 > @my\_function\_wrapper  
 >  class Class\(object\):  
 >  pass 
-```
 
-```
 > >>> c = Class\(\)  
 >  INSTANCE None  
 >  ARGS \(\)
-```
 
 Based on that we aren't able to distinguish it from a normal function or a class method.  
   
 If we think about it though, we are in this case wrapping an actual class, so the wrapped object which is passed to the decorator wrapper function will be the class itself. Lets print out the value of the wrapped argument passed to the decorator wrapper function as well and see whether that can be used to distinguish this case from others.  
 
 
-```
 > @decorator  
 >  def my\_function\_wrapper\(wrapped, instance, args, kwargs\):  
 >  print\('WRAPPED', wrapped\)  
 >  print\('INSTANCE', instance\)  
 >  print\('ARGS', args\)  
 >  return wrapped\(\*args, \*\*kwargs\) 
-```
 
-```
 > @my\_function\_wrapper  
 >  def function\(a, b\):  
 >  pass 
-```
 
-```
 > >>> function\(1, 2\)  
 >  WRAPPED <function function at 0x10e13bb18>  
 >  INSTANCE None  
 >  ARGS \(1, 2\) 
-```
 
-```
 > class Class\(object\):  
 >  @my\_function\_wrapper  
 >  def function\_im\(self, a, b\):  
@@ -663,66 +520,49 @@ If we think about it though, we are in this case wrapping an actual class, so th
 >  @staticmethod  
 >  def function\_sm\(a, b\):  
 >  pass 
-```
 
 > c = Class\(\) 
 
-```
 > >>> c.function\_im\(1,2\)  
 >  WRAPPED <bound method Class.function\_im of <\_\_main\_\_.Class object at 0x107e90950>>  
 >  INSTANCE <\_\_main\_\_.Class object at 0x107e90950>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_im\(c, 1, 2\)  
 >  WRAPPED <functools.partial object at 0x107df3208>  
 >  INSTANCE <\_\_main\_\_.Class object at 0x107e90950>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> c.function\_cm\(1,2\)  
 >  WRAPPED <bound method type.function\_cm of <class '\_\_main\_\_.Class'>>  
 >  INSTANCE <class '\_\_main\_\_.Class'>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_cm\(1, 2\)  
 >  WRAPPED <bound method type.function\_cm of <class '\_\_main\_\_.Class'>>  
 >  INSTANCE <class '\_\_main\_\_.Class'>  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> c.function\_sm\(1,2\)  
 >  WRAPPED <function function\_sm at 0x107e918c0>  
 >  INSTANCE None  
 >  ARGS \(1, 2\) 
-```
 
-```
 > >>> Class.function\_sm\(1, 2\)  
 >  WRAPPED <function function\_sm at 0x107e918c0>  
 >  INSTANCE None  
 >  ARGS \(1, 2\) 
-```
 
-```
 > @my\_function\_wrapper  
 >  class Class\(object\):  
 >  pass 
-```
 
 > c = Class\(\) 
 
-```
 > >>> c = Class\(\)  
 >  WRAPPED <class '\_\_main\_\_.Class'>  
 >  INSTANCE None  
 >  ARGS \(\)
-```
 
 And the answer is yes, as it is the only case where wrapped will be a type object.  
   
@@ -738,7 +578,6 @@ The information to identify the static method is actually available in the way t
 Anyway, after all this work, our universal decorator then would be written as:  
 
 
-```
 > @decorator  
 >  def universal\(wrapped, instance, args, kwargs\):  
 >  if instance is None:  
@@ -755,7 +594,6 @@ Anyway, after all this work, our universal decorator then would be written as:
 >  else:  
 >  \# Decorator was applied to an instancemethod.  
 >  return wrapped\(\*args, \*\*kwargs\)
-```
 
 Are there actual uses for such a universal decorator? I believe there are some quite good examples and I will cover one in particular in a subsequent blog post.  
   

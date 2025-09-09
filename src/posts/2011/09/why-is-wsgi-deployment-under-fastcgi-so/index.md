@@ -307,13 +307,9 @@ Input And Outputs
 
 Now we did manage to get an error message above, even so, you are probably lucky to even get that message. This is because the FASTCGI specification says:
 
-```
 > The initial state of a FastCGI process is more spartan than the initial state of a CGI/1.1 process, because the FastCGI process doesn't begin life connected to anything. It doesn't have the conventional open files stdin, stdout, and stderr, and it doesn't receive much information through environment variables. The key piece of initial state in a FastCGI process is a listening socket, through which it accepts connections from a Web server.
-```
 
-```
 > After a FastCGI process accepts a connection on its listening socket, the process executes a simple protocol to receive and send data. The protocol serves two purposes. First, the protocol multiplexes a single transport connection between several independent FastCGI requests. This supports applications that are able to process concurrent requests using event-driven or multi-threaded programming techniques. Second, within each request the protocol provides several independent data streams in each direction. This way, for instance, both stdout and stderr data pass over a single transport connection from the application to the Web server, rather than requiring separate pipes as with CGI/1.1.
-```
 
 Technically this means that prior to the point that you actually manage to start up the FASTCGI communications channel, there is no stderr or stdout. If a FASTCGI server sticks to the specification that error message likely wouldn't have any where to go and behaviour would be completely unpredictable. Most likely the process would just crash. Luckily mod\_fcgid preserves stderr, with stderr mapping into the Apache error log file.
 
@@ -339,9 +335,7 @@ Finally there is stdin. Here the relevant part of the FASTCGI specification is:
 
 > The Web server leaves a single file descriptor, FCGI\_LISTENSOCK\_FILENO, open when the application begins execution. This descriptor refers to a listening socket created by the Web server. 
 
-```
 > FCGI\_LISTENSOCK\_FILENO equals STDIN\_FILENO. The standard descriptors STDOUT\_FILENO and STDERR\_FILENO are closed when the application begins execution. A reliable method for an application to determine whether it was invoked using CGI or FastCGI is to call getpeername\(FCGI\_LISTENSOCK\_FILENO\), which returns -1 with errno set to ENOTCONN for a FastCGI application.
-```
 
 Remember above how it says that stdin doesn't exist, well guess what the file descriptor got replaced with. Yes, the socket over which FASTCGI communication occurs.
 

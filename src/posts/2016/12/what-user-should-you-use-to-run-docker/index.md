@@ -179,15 +179,11 @@ Thus by requiring that ‘USER’ be set to a UNIX user ID, we are able to guara
 
 What then is a better guideline about what user a Docker-formatted container should be run? I would suggest the following.
 
-```
 > Do not run a Docker-formatted container image as the root user. Always override in the Dockerfile what user the image will run as. This should be done by adding the ‘USER’ statement in the Dockerfile. The value of the ‘USER’ statement must be the integer UNIX user ID of the UNIX account you want any application to run as inside of the container. It should not be the user name for the UNIX account.
-```
 
 In addition to that guideline for the author of any Docker-formatted container image, I would also add the following guideline for anyone building a system on top of the Docker service for running images.
 
-```
 > Where it is intended not to allow images to run as the root user, but you want to allow an image to run as the user it specifies, reject any Docker-formatted container image that you can't verify what UNIX user ID it will run as. Use ‘docker inspect’ to determine the user it should run as. Reject the image and do not run it if the user setting specified in the image meta data, is not an integer value greater than 0.
-```
 
 Already you will find some orchestration systems for managing containers using the Docker runtime implement this latter recommendation in certain configurations. One such example is Kubernetes and systems based around it, such as OpenShift. Because of the growth of interest in Kubernetes, especially for enterprise usage and for hosting services, adhering to the first guideline is also the first step in ensuring you will be able to deploy your images to these systems when they are set up in a secure way.
 

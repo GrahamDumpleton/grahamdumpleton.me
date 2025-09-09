@@ -31,9 +31,7 @@ In that post Armin gives the following example of something that is possible wit
 
 Armin then goes on to say:
 
-```
 > """We have less features today than we had in Python 2 for a more complex type system. Because the code above cannot be done with new style classes and more."""
-```
 
 Actually that isn't strictly true. It is possible to write a transparent object proxy using new style classes, but in doing so the proxy itself must adopt the conventions around the use of the special slot methods.
     

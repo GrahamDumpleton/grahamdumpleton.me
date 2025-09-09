@@ -180,7 +180,6 @@ With our decorator implementation now being:
 the result we get when executing the decorated instance method of the class is:  
 
 
-```
 > \('\_\_get\_\_', 'call'\) \# function\_wrapper  
 >  \('\_\_init\_\_', 'call'\) \# bound\_function\_wrapper  
 >  \('\_\_init\_\_', 'call'\) \# object\_proxy  
@@ -193,7 +192,6 @@ the result we get when executing the decorated instance method of the class is:
 >  \('method', 'return'\)  
 >  \('my\_function\_wrapper', 'return'\)  
 > \('\_\_call\_\_', 'return'\)
-```
 
 As can be seen, due to the binding of the method to the instance of the class which occurs in \_\_get\_\_\(\), a lot more is now happening. The overhead can therefore be expected to be significantly more also.  
   

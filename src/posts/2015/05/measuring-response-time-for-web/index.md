@@ -149,9 +149,7 @@ If interested in the various ways that WSGI application callable objects can be 
 
 The solution to our problem with not being able to use a traditional function timing decorator can be found within the [WSGI](https://www.python.org/dev/peps/pep-3333/) protocol specification itself. Specifically it is stated in the specification:
 
-```
 > _If the iterable returned by the application has a close\(\) method, the server or gateway must call that method upon completion of the current request, whether the request was completed normally, or terminated early due to an application error during iteration or an early disconnect of the browser. \(The close\(\) method requirement is to support resource release by the application. This protocol is intended to complement PEP 342 's generator support, and other common iterables with close\(\) methods.\)_
-```
 
 What this means is that where the iterable from the WSGI application would otherwise be returned, we can instead return a wrapper object around that iterable and in our wrapper provide a 'close\(\)' method. This 'close\(\)' method is then guaranteed to be called at the end of the request regardless of whether it completes successfully or not.
 
