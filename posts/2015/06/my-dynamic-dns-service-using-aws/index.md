@@ -1,0 +1,32 @@
+---
+title: "My dynamic DNS service using AWS Route53/S3 now supports OpenShift."
+author: "Graham Dumpleton"
+date: "Thursday, June 18, 2015"
+url: "http://blog.dscpl.com.au/2015/06/my-dynamic-dns-service-using-aws.html"
+post_id: "5154819348854121837"
+blog_id: "2363643920942057324"
+tags: ['dyndns53', 'heroku', 'openshift']
+comments: 0
+published_timestamp: "2015-06-18T12:40:00+10:00"
+blog_title: "Graham Dumpleton"
+---
+
+Heroku is currently in the process of changing their [pricing structure](https://blog.heroku.com/archives/2015/6/15/dynos-pricing-ga), with what can be run using their free tier being affected. Specifically, to qualify for the free tier, any web application must effectively sleep for at least 6 hours per day.
+
+I had a few small sites running on Heroku which provide some simple static pages, redirections and a self hosted dynamic DNS service. These web applications would typically see less than 100 hits per day, but the hits are spread out such that the web applications being forced to sleep would actually cause a notable impact as far as their availability to myself and those who would access them.
+
+To ensure these web applications remained running, I would now have to step up to at least the paid hobby dyno. This would mean having to pay some where over $20 per month for all the sites, which for what these sites do isn't worth the money.
+
+I know that I could go pick up a hosted VM for $5 per month elsewhere, but I don't want to deal with setting up and running my own instance of Linux. I am very much a proponent of PaaS and the simplicity that brings to deployment. As such, I have shifted all my sites over to [OpenShift Online](https://www.openshift.com) instead.
+
+In making the move to OpenShift I have actually consolidated the various sites to run out of one instance for now, making using of virtual hosting capabilities of Apache/mod\_wsgi. This means I can get away with running a single OpenShift gear, leaving me spare gears still available in their free plan to play with when I need to.
+
+One of the sites I have moved was my self hosted dynamic DNS service. This is a project I created and have mentioned in a [previous post](http://blog.dscpl.com.au/2013/12/a-dynamic-dns-service-using-aws.html). Depending on how this was being used, then you might still have got away with being able to use the Heroku free dyno. This is because if you had configured your ADSL/cable modem to automatically register IP changes, then such changes would be infrequent and thus the application would be sleeping most of the time.
+
+If however you were relying on a cron job running on a host within your home network, and forcing a registration periodically to ensure the registered IP is always up to date, then you would hit problems with the new restriction that web applications running under a free dyno have a limit on how long they can be running each day.
+
+Although I was using my modem to do the registration, I was also using my dynamic DNS service to check my current public IP so I could register it with a separate service that wanted to always know what your active IP was in order to work properly. This had to be done periodically and so I still had the issue that the web application wouldn't sleep enough during the day.
+
+Anyway, if you are in market for a low cost way of self hosting a dynamic DNS service, you can check out my project called [dyndns53](https://github.com/GrahamDumpleton/dyndns53).
+
+Note that the changes I have made target OpenShift V2. Red Hat is currently overhauling their OpenShift offering and moving to a [docker based container system](https://www.openshift.com/products/origin). With the [Red Hat summit](http://www.redhat.com/summit/) being next week the expectation is that there will be lots more announcements about that then and hopefully the new OpenShift V3 will become available for public use via OpenShift Online in some form. If that does happen, then I will likely revisit my dyndns53 project and create a docker image for it up on Docker Hub for use with OpenShift Online running the new V3 variant. So keep an eye out for that as well if interested.

@@ -1,0 +1,120 @@
+---
+title: "Using Apache to start and manage Docker containers."
+author: "Graham Dumpleton"
+date: "Friday, July 3, 2015"
+url: "http://blog.dscpl.com.au/2015/07/using-apache-to-start-and-manage-docker.html"
+post_id: "6103072209841625668"
+blog_id: "2363643920942057324"
+tags: ['apache', 'docker', 'mod_wsgi', 'python', 'wsgi']
+comments: 0
+published_timestamp: "2015-07-03T21:48:00+10:00"
+blog_title: "Graham Dumpleton"
+---
+
+In the last couple of posts \([1](http://blog.dscpl.com.au/2015/06/proxying-to-python-web-application.html), [2](http://blog.dscpl.com.au/2015/07/redirection-problems-when-proxying-to.html)\) I described what needed to be done when migrating a Python web site running under Apache/mod\_wsgi to running inside of a Docker container. This included the steps necessary to have the existing Apache instance proxy requests for the original site through to the appropriate port on the Docker host and deal with any fix ups necessary to ensure that the backend Python web site understood what the public facing URL was.
+
+In changing to running the Python web site under Docker, I didn’t cover the issue of how the instance of the Docker container itself would be started up and managed. All I gave was an example command line for manually starting the container.
+
+> 
+>     docker run --rm -p 8002:80 blog.example.com
+
+The assumption here was that you already had the necessary infrastructure in place to start such Docker containers when the system started, and restart them automatically if for some reason they stopped running.
+
+There are various ways one could manage service orchestration under Docker. These all come with their own infrastructure which has to be set up and managed.
+
+If instead you are just after something simple to keep the Python web site you migrated into a Docker container running, and also manage it in conjunction with the front end Apache instance, then there is actually a trick one can do using mod\_wsgi on the front end Apache instance.
+
+# Daemon process groups
+
+When using mod\_wsgi, by default any hosted WSGI application will run in what is called embedded mode. Although this is the default, if you are running on a UNIX system it is [highly recommended](http://blog.dscpl.com.au/2012/10/why-are-you-using-embedded-mode-of.html) you do not use embedded mode and instead use what is called daemon mode.
+
+The difference is that with embedded mode, the WSGI application runs inside of the Apache child worker processes. These are the same processes which handle any requests received by Apache for serving up static files. Using embedded mode can result in [various issues](http://lanyrd.com/2013/pycon/scdyzk/) due to the way Apache manages those processes. The best solution is simply not to use embedded mode and use daemon mode instead.
+
+For daemon mode, what happens is that a group of one or more separate daemon processes are created by mod\_wsgi and the WSGI application is instead run within those. All that the Apache child worker processes do in this case is transparently proxy the requests through to the WSGI application running in those separate daemon processes. Being a separate set of processes, mod\_wsgi is able to better control how those processes are managed.
+
+In the initial post the example given was using daemon mode, but the aim was to move the WSGI application out of the front end Apache altogether and run it using a Docker container instead. This necessitated the manual configuration to proxy the requests through to that now entirely separate web application instance running under Docker.
+
+Now an important aspect of how mod\_wsgi daemon process groups work, is that the step of setting up a daemon process groups is separate to the step of saying what WSGI application should actually run in that daemon process group. What this means is that it is possible to tell mod\_wsgi to create a daemon process group, but then never actually run a WSGI application in it.
+
+Combining that with the ability of mod\_wsgi to load and run a specific Python script in the context of the processes making up a daemon process group when those processes are started, it is actually possible to use a daemon process group to run other Python based services instead and have Apache manage that service. This could for example be used to implement a mini background task execution service in Python allowing you to offload work from the WSGI application processes, with it all managed as part of the Apache instance.
+
+As far as mod\_wsgi is concerned it doesn’t really care what the process does though, it will simply create the process and trigger the loading of the initial Python script. It doesn’t even really care if that Python script performs an ‘exec\(\)’ to run a completely different program, thus replacing the Python process with something else. It is this latter trick of being able to run a separate program that we can use to have Apache manage the life of the Docker instance created from our container image.
+
+# Running the Docker image
+
+In the prior posts, the basic configuration we ended up with for proxying the requests through to the Python web site running under Docker was:
+
+> 
+>     # blog.example.com
+>     
+>     
+>     <VirtualHost *:80>  
+>     > ServerName blog.example.com
+>     
+>     
+>     ProxyPass / http://docker.example.com:8002/  
+>     > ProxyPassReverse / http://docker.example.com:8002/  
+>     >   
+>     > RequestHeader set X-Forwarded-Port 80  
+>     > </VirtualHost>
+
+This was after we had removed the configuration which had created a mod\_wsgi daemon process group and delegated the WSGI application to run in it. We are now going to add back the daemon process group, but we will not set up any WSGI application to run in it. Instead we will setup a Python script to be loaded in the process when it starts using the ‘WSGIImportScript’ directive.
+
+> 
+>     # blog.example.com<VirtualHost *:80>  
+>     > ServerName blog.example.com  
+>     >   
+>     > ProxyPass / http://docker.example.com:8002/  
+>     > ProxyPassReverse / http://docker.example.com:8002/  
+>     >   
+>     > RequestHeader set X-Forwarded-Port 80  
+>     >   
+>     > WSGIDaemonProcess blog.example.com threads=1  
+>     > WSGIImportScript /some/path/blog.example.com/docker-admin.py \  
+>     >     process-group=blog.example.com application-group=%{GLOBAL}  
+>     > </VirtualHost>
+
+In the ‘docker-admin.py’ file we now add:
+
+> 
+>     import os
+>     
+>     
+>     os.execl('/usr/local/bin/docker', '(docker:blog.example.com)', 'run',  
+>     >     '--rm', '-p', '8002:80', ‘blog.example.com')
+
+With this in place, when Apache is started, mod\_wsgi will create a daemon process group with a single process. It will then immediately load and execute the ‘docker-admin.py’ script which in turn will execute the ‘docker' program to run up a Docker container using the image created for the backend WSGI application.
+
+The resulting process tree would look like:
+
+> 
+>     -+= 00001 root /sbin/launchd  
+>     >  \-+= 64263 root /usr/sbin/httpd -D FOREGROUND  
+>     >  |--- 64265 _www /usr/sbin/httpd -D FOREGROUND  
+>     >  \--- 64270 _www (docker:blog.example.com.au) run --rm -p 8002:80 blog.example.com
+
+Of note, the ‘docker’ program was left running in foreground mode waiting for the Docker container to exit. Because it is running the Python web application, that will not occur unless explicitly shutdown.
+
+If the container exited because the Apache instance run by mod\_wsgi-express crashed for some reason, then being a managed daemon process created by mod\_wsgi, it will be detected that the ‘docker’ program process had exited and a new mod\_wsgi daemon process created to replace it, thereby executing the ‘docker-admin.py’ script again and so restarting the WSGI application running under Docker.
+
+Killing the backend WSGI application explicitly by running ‘docker kill’ on the Docker instance will also cause it to exit, but again it will be replaced automatically.
+
+The backend WSGI application would only be shutdown completely by shutting down the front end Apache itself.
+
+Using this configuration, Apache with mod\_wsgi, is therefore effectively being used as a simple process manager to startup and keep alive the backend WSGI application running under Docker. If the Docker instance exits it will be replaced. If Apache is shutdown, then so will the Docker instance.
+
+# Managing other services
+
+Although the example here showed starting up of the WSGI application which was shifted out of the front end Apache, there is no reason that a similar thing couldn’t be done for other services being run under Docker. For example, you could create separate dummy mod\_wsgi daemon process groups and corresponding scripts, to start up Redis or even a database.
+
+Because the front end Apache is usually already going to be integrated into the operating system startup scripts, we have managed to get management of Docker containers without needing to setup a separate system to create and manage them. If you are only playing or do not have a complicated set of services running under Docker, then this could save a bit of effort and be just as effective.
+
+With whatever the service is though, the one thing you may want to look at carefully is how a service is shutdown.
+
+The issue here is how Apache signals the shutdown of any managed process and what happens if it doesn’t shutdown promptly.
+
+Unfortunately how Apache does this cannot be overridden, so you do have to be mindful of it in case it would cause an issue.
+
+Specifically, when Apache is shutdown or a restart triggered, Apache will send the ‘SIGINT’ signal to each managed child process. If that process has not shutdown after one second, it will send the signal again. The same will occur if after a total of two seconds the process hasn't shutdown. Finally, if three seconds elapsed in total, then Apache will send a ‘SIGKILL’ signal.
+
+Realistically any service should be tolerant of being killed abruptly, but if you have a service which can take a long time to shutdown and is susceptible to problems if forcibly killed, that could be an issue and this may not be a suitable way of managing them.

@@ -1,0 +1,426 @@
+---
+title: "Load spikes and excessive memory usage in mod_python."
+author: "Graham Dumpleton"
+date: "Monday, March 9, 2009"
+url: "http://blog.dscpl.com.au/2009/03/load-spikes-and-excessive-memory-usage.html"
+post_id: "781695688333580638"
+blog_id: "2363643920942057324"
+tags: ['django', 'mod_python', 'mod_wsgi', 'python']
+comments: 19
+published_timestamp: "2009-03-09T22:22:00+11:00"
+blog_title: "Graham Dumpleton"
+---
+
+A common complaint about [mod\_python](http://www.modpython.org/) is that it uses too much memory and can cause huge spikes in processor load. Fact is that this isn't really caused by mod\_python itself, but indirectly by virtue of how, or more so how not, Apache has been configured for the type of web application that is being run.
+
+  
+
+
+Where the problem stems from is the choice of [Multi-Processing Module](http://httpd.apache.org/docs/2.2/mpm.html) \(MPM\) chosen for the Apache installation and the default settings for that MPM.
+
+  
+
+
+On UNIX systems there are two main MPMs that are used. These are the [prefork](http://httpd.apache.org/docs/2.2/mod/prefork.html) MPM and the [worker](http://httpd.apache.org/docs/2.2/mod/worker.html) MPM. The prefork MPM implements a multi process configuration where each process is single threaded. The worker MPM implements a multi process configuration but where each process is multi threaded.
+
+  
+
+
+Which MPM is used is a compile time option and not something that can be changed dynamically at run time. Thus, your decision has already been made by the time you have installed Apache from source code or from the binary operating system package. Often the choice is already made for you by what the operating system supplied as the default.
+
+  
+
+
+Traditionally the MPM used for an Apache installation has been prefork. This is because that is all the older Apache 1.3 supported, but also partly because modules for web development, such as PHP, were not generally multi thread safe and so required that prefork MPM be used.
+
+  
+
+
+With the MPM having being selected, either explicitly or through ignorance of there being a choice, that is where the majority of people stop. What most do not realise is that the default settings for an MPM will generally need to be modified based on what you are using Apache for and how much memory your system has available. Customising these settings is even more important for Python web applications as I will explain.
+
+  
+
+
+Lets first look at the default settings for the prefork MPM. The values for these as shipped with the original Apache source code is:
+    
+    
+```
+# prefork MPM  
+# StartServers: number of server processes to start  
+# MinSpareServers: minimum number of server processes which are kept spare  
+# MaxSpareServers: maximum number of server processes which are kept spare  
+# MaxClients: maximum number of server processes allowed to start  
+# MaxRequestsPerChild: maximum number of requests a server process serves  
+<IfModule mpm_prefork_module>  
+StartServers          5  
+MinSpareServers       5  
+MaxSpareServers      10  
+MaxClients          150  
+MaxRequestsPerChild   0  
+</IfModule>  
+```
+    
+
+What this all means is that when Apache starts up it will create 5 child server processes for handling of requests. The number of child server processes used isn't a fixed number however. Instead, what will happen is that Apache will dynamically create additional child server processes when the load increases. Exactly when this occurs is dictated by the setting for the minimum number of idle spare servers. Such additional child server processes may be created up to a number determined by the maximum number of allowed clients. In this case, because each child server process is single threaded, that means a maximum of 150 child server processes may be created.
+
+  
+
+
+This is actually quite a lot of child server processes that can be created. If Apache is being used only to serve static files then this number is quite reasonable however. This is because each child server process should be quite small in size. Even when using PHP the server child processes shouldn't grow to be overly large. This is because PHP is CGI like in the sense that each application script is reconstructed on each request and then thrown away at the end of the request. Thus, nothing of the application persists between requests and thus any memory use is always transient.
+
+  
+
+
+The other key aspect of PHP which means that memory use of the individual child server processes is kept down, is that the extensions available to the PHP user is fixed when PHP is initialised. Further, all the PHP internal libraries and any optional extensions are preloaded from shared libraries/objects in the Apache parent process before any child server processes are even created from it. Thus, all the code which a PHP application uses is not only preloaded, but shared between all child server processes and isn't counting as private memory to the child server processes. This is significant when one considers that the PHP library alone, not counting optional extensions, can be about 7MB in size.
+
+  
+
+
+We now need to contrast what happens with PHP to what happens with mod\_python and Python web applications.
+
+  
+
+
+When using mod\_python the only thing that happens in the Apache parent process is that the Python interpreter is initialised. There is no preloading of any modules which a Python web application may want to use. This is the case as Python works the opposite way to PHP in that it does as little as possible up front, only importing specific modules when actually used by an application.
+
+  
+
+
+The next difference with Python web applications is that once application code is loaded it remains loaded for the life of the process. That is, unlike PHP which throws away the application between requests, everything persists between requests in Python web applications. If a Python web application spans a large set of URLs, the application code may not even all get loaded upon the initial request. Instead it may only get progressively loaded as different URLs are accessed.
+
+  
+
+
+The important thing to realise here is that all this loading of Python application code is occuring in the child server processes which handle the requests and not the Apache parent process. Except where Python modules are implemented as C extension modules, all the code that is loaded is going to use up private memory of the process. It is not unheard of for even small to moderate sized Python web applications to consume 30MB or more of private memory in each child server process.
+
+  
+
+
+It is this significant amount of memory per process which is where problems start to occur. If you remember, the default settings for the prefork MPM were such that up to 150 child server processes could be created. This means that for such a small to moderate sized Python web application, if Apache decided to create up to the maximum number of child server processes, you would need in excess of 4GB of memory.
+
+  
+
+
+If you are running a small VPS system with an allocation of only 256MB, you can see that it just isn't going to work very well. You might just squeak by with having all the initial 5 child server processes having loaded up your application, but as soon as you get a sudden increase in requests and Apache decides that it needs to create more child server processes, your system will quickly run out of memory.
+
+  
+
+
+So, although the default settings for the prefork MPM may be reasonable for handling of static file requests or PHP, they are going to be completely inapproriate for any sizable Python web application, especially if running a system with only limited memory.
+
+  
+
+
+This then addresses one of the main complaints one often sees made against mod\_python. That is that it consumes huge amounts of memory. In reality it isn't mod\_python at all here which is the problem.
+
+  
+
+
+First off the memory is being consumed by the Python web application and not mod\_python. If you ran the same Python web application in a standalone process on top of a Python web server, that single instance of the application would still use about the same amount of memory.
+
+  
+
+
+The real problem here is that so many instances of the application have been allowed to be created by not changing the default settings for the prefork MPM. Specifically, the number defined for the maximum clients should be dropped comensurate with the amount of memory available to run it and how big the application gets.
+
+  
+
+
+A very crude measure for determining the maximum number of clients, and therefore how many child server processes will be created, is to divide the maximum amount of memory you want to allow the web server as a whole to use, by the amount of memory a single instance of the Python web application consumes.
+
+  
+
+
+Do note though that this is a very crude measure, things are in practice a bit more complicated than that. One thing that complicates the issue is whether keep alive is enabled for connections and what the keep alive timeout is set to.
+
+  
+
+
+Whether keep alive is enabled or not isn't going to change what the maximum number of clients should be set to, but it does in practice limit how many concurrent requests you will be able to effectively handle. This is because the Apache request handler threads will be busy waiting to see if a subsequent request is going to arrive over the same connection. Eventually the request handler thread will timeout, but during that time it will not be able to handle completely new requests.
+
+  
+
+
+If keep alive is a problem, one course often taken which can help out is to offload serving of static media files to a separate web server. Keep alive can then be turned off for the Apache instance running the Python web application where it generally isn't as beneficial as for static file requests. Web servers such as nginx and lighttpd are arguably better at serving static files anyway, and so you will actually get better performance when serving them that way. Offloading the static files also allows you to configure Apache properly for the specific Python web application being hosted, rather than having conflicting requirements.
+
+  
+
+
+As to the load spikes which can occur, what this comes down to is the startup costs of loading the Python web application being run. Here the problem is that Apache will create additional child server processes to meet demand. Because Python web applications these days generally have a lot of dependencies and need to load a lot of code they will not start up quickly. That startup is costly actually serves to multiply the severity of the problem, because although the additional processes are starting up, if they take too long, Apache will decide that it still doesn't have enough processes and will start creating more. In the worst case this can snowball until you have completely swamped your machine.
+
+  
+
+
+The solution here is not to create only a minimal number of servers when Apache starts, but create closer to what would be the maximum number of processes you would expect to require to handle the load. That way the processes always exist and are ready to handle requests and you will not end up in a situation where Apache needs to suddenly create a huge number of processes.
+
+  
+
+
+The catch here to watch out for is that the startup cost of the Python web application is simply transferred to when Apache is being started in the first place. If you find that even when a larger number of processes are created at startup, the initial burst of traffic and the subsequent loading of the actual Python web application strains the resources of your system, then you need to seriously look at whether you are creating many more processes than you need anyway.
+
+  
+
+
+First off, don't run PHP on the same web server. That way you can run worker MPM instead of prefork MPM. This immediately means you drop down drastically the number of processes you require because each process will then be multithreaded rather than single threaded and can handle many concurrent requests. To see how this works one can look at the default MPM settings for the worker MPM.
+    
+    
+```
+# worker MPM  
+# StartServers: initial number of server processes to start  
+# MaxClients: maximum number of simultaneous client connections  
+# MinSpareThreads: minimum number of worker threads which are kept spare  
+# MaxSpareThreads: maximum number of worker threads which are kept spare  
+# ThreadsPerChild: constant number of worker threads in each server process  
+# MaxRequestsPerChild: maximum number of requests a server process serves  
+<IfModule mpm_worker_module>  
+StartServers          2  
+MaxClients          150  
+MinSpareThreads      25  
+MaxSpareThreads      75  
+ThreadsPerChild      25  
+MaxRequestsPerChild   0  
+</IfModule>  
+```
+    
+
+The important thing to note here is that although the maximum number of clients is still 150, each process has 25 threads. Thus, the maximum number of processes that could be created is 6. For that 30MB process that means you only need 180MB in the worst case scenario rather than the 4GB required with the default MPM settings for prefork.
+
+  
+
+
+Keep that in mind and one has to question how wise the [advice in the Django documentation](http://docs.djangoproject.com/en/dev/howto/deployment/modpython/) is that states "you should use Apache’s prefork MPM, as opposed to the worker MPM" when using mod\_python.
+
+  
+
+
+All well and good if you run your own computer with huge amounts of memory and little traffic, but a potential recipe for disaster if you don't know that you should be changing the default MPM settings and you are using a memory constrained VPS and your site becomes popular or becomes subject to the [Slashdot effect](http://en.wikipedia.org/wiki/Slashdotted).
+
+  
+
+
+With Django 1.0 now believed to be multithread safe, which was in part why prefork was recommended previously, that advice should perhaps be revisited, or it made obvious that one would need to consider tuning your Apache MPM settings if you intend using prefork MPM.
+
+  
+
+
+Now, it needs to be stated that all of the above about mod\_python equally applies to embedded mode of [mod\_wsgi](http://www.modwsgi.org/). Thus, using mod\_wsgi isn't necessarily some magic pill which will solve all your problems overnight.
+
+  
+
+
+Most people who change to using mod\_wsgi don't actually have a problem though, but that that is the case is usually more by accident rather than design. This is because they see the additional benefits they get from using daemon mode of mod\_wsgi and choose to use it over embedded mode. By this simple decision they have escaped the main issue with embedded mode, which is that Apache can lazily create processes and that for prefork MPM the maximum number of processes is excessive.
+
+  
+
+
+Some have realised that mod\_wsgi daemon mode seems to offer a more predictable memory usage profile and performance curve and as a result fervently recommend it, but at the same time they still don't seem to understand what the problems with embedded mode, as outlined above actually were. So, hopefully the explanation above will help in clearing up why, not just in the case of mod\_wsgi daemon mode vs mod\_wsgi embedded mode, but also for the much maligned mod\_python.
+
+  
+
+
+So, what should you be using? The simple answer is that if you don't understand how to configure Apache and see it as some huge beast then you should certainly be tossing out mod\_python. Instead, you would be much better off using mod\_wsgi daemon mode.
+
+  
+
+
+Should one ever use embedded mode? Technically running embedded mode with prefork MPM should offer the best performance, especially for machines with many cpus/cores. If however you don't have huge amounts of memory, don't dedicate the system to just the dynamic Python web application and you don't change the default MPM settings for Apache, then you are potentially setting yourself up for disaster.
+
+  
+
+
+In practice one also has to realise that the underlying web server is never usually going to be the bottleneck. Instead the bottleneck will be your Python web application and the database it uses. So, just because mod\_wsgi embedded mode and prefork MPM may be the fastest solution out there for Apache and saves you a few milliseconds per request, that gain is going to be completely swallowed up by the overheads elsewhere in the system and not end up giving you any significant advantage.
+
+  
+
+
+You see a lot of people though still obsessing about the underlying raw performance of the web server. Frankly, you are just wasting your time. You will get greater benefits from concentrating on the performance of your application and using techniques such as caching and database query optimisation and indexing to make things run faster.
+
+  
+
+
+The final answer? Stop using mod\_python, use mod\_wsgi and run it with daemon mode instead. You will save yourself a lot of headaches by doing so.
+
+---
+
+## Comments
+
+### Harish Mallipeddi - March 10, 2009 at 12:13 AM
+
+You can also use mod\_fcgi. At this point it might make sense to stop using Apache and use something like lighttpd or nginx.
+
+### Doug Napoleone - March 10, 2009 at 5:33 AM
+
+mod\_wsgi is light years better than mod\_fcgi.
+
+### Niya - March 10, 2009 at 5:51 PM
+
+This is excellent post. Thanks.  
+  
+Regards,  
+[Distributed Enterprise Application](http://www.sblsoftware.com/web-distributed.aspx)
+
+### Unknown - March 13, 2009 at 12:09 PM
+
+If mod\_php is able to share libraries between processes with prefork, why can't mod\_python?   
+  
+Is there a problem with PHP's model of pre-loading and sharing libraries \(e.g. security\)?  
+  
+If mod\_php chose a "stupid" solution that seems to work well with shared nothing, how is the mod\_python solution any better?  
+  
+My guess is that mod\_python didn't do it that way out of any virtuous design choice, but rather that it was the easier implementation because of the way classes are loaded in python.  
+  
+I'd agree that wsgi is probably a more elegant solution than an Apache module overall.  
+  
+Also, things may have changed, but apart from threading issues, and legacy I thought that worker MPM just wasn't as stable, though I believe it was actually better on Windows than Linux. I'm a bit fuzzy on the details though, and it was a couple years ago, so I could be wrong.
+
+### Graham Dumpleton - March 13, 2009 at 1:48 PM
+
+@aarone  
+  
+In respect of stability of worker MPM, are you talking about the worker MPM implementation itself within Apache, or the ability of mod\_python and/or a specific Python web application to work properly in a multithreaded environment?  
+  
+Personally I have never heard of anyone having an issue with stability of Apache worker MPM itself. Also know of no multithreading issues in mod\_python. The problem has always been whether the applications hosted on top are properly written to work in multithreaded environment. As an example, this used to be a concern/issue with Django until 1.0. Multithreading is still a major problem with PHP. Supposedly the core of PHP may be thread safe, but various of the third party extensions still aren't. So it isn't Apache or mod\_python which is the problem but the stuff you run on top of it.  
+  
+As to Windows, it actually uses the 'winnt' MPM and not the 'worker' MPM, so can't be compared.  
+  
+As to shared libraries, when using mod\_python they are shared between processes and technically PHP doesn't even need to preload its shared library prior to the fork to achieve the same. This is because it is the operating system which maps shared libraries and so it manages sharing between processes even if separately loaded.  
+  
+The difference between PHP and Python is that in PHP all the extensions are written in C code and so it is all shareable. In Python extensions are written in a mix of Python code and C code. Only the C code bits, loadable from a .so file, are shareable. Even if you were to preload the Python code bits before the fork and rely on copy on write, it isn't going to help much because the reference counts in Python objects means that the memory is changed very quickly and isn't static and unchanging. So, not much benefit from preloading prior to a fork anyway as would become private memory as soon as it is used in subprocess.  
+  
+So, although technically you could preload Python code prior to fork, it would only really help in respect of load times and not overall memory usage.
+
+### Mikhail Korobov - March 14, 2009 at 12:06 AM
+
+I'm sorry to disagree with some points from your post.  
+  
+Prefork is much better for Python because of GIL \(when your scripts use database\). Database access \(and some other Python modules\) causes threads to lock so only 1 thread in process is active. This causes major performance penalty - all threads in process are waiting while SQL query is executing. If you use prefork mpm GIL won't affect anything as you will have exactly 1 thread for process anyway. Also, Django 1.0.2 has two known threading bugs: \#10470, \#10472 \(they are now fixed in trunk\), so it is not safe to use django with mpm\_worker.  
+  
+As of fastcgi I heard some bad things about flup \(python fastcgi layer\), it have memory leaks and it is not stable.  
+  
+So I'd go with mod\_wsgi in daemon mode with 1 thread per process or mod\_python in prefork mode.  
+  
+Please excuse my English\)
+
+### Graham Dumpleton - March 14, 2009 at 7:41 AM
+
+@kmike  
+  
+If a database adapter or other third party C extension module doesn't unlock the GIL before going into a blocking operation then that module is fundamentally flawed and it should be reported as a bug in that module. None of the major database adapters available have this problem as far as I am aware, so please be more specific about which extension modules you believe are broken.  
+  
+As to the Django multithreading issues, both of those issues have only come up since I made this blog post. I am aware of both of the issues and you are perhaps over estimating the problem those two issues can cause. In both cases they are initialisation bugs. Thus only concurrent requests occurring at exactly the same time as the first request that triggers the initialisation would be affected.  
+  
+Since you ideally would be using long lived processes, only an initial few requests might be affected and everything else should run fine after that. This though would only happen if your application was under load when the process started up such that it was even handling multiple requests at the same time.  
+  
+These problems can be exacerbated by the use of embedded mode and worker MPM, rather than mod\_wsgi daemon mode. This is because the default settings for worker MPM are such that it can still create processes on demand and also kill off processes when not required. This recycling of processes would obviously cause periodic requirement to be initialising a fresh process. In mod\_wsgi daemon mode, the default setting is that the process once created stays resident, as well as the number of processes existing being fixed. So, once things have started up, you would be affected.  
+  
+The only time that recycling of processes occurs with mod\_wsgi daemon mode is if you have set maximum-requests option to restart process after set number of requests, set inactivity-timeout option to kill it off when idle, or explicitly restarted it by touching WSGI script file or killing process.  
+  
+For Python web applications there is no good reason to be using maximum-requests, you are better off leaving the process resident. The only time you may need it is if your application grows memory, be it because you have some sort of debug enabled such as in Django, be it real memory leaks, or through bad caching and inability of garbage collector to destroy stuff.  
+  
+As to inactivity-timeout, if that even came into play, it is highly unlikely your application was even getting enough traffic to hit the multithreading issue to begin with.  
+  
+If using embedded mode and worker MPM, could also make the problem even worse by using MaxRequestsPerChild directive to recycle process. Same issues as maximum-requests with mod\_wsgi daemon mode.  
+  
+So yes those two issues are problems, but not really that severe in the greater scheme of things.
+
+### Graham Dumpleton - March 14, 2009 at 7:43 AM
+
+Obviously, instead of 'So, once things have started up, you would be affected.', meant to say 'So, once things have started up, you would NOT be affected.'
+
+### Mikhail Korobov - March 14, 2009 at 10:32 AM
+
+I see, I was wrong about GIL and 3d party extensions issuses.  
+  
+I've done some apache+mod\_wsgi \(daemon mode\) benchmarks with "ab" and "siege" utilities and the results seems confusing to me.  
+  
+The test page was django powered and have to execute ~15 SQL queries \(mysql\) to render.  
+  
+The configs was:  
+  
+1\) WSGIDaemonProcess site-1 user=user-1 group=user-1 threads=25  
+  
+2\) WSGIDaemonProcess site-1 user=user-1 group=user-1 threads=5 processes=1  
+  
+3\) WSGIDaemonProcess site-1 user=user-1 group=user-1 threads=1 processes=5  
+  
+4\) WSGIDaemonProcess site-1 user=user-1 group=user-1 threads=5 processes=5  
+  
+With 1 and 2 performance was the same, but 1 consume more memory. 3 and 4 performs much better. The only difference between 3 and 4 was that 4 consume more memory. So in my case adding threads causes more memory consumption without any visible performance bonus. Before the benchmark I thought that 2 and 3 should perform near equal, with 2 having less memory overhead, but it was not the case.  
+That's why I assume that "GIL problem" exist and project it into "prefork vs worker" perspective.
+
+### Mikhail Korobov - March 14, 2009 at 11:36 AM
+
+With no sql queries the results are basically the same.
+
+### Graham Dumpleton - March 14, 2009 at 4:35 PM
+
+@kmike  
+  
+You don't say what options you are using to ab/siege in respect to number of concurrent connections. Not obvious if you have eliminated preloading overheads or have ensure that aren't counting into your results. So, hard to comment. Maybe the mod\_wsgi list would be a better place to discuss this as am interested in this so can try and develop some sort of rule of thumb that can be given to people.  
+  
+BTW, Collin Grady in:  
+  
+http://collingrady.wordpress.com/2009/01/06/mod\_python-versus-mod\_wsgi/  
+  
+shows that Apache/mod\_wsgi/Django can work quite happily with one single threaded process. You get small delays under load, and that is where an extra process or two can help. Overall though, even the most minimal number of processes/threads is going to be adequate for a lot of the sites people run. Most people just over estimate what they really need.  
+  
+Whether one actually needs a lot of processes/threads can be governed more by the time taken to handle requests. If your application handles all requests really quickly, then small number of processes/threads probably more than adequate. If however you handle large file uploads, or otherwise have requests that taken a long time, you obviously need more processes/threads to handle many concurrent requests.  
+  
+It should be stated though that Collin has optimised to death his Django application with caching and lots of other stuff. So, he may well get away with it where others may not.
+
+### Alex Popescu - March 20, 2009 at 4:11 PM
+
+I've been documenting myself about the various alternatives available for deploying python webapps for quite a while and I have found your post very helpful in confirming my thoughts \(I'm not a very experienced Pythonist, but spent most of the last decade on the Java platform\).  
+  
+There is still one thing that I'm not 100% sure I do understand. Leaving aside the main difference between mod\_python and mod\_fcgi/mod\_wsgi daemon \(in-processes vs separate process\), my understanding so far is that in terms of resource consumption both approaches are leading to some very similar results, as both approaches will require a Python interpreter per process, so the only real difference is the size of the parent process \(httpd vs fastcgi vs wsgi\). So, at least theoretically, a very 'naked' httpd with mod\_python and worker MPM will require approximately as much machine resources as mod\_wsgi daemon or mod\_fcgi. Or am I wrong?  
+  
+Thanks for the excellent post.
+
+### Graham Dumpleton - March 20, 2009 at 4:38 PM
+
+@alex  
+  
+If the number of processes you configure fastcgi or mod\_wsgi daemon mode to use for a specific application is the same as the maximum number of Apache child server processes, whether using worker or prefork MPM, then yes you would expect overall memory usage to thus be roughly the same for fat Python web applications.  
+  
+For a very small Python web application, then obviously you would see a more notable difference as the Apache child server processes are going to have their own overhead. How much that is is going to depend on how many other Apache modules you have loaded. For fat Python web applications, that base overhead isn't going to stand out as much even though it is still there.  
+  
+This is something that I could not get some people pushing mod\_proxy to backend Python web server process to understand. They just kept wanting to say that using Apache would result in huge amounts of memory being used. They didn't want to entertain the thought that if they set up similar configuration, ie., load balance to equal number of backend Python HTTP server processes running their Python web application, that overall the Python web application would take about the same amount of memory for both approaches.
+
+### Alex Popescu - March 20, 2009 at 10:19 PM
+
+@Graham Thanks a bunch\!  
+  
+I find it quite unfortunate that this 'little detail' \(I mean the python webapp deployment model\) is so muddy in the Python world and I think you are doing an excellent job clarifying most of its aspects.  
+  
+I am preparing a blog post myself summarizing my findings \(which will most probably link heavily to your posts :-\)\) and I hope you'll not mind if I'll be posting here or send you a private email for reviewing it. Anyways, I'm still 'researching' a last option that seems to be used from time to time: Apache + mod\_proxy and I'm not yet very clear about it.  
+  
+I would really like that the next time somebody will be getting to this point they will have all the options covered and they will understand the alternatives \(instead of having to dig for days to figure it all out\).
+
+### Unknown - March 27, 2009 at 2:27 AM
+
+Graham, thanks for taking the time to write this up. It was very useful.
+
+### Unknown - May 27, 2009 at 6:55 PM
+
+Very important on at least an openVZ VPS is to reduce the per thread stack size. It is 8MB by default on linux. There is ThreadStackSize directive for apache, but I use ulimit -s 256 in the apache startup script. If you use mod\_wsgi in daemon mode, it has a stack-size option you can use.
+
+### Graham Dumpleton - May 27, 2009 at 7:22 PM
+
+The thread stack size issue is described in:  
+  
+http://code.google.com/p/modwsgi/wiki/ApplicationIssues\#Memory\_Constrained\_VPS\_Systems
+
+### Ramdas S - July 8, 2009 at 2:58 PM
+
+Graham,  
+Good points made. However your para on modwsgi in daemon mode vs embedded mode wasn't quite clear.   
+  
+My question if its a dedicated server and you are running multiple sites what should be the ideal configuration of modwsgi. Say I have 8 GB RAM.   
+Is there aplace which teaches me running modwsgi in dameon mode
+
+### Graham Dumpleton - July 8, 2009 at 5:24 PM
+
+@Ramdas, there is no single ideal configuration, it depends on your specific application and also where hosting multiple sites the amount of traffic going to specific sites and then memory used by each.  
+  
+If you want to have a discussion about it, use the mod\_wsgi list on Google Groups to explain your problems/requirements.
+

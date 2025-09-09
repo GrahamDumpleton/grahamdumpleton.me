@@ -1,0 +1,56 @@
+{
+  "title": "The mod_python project is now officially dead.",
+  "content": "At the Apache Software Foundation June board meeting which took place on the 16th June 2010, the following resolutions were passed unanimously.\n\n**B. Terminate the Apache Quetzalcoatl Project \\(to[Attic](http://attic.apache.org/)\\)**   \n\n\nThis was the umbrella project for [mod\\_python](http://www.modpython.org) and as such mod\\_python is now no more.\n\nLong live [mod\\_wsgi](http://www.modwsgi.org). Or at least until I get bored of it. ;-\\)",
+  "date": "Thursday, June 17, 2010",
+  "author": "Graham Dumpleton",
+  "url": "http://blog.dscpl.com.au/2010/06/modpython-project-is-now-officially.html",
+  "post_id": "750648647147521145",
+  "blog_id": "2363643920942057324",
+  "comments": [
+    {
+      "comment_id": "4207353060055720360",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Please be aware of previous post I made warning this was going to happen at '<http://blog.dscpl.com.au/2010/05/modpython-project-soon-to-be-officially.html>'. This post explains some of the options you have as far as moving away from mod\\_python.",
+      "timestamp": "June 18, 2010 at 9:09 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/06/modpython-project-is-now-officially.html?showComment=1276816173757#c4207353060055720360",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "4940907590121179850",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "It is now recorded in the Apache Attic that mod\\_python has been moved there. See 'http://attic.apache.org/projects/quetzalcoatl.html'.",
+      "timestamp": "June 23, 2010 at 9:32 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/06/modpython-project-is-now-officially.html?showComment=1277249549524#c4940907590121179850",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "8750882627376188103",
+      "author": "Alan Kennedy",
+      "author_url": "https://www.blogger.com/profile/04021039156849221485",
+      "author_profile_id": "04021039156849221485",
+      "content": "Hi Graham,  \n  \nIndeed, long live mod\\_wsgi.  \n  \nI suggest requesting the quetzalcoatl people and asking them to link to the mod\\_wsgi page.  \n  \nPerhaps a suitable landing page on the mod\\_wsgi wiki that explains the path forward into the WSGI world?  \n  \nThanks for all your good work over the years.  \n  \nAlan.",
+      "timestamp": "July 2, 2010 at 10:49 AM",
+      "permalink": "http://blog.dscpl.com.au/2010/06/modpython-project-is-now-officially.html?showComment=1278031762239#c8750882627376188103",
+      "is_blog_author": false
+    }
+  ],
+  "labels": [
+    "apache",
+    "mod_python",
+    "mod_wsgi",
+    "python"
+  ],
+  "metadata": {
+    "published_timestamp": "2010-06-17T22:53:00+10:00",
+    "blog_title": "Graham Dumpleton",
+    "page_title": "Graham Dumpleton: The mod_python project is now officially dead.",
+    "og_title": "The mod_python project is now officially dead.",
+    "og_description": "At the Apache Software Foundation June board meeting which took place on the 16th June 2010, the following resolutions were passed unanimous...",
+    "og_url": "http://blog.dscpl.com.au/2010/06/modpython-project-is-now-officially.html"
+  },
+  "downloaded_images": []
+}

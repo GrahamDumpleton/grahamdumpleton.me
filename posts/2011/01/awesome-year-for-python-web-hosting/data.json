@@ -1,0 +1,114 @@
+{
+  "title": "An awesome year for Python web hosting.",
+  "content": "This year is shaping up to be an awesome year for Python web hosting. Not only do we have existing reliable providers like [WebFaction](http://www.webfaction.com/), but we now also have a gaggle of Python specific web hosting services coming online. So many that one can easily start loosing track of who they are. As such, doing this post to list those that I know of. Are there any more that people know of that are just starting up?  \n\n\n  \n\n\nThe new contenders that I know of are as follows:\n\n  * [ep.io](http://www.ep.io/)\n  * [gondor.io](http://gondor.io/)\n  * [djangozoom.com](http://djangozoom.com/)\n  * [stable.io](http://stable.io/)\n  * [djangy.com](https://www.djangy.com/)\n  * [pydra.com](http://pydra.com/)\n  * [apphosted.com](https://apphosted.com/)\n\n\n\nWhat will be even more awesome will be to see these teamed up with production monitoring tools like those from [NewRelic](http://www.newrelic.com/). NewRelic has been building relationships with hosting services for other languages they already support, which provide people who sign up with that hosting service free access to their [Bronze level subscription](http://www.newrelic.com/web-app-monitoring-pricing.html). The latest of these announced was for a [PHP web hosting service](http://blog.newrelic.com/2011/01/25/php-fog-offers-free-new-relic-rpm/). So, imagine how things will be if this sort of tool becomes available for the Python web community. As I say, looking to be an awesome year for Python web hosting.\n\n  \n\n\nAnd yes, some will say this is just an unashamed blatant plug for NewRelic just because I am working there now. Seriously though, I reckon this influx of new Python web hosting services, and the monitoring tools to match, is going to be a really great thing for the Python web community. I know I have not been this excited about something for a very very long time. :-\\)",
+  "date": "Friday, January 28, 2011",
+  "author": "Graham Dumpleton",
+  "url": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html",
+  "post_id": "1307472191905754814",
+  "blog_id": "2363643920942057324",
+  "comments": [
+    {
+      "comment_id": "1173291593115384328",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Please note that comments are being moderated. Links advertising existing old school web hosting services, ie., those who provide servers for PHP, Python or arbitrary FASTCGI applications will not be posted. Am only interested in knowing about these new Heroku style of services which are starting to become available and which are specifically dedicated to Python and which are normally using git/mercurial push for automatic deployment to a black box infrastructure and not systems which give you shell or cPanel type access.",
+      "timestamp": "January 28, 2011 at 7:34 PM",
+      "permalink": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html?showComment=1296203681054#c1173291593115384328",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "3305479493681503191",
+      "author": "নাসিম",
+      "author_url": "https://www.blogger.com/profile/02741391032172309130",
+      "author_profile_id": "02741391032172309130",
+      "content": "Why did you avoid Google Appengine? What are the reasons?",
+      "timestamp": "January 29, 2011 at 1:26 AM",
+      "permalink": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html?showComment=1296224791905#c3305479493681503191",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "764848660164829148",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Google App Engine was not mentioned because it has been around for ages. The point of the post was to highlight the 'NEW' kids on the block. It is not meant to be a catalogue of everything that is available.  \n  \nAn important distinction with the new offerings is that they offer up conventional database systems and you aren't forced into using some special purpose database. The new systems also tend to use tools such as git/mercurial to push changes and deploy. This is the style of system am looking at.",
+      "timestamp": "January 29, 2011 at 1:49 PM",
+      "permalink": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html?showComment=1296269343525#c764848660164829148",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "7936755813136317062",
+      "author": "jfischer",
+      "author_url": "https://www.blogger.com/profile/01563879948256299745",
+      "author_profile_id": "01563879948256299745",
+      "content": "Hi, we have a startup called [genForma](http://www.genforma.com) building a Django application service. It will allow easy deployment to the cloud from your development environment and will use standard components. We'll be starting our private beta in the next few weeks and plan to open source our underlying platform.  \n  \n\\- Jeff",
+      "timestamp": "January 30, 2011 at 9:17 AM",
+      "permalink": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html?showComment=1296339440831#c7936755813136317062",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "6545302486510624072",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Seems that djangy.com is shutting down even before it makes it out of private beta. http://blog.djangy.com/2011/02/27/final-djangy-newsletter/",
+      "timestamp": "February 28, 2011 at 11:31 AM",
+      "permalink": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html?showComment=1298853081573#c6545302486510624072",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "4779253930095610788",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/03732072792834839299",
+      "author_profile_id": "03732072792834839299",
+      "content": "Another private beta Django and Python hosting platform: [30loops](http://30loops.net)",
+      "timestamp": "March 15, 2011 at 3:46 AM",
+      "permalink": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html?showComment=1300121165900#c4779253930095610788",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "1457734640268739958",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Yet another one. http://nuagehq.com/",
+      "timestamp": "March 16, 2011 at 3:21 AM",
+      "permalink": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html?showComment=1300206110467#c1457734640268739958",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "6303206837908742909",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "ActivateState has finally announced they are entering this area.  \n  \nhttp://www.activestate.com/blog/2011/05/stackato-platform-python-and-perl-cloud  \n  \nI have known about this one for a little but since they hadn't gone public couldn't say anything.  \n  \nUse of CloudFoundry is interesting and if the addition of Python support has been fed back into the CloudFoundry project then could open up option for VMWare themselves to support Python in their commercial offering as well.  \n  \nWorth pointing out though is that these companies have a focus on using isolated host instances if I understand it correctly and not shared like with existing services. So it isn't necessarily the same market as the existing providers.",
+      "timestamp": "May 6, 2011 at 9:04 AM",
+      "permalink": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html?showComment=1304636667738#c6303206837908742909",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "4547514280221223989",
+      "author": "Harry",
+      "author_url": "https://www.blogger.com/profile/09613612130251313259",
+      "author_profile_id": "09613612130251313259",
+      "content": "May I plug our own offering? [PythonAnywhere](http://www.pythonanywhere.com) offers free hosting for Python web apps, plus all sorts of browser-based dev tools. Drop in and tell us what you think via the big feedback button\\!",
+      "timestamp": "January 15, 2013 at 1:08 AM",
+      "permalink": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html?showComment=1358172484420#c4547514280221223989",
+      "is_blog_author": false
+    }
+  ],
+  "labels": [
+    "python",
+    "wsgi"
+  ],
+  "metadata": {
+    "published_timestamp": "2011-01-28T09:16:00+11:00",
+    "blog_title": "Graham Dumpleton",
+    "page_title": "Graham Dumpleton: An awesome year for Python web hosting.",
+    "og_title": "An awesome year for Python web hosting.",
+    "og_description": "This year is shaping up to be an awesome year for Python web hosting. Not only do we have existing reliable providers like WebFaction , but ...",
+    "og_url": "http://blog.dscpl.com.au/2011/01/awesome-year-for-python-web-hosting.html"
+  },
+  "downloaded_images": []
+}

@@ -1,0 +1,75 @@
+{
+  "title": "Versions 3.0 and 2.7 of mod_wsgi are now available.",
+  "content": "No problems were reported with last release candidate and no one took issue with [Python 3.X support](http://code.google.com/p/modwsgi/wiki/SupportForPython3X), so have finally released [mod\\_wsgi 3.0](http://code.google.com/p/modwsgi/wiki/ChangesInVersion0300). Have also released a very minor update of 2.X branch as well in form of [mod\\_wsgi 2.7](http://code.google.com/p/modwsgi/wiki/ChangesInVersion0207). Unless significant issues come up, there will be no more releases from the 2.X branch.",
+  "date": "Saturday, November 21, 2009",
+  "author": "Graham Dumpleton",
+  "url": "http://blog.dscpl.com.au/2009/11/versions-30-and-27-of-modwsgi-are-now.html",
+  "post_id": "3384369215181650370",
+  "blog_id": "2363643920942057324",
+  "comments": [
+    {
+      "comment_id": "8029729503455561849",
+      "author": "Dirkjan Ochtman",
+      "author_url": "https://www.blogger.com/profile/13084577766817754949",
+      "author_profile_id": "13084577766817754949",
+      "content": "It seems 2.7 reacts weirdly to the Gentoo way of building it, at least...  \n  \n>>> Compiling source in /var/tmp/portage/www-apache/mod\\_wsgi-2.7/work/mod\\_wsgi-2.7 ...  \nmake -j2   \n/usr/sbin/apxs2 -c -I/usr/include/python2.6 -DNDEBUG -Os -march=native -pipe mod\\_wsgi.c -Wl,-O1 -L/usr/lib -L/usr/lib/python2.6/config -lpython2.6 -lpthread -ldl -lutil -lm  \napxs:Error: Unknown option: O.  \napxs:Error: Unknown option: s.  \napxs:Error: Unknown option: m.  \napxs:Error: Unknown option: r.  \napxs:Error: Unknown option: h.  \napxs:Error: Unknown option: =.",
+      "timestamp": "November 22, 2009 at 5:10 AM",
+      "permalink": "http://blog.dscpl.com.au/2009/11/versions-30-and-27-of-modwsgi-are-now.html?showComment=1258827058774#c8029729503455561849",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "1098164804957310349",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@djc: See discussion in 'http://groups.google.com/group/modwsgi/browse\\_frm/thread/667933ac958d1e6b'.",
+      "timestamp": "November 22, 2009 at 1:08 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/11/versions-30-and-27-of-modwsgi-are-now.html?showComment=1258855683044#c1098164804957310349",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "398403125051887148",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Fixes in trunk for 3.1 and branch for 2.8. New versions will come out in next day or so. The changes only affect building form package distribution scripts which inject CFLAGS into configure. If you have got existing versions compiled, no need to bother with update versions when they come out. If just want the patch, see mailing list discussion.",
+      "timestamp": "November 24, 2009 at 9:40 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/11/versions-30-and-27-of-modwsgi-are-now.html?showComment=1259059236122#c398403125051887148",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "5329928331957405505",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Version 2.8 and 3.1 of mod\\_wsgi are now available to address the CFLAGS issue.",
+      "timestamp": "November 25, 2009 at 9:28 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/11/versions-30-and-27-of-modwsgi-are-now.html?showComment=1259144926304#c5329928331957405505",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "6460710969842131350",
+      "author": "Dirkjan Ochtman",
+      "author_url": "https://www.blogger.com/profile/13084577766817754949",
+      "author_profile_id": "13084577766817754949",
+      "content": "Great, thanks. I committed a 2.8 ebuild to Gentoo's tree.",
+      "timestamp": "November 25, 2009 at 11:01 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/11/versions-30-and-27-of-modwsgi-are-now.html?showComment=1259150494073#c6460710969842131350",
+      "is_blog_author": false
+    }
+  ],
+  "labels": [
+    "mod_wsgi",
+    "python",
+    "wsgi"
+  ],
+  "metadata": {
+    "published_timestamp": "2009-11-21T22:15:00+11:00",
+    "blog_title": "Graham Dumpleton",
+    "page_title": "Graham Dumpleton: Versions 3.0 and 2.7 of mod_wsgi are now available.",
+    "og_title": "Versions 3.0 and 2.7 of mod_wsgi are now available.",
+    "og_description": "No problems were reported with last release candidate and no one took issue with Python 3.X support , so have finally released mod_wsgi 3.0 ...",
+    "og_url": "http://blog.dscpl.com.au/2009/11/versions-30-and-27-of-modwsgi-are-now.html"
+  },
+  "downloaded_images": []
+}

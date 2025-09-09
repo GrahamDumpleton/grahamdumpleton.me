@@ -1,0 +1,195 @@
+{
+  "title": "A Python interpreter is not created for each request in mod_python.",
+  "content": "There are various myths about mod\\_python floating around the net and it gets a bit annoying when one keeps seeing them posted again and again, especially when used to support some conjecture that some other system is so much better as a result. It gets more annoying though when they are posted on sites whose commenting feature doesn't work, or you have to jump through hoops to register for the site. As such, often one can't even correct the misconceptions and so the misinformation just keeps propagating and you can never kill it.\n\n  \n\n\nThe latest instance of this is at [www.pypi.info](http://www.pypi.info/index.php?option=com_content&task=view&id=478&Itemid=0), and it isn't the first time I have seen this person making incorrect statements about mod\\_python and how it works.\n\n  \n\n\nSo, let me set the record straight on one such myth about mod\\_python. That myth is that mod\\_python creates a separate Python interpreter instance for each request. This is just not the case.\n\n  \n\n\nWhat actually happens is that the first time a request arrives for an application which hasn't yet been loaded, and which hasn't been marked to run in the main Python interpreter, is that a new sub interpreter is created. That sub interpreter is then persistent within that process though, not being destroyed until the process itself is destroyed. Any subsequent requests for that application are then handled within the context of that same sub interpreter which has already been created, so no new sub interpreter is created. Even when multithreading is used, all the request handler threads execute within the context of that one sub interpreter. So, neither is a separate sub interpreter created for each distinct request handler thread in the Apache thread pool, as is also sometimes claimed.\n\n  \n\n\nAs to why that poster had the problems he had with mod\\_python, they are more likely because of which Apache MPM was selected when Apache was compiled, as well as not changing the default MPM settings used. Especially with prefork MPM, the default settings are more appropriate for static file serving and PHP. If you do not change the default MPM settings as well as tweak HTTP keep alive settings to make them more appropriate for a large persistent Python web application, you will see load spikes and memory issues, especially when a system is put under load.\n\n  \n\n\nFrom what I have seen, the majority of people setting up mod\\_python don't understand the need to change the default Apache configuration. It may well have been the case that back in time when mod\\_python was somewhat newer that you didn't have to, but this is because back then Python web applications were typically much smaller and so didn't have significant start up times or use large amounts of memory. These days though they do, so you need to change how Apache is configured to have it perform adequately.\n\n  \n\n\nNow, can we please stop trying to do performance and memory usage comparisons if you don't know how to setup the systems being compared properly. :-\\(\n\n  \n\n\nBTW, everything above also applies to mod\\_wsgi when using embedded mode, as it is implemented in a similar manner to mod\\_python. Because I'd rather not see these misconceptions about mod\\_python transfers onto mod\\_wsgi, I will blog later more about the real source of these load spikes and memory issues. In the mean time, if using mod\\_wsgi use daemon mode and you will not have to think about it, as these issues in the main only relate to embedded mode.",
+  "date": "Monday, March 9, 2009",
+  "author": "Graham Dumpleton",
+  "url": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html",
+  "post_id": "4053686739275841577",
+  "blog_id": "2363643920942057324",
+  "comments": [
+    {
+      "comment_id": "7045758445852704395",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/09677373455462647507",
+      "author_profile_id": "09677373455462647507",
+      "content": "That site is the same turkey who is selling \"Django 2.0\". His attempts at sowing name-brand confusion \\(pypi.info?\\!\\) are legendary, too, unfortunately.  \n  \nGood to have this information laid out clearly, but there might be an argument for not feeding the trolls in the future for that particular site.",
+      "timestamp": "March 9, 2009 at 11:15 AM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236557700000#c7045758445852704395",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "8853724241272466109",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "Oh, one of those sort of people. Always gets my goat up when people try and trade off of someone else's name and good work. I did notice the 'pypi' site name and thought they were going a bit far in thinking they could hijack it. Didn't know about them also using 'Django 2.0'.",
+      "timestamp": "March 9, 2009 at 12:31 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236562260000#c8853724241272466109",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "721212968869363955",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/18295886505120539832",
+      "author_profile_id": "18295886505120539832",
+      "content": "Yes that website really is a horrible hoax trying to exploit money out of naive people, I wish there was some way someone could shut them down.",
+      "timestamp": "March 9, 2009 at 12:56 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236563760000#c721212968869363955",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "1627355909203280449",
+      "author": "mike bayer",
+      "author_url": "https://www.blogger.com/profile/01417862951114999907",
+      "author_profile_id": "01417862951114999907",
+      "content": "and SalesForceAlchemy \\! sites like these are for dummies, and you can't do much about them.",
+      "timestamp": "March 9, 2009 at 1:05 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236564300000#c1627355909203280449",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "3297424128431399776",
+      "author": "Florian",
+      "author_url": "https://www.blogger.com/profile/06798512674087485252",
+      "author_profile_id": "06798512674087485252",
+      "content": "mod\\_python still sucks because  \n  \n\\- the build in module/function dispatch algorithm  \n\\- weird configuration  \n\\- need to re-configure from apache default  \n\\- fails to reload properly when configured thus \\(which wouldn't matter if...\\)  \n\\- poor hosting choices, apache only \\(as opposed to wsgi which you run on apache and nginx as mod\\_wsgi, on flup as fscgi, scgi or ajp, with wsgiref etc.\\)  \n\\- random crashes  \n\\- inability to configure it to daemon mode \\(as opposed to apache mod\\_wsgi\\) which prevents any sane shared hoster from offering it",
+      "timestamp": "March 9, 2009 at 7:01 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236585660000#c3297424128431399776",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "3886585957237684106",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@florian  \n  \n _the build in module/function dispatch algorithm_  \n  \nNot sure exactly what you mean here. If you mean how it supplies both a low level handler mechanism and the high level publisher dispatch mechanism then would in part agree.  \n  \nI believe that mod\\_python should have stopped at the low level handler mechanism and made it as simple as possible. All the other high level handlers such as publisher should have been done as a separate package with its own release schedule.  \n  \nPart of the problem with mod\\_python is those high level handlers have added to mod\\_python overall code size, plus some of the machinery to support them has been pushed down into the lower level handler causing a bit more in memory bloat, even though not used, that really should not exist, for those people who are only using the low level handler.  \n  \n_weird configuration_  \n  \nFor the content handler phase, I believe the mistake in mod\\_python was moving away from the more conventional CGI approach of using proper URL matching rules to match to a file based resource. Instead you give the name of a Python module as an entry point. This is bad in my mind as you have side stepped all the security mechanisms in Apache as far as controlling what file based resources can be served up by Apache. Also, by doing what it did and not using proper URL to resource based matching, there is no reliable way of determining what SCRIPT\\_NAME should be for a WSGI application.  \n  \nThat said, some of the Trac folks think how mod\\_wsgi works, which is the CGI approach is a PITA as they can't just do everything in the Apache configuration file and instead must create a WSGI script file as the entry point and set up permissions properly on the directory such that it can be used.  \n  \n_need to re-configure from apache default_  \n  \nIf you mean the need to change the default MPM settings then that isn't strictly mod\\_python's fault, but the fault of the specific heavy weight Python applications that people try and run on top of it. In short, mod\\_python came about when Python web applications were small, but now that they are much much bigger and have greater memory requirements. Thus, it isn't really possible any more to mix Python web applications and static file serving and PHP all on the one Apache server. I am writing a separate blog about that.  \n  \n_fails to reload properly_  \n  \nThe module importer in mod\\_python is not meant to provide automatic reload ability for all Python code. It is a misconception I have seen many people have. When you are using a high level framework or Python application such as Django or Trac, you may as well turn off mod\\_python autoreload as it doesn't do anything for that case where entry point is a Python module on standard sys.path. The situation is not much different for mod\\_wsgi embedded mode, although recently showed how on Windows at least one could implement automatic restarts for any code change.  \n  \n_poor hosting choices, apache only_  \n  \nIf you bind code to the mod\\_python specific API then yes, but no reason why you can't use a mod\\_python/WSGI bridge and so it just becomes another WSGI hosting mechanism. Well, accept for the fact that SCRIPT\\_NAME isn't correct and you have to manually set it.  \n  \n_random crashes_  \n  \nThe reason for which most are understood and logged as issues, but because mod\\_python has stagnated, the fixes haven't been implemented. At least learnt from the mistakes in mod\\_python and didn't do the same thing in mod\\_wsgi. Actually, most of the problems with mod\\_python were worked out when implementing mod\\_wsgi and seeing how the code in mod\\_python was just broken.  \n  \n_inability to configure it to daemon mode \\(as opposed to apache mod\\_wsgi\\) which prevents any sane shared hoster from offering it_  \n  \nMy personal opinion is that any sane shared hoster shouldn't necessarily be offering shared hosting with mod\\_wsgi just yet, well commodity shared hosting at least. At least, I wouldn't trust them to set it up as securely as possible, especially since how to do so isn't properly documented yet. Also, mod\\_wsgi 2.X isn't as secure as it could be and mod\\_wsgi 3.0 improves things in that area. Even so, for maximum security a certain architecture should be used which would involve not only Apache but a separate front end proxy and static file server such as nginx.  \n  \nAt the moment, only web hosting company I would trust fully is WebFaction, as they give each user their own Apache for running the dynamic web applications. Any others I would be suspicious of for commodity web hosting. Managed application web hosting is a different matter.  \n  \nBTW, I have never once been approached by any web hosting company, at least not one that has been open about it, as to how to properly configure mod\\_wsgi for any level of shared hosting. This in part shows how conservative they are in taking up new technology, but perhaps also shows a mistaken belief that they think they know what they are doing. Certainly I have heard some feedback from people who have talked to companies about using mod\\_wsgi, and some of what the companies was saying was just utter nonsense and only showed they had no idea how mod\\_wsgi or even mod\\_python worked and how to use it properly.",
+      "timestamp": "March 9, 2009 at 8:52 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236592320000#c3886585957237684106",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "68287368374613224",
+      "author": "Florian",
+      "author_url": "https://www.blogger.com/profile/06798512674087485252",
+      "author_profile_id": "06798512674087485252",
+      "content": "@Graham  \n  \nso since you basically agree with the raised points, and add a few of your own like that mod\\_python is kinda bloated and that its development is stagnant, why does it matter who spreads what kind of missinformation about it?  \n  \nThe bottom line is nobody should use it.",
+      "timestamp": "March 9, 2009 at 9:03 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236592980000#c68287368374613224",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "2149457468085008320",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@florian  \n  \nIt matters because in some ways mod\\_wsgi works very similar to mod\\_python.  \n  \nIf people think that mod\\_python works in a certain way, when it doesn't, or that mod\\_python has certain problems, which may not actually be its fault directly, then they will assume that the same applies to mod\\_wsgi.  \n  \nThis isn't fiction. I have already come across people doing exactly this, most out of ignorance, but a few who seemed to knowingly do it with the intention to cast mod\\_wsgi as a broken solution as well because it competed with their own favoured solution.  \n  \nSo, would rather like to just try and set the record straight a bit. Explaining how mod\\_python works also helps people to understand mod\\_wsgi at the same time.",
+      "timestamp": "March 9, 2009 at 9:20 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236594000000#c2149457468085008320",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "5824204567251209254",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@florian  \n  \nOne final thing about what is getting labelled here as bloat in mod\\_python. The extra stuff I am talking about represents at most 1MB of memory and it stays constant and doesn't increase over time. This amount isn't that much when Python web applications quite often are 30MB+ in size in their own right. In some cases the Python web applications would actually drag in the same code that mod\\_python had already imported but which wasn't strictly needed for basic mod\\_python use case.",
+      "timestamp": "March 9, 2009 at 11:11 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236600660000#c5824204567251209254",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "2805552571813628782",
+      "author": "Florian",
+      "author_url": "https://www.blogger.com/profile/06798512674087485252",
+      "author_profile_id": "06798512674087485252",
+      "content": "@graham  \n  \nby bloat I'm largely refering to features nobody wants, but needs to configure and put up and that keep development of mod\\_python up.",
+      "timestamp": "March 10, 2009 at 1:39 AM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236609540000#c2805552571813628782",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "8337320995397398712",
+      "author": "Laurence Rowe",
+      "author_url": "https://www.blogger.com/profile/02164563755538372331",
+      "author_profile_id": "02164563755538372331",
+      "content": "@florian  \nI much prefer mod\\_wsgi in general, but mod\\_python still has one feature that mod\\_wsgi lacks: the ability to write apache filters in python.  \n  \nAnd as for the general statements on bloat... surely you have nginx and varnish in front of anything that serves a serious amount of traffic.",
+      "timestamp": "March 11, 2009 at 4:01 AM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236704460000#c8337320995397398712",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "4060301087012615852",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@laurence  \n  \nPython isn't particularly the best language for writing Apache input/output filters as the performance hit is quite significant. So, although it wouldn't be that hard to add support for writing input/output filters in Python, I am dubious about whether it is something that should be encouraged.  \n  \nIf you haven't already had a discussion on mod\\_wsgi list about what you are doing with input/output filters suggest you come other and we talk about it some more, especially with respect to what you are doing. This would be a really good time to revisit this issue as last opportunity to get something into mod\\_wsgi 3.0.",
+      "timestamp": "March 11, 2009 at 7:51 AM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236718260000#c4060301087012615852",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "4196002394271597448",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@laurence  \n  \nAhhh, but then I remembered all the other reasons why implementing Apache input/output filters in Python is bad. I'll try and blog about why mod\\_wsgi is unlikely to support them and why in general Python is bad for implementing them. Even so, do still come over to the mod\\_wsgi list if want to discuss it.",
+      "timestamp": "March 11, 2009 at 8:21 AM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236720060000#c4196002394271597448",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "6662699024049520859",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/17666222311375669548",
+      "author_profile_id": "17666222311375669548",
+      "content": "Even though writing filters in python might not be optimal, they are hugely easier to do than implementing in C. The relevant Apache APIs are poorly documented, and there do not appear to be any useful examples you ca start from.  \n  \nAfter trying the C implementation for a while I switched to python and had an output filter up and running quickly.",
+      "timestamp": "March 11, 2009 at 9:49 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236768540000#c6662699024049520859",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "4739545924935031790",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "That writing input/output filters in Python using mod\\_python is easy I will accept. Part of my concerns though are that in making it so simple it has abstracted away too much and you have lost the ability to properly deal with the buckets in the underlying bucket brigade. The result is that although it may work in most cases, there seems to be a small subset where mod\\_python may not be dealing with what comes down the bucket brigade properly and it fails in strange ways. In other words, it may not be a properly behaved filter implementation. Yes I realise this is an implementation detail and might be able to be solved, but it is just one of a number of issues I have with the existing mod\\_python code.  \n  \nAnyway, as I said to previous poster, please come over to the mod\\_wsgi list so we can have a proper discussion about it. I'll still entertain the idea of filters if I believe there is a reasonable set of use cases for it to make it worthwhile and that such use cases can actually work with mod\\_wsgi and WSGI applications. Problem is that the way the WSGI interface works is that some input filters wouldn't be able to work with them. Specifically input filters that modify/add setenv variables or request headers upon first read are lost to WSGI because it takes a snapshot when application first entered. This is in contrast to mod\\_python which allows access to original data all the time so if modified it can see it.  \n  \nSo, at the moment I have people say that they want filter support, but no idea how you are using it and whether the use case is specific to an associated Python web application or being used in conjunction with non Python applications. Where associated with a specific Python web application, it is likely that it can just be done at the level of the WSGI application.",
+      "timestamp": "March 12, 2009 at 7:36 AM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1236803760000#c4739545924935031790",
+      "is_blog_author": true
+    },
+    {
+      "comment_id": "3753654156759654445",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/06747523967625889493",
+      "author_profile_id": "06747523967625889493",
+      "content": "Hello,  \nThanks for the article.  \nI have the following question : my django app uses a python module I wrote. This module makes calls to a postgres DB \\(which is not the DB used by the app for the model, it's an other DB\\). Every time django receives a request, a new DB connection is created by this module, which is very time consuming. So I was wondering, if I run Apache in daemon mode and that all my python application stays loaded in memory, does it mean I can open a DB connection at the first call and then let it open ?  \n  \nsomething like \\(pseudo code\\):  \n  \n\\#MyModule.py  \ncon = psycopg2.connect\\(\\)  \n  \ndef foo\\(query\\):  \ncur = con.cursor\\(\\)  \ncur.execute\\(query\\)  \n...  \nreturn results  \n  \n\\#views.py \\(django app\\)  \nfrom MyModule import foo  \n  \ndef bar\\(request\\):  \n...  \nres = foo\\(someQuery\\)  \n...  \n  \nThe only other solution I could think about was to have an external process running in the background with a pool of open connections, and making requests to this external process.  \nAny advice will be much appreciated \\!",
+      "timestamp": "February 5, 2016 at 11:18 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1454674711703#c3753654156759654445",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "2705296935262361046",
+      "author": "Graham Dumpleton",
+      "author_url": "https://www.blogger.com/profile/13609779138164842374",
+      "author_profile_id": "13609779138164842374",
+      "content": "@Francis You should ask your question on the mod\\_wsgi mailing list, not here in a very old blog post. Also why aren't you using Django's builtin database support? It manages cursors for you and newer versions of Django support database connection pooling across requests. Followups to the mod\\_wsgi mailing list, not here.",
+      "timestamp": "February 12, 2016 at 1:48 PM",
+      "permalink": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html?showComment=1455245301160#c2705296935262361046",
+      "is_blog_author": true
+    }
+  ],
+  "labels": [
+    "mod_python",
+    "mod_wsgi",
+    "python"
+  ],
+  "metadata": {
+    "published_timestamp": "2009-03-09T10:21:00+11:00",
+    "blog_title": "Graham Dumpleton",
+    "page_title": "Graham Dumpleton: A Python interpreter is not created for each request in mod_python.",
+    "og_title": "A Python interpreter is not created for each request in mod_python.",
+    "og_description": "There are various myths about mod_python floating around the net and it gets a bit annoying when one keeps seeing them posted again and agai...",
+    "og_url": "http://blog.dscpl.com.au/2009/03/python-interpreter-is-not-created-for.html"
+  },
+  "downloaded_images": []
+}

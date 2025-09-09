@@ -1,0 +1,182 @@
+---
+title: "Creating your own custom terminal image"
+author: "Graham Dumpleton"
+date: "Sunday, December 30, 2018"
+url: "http://blog.dscpl.com.au/2018/12/creating-your-own-custom-terminal-image.html"
+post_id: "5054528339561113300"
+blog_id: "2363643920942057324"
+tags: ['docker', 'jupyterhub', 'kubernetes', 'openshift', 'red hat']
+images: ['1546146845.png']
+comments: 0
+published_timestamp: "2018-12-30T17:42:00+11:00"
+blog_title: "Graham Dumpleton"
+---
+
+In this series of posts I have been talking about some of the work I have been doing with creating environments to host workshops when needing to train users in using a software product such as OpenShift.
+
+In the [first post](http://blog.dscpl.com.au/2018/12/using-jupyterhub-as-generic-application.html) I explained how JupyterHub can be used to deploy web applications other than Jupyter notebooks, and how I use it to deploy user environments which give each attendee of a workshop, access to an interactive command line shell in their browser, with all the command line client tools and files they need for the workshop.
+
+In the [second post](http://blog.dscpl.com.au/2018/12/running-interactive-terminal-in-browser.html) I delved into how the container image was constructed, as well as how it could be run independent of using JupyterHub where a user may want to deploy it themselves and wasn't running a workshop.
+
+In this post I am going to explain more about how the terminal image is constructed and how it can be extended to add additional command line tools and files required for a specific workshop.
+
+# Contents of the base container image
+
+In addition to the Butterfly application, which provides the interactive terminal in the browser, and the auth proxy, which handles authentication and authorisation, the terminal base image includes a range of command line tools that may be needed in the workshops.
+
+As the main target of any workshops is going to be learning about Kubernetes and OpenShift, the command line clients `kubectl`, `oc` and `odo` are included. You also have commonly used UNIX command utilities such as `git`, `vi`, `nano`, `wget`, and `curl`, as well as tools required to work with specific programming languages. The language runtimes which are provided are Java, Node.js and Python.
+
+When you run specific workshops, you may need additional command line tools to be available, or you may want a users environment to be pre-populated with files for the workshop. This could include a checkout of an existing remote Git respository, so the user will already have all the files necessary present, without needing to pull them down themselves.
+
+In order to add these on top of the base container image, you can extend it using a Source-to-Image \(S2I\) build, or using `buildah` or `docker` builds.
+
+# Running a Source-to-Image build
+
+A [Source-to-Image](https://github.com/openshift/source-to-image) \(S2I\) build is a means of creating custom container images. It works by starting out with a S2I builder image, running it, injecting source files into it, and then running an assemble script within the container which prepares the contents of the image being created. A container image is then created from the running container.
+
+If you are familar with hosting services such as Heroku, or Cloud Foundry, which use what are called build packs, S2I is similar to that, except that S2I was purpose built to create container images. In fact, the S2I builder is itself a container image and in our case, the terminal image is what is called S2I enabled, and acts as the S2I builder image.
+
+An S2I build can be run from the command line on a host where the docker container runtime is available, using the `s2i` tool. An S2I build can also be run inside of any container platform which supports it, such as OpenShift.
+
+When using the `s2i` command line tool, you have two options for where the files you want to inject into the build come from. The first is that files can be injected from the local file system, and the second is for the files to be pulled from a hosted Git repository, such as on GitHub, Gitlab, or Bitbucket.
+
+In either case, when the S2I build is run, the directory of files used as input will be placed in the directory `/opt/app-root/src` of the image. This is the same directory which acts as the home directory for a users session when they access the terminal session through the browser.
+
+In addition to any files from the build directory or Git repository being available, you can also create other files as part of the build process for the custom terminal image. This is done by supplying an executable shell script file at the location `.workshop/build`. This script will be run after files have been placed in the `/opt/app-root/src` directory.
+
+One use for the build script might be to checkout copies of a remote Git repository so that it is included in the image and thus available to the user immediately they access the terminal session. You might also pre-compile any build artifacts from the source code.
+    
+    
+```
+#!/bin/bash
+```
+    
+```
+set -x
+set -eo pipefail
+```
+    
+```
+git clone https://github.com/openshift-evangelists/Wild-West-Backend.git backend
+git clone https://github.com/openshift-evangelists/Wild-West-Frontend.git frontend
+```
+    
+    
+
+By pre-compiling build artifacts once as part of the image build, it avoids the need for every user in a workshop to have to run the build. The only time they would need to re-compile build artifacts is if they make code changes, and even then it would only be necessary to rebuild anything corresponding to the changes.
+
+Note that to ensure that the S2I build of the image fails if any build step fails, you should include the line:
+    
+    
+```
+set -eo pipefail
+```
+    
+    
+
+in the `.workshop/build` script.
+
+By including this line, the whole build will fail immediately any time one specific step fails, and you do not need to manually check the result of every step and explicitly exit the script if a step fails. Failing the build like this ensures that you don't unknowingly create and use an image where a build step didn't fully succeed, but the remainder of the build ran to completion anyway.
+
+With any files you want to include in place, or any build script, if you had them in the current directory, you run `s2i` as:
+    
+    
+```
+s2i build . quay.io/openshiftlabs/workshop-terminal:latest my-workshop-terminal
+```
+    
+    
+
+If you had the files in a hosted Git repository, replace the directory path "`.`" with the Git repository URL.
+
+Once the build has finished, you can verify that the image has been built correctly using docker by running:
+    
+    
+```
+docker run --rm -p 10080:10080 my-workshop-terminal
+```
+    
+    
+
+and accessing http://localhost:10080.
+
+![img-alternative-text](1546146845.png)
+
+If you were using OpenShift, and wanted to do the build in the same project where a workshop will be run from, you can use:
+    
+    
+```
+oc new-build quay.io/openshiftlabs/workshop-terminal:latest~https://your-repository-url \
+  --name my-workshop-terminal
+```
+    
+    
+
+If necessary you could also use a binary input build and build from files in a local directory.
+
+# Building an image from a Dockerfile
+
+If you don't want to use the `s2i` tool, but want to use `buildah build` or `docker build` instead, you can use a `Dockerfile`.
+
+When using a `Dockerfile` you could manually perform all the steps yourself, but it is usually better to setup everything as if an S2I build was triggered and then run the S2I assemble script. In this case the `Dockerfile` would be:
+    
+    
+```
+FROM quay.io/openshiftlabs/workshop-terminal:latest
+```
+    
+```
+USER root
+```
+    
+```
+COPY . /tmp/src
+```
+    
+```
+RUN rm -rf /tmp/src/.git* && \
+    chown -R 1001 /tmp/src && \
+    chgrp -R 0 /tmp/src && \
+    chmod -R g+w /tmp/src
+```
+    
+```
+USER 1001
+```
+    
+```
+RUN /usr/libexec/s2i/assemble
+```
+    
+    
+
+You do not need to provide `CMD` or `ENTRYPOINT` as these are inherited from the base image.
+
+When ready, run `buildah build` or `docker build` to create the custom image.
+
+Building a custom image using these tools from a `Dockerfile` would be necessary where you want to install additional system packages that can only be installed as the `root` user. This is because an S2I build is always run as an unprivileged user.
+
+# Defining steps for when the image is run
+
+The `.workshop/build` script is run during the build phase when using an S2I build using `s2i` or when emulating it using the above `Dockerfile`. If you want to have special steps run when a container is started up from the image, you can supply an executable shell script called `.workshop/setup`. Depending on the environment in which the image is known to be running, this might run steps such as creating projects in OpenShift for use by the user, or set up special service accounts or role bindings, so the user doesn't need to do those things themselves.
+
+Note that the `.workshop/setup` script can only define commands to run, it cannot be used to set environment variables that would be inherited by the users terminal session. If you need to set environment variables, you can create a shell script file in the directory `/opt/app-root/etc/profile.d`. For example, if using a `Dockerfile` build you had installed the Ruby package from the Software Collections Library \(SCL\), you would create the file `/opt/app-root/etc/profile.d/ruby.sh` which contained:
+    
+    
+```
+source scl_source enable rh-ruby25
+```
+    
+    
+
+This would activate the Ruby runtime and ensure that any appropriate environment variables are set and the `PATH` updated to include the `bin` directory for the Ruby distribution.
+
+# Coming up next, deploying the workshop
+
+In this post we covered how the terminal base container image can be extending using the Source-to-Image \(S2I\) build process, or a build using a `Dockerfile`. It touched on some of the extension points used by this specific S2I builder implementation, but also when the image is run in a container. This isn't all the ways that the base image can be extended. How the web interface for the terminal can for example be customised will be covered in a later post.
+
+The benefit of using a base image and then building a custom image on top which contains everything needed for a workshop, is that the image becomes the packaging mechanism for the content required, but also contains everything needed to run it standalone if necessary.
+
+One of the issues that comes up with running workshops is that people will ask how they can do over the workshop themselves again later. If the only way to work through the exercises is to deploy the complete multi user workshop environment, that isn't necessarily practical. Because everything needed is in the image, they can run the image themselves, as was covered in the prior post. So if you wanted to allow attendees to do it again, you need only host the image on a public image repository such as quay.io so they can pull it down and use it later.
+
+Now that you can see how you can create a custom terminal image with special content for a workshop, we will move onto how you could run a multi user workshop using JupyterHub. That will be the topic of the next post in this series.

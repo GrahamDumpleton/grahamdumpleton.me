@@ -1,0 +1,96 @@
+{
+  "title": "Should my next conference talk be on how web servers work?",
+  "content": "Last year was actually the first time I had attended a PyCon conference. This was because Australia hadn't ever hosted a PyCon conference before and everywhere else was far enough away from Australia to make it hard to justify. When Singapore announced they would be hosting their first PyCon conference however I just had to go as that part of Asia is an area I like visiting. Coincidentally Australia then announced quite late that they would also host their own PyCon a week after the Singapore PyCon. In the end I went to PyCon conferences in Singapore, Australia and New Zealand last year. This was topped off by getting the opportunity through my new job at New Relic to go to US PyCon this year.\n\n  \n\n\nBecause of time constraints I didn't present any talk at Singapore PyCon, but did step up and do one in Sydney which I then gave again at New Zealand. I didn't do anything for US PyCon as I only found out I would be going a bit more than a month out from the conference.\n\n  \n\n\nThe conference talk I did last year was one on getting started with mod\\_wsgi. The approach the talk took was to show all the things that could go wrong and explain why those situations come about. Having now attended the US PyCon, in hindsight I probably tried to pack a bit too much into the talk and one could argue it was also perhaps too instructional for a conference talk. Most talks seem to be much more high level and along the lines of 'hey look at what I am doing' rather that being a mini tutorial intended to actually teach you a lot of stuff while you are there.\n\n  \n\n\nFor that reason, rather than try and do further highly technical talks on WSGI deployment or debugging of web applications, I thought for this year that I would instead step back a bit and do a talk on the basics of how web servers work. I realise that this isn't necessarily Python specific, but what keeps coming up out there on the various forums is that many people simply don't understand how the web server they are using actually works. Most see the web server as merely an inconvenience, something that they have to install but which they never understand enough to know how to set it up properly.\n\n  \n\n\nThe talk I have in mind would therefore cover the common architectures that web servers use. So, topics such as threaded vs event driven systems, single process vs multi process, as well as descriptions of the different request queuing mechanisms and use of backend daemon processes for running the dynamic parts of a web application. There obviously needs to be some Python slant to all this, so would also cover how the architecture of the web server affects the type of interface used between a Python web application and the web server, plus issues such as data sharing between different parts of the Python web application. Finally, would try and cover why you would choose one server architecture over another or when you should actually employ multiple web servers with different architectures for different parts of one overall Python web application.\n\n  \n\n\nSo my question is, is a talk about such a topic something that would be of interest out there in the Python web community? I sort of feel it is an area where there isn't a great deal of good information out there about, but I could be totally wrong.\n\n  \n\n\nIf not the above topic then, what would people like to hear me do a talk on? Realistically I might only have time to prepare one good talk, but if there is interest in other topics, I can always try for more. I do have to work it out soon though to get in before call for papers for Singapore and Sydney PyCon conferences closes.",
+  "date": "Thursday, March 24, 2011",
+  "author": "Graham Dumpleton",
+  "url": "http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html",
+  "post_id": "6097649225318501254",
+  "blog_id": "2363643920942057324",
+  "comments": [
+    {
+      "comment_id": "1984709006731934810",
+      "author": "Unknown",
+      "author_url": "https://www.blogger.com/profile/16309803627858715443",
+      "author_profile_id": "16309803627858715443",
+      "content": "I'd be in favour. The only thing that crosses my mind is it sounds like quite a lot of ground to cover in the time allowed.  \n  \nGoing off topic here I was struck by your having been to four different Pycons in one year. I'd be interested to see you do a blog post which compared and contrasted the nature of the different events \\(speaking as someone who's only ever been to Kiwi pycons\\)",
+      "timestamp": "March 24, 2011 at 10:10 AM",
+      "permalink": "http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html?showComment=1300921849824#c1984709006731934810",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "1378950716358879311",
+      "author": "Robert Kern",
+      "author_url": "https://www.blogger.com/profile/12587923021287252757",
+      "author_profile_id": "12587923021287252757",
+      "content": "That sounds fantastic. Yes, please give this talk.",
+      "timestamp": "March 24, 2011 at 1:42 PM",
+      "permalink": "http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html?showComment=1300934558887#c1378950716358879311",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "3817136549568573272",
+      "author": "Tim Knapp",
+      "author_url": "https://www.blogger.com/profile/09267034238006033927",
+      "author_profile_id": "09267034238006033927",
+      "content": "I agree, sounds an excellent topic and something I'd definitely want to listen to. On a purely selfish note, I'd love to hear you give it at Kiwi PyCon 2011 :\\)",
+      "timestamp": "March 24, 2011 at 8:09 PM",
+      "permalink": "http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html?showComment=1300957770896#c3817136549568573272",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "4455116717337508050",
+      "author": "Marius Gedminas",
+      "author_url": "https://www.blogger.com/profile/15155998626202067226",
+      "author_profile_id": "15155998626202067226",
+      "content": "I haven't seen the talk itself, but I found your mod\\_wsgi slides to be \\*excellent\\*.  \n  \nA generic talk about how web servers work doesn't sound that interesting -- I know the basic principles already. What I'd love to hear about would be practical consequences: how to tune your Apache/Ngnix/whatever if you're going to deploy Python WSGI apps, so you get acceptable performance/memory usage.  \n  \nBut since I live on approximately exactly the opposite point on the globe, I'm unlikely to visit any of the conferences you're speaking at...",
+      "timestamp": "March 25, 2011 at 1:30 AM",
+      "permalink": "http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html?showComment=1300977016648#c4455116717337508050",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "1584965661147306655",
+      "author": "Rodrigue",
+      "author_url": "https://www.blogger.com/profile/12812958327033234553",
+      "author_profile_id": "12812958327033234553",
+      "content": "That would make for a very interesting talk indeed. As soon as you try to develop a web app that does something a bit complex, you certainly need a grasp of what your web server is doing. For example, to avoid situations like: what\\!? More than one requests are accessing this variable at the same time\\!?  \n  \nExplaining a web server's design and behaviour, its implications on a web app, and then more specifically on a WSGI app would be very interesting.",
+      "timestamp": "March 25, 2011 at 11:25 PM",
+      "permalink": "http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html?showComment=1301055913632#c1584965661147306655",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "4543312345026186352",
+      "author": "Rodrigue",
+      "author_url": "https://www.blogger.com/profile/12812958327033234553",
+      "author_profile_id": "12812958327033234553",
+      "content": "Hey Graham. I have been thinking more about your post and the talk you're thinking of giving. I am involved in organizing PyCon Ireland 2011 in Dublin. We would be delighted to have you as a guest speaker if you could be interested. I suspect we could apply for funding from the PSF to sponsor your trip to Europe.  \n  \nIf you have any interest feel free to drop me a line rodriguealcazar at gmail dot com.",
+      "timestamp": "March 26, 2011 at 11:50 PM",
+      "permalink": "http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html?showComment=1301143801141#c4543312345026186352",
+      "is_blog_author": false
+    },
+    {
+      "comment_id": "2372628134935623297",
+      "author": "blueskiwi",
+      "author_url": "https://www.blogger.com/profile/01170674347921641702",
+      "author_profile_id": "01170674347921641702",
+      "content": "If you wrote it as a blog post I'd read it tomorrow\\!",
+      "timestamp": "May 12, 2011 at 1:48 AM",
+      "permalink": "http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html?showComment=1305128911409#c2372628134935623297",
+      "is_blog_author": false
+    }
+  ],
+  "labels": [
+    "apache",
+    "mod_wsgi",
+    "python",
+    "wsgi"
+  ],
+  "metadata": {
+    "published_timestamp": "2011-03-24T08:18:00+11:00",
+    "blog_title": "Graham Dumpleton",
+    "page_title": "Graham Dumpleton: Should my next conference talk be on how web servers work?",
+    "og_title": "Should my next conference talk be on how web servers work?",
+    "og_description": "Last year was actually the first time I had attended a PyCon conference. This was because Australia hadn't ever hosted a PyCon conference be...",
+    "og_url": "http://blog.dscpl.com.au/2011/03/should-my-next-conference-talk-be-on.html"
+  },
+  "downloaded_images": []
+}
