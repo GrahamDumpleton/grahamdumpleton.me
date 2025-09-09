@@ -12,9 +12,9 @@ published_timestamp: "2018-12-31T13:57:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In this fourth post of this [series of posts](http://blog.dscpl.com.au/2018/12/using-jupyterhub-as-generic-application.html), we finally get to how to deploy a multi user workshop environment using OpenShift, or at least, how to deploy an interactive terminal session per user accessible in the browser. Right now we are still working on the assumption that the workshop notes are deployed separately, but we will get to that in a later post.
+In this fourth post of this [series of posts](/posts/2018/12/using-jupyterhub-as-generic-application/), we finally get to how to deploy a multi user workshop environment using OpenShift, or at least, how to deploy an interactive terminal session per user accessible in the browser. Right now we are still working on the assumption that the workshop notes are deployed separately, but we will get to that in a later post.
 
-From the [second post](http://blog.dscpl.com.au/2018/12/running-interactive-terminal-in-browser.html) in this series we know we could have each user log into OpenShift and deploy an instance of the terminal themselves, but that implies they know how to do that using just the OpenShift web console, or they need to be instructed how to do it.
+From the [second post](/posts/2018/12/running-interactive-terminal-in-browser/) in this series we know we could have each user log into OpenShift and deploy an instance of the terminal themselves, but that implies they know how to do that using just the OpenShift web console, or they need to be instructed how to do it.
 
 In the interests of making things easy for attendees of the workshop at the beginning, a better workflow is to give them all the same URL. When they visit this URL, they would log in with the access credentials they were given, and be immediately dropped into their own terminal session. They can then proceed to follow the workshop notes and do the exercises.
 
@@ -97,7 +97,7 @@ Using this mechanism, the persistent volume can be populated the first time with
 
 When the template above is used to deploy JupyterHub for the workshop, it will by default use the workshop terminal base image. The image will provide a default set of command line tools, but will not contain any files specific to the workshop.
 
-If a custom terminal image has been created using the steps explained in the [prior blog post](http://blog.dscpl.com.au/2018/12/creating-your-own-custom-terminal-image.html), this image can be used for the workshop, by passing its name as parameter to the template when deploying JupyterHub.
+If a custom terminal image has been created using the steps explained in the [prior blog post](/posts/2018/12/creating-your-own-custom-terminal-image/), this image can be used for the workshop, by passing its name as parameter to the template when deploying JupyterHub.
     
     
 ```

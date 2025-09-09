@@ -11,7 +11,7 @@ published_timestamp: "2014-01-14T22:03:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-This is the seventh post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[Maintaining decorator state using a class](http://blog.dscpl.com.au/2014/01/maintaining-decorator-state-using-class.html)', with the very first post in the series being '[How you implemented your Python decorator is wrong](http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html)'.
+This is the seventh post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[Maintaining decorator state using a class](/posts/2014/01/maintaining-decorator-state-using-class/)', with the very first post in the series being '[How you implemented your Python decorator is wrong](/posts/2014/01/how-you-implemented-your-python/)'.
 
   
 In the previous post I effectively rounded out the discussion on the implementation of the decorator pattern, or at least the key parts that I care to cover at this point. I may expand on a few other things that can be done at a later time.  

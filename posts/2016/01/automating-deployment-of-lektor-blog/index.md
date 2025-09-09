@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2016/01/automating-deployment-of-lektor-blog.html
 post_id: "2613290079143671376"
 blog_id: "2363643920942057324"
 tags: ['apache', 'docker', 'lektor', 'mod_wsgi', 'openshift', 'python', 's2i']
-images: ['image_54481.png', 'image_84516.png', 'image_64677.png', 'image_39717.png']
+images: ['image_13215.png', 'image_88041.png', 'image_86801.png', 'image_53994.png']
 comments: 0
 published_timestamp: "2016-01-18T09:54:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -372,21 +372,21 @@ This definition is provided as part of the ‘s2i-lektor’ project on GitHub an
 
 If we now go to the OpenShift UI for our project we have the option of adding a Lektor based site.
 
-![Openshift add to project lektor](image_54481.png)
+![Openshift add to project lektor](image_13215.png)
 
 Clicking through on the ‘lektor:1.1’ entry we can now fill out the details for the label to be given to our site and the location of the Git repository which contains the source files.
 
-![Openshift lektor parameters](image_84516.png)
+![Openshift lektor parameters](image_88041.png)
 
 Upon clicking on ‘Create’ it will then go off and build our Lektor site, including making it publicly accessible.
 
-![Openshift lektor service](image_64677.png)
+![Openshift lektor service](image_86801.png)
 
 By default only a single instance of our site will be created, but if it were an extremely popular site, then to handle all the traffic we would just increase the number of pods \(instances\) running. When a web application is scaled in this way, OpenShift will automatically handle all the load balancing of traffic across the multiple instances. We do not need to worry ourselves about needing to set up any front end router or deal with registration of the back end instances with the router.
 
 When it comes to making changes to our site and redeploying it we have a few options.
 
-![Openshift lektor build](image_39717.png)
+![Openshift lektor build](image_53994.png)
 
 We could manually trigger a rebuild of the site through the UI or the command line after we have pushed up our changes to GitHub, or we could instead link the application in OpenShift with our GitHub repository. To do the latter we would configure a web hook into our repository on GitHub. What will happen then is that every time a change is made and pushed up to the Git repository, the application on OpenShift will be automatically rebuilt and redeployed for us.
 

@@ -11,7 +11,7 @@ published_timestamp: "2014-01-15T22:43:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-This is the eigth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[The missing @synchronized decorator](http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html)', with the very first post in the series being '[How you implemented your Python decorator is wrong](http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html)'.  
+This is the eigth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[The missing @synchronized decorator](/posts/2014/01/the-missing-synchronized-decorator/)', with the very first post in the series being '[How you implemented your Python decorator is wrong](/posts/2014/01/how-you-implemented-your-python/)'.  
   
 In the previous post I described how we could use our new universal decorator pattern to implement a better @synchronized decorator for Python. The intent in doing this was to come up with a better approximation of the equivalent synchronization mechanisms in Java.  
   

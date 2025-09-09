@@ -14,9 +14,9 @@ blog_title: "Graham Dumpleton"
 
 In this series of posts I have been talking about some of the work I have been doing with creating environments to host workshops when needing to train users in using a software product such as OpenShift.
 
-In the [first post](http://blog.dscpl.com.au/2018/12/using-jupyterhub-as-generic-application.html) I explained how JupyterHub can be used to deploy web applications other than Jupyter notebooks, and how I use it to deploy user environments which give each attendee of a workshop, access to an interactive command line shell in their browser, with all the command line client tools and files they need for the workshop.
+In the [first post](/posts/2018/12/using-jupyterhub-as-generic-application/) I explained how JupyterHub can be used to deploy web applications other than Jupyter notebooks, and how I use it to deploy user environments which give each attendee of a workshop, access to an interactive command line shell in their browser, with all the command line client tools and files they need for the workshop.
 
-In the [second post](http://blog.dscpl.com.au/2018/12/running-interactive-terminal-in-browser.html) I delved into how the container image was constructed, as well as how it could be run independent of using JupyterHub where a user may want to deploy it themselves and wasn't running a workshop.
+In the [second post](/posts/2018/12/running-interactive-terminal-in-browser/) I delved into how the container image was constructed, as well as how it could be run independent of using JupyterHub where a user may want to deploy it themselves and wasn't running a workshop.
 
 In this post I am going to explain more about how the terminal image is constructed and how it can be extended to add additional command line tools and files required for a specific workshop.
 

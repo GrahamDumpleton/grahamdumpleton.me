@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2016/01/roundup-of-docker-issues-when-hosting.htm
 post_id: "5905550283187646322"
 blog_id: "2363643920942057324"
 tags: ['docker', 'ipython', 'openshift', 'python']
-images: ['image_46515.png']
+images: ['image_38682.png']
 comments: 0
 published_timestamp: "2016-01-04T15:04:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -32,37 +32,37 @@ So right now this is the problem I faced with trying to use IPython. The Docker 
 
 Lets now do a roundup of the posts and the different issues that needed to be addressed in trying to make the IPython image run as an unprivileged user.
 
-  * [Running IPython as a Docker container under OpenShift.](http://blog.dscpl.com.au/2015/12/running-ipython-as-docker-container.html)
+  * [Running IPython as a Docker container under OpenShift.](/posts/2015/12/running-ipython-as-docker-container/)
 
 
 
 > This got everything started. We had no issues with getting ‘ipython/nbviewer’, a static viewer for IPython notebooks, running on OpenShift. In looking at the most obvious candidate image for running a live IPython notebook, that is ‘ipython/ipython’, we found it was actually deprecated and that when we dug into the ‘Dockerfile’ we found it points you towards using ‘jupyter/notebook’. The information available on the Docker Hub Registry for the images is well overdue for an update as coming in via that path it wasn’t at all clear that it shouldn’t be used and what to use instead. Even when using ‘jupyter/notebook’, we found that it fails to run as a non privileged user due to file system permission issues.
 
-  * [Don't run as root inside of Docker containers.](http://blog.dscpl.com.au/2015/12/don-run-as-root-inside-of-docker.html)
+  * [Don't run as root inside of Docker containers.](/posts/2015/12/don-run-as-root-inside-of-docker/)
 
 
 
 > To understand why one should run as a non privileged user in the first place, or why a hosting service may enforce it, we looked next at the dangers of running as the ‘root’ user inside of a Docker container. It was demonstrated how it was quite easy to gain root privileges in the Docker host were an untrusted user allowed to mount arbitrary volumes from the Docker host into a container. Although a hosting service may not expose the Docker API directly, via the ‘docker’ client or otherwise, and hide it behind another tool or user interface, it is still probably wiser not to allow users to run as ‘root’, especially when in nearly all cases it isn’t necessary.
 
-  * [Overriding the user Docker containers run as.](http://blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html)
+  * [Overriding the user Docker containers run as.](/posts/2015/12/overriding-user-docker-containers-run-as/)
 
 
 
 > Overriding of the user that a Docker container runs as can be done from a ‘Dockerfile’, or when ‘docker run’ is used to actually start the container. The latter will even override what may be specified in the ‘Dockerfile’. A hosting service may well always override the user the Docker container runs as due to the fact that where the user is specified in the ‘Dockerfile’, if it isn’t specified as an integer user ID, then what that user is cannot be trusted. Where persistent volumes are offered by a hosting service, it may well want to enforce a specific user ID be used due to the current lack of an ability to map user IDs.
 
-  * [Random user IDs when running Docker containers.](http://blog.dscpl.com.au/2015/12/random-user-ids-when-running-docker.html)
+  * [Random user IDs when running Docker containers.](/posts/2015/12/random-user-ids-when-running-docker/)
 
 
 
 > Having the user ID be overridden presented further problems even where the Docker image had been setup to run as a specific non ‘root’ user. This was because the associated group for the user and the corresponding file system permissions that the Docker image was set up for, didn’t allow the user specified when overridden, to write to parts of the file system such as the home directory of the user. It was therefore necessary to override the ‘HOME’ directory in the ‘Dockerfile’ and be quite specific in how the default user account and its corresponding group were setup.
 
-  * [Unknown user when running Docker container.](http://blog.dscpl.com.au/2015/12/unknown-user-when-running-docker.html)
+  * [Unknown user when running Docker container.](/posts/2015/12/unknown-user-when-running-docker/)
 
 
 
 > Although we could fix up things so they would run as a random user ID, a remaining problem was that the user ID didn’t have an actual entry in the system password database. This meant that attempts to look up details for the user would fail. This could cause some applications to give unexpected results or cause a web application to fail. It was necessary to use a user level library, preloaded into programs, for overriding what details were returned when programs looked up user details.
 
-  * [Issues with running as PID 1 in a Docker container.](http://blog.dscpl.com.au/2015/12/issues-with-running-as-pid-1-in-docker.html)
+  * [Issues with running as PID 1 in a Docker container.](/posts/2015/12/issues-with-running-as-pid-1-in-docker/)
 
 
 
@@ -91,6 +91,6 @@ To test whether whatever process is running inside of the Docker container as pr
 
 If after waiting the 10 seconds for the ‘sleep’ to finish, you find a zombie process as child to process ID ‘1’, then whatever you are running as process ID ‘1’ is not reaping child processes correctly.
 
-![Docker container top wsgiref sleep](image_46515.png)
+![Docker container top wsgiref sleep](image_38682.png)
 
 These therefore are two simple tests you can do to make sure your own Docker images can run as a non privileged user and that you will not have issues due to zombie processes. Have issues and you perhaps should look through the prior blog posts as to what changes you need to look at making.

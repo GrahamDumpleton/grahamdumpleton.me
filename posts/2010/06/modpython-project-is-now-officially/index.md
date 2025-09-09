@@ -26,7 +26,7 @@ Long live [mod\_wsgi](http://www.modwsgi.org). Or at least until I get bored of 
 
 ### Graham Dumpleton - June 18, 2010 at 9:09 AM
 
-Please be aware of previous post I made warning this was going to happen at '<http://blog.dscpl.com.au/2010/05/modpython-project-soon-to-be-officially.html>'. This post explains some of the options you have as far as moving away from mod\_python.
+Please be aware of previous post I made warning this was going to happen at '<[/posts/2010/05/modpython-project-soon-to-be-officially/](/posts/2010/05/modpython-project-soon-to-be-officially/)>'. This post explains some of the options you have as far as moving away from mod\_python.
 
 ### Graham Dumpleton - June 23, 2010 at 9:32 AM
 

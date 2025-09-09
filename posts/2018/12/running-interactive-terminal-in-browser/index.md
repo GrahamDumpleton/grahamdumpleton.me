@@ -12,7 +12,7 @@ published_timestamp: "2018-12-29T13:58:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In the [last blog post](http://blog.dscpl.com.au/2018/12/using-jupyterhub-as-generic-application.html) I explained that JupyterHub can be used to spawn instances of applications other than Jupyter notebooks. Because JupyterHub can also handle user authentication, this made it a handy way of spinning up distinct user environments when running workshops. Each attendee of the workshop would be given access to a shell environment running in a separate pod inside of Kubernetes, with access via an interactive terminal running in their web browser. This meant that they did not need to install anything on their local computer in order to complete the workshop.
+In the [last blog post](/posts/2018/12/using-jupyterhub-as-generic-application/) I explained that JupyterHub can be used to spawn instances of applications other than Jupyter notebooks. Because JupyterHub can also handle user authentication, this made it a handy way of spinning up distinct user environments when running workshops. Each attendee of the workshop would be given access to a shell environment running in a separate pod inside of Kubernetes, with access via an interactive terminal running in their web browser. This meant that they did not need to install anything on their local computer in order to complete the workshop.
 
 For the interactive terminal, the [Butterfly](https://github.com/paradoxxxzero/butterfly) application was used. This is a backend Python application implemented using the Tornado web framework, with the in browser terminal support being based on term.js.
 

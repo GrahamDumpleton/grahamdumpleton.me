@@ -11,7 +11,7 @@ published_timestamp: "2014-01-08T17:46:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-This is the third post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[The interaction between decorators and descriptors](http://blog.dscpl.com.au/2014/01/the-interaction-between-decorators-and.html)', with the very first post in the series being '[How you implemented your Python decorator is wrong](http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html)'.  
+This is the third post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[The interaction between decorators and descriptors](/posts/2014/01/the-interaction-between-decorators-and/)', with the very first post in the series being '[How you implemented your Python decorator is wrong](/posts/2014/01/how-you-implemented-your-python/)'.  
   
 In the very first post I described a number of ways in which the traditional way that Python decorators are implemented is lacking. These were:  
   

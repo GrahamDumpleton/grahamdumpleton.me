@@ -11,7 +11,7 @@ published_timestamp: "2014-12-16T23:33:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-So far in this current series of blog posts I [introduced](http://blog.dscpl.com.au/2014/12/hosting-python-wsgi-applications-using.html) the Docker image I have created for hosting Python WSGI applications using Apache/mod\_wsgi. I then went on to explain what happens when you [build your own image](http://blog.dscpl.com.au/2014/12/deferred-build-actions-for-docker-images.html) derived from it which incorporates your specific Python web application. In this blog post I am going to explain what happens when you run the image and how your Python web application gets started.
+So far in this current series of blog posts I [introduced](/posts/2014/12/hosting-python-wsgi-applications-using/) the Docker image I have created for hosting Python WSGI applications using Apache/mod\_wsgi. I then went on to explain what happens when you [build your own image](/posts/2014/12/deferred-build-actions-for-docker-images/) derived from it which incorporates your specific Python web application. In this blog post I am going to explain what happens when you run the image and how your Python web application gets started.
 
 As shown in the previous blog posts I gave an example of the Dockerfile you would use for a simple WSGI hello world application:
 

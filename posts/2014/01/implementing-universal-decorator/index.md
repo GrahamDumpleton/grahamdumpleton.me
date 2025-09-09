@@ -11,7 +11,7 @@ published_timestamp: "2014-01-09T23:06:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-This is the fourth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[Implementing a factory for creating decorators](http://blog.dscpl.com.au/2014/01/implementing-factory-for-creating.html)', with the very first post in the series being '[How you implemented your Python decorator is wrong](http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html)'.
+This is the fourth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[Implementing a factory for creating decorators](/posts/2014/01/implementing-factory-for-creating/)', with the very first post in the series being '[How you implemented your Python decorator is wrong](/posts/2014/01/how-you-implemented-your-python/)'.
 
   
 In the second post of this series I described a better way of building a decorator which avoided a number of issues I outlined with the typical way in which decorators are coded. This entailed a measure of boiler plate code which needed to be replicated each time. In the previous post to this one I described how we could use a decorator as a decorator factory, and a bit of delegation to hide the boiler plate code and reduce what a user needed to actually declare for a new decorator.  

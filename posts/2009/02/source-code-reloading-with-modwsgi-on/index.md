@@ -11,7 +11,7 @@ published_timestamp: "2009-02-26T09:41:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-I recently highlighted how with mod\_wsgi daemon mode one can enable full automatic source code reloading, using Django as an [example](http://blog.dscpl.com.au/2008/12/using-modwsgi-when-developing-django.html). Because it required daemon mode however, that recipe would only work on UNIX systems. Here I'll explain though how we can go about modifying the code so that it works with Apache being run on Windows.
+I recently highlighted how with mod\_wsgi daemon mode one can enable full automatic source code reloading, using Django as an [example](/posts/2008/12/using-modwsgi-when-developing-django/). Because it required daemon mode however, that recipe would only work on UNIX systems. Here I'll explain though how we can go about modifying the code so that it works with Apache being run on Windows.
 
   
 
@@ -31,7 +31,7 @@ Although a full restart is required, Apache on Windows only uses a single child 
   
 
 
-So, what is the bit of magic that makes this work. For that you are referred to section [Restarting Windows Apache](http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode#Restarting_Windows_Apache) in the mod\_wsgi documentation. Also refer to section [Restarting Daemon Processes](http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode#Restarting_Daemon_Processes) for the original code. For how to integrate this with Django, see the [original blog post](http://blog.dscpl.com.au/2008/12/using-modwsgi-when-developing-django.html).
+So, what is the bit of magic that makes this work. For that you are referred to section [Restarting Windows Apache](http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode#Restarting_Windows_Apache) in the mod\_wsgi documentation. Also refer to section [Restarting Daemon Processes](http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode#Restarting_Daemon_Processes) for the original code. For how to integrate this with Django, see the [original blog post](/posts/2008/12/using-modwsgi-when-developing-django/).
 
   
 

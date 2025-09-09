@@ -11,7 +11,7 @@ published_timestamp: "2015-12-23T16:39:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-At this point in our exploration of [getting IPython to work on OpenShift](http://blog.dscpl.com.au/2015/12/running-ipython-as-docker-container.html) we have deduced that we cannot, and should not, have our Docker container be dependent on [running as the 'root' user](http://blog.dscpl.com.au/2015/12/don-run-as-root-inside-of-docker.html). Simply setting up the Docker container to [run as a specific non ‘root’ user](http://blog.dscpl.com.au/2015/12/overriding-user-docker-containers-run-as.html) wasn’t enough however. This is because in pursuit of a more secure environment, OpenShift actually uses a different user ID for each project when running Docker containers.
+At this point in our exploration of [getting IPython to work on OpenShift](/posts/2015/12/running-ipython-as-docker-container/) we have deduced that we cannot, and should not, have our Docker container be dependent on [running as the 'root' user](/posts/2015/12/don-run-as-root-inside-of-docker/). Simply setting up the Docker container to [run as a specific non ‘root’ user](/posts/2015/12/overriding-user-docker-containers-run-as/) wasn’t enough however. This is because in pursuit of a more secure environment, OpenShift actually uses a different user ID for each project when running Docker containers.
 
 As I keep noting, user namespaces when available in Docker, should be able to transparently hide any underlying mapping to a special user ID as required by an underlying platform, allowing the Docker container to use what ever user ID it wants. We aren’t there yet, and given that user namespaces were first talked about as coming soon [well over a year ago](https://news.ycombinator.com/item?id=7909622), we could well be waiting some time yet for all the necessary pieces to fall into place to enable that.
 
@@ -326,5 +326,5 @@ whoami: cannot find name for user ID 10000
 
 How to solve the issue explained in this post is in the next post in this series:  
   
-http://blog.dscpl.com.au/2015/12/unknown-user-when-running-docker.html
+[/posts/2015/12/unknown-user-when-running-docker/](/posts/2015/12/unknown-user-when-running-docker/)
 

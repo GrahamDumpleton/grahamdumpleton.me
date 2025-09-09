@@ -11,7 +11,7 @@ published_timestamp: "2015-05-23T21:41:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-I have been focusing in the last couple of [posts](http://blog.dscpl.com.au/2015/05/returning-string-as-iterable-from-wsgi.html) about the overheads of generating response content from a WSGI application as many separate blocks rather than as one large block. This has illustrated how there can be quite marked differences between different WSGI servers and even with a specific WSGI server depending on how it is configured or integrated into an overall architecture. 
+I have been focusing in the last couple of [posts](/posts/2015/05/returning-string-as-iterable-from-wsgi/) about the overheads of generating response content from a WSGI application as many separate blocks rather than as one large block. This has illustrated how there can be quite marked differences between different WSGI servers and even with a specific WSGI server depending on how it is configured or integrated into an overall architecture. 
 
 In this post I want to look at how we could actually add monitoring which could track how much data is actually being returned in a response and how many blocks it was broken up into. We can also track how much time was being spent by the WSGI server trying to write that data back to the HTTP client.
 
@@ -121,7 +121,7 @@ To support certain older style Python web applications that preceded the WSGI sp
 
 When this 'write\(\)' callback function is used to provide the response content, then the iterable returned by the WSGI application would normally be an empty list. The code above would therefore never actually see any response content.
 
-I have blogged previously about this [hidden 'write\(\)' callback](http://blog.dscpl.com.au/2012/10/wsgi-middleware-and-hidden-write.html) and although a correct WSGI middleware should support it, for the purposes of this analysis I am going to ignore it.
+I have blogged previously about this [hidden 'write\(\)' callback](/posts/2012/10/wsgi-middleware-and-hidden-write/) and although a correct WSGI middleware should support it, for the purposes of this analysis I am going to ignore it.
 
 Ignoring the 'write\(\)' callback function will not affect the operation of the wrapped WSGI application, but it means that if the 'write\(\)' callback function were used, we wouldn't report anything about the response content generated that way.
 

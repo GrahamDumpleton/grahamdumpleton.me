@@ -11,7 +11,7 @@ published_timestamp: "2019-01-03T17:48:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-If you are still following this series of blog posts, we now have a [dashboard](http://blog.dscpl.com.au/2019/01/dashboard-combining-workshop-notes-and.html) for our workshop environment which combines workshop notes with the interactive terminal in the users browser.
+If you are still following this series of blog posts, we now have a [dashboard](/posts/2019/01/dashboard-combining-workshop-notes-and/) for our workshop environment which combines workshop notes with the interactive terminal in the users browser.
 
 This enabled us to have the instructions right next to the terminal where workshop attendees execute the commands. Further, it was possible to have it so that they need only click on the commands and they would be automatically executed in the terminal. This way they didn't need to manually enter commands or cut and paste them, both which can be prone to mistakes.
 
@@ -19,7 +19,7 @@ In this blog post we will look at how workshop notes for a specific workshop can
 
 # Building a custom dashboard image
 
-We already [covered previously](http://blog.dscpl.com.au/2018/12/creating-your-own-custom-terminal-image.html) the methods for creating a custom version of the terminal image which included additional command line tools and source files required for a workshop. The process is the same, but instead of using the terminal base image, the dashboard base image is used instead.
+We already [covered previously](/posts/2018/12/creating-your-own-custom-terminal-image/) the methods for creating a custom version of the terminal image which included additional command line tools and source files required for a workshop. The process is the same, but instead of using the terminal base image, the dashboard base image is used instead.
 
 The two methods that could be used were to use the base image as a Source-to-Image \(S2I\) builder, or to build a custom image from a `Dockerfile`.
 
@@ -203,7 +203,7 @@ As when creating a custom terminal image using the S2I build process, you can de
 
 # Coming up next, deploying the full workshop
 
-This post provides a rough guide on how to add workshop notes to the image when using the dashboard image in an S2I build. How to deploy the dashboard image for a multi user workshop is similar to what was [described previously](http://blog.dscpl.com.au/2018/12/deploying-multi-user-workshop.html), you just need to supply the custom dashboard image instead of the custom terminal image.
+This post provides a rough guide on how to add workshop notes to the image when using the dashboard image in an S2I build. How to deploy the dashboard image for a multi user workshop is similar to what was [described previously](/posts/2018/12/deploying-multi-user-workshop/), you just need to supply the custom dashboard image instead of the custom terminal image.
 
 Deploying a multi user workshop where the users are known in advance by virtue of performing user authentication against OpenShift, isn't the only way that JupyterHub could be used to create a workshop environment.
 

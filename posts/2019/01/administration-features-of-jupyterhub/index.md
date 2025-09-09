@@ -12,7 +12,7 @@ published_timestamp: "2019-01-01T14:22:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-You have seen now in the [last post](http://blog.dscpl.com.au/2018/12/deploying-multi-user-workshop.html) how you can use JupyterHub to deploy a multi user workshop environment where each user is given access to their own interactive shell environment in their web browser. This is by having JupyterHub spawn a terminal application instead of the usual Jupyter notebooks it would be used for.
+You have seen now in the [last post](/posts/2018/12/deploying-multi-user-workshop/) how you can use JupyterHub to deploy a multi user workshop environment where each user is given access to their own interactive shell environment in their web browser. This is by having JupyterHub spawn a terminal application instead of the usual Jupyter notebooks it would be used for.
 
 The aim in being able to provide this out of the box experience, is that it avoids the problem of workshop attendees wasting time trying to install any command line tools on their own local computer that may be needed for a workshop. Instead, everything they need, be it command line tools, or copies of source code files, are ready for them and they can immediately get started with their workshop. This can save up to 20 minutes or more at the start of a workshop, especially if running the workshop at a conference where there is poor wifi connectivity and downloads are slow.
 

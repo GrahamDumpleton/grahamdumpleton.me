@@ -11,7 +11,7 @@ published_timestamp: "2016-12-09T16:22:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In my last [post](http://blog.dscpl.com.au/2016/12/what-user-should-you-use-to-run-docker.html), the main issue I looked at was whether you can trust what a Docker-formatted image says about the user it will run as. What we found was that if the ‘USER’ statement is used in a Dockefile, but is set to a name, you have no idea what UNIX user ID the application in the container will run as. This is because the name could be mapped to any user ID by the UNIX passwd file.
+In my last [post](/posts/2016/12/what-user-should-you-use-to-run-docker/), the main issue I looked at was whether you can trust what a Docker-formatted image says about the user it will run as. What we found was that if the ‘USER’ statement is used in a Dockefile, but is set to a name, you have no idea what UNIX user ID the application in the container will run as. This is because the name could be mapped to any user ID by the UNIX passwd file.
 
 Setting up the UNIX passwd file such that a user name other than ‘root’ also mapped to the UID of 0 provided a backdoor to becoming root in the running container. By requiring that an integer UID be used with the ‘USER’ statement in a Dockerfile, we can inspect the image metadata and decide not to run the image if ‘USER’ wasn’t a non zero integer value.
 

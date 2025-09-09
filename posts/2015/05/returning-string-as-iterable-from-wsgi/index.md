@@ -11,7 +11,7 @@ published_timestamp: "2015-05-19T21:03:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-The possible performance consequences of returning many separate data blocks from a WSGI application were covered in the [previous post](http://blog.dscpl.com.au/2015/05/effects-of-yielding-multiple-blocks-in.html). In that post the WSGI application used as an example was one which returned the contents of a file as many small blocks of data. Part of the performance problems seen arose due to how the WSGI servers would flush each individual block of data out, writing it onto the socket connection back to the HTTP client. Flushing the data in this way for many small blocks, as opposed to as few as possible larger blocks had a notable overhead, especially when writing back to an INET socket connection.
+The possible performance consequences of returning many separate data blocks from a WSGI application were covered in the [previous post](/posts/2015/05/effects-of-yielding-multiple-blocks-in/). In that post the WSGI application used as an example was one which returned the contents of a file as many small blocks of data. Part of the performance problems seen arose due to how the WSGI servers would flush each individual block of data out, writing it onto the socket connection back to the HTTP client. Flushing the data in this way for many small blocks, as opposed to as few as possible larger blocks had a notable overhead, especially when writing back to an INET socket connection.
 
 In this post I want to investigate an even more severe case of this problem that can occur. For that we need to go back and start over with the more typical way that most Python web frameworks return response data. That is, as a single large string.
 

@@ -416,7 +416,7 @@ I was trying to say that unless there are compelling reasons not to one should b
 
 ### Graham Dumpleton - February 8, 2017 at 10:13 PM
 
-On the issue of using virtualenv in a Python container, it is actually very important to still use one if using a system Python installation, or one from a package collection such as Red Hat Software Collections for RHEL/CentOS. I have blogged about those issues in http://blog.dscpl.com.au/2016/01/python-virtual-environments-and-docker.html  
+On the issue of using virtualenv in a Python container, it is actually very important to still use one if using a system Python installation, or one from a package collection such as Red Hat Software Collections for RHEL/CentOS. I have blogged about those issues in [/posts/2016/01/python-virtual-environments-and-docker/](/posts/2016/01/python-virtual-environments-and-docker/)  
   
 As to always using $ORIGIN, I am just wary of using magic in the path resolution for shared libraries as have been burnt by various problems with that on MacOS X. I know that is not Linux and how it works is a bit different, but have learnt from such bad experiences that prefer explicit rather than dynamic. So for Docker at least would take opposite view that unless someone can show me a valid need for it, I wouldn't do it that way. Outside of Docker, it may well be valid, especially for people who manage Python installation and packaging themselves to deploy out to their own hosts.
 

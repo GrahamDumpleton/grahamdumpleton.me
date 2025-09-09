@@ -6,13 +6,13 @@ url: "http://blog.dscpl.com.au/2015/05/performance-monitoring-of-real-wsgi.html"
 post_id: "2208585216229107257"
 blog_id: "2363643920942057324"
 tags: ['datadog', 'python', 'statsd', 'wsgi']
-images: ['image_60507.png', 'image_28311.png', 'image_20489.png', 'image_38252.png', 'image_10033.png']
+images: ['image_85476.png', 'image_1023.png', 'image_46193.png', 'image_99006.png', 'image_456.png']
 comments: 0
 published_timestamp: "2015-05-26T11:30:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-Attempting to monitor WSGI application response times and other details of a web request using 'print' statements, as described in the last few [posts](http://blog.dscpl.com.au/2015/05/monitoring-response-content-from-wsgi.html), may be okay for when playing around in a development environment to understand how a WSGI server works, but it is totally inadequate when wanting to monitor traffic against a real web site. In a production setting, or even just a testing or QA environment, we need to get the raw information we are collecting for all the WSGI application traffic out into a separate system of some sort where it can be analysed and visualised.
+Attempting to monitor WSGI application response times and other details of a web request using 'print' statements, as described in the last few [posts](/posts/2015/05/monitoring-response-content-from-wsgi/), may be okay for when playing around in a development environment to understand how a WSGI server works, but it is totally inadequate when wanting to monitor traffic against a real web site. In a production setting, or even just a testing or QA environment, we need to get the raw information we are collecting for all the WSGI application traffic out into a separate system of some sort where it can be analysed and visualised.
 
 A common set of Open Source tools which is often used for the collection and visualising of such time series data is [statsd](https://github.com/etsy/statsd) and [Graphite](http://graphite.readthedocs.org). In this blog post I am going to show how one can hook up the WSGI middleware that was previously constructed for monitoring WSGI application requests to a statsd instance. Being a lazy sort of person though, and wishing to avoid any pain in needing to setup statsd and Graphite myself, I am actually going to use the [Datadog](http://www.datadoghq.com) monitoring service. Datadog has a free tier which provides the main features we will need to illustrate the approach.
 
@@ -91,23 +91,23 @@ Finally the 'requests' level of the naming hierarchy indicates we are dealing wi
 
 Jumping into Datadog, we can now construct a visualisation from these metrics showing the throughput and response time.
 
-![DatadogThroughputAndResponseTimeCharts](image_60507.png)
+![DatadogThroughputAndResponseTimeCharts](image_85476.png)
 
 For the top chart displaying the throughput I have charted the counter recorded as 'wsgi.application.requests'.
 
-![DatadogThroughputChartConfiguration](image_28311.png)
+![DatadogThroughputChartConfiguration](image_1023.png)
 
 Being a counter, this can be displayed as the actual count, but instead I have chosen to display it as a rate metric showing the number of requests/sec. Doing this avoids a lot of confusion as the result will be the same no matter what time period you have selected in the UI. If you choose to display it as a count, then the number shown can vary dependent on the time period displayed due to how data buckets are merged together and values counted when displaying a larger time period.
 
 For the bottom chart displaying the response time you can see there are actually three different lines on the chart. They correspond to the median, average and 95th percentile. That we have these sub categories available for this metric is a by product of having used 'statsd.timing\(\)' to record the metric.
 
-![DatadogResponseTimeChartConfiguration](image_20489.png)
+![DatadogResponseTimeChartConfiguration](image_46193.png)
 
 We chart more than one value for the response time as relying on the average alone can be misleading. This is because the average can be skewed by very large one off response times which are outside of the normal. By also displaying the 95th percentile then one gets a better indication of what time value the majority of the web requests come in under, but with those outliers still being excluded.
 
 When you have more than one line on the chart, you can hover over the chart and tooltip like overlays will appear explaining what the line represents. It is also possible to expand the view of the chart itself to get a better view along with a legend.
 
-![DatadoThroughputChartExpand](image_38252.png)
+![DatadoThroughputChartExpand](image_99006.png)
 
 # Response content metrics
 
@@ -324,7 +324,7 @@ As well as the response time, we can also record metrics for the details of the 
 
 In the case of 'wsgi.application.requests.output\_time', as it is a time value we have used 'statsd.timing\(\)' once again. For the value tracking the number of bytes and number of blocks, we could have used 'statsd.gauge\(\)', but this would have just given us the average. Instead we use 'statsd.histogram\(\)', which like 'statsd.timing\(\)' provides us with the ability to display the median and 95th percentile as well as the average.
 
-![DatadogResponseContentCharts](image_10033.png)
+![DatadogResponseContentCharts](image_456.png)
 
 In a situation where the amount of response content generated can in practice vary between request, this may provide us additional detail about the variance in what is being generated. In this test example we were generating the same amount of data as a single block all the time, so each of these will actually end up being the same.
 

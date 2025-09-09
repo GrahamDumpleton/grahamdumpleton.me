@@ -354,7 +354,7 @@ The information above gives a quick heads up on how to check whether you are run
 
 Related blog posts which would be worthwhile reading are:
 
-  * [Save on memory with mod\_wsgi 3.0.](http://blog.dscpl.com.au/2009/11/save-on-memory-with-modwsgi-30.html)
+  * [Save on memory with mod\_wsgi 3.0.](/posts/2009/11/save-on-memory-with-modwsgi-30/)
 
 
 

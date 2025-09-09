@@ -11,7 +11,7 @@ published_timestamp: "2009-08-21T20:39:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In the [last post](http://blog.dscpl.com.au/2009/08/problems-with-example-web2py.html) about web2py I covered the problems with the HTTP configuration for using [mod\_wsgi](http://www.modwsgi.org). This time will look at the combined HTTP/HTTPS configurations from the web2py book. The configuration in this case is as follows.
+In the [last post](/posts/2009/08/problems-with-example-web2py/) about web2py I covered the problems with the HTTP configuration for using [mod\_wsgi](http://www.modwsgi.org). This time will look at the combined HTTP/HTTPS configurations from the web2py book. The configuration in this case is as follows.
     
     
 ```
@@ -75,7 +75,7 @@ In the [last post](http://blog.dscpl.com.au/2009/08/problems-with-example-web2py
 58 </VirtualHost> 
 ```
 
-As already stated in the last post, this has all the same problems as for the HTTP only configuration. Because a separate VirtualHost is used for HTTP and HTTPS, the problems are actually duplicated and occur in each VirtualHost. I will not cover all that again, so ensure you read the [last post](http://blog.dscpl.com.au/2009/08/problems-with-example-web2py.html).
+As already stated in the last post, this has all the same problems as for the HTTP only configuration. Because a separate VirtualHost is used for HTTP and HTTPS, the problems are actually duplicated and occur in each VirtualHost. I will not cover all that again, so ensure you read the [last post](/posts/2009/08/problems-with-example-web2py/).
 
   
 

@@ -11,7 +11,7 @@ published_timestamp: "2009-10-02T15:00:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In my last [gargantuan post](http://blog.dscpl.com.au/2009/09/roadmap-for-python-wsgi-specification.html) I tried to lay out a possible roadmap for the future of [WSGI](http://www.python.org/dev/peps/pep-0333/). That generated another large discussion on the [Python WEB-SIG](http://groups.google.com/group/python-web-sig?lnk=) list. I don't want to go into any outcomes of that discussion just yet though. Instead, I want to focus on one part of that roadmap and go into it in more detail. That part was the set of amendments/clarifications I listed towards the end of the roadmap. Although these were thrown in towards the end of the post, they actually stand independent of the bigger issue of how WSGI should look for Python 3.X.
+In my last [gargantuan post](/posts/2009/09/roadmap-for-python-wsgi-specification/) I tried to lay out a possible roadmap for the future of [WSGI](http://www.python.org/dev/peps/pep-0333/). That generated another large discussion on the [Python WEB-SIG](http://groups.google.com/group/python-web-sig?lnk=) list. I don't want to go into any outcomes of that discussion just yet though. Instead, I want to focus on one part of that roadmap and go into it in more detail. That part was the set of amendments/clarifications I listed towards the end of the roadmap. Although these were thrown in towards the end of the post, they actually stand independent of the bigger issue of how WSGI should look for Python 3.X.
 
   
 

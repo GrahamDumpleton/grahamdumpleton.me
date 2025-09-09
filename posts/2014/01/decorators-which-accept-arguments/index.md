@@ -11,7 +11,7 @@ published_timestamp: "2014-01-11T23:05:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-This is the fifth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[Implementing a universal decorator](http://blog.dscpl.com.au/2014/01/implementing-universal-decorator.html)', with the very first post in the series being '[How you implemented your Python decorator is wrong](http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html)'.  
+This is the fifth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[Implementing a universal decorator](/posts/2014/01/implementing-universal-decorator/)', with the very first post in the series being '[How you implemented your Python decorator is wrong](/posts/2014/01/how-you-implemented-your-python/)'.  
   
 So far in this series of posts I have explained the short comings of implementing a decorator in the traditional way they are done in Python. I have shown an alternative implementation based on an object proxy and a descriptor which solves these issues, as well as provides the ability to implement what I call a universal decorator. That is, a decorator which understands the context it was used in and can determine whether it was applied to a normal function, an instance method, a class method or a class type.  
   

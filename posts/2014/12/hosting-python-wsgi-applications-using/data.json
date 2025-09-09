@@ -102,7 +102,7 @@
       "author": "Graham Dumpleton",
       "author_url": "https://www.blogger.com/profile/13609779138164842374",
       "author_profile_id": "13609779138164842374",
-      "content": "I have a newer Docker image which supersedes this one and which is much smarter. It includes knowledge about Django and will run collectstatic for during the build and automatically configure mod\\_wsgi to host the static files as well. I talk a bit about it in http://blog.dscpl.com.au/2016/02/building-better-user-experience-for.html",
+      "content": "I have a newer Docker image which supersedes this one and which is much smarter. It includes knowledge about Django and will run collectstatic for during the build and automatically configure mod\\_wsgi to host the static files as well. I talk a bit about it in [/posts/2016/02/building-better-user-experience-for/](/posts/2016/02/building-better-user-experience-for/)",
       "timestamp": "November 23, 2016 at 11:53 AM",
       "permalink": "http://blog.dscpl.com.au/2014/12/hosting-python-wsgi-applications-using.html?showComment=1479862381590#c5722554496580462045",
       "is_blog_author": true

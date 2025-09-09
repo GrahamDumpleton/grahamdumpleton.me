@@ -399,4 +399,4 @@ I therefore leave you with one final example to get you thinking about the ways 
 
 So that is a quick run down of the main parts of the functionality provided by wrapt for doing monkey patching. There are a few others things, but that is in the main all you usually require. I use monkey patching for actually adding instrumentation into existing code to support performance monitoring, but I have shown here how the same techniques can be used in writing tests for your code as an alternative to a package like Mock.
 
-As I mentioned in my [previous post](http://blog.dscpl.com.au/2015/03/safely-applying-monkey-patches-in-python.html) though, one of the big problems with monkey patching is the order in which modules get imported relative to when the monkey patching is done. I will talk more about that issue in the next post.
+As I mentioned in my [previous post](/posts/2015/03/safely-applying-monkey-patches-in-python/) though, one of the big problems with monkey patching is the order in which modules get imported relative to when the monkey patching is done. I will talk more about that issue in the next post.

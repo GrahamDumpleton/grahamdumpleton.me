@@ -55,7 +55,7 @@ What you need to do to reveal information about exceptions obviously varies base
 
 This will result in the display of the exception, a stack trace, and the values of any local variables for each stack frame for the stack trace back. Obviously you don’t want to leave this enabled when deploying to a production environment.
 
-As explained in the prior post where I detailed how to [integrate mod\_wsgi-express with Django](http://blog.dscpl.com.au/2015/04/integrating-modwsgi-express-as-django.html) as a management command, a safer option to capture at least the details of the exception and the stack trace, is to enable Django logging to log the details of the exceptions to the error log.
+As explained in the prior post where I detailed how to [integrate mod\_wsgi-express with Django](/posts/2015/04/integrating-modwsgi-express-as-django/) as a management command, a safer option to capture at least the details of the exception and the stack trace, is to enable Django logging to log the details of the exceptions to the error log.
 
 > 
 >     LOGGING = {  

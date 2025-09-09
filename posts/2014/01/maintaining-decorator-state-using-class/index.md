@@ -11,7 +11,7 @@ published_timestamp: "2014-01-13T10:07:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-This is the sixth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[Decorators which accept arguments](http://blog.dscpl.com.au/2014/01/decorators-which-accept-arguments.html)', with the very first post in the series being '[How you implemented your Python decorator is wrong](http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html)'.
+This is the sixth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[Decorators which accept arguments](/posts/2014/01/decorators-which-accept-arguments/)', with the very first post in the series being '[How you implemented your Python decorator is wrong](/posts/2014/01/how-you-implemented-your-python/)'.
 
   
 In the previous post I described how to implement decorators which accept arguments. This covered mandatory arguments, but also how to have a decorator optionally accept arguments. I also touched on how one can maintain state between invocations of the decorator wrapper function for a specific wrapped function.  

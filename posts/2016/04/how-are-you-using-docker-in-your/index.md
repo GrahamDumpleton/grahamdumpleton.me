@@ -11,7 +11,7 @@ published_timestamp: "2016-04-08T08:53:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-If you have been reading my blog posts rather than simply flicking them out of your news feed as a bit of noise, you will know that I have been working on a project which aims to make the deployment of Python web applications easier. I wrote a bit about this in the post titled '[Building a better user experience for deploying Python web applications](http://blog.dscpl.com.au/2016/02/building-better-user-experience-for.html)’.
+If you have been reading my blog posts rather than simply flicking them out of your news feed as a bit of noise, you will know that I have been working on a project which aims to make the deployment of Python web applications easier. I wrote a bit about this in the post titled '[Building a better user experience for deploying Python web applications](/posts/2016/02/building-better-user-experience-for/)’.
 
 That post got a surprising number of reads, many more than I would normally expect to see in such a short period of time. There definitely therefore seems to be a lot of interest in the topic.
 

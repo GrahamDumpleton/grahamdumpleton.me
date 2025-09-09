@@ -11,7 +11,7 @@ published_timestamp: "2014-02-17T23:36:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-This is the tenth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[Performance overhead of using decorators](http://blog.dscpl.com.au/2014/02/performance-overhead-of-using-decorators.html)', with the very first post in the series being '[How you implemented your Python decorator is wrong](http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html)'.  
+This is the tenth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[Performance overhead of using decorators](/posts/2014/02/performance-overhead-of-using-decorators/)', with the very first post in the series being '[How you implemented your Python decorator is wrong](/posts/2014/01/how-you-implemented-your-python/)'.  
   
 In the previous post I started looking at the performance implications of using decorators. In that post I started out by looking at the overheads when applying a decorator to a normal function, comparing a decorator implemented as a function closure to the more robust decorator implementation which has been the subject of this series of posts.  
   

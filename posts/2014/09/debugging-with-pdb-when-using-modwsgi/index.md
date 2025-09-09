@@ -21,7 +21,7 @@ So all well and good and I thought I was doing a good thing by encouraging peopl
 
 What happened therefore is that documentation for some Python web frameworks and various blog posts started to say that mod\_wsgi has these restrictions and/or was broken and here is how you workaround it. The Flask [documentation](http://flask.pocoo.org/docs/0.10/deploying/mod_wsgi/#troubleshooting) even today still carries such a warning even though it isn't relevant to more recent mod\_wsgi versions, with the restriction removed back in mod\_wsgi 3.0, which was released on 21st November 2009, almost five years ago.
 
-For some more background on this issue you can read my prior [blog post](http://blog.dscpl.com.au/2009/04/wsgi-and-printing-to-standard-output.html) back in 2009 about it. In short though, if you are using:
+For some more background on this issue you can read my prior [blog post](/posts/2009/04/wsgi-and-printing-to-standard-output/) back in 2009 about it. In short though, if you are using:
     
     
 ```

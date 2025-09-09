@@ -11,7 +11,7 @@ published_timestamp: "2015-04-10T06:37:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In my [previous posts](http://blog.dscpl.com.au/2015/03/ordering-issues-when-monkey-patching-in.html) on monkey patching I discussed the ordering problem. That is, that the ability to properly monkey patch is dependent on whether we can get in before any other code has already imported the module we want to patch. The specific issue in this case is where other code has imported a reference to a function within a module by name and stored that in it is own namespace. In other words, where it has used:
+In my [previous posts](/posts/2015/03/ordering-issues-when-monkey-patching-in/) on monkey patching I discussed the ordering problem. That is, that the ability to properly monkey patch is dependent on whether we can get in before any other code has already imported the module we want to patch. The specific issue in this case is where other code has imported a reference to a function within a module by name and stored that in it is own namespace. In other words, where it has used:
 
 > 
 >     from module import function

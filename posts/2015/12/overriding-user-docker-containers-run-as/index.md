@@ -11,7 +11,7 @@ published_timestamp: "2015-12-22T07:11:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In the [first post](http://blog.dscpl.com.au/2015/12/running-ipython-as-docker-container.html) of this series looking at how to get IPython running on OpenShift I showed how taking the ‘jupyter/notebook’ Docker image and trying to use it results in failure. The error we encountered was:
+In the [first post](/posts/2015/12/running-ipython-as-docker-container/) of this series looking at how to get IPython running on OpenShift I showed how taking the ‘jupyter/notebook’ Docker image and trying to use it results in failure. The error we encountered was:
 
 > 
 >     $ oc logs --previous notebook-1-718ce  
@@ -27,7 +27,7 @@ In the [first post](http://blog.dscpl.com.au/2015/12/running-ipython-as-docker-c
 
 The problem occurred because the ‘jupyter/notebook’ expects to run as the ‘root’ user, but OpenShift doesn’t permit that by default due to the increased security risks from allowing that with how Docker currently works.
 
-Changes are supposedly coming for Docker, in the way of support for user namespaces, which would reduce the security risks, but right now, and perhaps even when support for user namespaces is available, it is simply better that you [do not run Docker containers as ‘root’](http://blog.dscpl.com.au/2015/12/don-run-as-root-inside-of-docker.html).
+Changes are supposedly coming for Docker, in the way of support for user namespaces, which would reduce the security risks, but right now, and perhaps even when support for user namespaces is available, it is simply better that you [do not run Docker containers as ‘root’](/posts/2015/12/don-run-as-root-inside-of-docker/).
 
 Lets now dig more into the ways that a Docker container can be made to not run as the ‘root’ user.
 

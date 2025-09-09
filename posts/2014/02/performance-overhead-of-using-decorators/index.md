@@ -11,7 +11,7 @@ published_timestamp: "2014-02-08T22:42:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-This is the ninth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[The @synchronized decorator as context manager](http://blog.dscpl.com.au/2014/01/the-synchronized-decorator-as-context.html)', with the very first post in the series being '[How you implemented your Python decorator is wrong](http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html)'.  
+This is the ninth post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '[The @synchronized decorator as context manager](/posts/2014/01/the-synchronized-decorator-as-context/)', with the very first post in the series being '[How you implemented your Python decorator is wrong](/posts/2014/01/how-you-implemented-your-python/)'.  
   
 The posts so far in this series were bashed out in quick succession in a bit over a week. Because that was quite draining on the brain and due to other commitments I took a bit of a break. Hopefully I can get through another burst of posts, initially about performance considerations when implementing decorators and then start a dive into how to implement the object proxy which underlies the function wrapper the decorator mechanism described relies on.  
   
@@ -48,7 +48,7 @@ In this post I am only going to look at the overhead of decorating a normal func
 >  return \_execute\(\*args, \*\*kwargs\)  
 >  return function\_wrapper\(wrapper, \_wrapper\)
 
-If you want to refresh your memory of the complete code that was previously presented you can check back to the [last post](http://blog.dscpl.com.au/2014/01/maintaining-decorator-state-using-class.html) where it was described in full.  
+If you want to refresh your memory of the complete code that was previously presented you can check back to the [last post](/posts/2014/01/maintaining-decorator-state-using-class/) where it was described in full.  
   
 With our decorator factory, when creating a decorator and then decorating a normal function with it we would use:  
 

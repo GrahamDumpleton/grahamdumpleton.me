@@ -11,7 +11,7 @@ published_timestamp: "2015-05-19T11:49:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In my [last post](http://blog.dscpl.com.au/2015/05/measuring-response-time-for-web.html) I introduced a Python decorator that can be used for measuring the overall time taken by a WSGI application to process a request and for the response to then be sent on its way back to the client.
+In my [last post](/posts/2015/05/measuring-response-time-for-web/) I introduced a Python decorator that can be used for measuring the overall time taken by a WSGI application to process a request and for the response to then be sent on its way back to the client.
 
 That prior post showed an example where the complete response was generated and returned as one string. That the response has to be returned as one complete string is not a requirement of the WSGI specification, albeit for many Python web frameworks it is the more typical scenario for responses generated as the output from a page template system.
 
@@ -113,7 +113,7 @@ For the case of mod\_wsgi-express though there is a slight difference. This is b
 
 Instead the WSGI application will be running in a separate daemon process run up by mod\_wsgi and to which the Apache child worker processes are communicating as a proxy via a UNIX socket connection.
 
-To explore whether this may account for why mod\_wsgi-express shows a markedly better response time, what we can do is run mod\_wsgi-express in [debug mode](http://blog.dscpl.com.au/2015/05/using-modwsgi-express-as-development.html). This is a special mode which forces Apache and mod\_wsgi to run as one process, rather than the normal situation where there is an Apache parent process, Apache child worker processes and the mod\_wsgi daemon processes.
+To explore whether this may account for why mod\_wsgi-express shows a markedly better response time, what we can do is run mod\_wsgi-express in [debug mode](/posts/2015/05/using-modwsgi-express-as-development/). This is a special mode which forces Apache and mod\_wsgi to run as one process, rather than the normal situation where there is an Apache parent process, Apache child worker processes and the mod\_wsgi daemon processes.
 
 This debug mode is normally used when wishing to be able to interact with the WSGI application running under mod\_wsgi, such as if using the Python debugger pdb or some other interactive debugging tool which exposes a console prompt direct from the WSGI application process.
 

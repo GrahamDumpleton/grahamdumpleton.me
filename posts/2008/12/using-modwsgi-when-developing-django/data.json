@@ -72,7 +72,7 @@
       "author": "Graham Dumpleton",
       "author_url": "https://www.blogger.com/profile/13609779138164842374",
       "author_profile_id": "13609779138164842374",
-      "content": "See http://blog.dscpl.com.au/2009/02/source-code-reloading-with-modwsgi-on.html for how to adapt this to Windows.",
+      "content": "See [/posts/2009/02/source-code-reloading-with-modwsgi-on/](/posts/2009/02/source-code-reloading-with-modwsgi-on/) for how to adapt this to Windows.",
       "timestamp": "February 26, 2009 at 10:18 AM",
       "permalink": "http://blog.dscpl.com.au/2008/12/using-modwsgi-when-developing-django.html?showComment=1235603880000#c2794897967352519264",
       "is_blog_author": true
@@ -112,7 +112,7 @@
       "author": "Graham Dumpleton",
       "author_url": "https://www.blogger.com/profile/13609779138164842374",
       "author_profile_id": "13609779138164842374",
-      "content": "rocketmonkeys: Why did you modify it how you did.?The separate post at http://blog.dscpl.com.au/2009/02/source-code-reloading-with-modwsgi-on.html and the documentation on mod\\_wsgi site at http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode already explain better way of doing it for Windows.",
+      "content": "rocketmonkeys: Why did you modify it how you did.?The separate post at [/posts/2009/02/source-code-reloading-with-modwsgi-on/](/posts/2009/02/source-code-reloading-with-modwsgi-on/) and the documentation on mod\\_wsgi site at http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode already explain better way of doing it for Windows.",
       "timestamp": "November 12, 2009 at 8:13 AM",
       "permalink": "http://blog.dscpl.com.au/2008/12/using-modwsgi-when-developing-django.html?showComment=1257973986485#c4210945819178495078",
       "is_blog_author": true

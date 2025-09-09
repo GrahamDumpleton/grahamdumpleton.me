@@ -11,7 +11,7 @@ published_timestamp: "2015-07-01T14:04:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In my [prior post](http://blog.dscpl.com.au/2015/06/proxying-to-python-web-application.html) I described various issues which can arise when moving a Python web application hosted using Apache/mod\_wsgi into a Docker container and then using the existing Apache instance to proxy requests through to the Docker instance.
+In my [prior post](/posts/2015/06/proxying-to-python-web-application/) I described various issues which can arise when moving a Python web application hosted using Apache/mod\_wsgi into a Docker container and then using the existing Apache instance to proxy requests through to the Docker instance.
 
 The issues arose due to the instance of the backend Python web application running under Docker, not knowing what the true URL was that was being used to access the site. The backend would only know about the URL used to identify the Docker host and the port on which the Python web application was being exposed. It did not know what the original URL was that the HTTP client used, nor specifically whether a HTTP or HTTPS connection was being used by the client.
 

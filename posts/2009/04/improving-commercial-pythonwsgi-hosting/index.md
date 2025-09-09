@@ -26,7 +26,7 @@ In taking the view that support for Python isn't very good, one does have to be 
   
 
 
-As I have previously described in the mod\_wsgi [roadmap](http://blog.dscpl.com.au/2009/03/future-roadmap-for-modwsgi.html), the intention is to support features that would allow mod\_wsgi to be used in mass virtual hosting, but there is a lot more to it than just providing yet another option that they might be able to use. In fact, there is no real reason why good Python web hosting couldn't be offered using FASTCGI right now.
+As I have previously described in the mod\_wsgi [roadmap](/posts/2009/03/future-roadmap-for-modwsgi/), the intention is to support features that would allow mod\_wsgi to be used in mass virtual hosting, but there is a lot more to it than just providing yet another option that they might be able to use. In fact, there is no real reason why good Python web hosting couldn't be offered using FASTCGI right now.
 
   
 
@@ -229,7 +229,7 @@ What's missing from the world is exactly what you're proposing, a sort of enabli
 @Michael: You can see some discussion about PHP vs Python and mod\_python/mod\_wsgi in the following posts:  
   
 http://blog.ianbicking.org/2008/01/12/what-php-deployment-gets-right/  
-http://blog.dscpl.com.au/2009/03/load-spikes-and-excessive-memory-usage.html  
+[/posts/2009/03/load-spikes-and-excessive-memory-usage/](/posts/2009/03/load-spikes-and-excessive-memory-usage/)  
   
 @Chris: Yes the Ruby folks matter in as much as they have made good progress in getting web hosting companies to use Phusion Passenger. Not necessarily widely known and not well documented is that Phusion Passenger supports Python WSGI applications as well. Thus, if it satisfies all the criteria for what would be considered acceptable to web hosting companies, then it can be an option instead of using FASTCGI. I haven't looked enough at Phusion Passenger yet to know what it does about logging for different users applications nor what it does to keep users applications running as that user.  
   

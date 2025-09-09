@@ -11,7 +11,7 @@ published_timestamp: "2012-10-14T23:17:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-When I posted recently about the [obligations of a WSGI server or middleware to call close\(\)](http://blog.dscpl.com.au/2012/10/obligations-for-calling-close-on.html) on the iterable returned from a WSGI application, I posted a pattern for a WSGI middleware of:  
+When I posted recently about the [obligations of a WSGI server or middleware to call close\(\)](/posts/2012/10/obligations-for-calling-close-on/) on the iterable returned from a WSGI application, I posted a pattern for a WSGI middleware of:  
   
   
 class Middleware\(object\):  

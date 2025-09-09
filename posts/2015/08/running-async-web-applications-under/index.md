@@ -11,7 +11,7 @@ published_timestamp: "2015-08-11T21:32:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In a previous post I explained how one could run [custom WSGI servers](http://blog.dscpl.com.au/2015/01/using-alternative-wsgi-servers-with.html) under [OpenShift](https://www.openshift.com). This can get a little tricky as by default the OpenShift Python cartridges are setup to use Apache and mod\_wsgi to host your WSGI server. In order to be able to run an alternate WSGI server such as gunicorn, uWSGI or Waitress, you need to provide a special ‘app.py’ file which exec’s a shell script which in turn then executes the target WSGI server.
+In a previous post I explained how one could run [custom WSGI servers](/posts/2015/01/using-alternative-wsgi-servers-with/) under [OpenShift](https://www.openshift.com). This can get a little tricky as by default the OpenShift Python cartridges are setup to use Apache and mod\_wsgi to host your WSGI server. In order to be able to run an alternate WSGI server such as gunicorn, uWSGI or Waitress, you need to provide a special ‘app.py’ file which exec’s a shell script which in turn then executes the target WSGI server.
 
 This level of indirection was needed to allow the alternate WSGI server to be started up, but at the same time use the same process name as the original process which the OpenShift platform created. If this wasn’t done then OpenShift wouldn’t be able to correctly identify the WSGI server process and would think that it may not have started up correctly and force the gear into an error state.
 

@@ -11,7 +11,7 @@ published_timestamp: "2014-12-10T22:19:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In my [last blog post](http://blog.dscpl.com.au/2014/12/hosting-python-wsgi-applications-using.html) I introduced what I have been doing on creating a production quality Docker image for hosting Python WSGI applications using Apache/mod\_wsgi.
+In my [last blog post](/posts/2014/12/hosting-python-wsgi-applications-using/) I introduced what I have been doing on creating a production quality Docker image for hosting Python WSGI applications using Apache/mod\_wsgi.
 
 In that post I gave an example of the Dockerfile you would use for a simple WSGI hello world application:
 

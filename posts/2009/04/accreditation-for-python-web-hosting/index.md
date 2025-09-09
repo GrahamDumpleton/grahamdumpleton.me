@@ -11,7 +11,7 @@ published_timestamp: "2009-04-20T09:31:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-I have already described the [need](http://blog.dscpl.com.au/2009/04/improving-commercial-pythonwsgi-hosting.html) for better Python web hosting. Some of the comments in that discussion make me wonder if we need some sort of accreditation for Python web hosting. After all, there is a huge difference between a web hosting company who only offers CGI and whose only goal is to maximise profit by cramming as many unsuspecting users into one machine as possible, and a web hosting company who consciously regards quality of service as being equally or more important, and as such offers a much higher quality of hosting than just CGI, with a ratio of users to machines which also benefits the users and not just themselves.
+I have already described the [need](/posts/2009/04/improving-commercial-pythonwsgi-hosting/) for better Python web hosting. Some of the comments in that discussion make me wonder if we need some sort of accreditation for Python web hosting. After all, there is a huge difference between a web hosting company who only offers CGI and whose only goal is to maximise profit by cramming as many unsuspecting users into one machine as possible, and a web hosting company who consciously regards quality of service as being equally or more important, and as such offers a much higher quality of hosting than just CGI, with a ratio of users to machines which also benefits the users and not just themselves.
 
   
 

@@ -11,7 +11,7 @@ published_timestamp: "2015-07-03T21:48:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In the last couple of posts \([1](http://blog.dscpl.com.au/2015/06/proxying-to-python-web-application.html), [2](http://blog.dscpl.com.au/2015/07/redirection-problems-when-proxying-to.html)\) I described what needed to be done when migrating a Python web site running under Apache/mod\_wsgi to running inside of a Docker container. This included the steps necessary to have the existing Apache instance proxy requests for the original site through to the appropriate port on the Docker host and deal with any fix ups necessary to ensure that the backend Python web site understood what the public facing URL was.
+In the last couple of posts \([1](/posts/2015/06/proxying-to-python-web-application/), [2](/posts/2015/07/redirection-problems-when-proxying-to/)\) I described what needed to be done when migrating a Python web site running under Apache/mod\_wsgi to running inside of a Docker container. This included the steps necessary to have the existing Apache instance proxy requests for the original site through to the appropriate port on the Docker host and deal with any fix ups necessary to ensure that the backend Python web site understood what the public facing URL was.
 
 In changing to running the Python web site under Docker, I didn’t cover the issue of how the instance of the Docker container itself would be started up and managed. All I gave was an example command line for manually starting the container.
 
@@ -26,7 +26,7 @@ If instead you are just after something simple to keep the Python web site you m
 
 # Daemon process groups
 
-When using mod\_wsgi, by default any hosted WSGI application will run in what is called embedded mode. Although this is the default, if you are running on a UNIX system it is [highly recommended](http://blog.dscpl.com.au/2012/10/why-are-you-using-embedded-mode-of.html) you do not use embedded mode and instead use what is called daemon mode.
+When using mod\_wsgi, by default any hosted WSGI application will run in what is called embedded mode. Although this is the default, if you are running on a UNIX system it is [highly recommended](/posts/2012/10/why-are-you-using-embedded-mode-of/) you do not use embedded mode and instead use what is called daemon mode.
 
 The difference is that with embedded mode, the WSGI application runs inside of the Apache child worker processes. These are the same processes which handle any requests received by Apache for serving up static files. Using embedded mode can result in [various issues](http://lanyrd.com/2013/pycon/scdyzk/) due to the way Apache manages those processes. The best solution is simply not to use embedded mode and use daemon mode instead.
 

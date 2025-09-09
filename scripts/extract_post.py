@@ -96,6 +96,75 @@ def extract_and_download_images(content_element, output_dir, overwrite=False):
     return downloaded_images
 
 
+def convert_blog_urls_to_relative(markdown_content):
+    """
+    Convert blog URLs in markdown links to relative paths.
+    
+    Converts URLs like:
+    [text](http://blog.dscpl.com.au/2015/12/running-ipython-as-docker-container.html)
+    to:
+    [text](/posts/2015/12/running-ipython-as-docker-container/)
+    
+    Args:
+        markdown_content (str): The markdown content to process
+        
+    Returns:
+        str: Markdown content with converted URLs
+    """
+    # Pattern to match markdown links with blog URLs
+    # This regex captures the link text and the URL
+    pattern = r'\[([^\]]+)\]\((https?://blog\.dscpl\.com\.au/(\d{4})/(\d{2})/([^/]+)\.html)\)'
+    
+    def replace_url(match):
+        link_text = match.group(1)
+        year = match.group(3)
+        month = match.group(4)
+        post_slug = match.group(5)
+        
+        # Convert to relative path format
+        relative_path = f"/posts/{year}/{month}/{post_slug}/"
+        return f"[{link_text}]({relative_path})"
+    
+    # Replace all matching URLs
+    converted_content = re.sub(pattern, replace_url, markdown_content)
+    
+    return converted_content
+
+
+def convert_plain_blog_urls_to_markdown_links(markdown_content):
+    """
+    Convert plain blog URLs to markdown links.
+    
+    Converts URLs like:
+    http://blog.dscpl.com.au/2014/12/hosting-python-wsgi-applications-using.html
+    to:
+    [/posts/2014/12/hosting-python-wsgi-applications-using/](/posts/2014/12/hosting-python-wsgi-applications-using/)
+    
+    Args:
+        markdown_content (str): The markdown content to process
+        
+    Returns:
+        str: Markdown content with plain URLs converted to markdown links
+    """
+    # Pattern to match plain blog URLs (not already in markdown links)
+    # This regex uses negative lookbehind and lookahead to ensure the URL is not already in a markdown link
+    pattern = r'(?<!\]\()(https?://blog\.dscpl\.com\.au/(\d{4})/(\d{2})/([^/\s]+)\.html)(?!\))'
+    
+    def replace_plain_url(match):
+        year = match.group(2)
+        month = match.group(3)
+        post_slug = match.group(4)
+        
+        # Convert to relative path format
+        relative_path = f"/posts/{year}/{month}/{post_slug}/"
+        return f"[{relative_path}]({relative_path})"
+    
+    # Replace all matching plain URLs
+    converted_content = re.sub(pattern, replace_plain_url, markdown_content)
+    
+    return converted_content
+
+
 def create_markdown_file(post_data, output_path):
     """
     Create a standalone Markdown file with YAML front matter for 11ty/Hugo.
@@ -230,7 +299,16 @@ def extract_post_data(html_file_path, overwrite=False):
         if in_code_block:
             processed_lines.append('```')
         
-        post_data['content'] = '\n'.join(processed_lines)
+        # Convert the processed markdown content
+        markdown_content = '\n'.join(processed_lines)
+        
+        # Convert blog URLs to relative paths
+        markdown_content = convert_blog_urls_to_relative(markdown_content)
+        
+        # Convert plain blog URLs to markdown links
+        markdown_content = convert_plain_blog_urls_to_markdown_links(markdown_content)
+        
+        post_data['content'] = markdown_content
     
     # Extract date
     date_element = soup.find('h2', class_='date-header')
@@ -322,7 +400,14 @@ def extract_post_data(html_file_path, overwrite=False):
                     h.escape_snob = True
                     
                     html_content = str(content_element)
-                    comment_data['content'] = h.handle(html_content).strip()
+                    comment_markdown = h.handle(html_content).strip()
+                    
+                    # Convert blog URLs to relative paths in comments too
+                    comment_markdown = convert_blog_urls_to_relative(comment_markdown)
+                    
+                    # Convert plain blog URLs to markdown links in comments too
+                    comment_markdown = convert_plain_blog_urls_to_markdown_links(comment_markdown)
+                    comment_data['content'] = comment_markdown
                 
                 # Extract comment timestamp and permalink
                 comment_footer = comment_element.find_next('dd', class_='comment-footer')

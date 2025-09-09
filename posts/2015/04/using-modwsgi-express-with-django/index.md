@@ -11,7 +11,7 @@ published_timestamp: "2015-04-05T23:22:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In my [last post](http://blog.dscpl.com.au/2015/04/introducing-modwsgi-express.html) I finally officially introduced [mod\_wsgi-express](https://pypi.python.org/pypi/mod_wsgi), an extension to mod\_wsgi that I have been working on over the past year and a half. The purpose of mod\_wsgi-express is to radically simplify the steps required to deploy a Python WSGI application using Apache and mod\_wsgi. In that post I introduced some of the basic functionality of mod\_wsgi-express. As Django is the most popular Python web framework, in this post I want to explain what is involved in using mod\_wsgi-express with Django.
+In my [last post](/posts/2015/04/introducing-modwsgi-express/) I finally officially introduced [mod\_wsgi-express](https://pypi.python.org/pypi/mod_wsgi), an extension to mod\_wsgi that I have been working on over the past year and a half. The purpose of mod\_wsgi-express is to radically simplify the steps required to deploy a Python WSGI application using Apache and mod\_wsgi. In that post I introduced some of the basic functionality of mod\_wsgi-express. As Django is the most popular Python web framework, in this post I want to explain what is involved in using mod\_wsgi-express with Django.
 
 # The structure of a Django project
 

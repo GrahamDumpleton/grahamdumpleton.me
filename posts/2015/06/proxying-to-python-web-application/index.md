@@ -531,7 +531,7 @@ Unfortunately there is one scenario where it can be an issue even when serving u
 
 Followup post that covers the further issues with redirections when hosting static files can be found at:  
   
-http://blog.dscpl.com.au/2015/07/redirection-problems-when-proxying-to.html
+[/posts/2015/07/redirection-problems-when-proxying-to/](/posts/2015/07/redirection-problems-when-proxying-to/)
 
 ### Unknown - July 3, 2015 at 11:23 PM
 

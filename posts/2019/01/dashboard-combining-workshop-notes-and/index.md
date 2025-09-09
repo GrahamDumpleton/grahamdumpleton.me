@@ -12,7 +12,7 @@ published_timestamp: "2019-01-02T10:18:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-The workshop environment described so far in this [series of posts](http://blog.dscpl.com.au/2018/12/using-jupyterhub-as-generic-application.html) only targeted the problem of providing an in browser interactive terminal session for workshop attendees. This approach was initially taken because we already had a separate tool called workshopper for hosting and displaying workshop notes.
+The workshop environment described so far in this [series of posts](/posts/2018/12/using-jupyterhub-as-generic-application/) only targeted the problem of providing an in browser interactive terminal session for workshop attendees. This approach was initially taken because we already had a separate tool called workshopper for hosting and displaying workshop notes.
 
 I didn't want to try and modify the existing workshopper tool as it was implemented in a programming language I wasn't familiar with, plus starting with it would have meant I would have had to extend it to know about user authentication, as well as add the capability to spawn terminals for each user which would be embedded in the workshopper page.
 
@@ -88,6 +88,6 @@ People will know me as a Python fan boy and this was really the first time using
 
 In addition to being able to run up the dashboard standalone, you can also deploy it using JupyterHub for a multi user workshop environment. The next step therefore is to add your own workshop notes.
 
-This is done in the same was as when [extending the terminal](http://blog.dscpl.com.au/2018/12/creating-your-own-custom-terminal-image.html) to add additional command line tools, or source files, including the ability to be able to add a build script to run your own steps during the build phase. That is, using a Source-to-Image \(S2I\) build, or a build from a `Dockerfile`. The result is the same, a self contained container image, but this time adding the workshop notes and the way of displaying them in a single dashboard view.
+This is done in the same was as when [extending the terminal](/posts/2018/12/creating-your-own-custom-terminal-image/) to add additional command line tools, or source files, including the ability to be able to add a build script to run your own steps during the build phase. That is, using a Source-to-Image \(S2I\) build, or a build from a `Dockerfile`. The result is the same, a self contained container image, but this time adding the workshop notes and the way of displaying them in a single dashboard view.
 
 In the next post I will explain how you would layout your content for your workshop notes, how to markup code blocks so they can be clicked on to be executed, and how to link pages together to create the path users should follow when working through the exercises.

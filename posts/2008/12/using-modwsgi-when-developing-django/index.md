@@ -182,7 +182,7 @@ The referenced page about Django threading issues is a Django user contributed p
 
 ### Graham Dumpleton - February 26, 2009 at 10:18 AM
 
-See http://blog.dscpl.com.au/2009/02/source-code-reloading-with-modwsgi-on.html for how to adapt this to Windows.
+See [/posts/2009/02/source-code-reloading-with-modwsgi-on/](/posts/2009/02/source-code-reloading-with-modwsgi-on/) for how to adapt this to Windows.
 
 ### Unknown - June 22, 2009 at 8:52 PM
 
@@ -207,7 +207,7 @@ Makes things so much nicer to develop in windows when using apache instead of th
 
 ### Graham Dumpleton - November 12, 2009 at 8:13 AM
 
-rocketmonkeys: Why did you modify it how you did.?The separate post at http://blog.dscpl.com.au/2009/02/source-code-reloading-with-modwsgi-on.html and the documentation on mod\_wsgi site at http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode already explain better way of doing it for Windows.
+rocketmonkeys: Why did you modify it how you did.?The separate post at [/posts/2009/02/source-code-reloading-with-modwsgi-on/](/posts/2009/02/source-code-reloading-with-modwsgi-on/) and the documentation on mod\_wsgi site at http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode already explain better way of doing it for Windows.
 
 ### GamesBook - March 3, 2010 at 6:20 PM
 

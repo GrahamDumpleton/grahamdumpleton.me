@@ -11,7 +11,7 @@ published_timestamp: "2015-12-24T22:19:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In the [last post](http://blog.dscpl.com.au/2015/12/random-user-ids-when-running-docker.html) we covered how to setup a Docker image to cope with the prospect of a random user ID being used when the Docker container was started. The discussion so far has though only dealt with the issue of ensuring file system access permissions were set correctly to allow the original default user, as well as the random user ID being used, to update files.
+In the [last post](/posts/2015/12/random-user-ids-when-running-docker/) we covered how to setup a Docker image to cope with the prospect of a random user ID being used when the Docker container was started. The discussion so far has though only dealt with the issue of ensuring file system access permissions were set correctly to allow the original default user, as well as the random user ID being used, to update files.
 
 A remaining issue of concern was the fact that when a random user ID is used which doesn’t correspond to an actual user account, that UNIX tools such as ‘whoami’ will not return valid results.
 

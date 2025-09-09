@@ -11,7 +11,7 @@ published_timestamp: "2015-04-06T16:14:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-To followup on my first post [introducing mod\_wsgi-express](http://blog.dscpl.com.au/2015/04/introducing-modwsgi-express.html), I posted about [how to use mod\_wsgi-express with Django](http://blog.dscpl.com.au/2015/04/using-modwsgi-express-with-django.html). This provided us with a workable solution but did result in us needing to duplicate some information which was available within the Django settings file on the command line to mod\_wsgi-express.
+To followup on my first post [introducing mod\_wsgi-express](/posts/2015/04/introducing-modwsgi-express/), I posted about [how to use mod\_wsgi-express with Django](/posts/2015/04/using-modwsgi-express-with-django/). This provided us with a workable solution but did result in us needing to duplicate some information which was available within the Django settings file on the command line to mod\_wsgi-express.
 
 The next step therefore was to avoid this requirement by integrating mod\_wsgi-express into the Django site itself so that it can be executed as a Django management command. By integrating mod\_wsgi-express in this way it can directly interrogate the Django settings module for your Django project to obtain the information it wants.
 

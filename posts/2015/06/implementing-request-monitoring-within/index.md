@@ -6,15 +6,15 @@ url: "http://blog.dscpl.com.au/2015/06/implementing-request-monitoring-within.ht
 post_id: "4058570414587205346"
 blog_id: "2363643920942057324"
 tags: ['apache', 'datadog', 'mod_wsgi', 'python', 'statsd', 'wsgi']
-images: ['image_60507.png', 'image_34203.png', 'image_31798.png', 'image_37416.png']
+images: ['image_85476.png', 'image_14294.png', 'image_18917.png', 'image_97602.png']
 comments: 0
 published_timestamp: "2015-06-07T22:09:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-In my [last blog post](http://blog.dscpl.com.au/2015/05/performance-monitoring-of-real-wsgi.html) I showed how a WSGI middleware could be used to monitor aspects of a web request and push metric data out to statsd for collation and eventual visualisation.
+In my [last blog post](/posts/2015/05/performance-monitoring-of-real-wsgi/) I showed how a WSGI middleware could be used to monitor aspects of a web request and push metric data out to statsd for collation and eventual visualisation.
 
-![DatadogThroughputAndResponseTimeCharts](image_60507.png)
+![DatadogThroughputAndResponseTimeCharts](image_85476.png)
 
 Although a WSGI middleware can be used as the basis for WSGI application monitoring, there is a risk, depending on what it is tracking, that it can introduce overheads and so impact the overall time spent in the WSGI application handling a web request. This is particularly the case if wanting to collect data about the volume of request content and response content, how reading and writing of that content may be broken up, and how much time was spent in the WSGI server performing those operations.
 
@@ -119,17 +119,17 @@ The exception raised event was named 'request\_exception'. This would be generat
 
 From these events one can use a custom adapter to extract metrics and input them into a tool such as statsd. The information available by virtue of the monitoring being embedded in the WSGI server is much more in depth that what can be achieved through the use of a WSGI middleware alone.
 
-![DatadogApplicationOverview](image_34203.png)
+![DatadogApplicationOverview](image_14294.png)
 
 For example, in the case of mod\_wsgi and in particular when daemon mode is being used, it is possible to get timing values for how long the request took to progress through Apache from when it was first accepted, until the point it was handled by the WSGI application running in the daemon process.
 
-![DatadogResponseTimeBreakdown](image_31798.png)
+![DatadogResponseTimeBreakdown](image_18917.png)
 
 This extra level of information is very important when it comes to being able to tune Apache and mod\_wsgi to provide the best performance as it allows one to better determine where the bottlenecks are occurring. In this particular case for example, where the server was under heavy load, although the time spent within the WSGI application was averaging less than one millisecond, the average time the request took in being proxied from the Apache child worker process to the daemon process \(the queue time\), was peaking up over four milliseconds.
 
 Knowing that the queue time here is an issue and that averages don't always show the true picture, we can look instead at the distribution of the queue time.
 
-![DatadogQueueTimeDistribution](image_37416.png)
+![DatadogQueueTimeDistribution](image_97602.png)
 
 This actually shows that 95% of requests were passed through with a queue time of ten milliseconds or less. In the worst case though, this was peaking up to over one hundred milliseconds.
 

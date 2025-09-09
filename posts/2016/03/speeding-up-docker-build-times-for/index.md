@@ -11,7 +11,7 @@ published_timestamp: "2016-03-02T09:09:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-I recently wrote a [post](http://blog.dscpl.com.au/2016/02/building-better-user-experience-for.html) where I talked about building a better user experience for deploying Python web applications. If one counts page hits as an indicator of interest in a subject then it certainly seems like an area people would like to see improvements.
+I recently wrote a [post](/posts/2016/02/building-better-user-experience-for/) where I talked about building a better user experience for deploying Python web applications. If one counts page hits as an indicator of interest in a subject then it certainly seems like an area people would like to see improvements.
 
 In that post I talked about a system I was working on which simplified starting up a Python web server for your web application in your local environment, but also then how you can easily move to deploying that Python web application to Docker or OpenShift 3.
 

@@ -242,5 +242,5 @@ In the original project directory:
 
 ### Graham Dumpleton - November 23, 2016 at 11:53 AM
 
-I have a newer Docker image which supersedes this one and which is much smarter. It includes knowledge about Django and will run collectstatic for during the build and automatically configure mod\_wsgi to host the static files as well. I talk a bit about it in http://blog.dscpl.com.au/2016/02/building-better-user-experience-for.html
+I have a newer Docker image which supersedes this one and which is much smarter. It includes knowledge about Django and will run collectstatic for during the build and automatically configure mod\_wsgi to host the static files as well. I talk a bit about it in [/posts/2016/02/building-better-user-experience-for/](/posts/2016/02/building-better-user-experience-for/)
 

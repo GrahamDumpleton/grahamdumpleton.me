@@ -34,7 +34,7 @@ In my hallway track discussions at DjangoCon US 2014, this issue of mod\_wsgi ve
 
 I will not list all the newer versions than 3.4, but some key versions are:
 
-  * mod\_wsgi version 3.5 - released 20th May 2014 \([security release](http://blog.dscpl.com.au/2014/05/security-release-for-modwsgi-version-35.html)\)
+  * mod\_wsgi version 3.5 - released 20th May 2014 \([security release](/posts/2014/05/security-release-for-modwsgi-version-35/)\)
   * mod\_wsgi version 4.0 - never released
   * mod\_wsgi version 4.1.0 - released 23rd May 2014
   * mod\_wsgi version 4.1.3 - released 3rd June 2014

@@ -382,7 +382,7 @@ In doing this you will have to be very mindful of how you set up file system per
 
 Even then it becomes tricky as when a container is run, the user that is specified by the ‘USER’ statement can still be overridden using the ‘-u’ option to ‘docker run’. If this is done, even though you may have fixed up filesystem permission so they match the user specified by the ‘USER’ statement, then your application could still fail.
 
-It was the overriding of the user that the container ran as that was in part the issue I described in my [last blog post](http://blog.dscpl.com.au/2015/12/running-ipython-as-docker-container.html) about trying to run the IPython Docker image called ‘jupyter/notebook’ under OpenShift. In order to prohibit applications from running as ‘root’ in a Docker container, OpenShift uses the ‘-u’ option to ‘docker run’ to override the user to be a non privileged user.
+It was the overriding of the user that the container ran as that was in part the issue I described in my [last blog post](/posts/2015/12/running-ipython-as-docker-container/) about trying to run the IPython Docker image called ‘jupyter/notebook’ under OpenShift. In order to prohibit applications from running as ‘root’ in a Docker container, OpenShift uses the ‘-u’ option to ‘docker run’ to override the user to be a non privileged user.
 
 In my next blog post I will delve more into the ‘-u’ option of ‘docker run’, what it does and the complications it causes. We will also return back to our IPython example in illustrating those issues.
 

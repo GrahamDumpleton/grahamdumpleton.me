@@ -11,7 +11,7 @@ published_timestamp: "2015-05-15T19:00:00+10:00"
 blog_title: "Graham Dumpleton"
 ---
 
-The first topic I want to cover as part of my planned research for a possible upcoming PyCon talk titled '[Using benchmarks to understand how WSGI servers work](http://blog.dscpl.com.au/2015/05/using-benchmarks-to-understand-how-wsgi.html)' is how can one measure the response time of a web request being handled by a web application.
+The first topic I want to cover as part of my planned research for a possible upcoming PyCon talk titled '[Using benchmarks to understand how WSGI servers work](/posts/2015/05/using-benchmarks-to-understand-how-wsgi/)' is how can one measure the response time of a web request being handled by a web application.
 
 As far as benchmarks go this is usually done from the perspective of the tool used to generate the web requests. This is though a very gross value, incorporating not just the time spent in the WSGI application, but also network overheads and the time in any underlying or front end web server.
 
@@ -150,7 +150,7 @@ The traditional method of using a decorator with before and after actions execut
 
 There are actually other situations besides a generator function which will also fail as there are in fact numerous ways that a WSGI application callable object can be implemented. Any scenario which defers work until the point when the iterable returned is being consumed will not yield the correct results with our first attempt at a timing decorator.
 
-If interested in the various ways that WSGI application callable objects can be implemented, you can read a previous post I wrote on the topic called '[Implementing WSGI application objects](http://blog.dscpl.com.au/2011/01/implementing-wsgi-application-objects.html)'.
+If interested in the various ways that WSGI application callable objects can be implemented, you can read a previous post I wrote on the topic called '[Implementing WSGI application objects](/posts/2011/01/implementing-wsgi-application-objects/)'.
 
 # Marking the end of a request
 

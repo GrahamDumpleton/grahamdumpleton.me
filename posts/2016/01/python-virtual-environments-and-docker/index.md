@@ -281,7 +281,7 @@ Chris Martin
   
 I have my own base image which I introduced at:  
   
-\* http://blog.dscpl.com.au/2014/12/hosting-python-wsgi-applications-using.html  
+\* [/posts/2014/12/hosting-python-wsgi-applications-using/](/posts/2014/12/hosting-python-wsgi-applications-using/)  
   
 and also covered in subsequent blog posts.  
   
