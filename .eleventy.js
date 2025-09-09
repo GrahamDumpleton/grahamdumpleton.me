@@ -7,7 +7,7 @@ module.exports = function(eleventyConfig) {
   
   // Add collections
   eleventyConfig.addCollection("posts", function(collectionApi) {
-    return collectionApi.getFilteredByGlob("src/posts/*/index.md")
+    return collectionApi.getFilteredByGlob("src/posts/*/*/*/index.md")
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   });
   
@@ -76,6 +76,9 @@ module.exports = function(eleventyConfig) {
     
     return md.render(content);
   });
+
+  // Enable indented code blocks (disabled by default in Eleventy v2.0+)
+  eleventyConfig.amendLibrary("md", (mdLib) => mdLib.enable("code"));
 
   return {
     dir: {
