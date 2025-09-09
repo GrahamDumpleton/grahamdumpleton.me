@@ -54,6 +54,16 @@ def get_filename_from_url(url):
     return os.path.basename(parsed.path)
 
 
+def get_basename_from_url(url):
+    """Extract basename (without extension) from URL."""
+    parsed = urlparse(url)
+    filename = os.path.basename(parsed.path)
+    # Remove .html extension if present
+    if filename.endswith('.html'):
+        return filename[:-5]  # Remove last 5 characters (.html)
+    return filename
+
+
 def download_webpage(url, user_agent=None):
     """
     Download webpage content from URL.
@@ -116,21 +126,22 @@ def process_single_url(url, posts_dir, overwrite=False):
         print("Error: Cannot extract year/month from URL")
         return False
     
-    # Create subdirectory path
-    subdir = posts_dir / year / month
+    # Get basename from URL (without .html extension)
+    basename = get_basename_from_url(url)
+    if not basename:
+        print("Error: Cannot extract basename from URL")
+        return False
+    
+    # Create subdirectory path: posts/YYYY/MM/filename/
+    subdir = posts_dir / year / month / basename
     print("Target directory:", subdir)
     
     # Create directory if it doesn't exist
     if not create_directory_if_not_exists(subdir):
         return False
     
-    # Get filename from URL
-    filename = get_filename_from_url(url)
-    if not filename:
-        print("Error: Cannot extract filename from URL")
-        return False
-    
-    file_path = subdir / filename
+    # Save as original.html inside the subdirectory
+    file_path = subdir / "original.html"
     
     # Check if file already exists (unless overwrite is True)
     if file_path.exists() and not overwrite:
@@ -222,8 +233,15 @@ def main():
             skipped += 1
             continue
         
-        # Create subdirectory path
-        subdir = posts_dir / year / month
+        # Get basename from URL (without .html extension)
+        basename = get_basename_from_url(original_url)
+        if not basename:
+            print("  Warning: Cannot extract basename from URL, skipping")
+            skipped += 1
+            continue
+        
+        # Create subdirectory path: posts/YYYY/MM/filename/
+        subdir = posts_dir / year / month / basename
         print("  Target directory:", subdir)
         
         # Create directory if it doesn't exist
@@ -231,14 +249,8 @@ def main():
             errors += 1
             continue
         
-        # Get filename from URL
-        filename = get_filename_from_url(original_url)
-        if not filename:
-            print("  Warning: Cannot extract filename from URL, skipping")
-            skipped += 1
-            continue
-        
-        file_path = subdir / filename
+        # Save as original.html inside the subdirectory
+        file_path = subdir / "original.html"
         
         # Check if file already exists (normal mode never overwrites)
         if file_path.exists():

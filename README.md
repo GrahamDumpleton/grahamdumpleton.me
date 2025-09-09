@@ -40,9 +40,11 @@ uv run python scripts/download_posts.py --help
 - Supports both batch processing and single URL downloads
 
 **Directory Structure:**
-The script automatically creates subdirectories based on the URL path:
-- `http://blog.dscpl.com.au/2007/03/resistance-is-futile.html` → `posts/2007/03/resistance-is-futile.html`
-- `http://blog.dscpl.com.au/2019/01/administration-features-of-jupyterhub.html` → `posts/2019/01/administration-features-of-jupyterhub.html`
+The script automatically creates subdirectories based on the URL path, with each post getting its own directory:
+- `http://blog.dscpl.com.au/2007/03/resistance-is-futile.html` → `posts/2007/03/resistance-is-futile/original.html`
+- `http://blog.dscpl.com.au/2019/01/administration-features-of-jupyterhub.html` → `posts/2019/01/administration-features-of-jupyterhub/original.html`
+
+Each post is saved in its own subdirectory named after the HTML filename (without the .html extension), with the downloaded content saved as `original.html`. This structure allows for additional files (like extracted content, metadata, etc.) to be stored alongside the original HTML file.
 
 **Error Handling:**
 - Network timeouts and connection errors

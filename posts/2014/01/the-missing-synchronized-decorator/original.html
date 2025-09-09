@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html class='v2' dir='ltr' lang='en'>
+<head>
+<link href='https://www.blogger.com/static/v1/widgets/2508126174-css_bundle_v2.css' rel='stylesheet' type='text/css'/>
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='blogger' name='generator'/>
+<link href='http://blog.dscpl.com.au/favicon.ico' rel='icon' type='image/x-icon'/>
+<link href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html' rel='canonical'/>
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Graham Dumpleton - RSS" href="http://blog.dscpl.com.au/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Graham Dumpleton - Atom" href="https://www.blogger.com/feeds/2363643920942057324/posts/default" />
+
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/8848250866326062903/comments/default" />
+<!--Can't find substitution for tag [blog.ieCssRetrofitLinks]-->
+<meta content='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html' property='og:url'/>
+<meta content='The missing @synchronized decorator.' property='og:title'/>
+<meta content=' This is the seventh post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It fol...' property='og:description'/>
+<title>Graham Dumpleton: The missing @synchronized decorator.</title>
+<style id='page-skin-1' type='text/css'><!--
+/*
+-----------------------------------------------
+Blogger Template Style
+Name:     Simple
+Designer: Blogger
+URL:      www.blogger.com
+----------------------------------------------- */
+/* Content
+----------------------------------------------- */
+body {
+font: normal normal 12px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #222222;
+background: #66bbdd none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 {
+font-size: 22px;
+}
+a:link {
+text-decoration:none;
+color: #2187bb;
+}
+a:visited {
+text-decoration:none;
+color: #888888;
+}
+a:hover {
+text-decoration:underline;
+color: #32aaff;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #ffffff;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #3299bb;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #3299bb;
+}
+.Header .description {
+font-size: 140%;
+color: #777777;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #eeeeee;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #eeeeee;
+border-left: 0 solid #eeeeee;
+border-right: 0 solid #eeeeee;
+}
+.tabs-inner .widget ul {
+background: #f5f5f5 url(https://resources.blogblog.com/blogblog/data/1kt/simple/gradients_light.png) repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #eeeeee;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 14px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #ffffff;
+border-right: 1px solid #eeeeee;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #000000;
+background-color: #eeeeee;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #eeeeee;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #eeeeee;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #eeeeee;
+}
+/* Headings
+----------------------------------------------- */
+div.widget > h2,
+div.widget h2.title {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #000000;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+h2.date-header {
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+}
+.date-header span {
+background-color: transparent;
+color: #222222;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 22px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 2px;
+background: #ffffff;
+border: 1px solid #eeeeee;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 5px;
+}
+.post-body .tr-caption-container {
+color: #222222;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #666666;
+background-color: #f9f9f9;
+border-bottom: 1px solid #eeeeee;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #eeeeee;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #eeeeee;
+}
+/* Comments
+----------------------------------------------- */
+.comments .comments-content .icon.blog-author {
+background-repeat: no-repeat;
+background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9sLFwMeCjjhcOMAAAD+SURBVDjLtZSvTgNBEIe/WRRnm3U8RC1neQdsm1zSBIU9VVF1FkUguQQsD9ITmD7ECZIJSE4OZo9stoVjC/zc7ky+zH9hXwVwDpTAWWLrgS3QAe8AZgaAJI5zYAmc8r0G4AHYHQKVwII8PZrZFsBFkeRCABYiMh9BRUhnSkPTNCtVXYXURi1FpBDgArj8QU1eVXUzfnjv7yP7kwu1mYrkWlU33vs1QNu2qU8pwN0UpKoqokjWwCztrMuBhEhmh8bD5UDqur75asbcX0BGUB9/HAMB+r32hznJgXy2v0sGLBcyAJ1EK3LFcbo1s91JeLwAbwGYu7TP/3ZGfnXYPgAVNngtqatUNgAAAABJRU5ErkJggg==);
+}
+.comments .comments-content .loadmore a {
+border-top: 1px solid #999999;
+border-bottom: 1px solid #999999;
+}
+.comments .comment-thread.inline-thread {
+background-color: #f9f9f9;
+}
+.comments .continue {
+border-top: 2px solid #999999;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #eeeeee;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #ffffff;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #ffffff;
+}
+.mobile-index-contents {
+color: #222222;
+}
+.mobile-link-button {
+background-color: #2187bb;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #eeeeee;
+color: #000000;
+border-top: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #eeeeee;
+}
+
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 1020px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 1020px;
+max-width: 1020px;
+_width: 1020px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 200px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 200px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("200px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 200px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 200px;
+margin-right: -200px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+body#layout div.add_widget {
+padding: 8px;
+}
+body#layout div.add_widget a {
+margin-left: 32px;
+}
+--></style>
+<link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' media='none' onload='if(media!=&#39;all&#39;)media=&#39;all&#39;' rel='stylesheet'/><noscript><link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' rel='stylesheet'/></noscript>
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+
+<!-- data-ad-client=ca-pub-6433235630058377 -->
+
+</head>
+<body class='loading variant-pale'>
+<div class='navbar section' id='navbar' name='Navbar'><div class='widget Navbar' data-version='1' id='Navbar1'><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/2363643920942057324?po\x3d8848250866326062903\x26origin\x3dhttp://blog.dscpl.com.au',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script><script type="text/javascript">
+(function() {
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = '//pagead2.googlesyndication.com/pagead/js/google_top_exp.js';
+var head = document.getElementsByTagName('head')[0];
+if (head) {
+head.appendChild(script);
+}})();
+</script>
+</div></div>
+<div class='body-fauxcolumns'>
+<div class='fauxcolumn-outer body-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content'>
+<div class='content-fauxcolumns'>
+<div class='fauxcolumn-outer content-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content-outer'>
+<div class='content-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='fauxborder-right content-fauxborder-right'></div>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='header-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='fauxborder-right header-fauxborder-right'></div>
+<div class='region-inner header-inner'>
+<div class='header section' id='header' name='Header'><div class='widget Header' data-version='1' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://blog.dscpl.com.au/'>
+Graham Dumpleton
+</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>
+</span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='header-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</header>
+<div class='tabs-outer'>
+<div class='tabs-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left tabs-fauxborder-left'>
+<div class='fauxborder-right tabs-fauxborder-right'></div>
+<div class='region-inner tabs-inner'>
+<div class='tabs no-items section' id='crosscol' name='Cross-Column'></div>
+<div class='tabs no-items section' id='crosscol-overflow' name='Cross-Column 2'></div>
+</div>
+</div>
+<div class='tabs-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='main-outer'>
+<div class='main-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='fauxborder-right main-fauxborder-right'></div>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<div class='fauxcolumn-outer fauxcolumn-center-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-left-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-right-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main' name='Main'><div class='widget Blog' data-version='1' id='Blog1'>
+<div class='blog-posts hfeed'>
+
+          <div class="date-outer">
+        
+<h2 class='date-header'><span>Tuesday, January 14, 2014</span></h2>
+
+          <div class="date-posts">
+        
+<div class='post-outer'>
+<div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<meta content='2363643920942057324' itemprop='blogId'/>
+<meta content='8848250866326062903' itemprop='postId'/>
+<a name='8848250866326062903'></a>
+<h3 class='post-title entry-title' itemprop='name'>
+The missing @synchronized decorator.
+</h3>
+<div class='post-header'>
+<div class='post-header-line-1'></div>
+</div>
+<div class='post-body entry-content' id='post-body-8848250866326062903' itemprop='description articleBody'>
+<div class="tr_bq">
+This is the seventh post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It follows on from the previous post titled '<a href="http://blog.dscpl.com.au/2014/01/maintaining-decorator-state-using-class.html">Maintaining decorator state using a class</a>', with the very first post in the series being '<a href="http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html">How you implemented your Python decorator is wrong</a>'.</div>
+<br />
+In the previous post I effectively rounded out the discussion on the implementation of the decorator pattern, or at least the key parts that I care to cover at this point. I may expand on a few other things that can be done at a later time.<br />
+<br />
+At this point I want to start looking at ways this decorator pattern can be used to implement better decorators. For this post I want to look at the @synchronized decorator.<br />
+<br />
+The concept of the @synchronized decorator originates from Java and the idea of being able to write such a decorator in Python was a bit of a poster child when decorators were first added to Python. Despite this, there is no standard @synchronized decorator in the Python standard library. If this was such a good example of why decorators are so useful, why is this the case?<br />
+<br />
+<h3>
+Stealing ideas from the Java language</h3>
+<br />
+The equivalent synchronization primitive from Java comes in two forms. These are <a href="http://docs.oracle.com/javase/tutorial/essential/concurrency/syncmeth.html">synchronized methods</a> and <a href="http://docs.oracle.com/javase/tutorial/essential/concurrency/locksync.html">synchronized statements</a>.<br />
+<br />
+In Java, to make a method synchronized, you simply add the synchronized keyword to its declaration:<br />
+<blockquote>
+public class SynchronizedCounter {<br />
+&nbsp; &nbsp; private int c = 0;&nbsp;</blockquote>
+<blockquote>
+&nbsp; &nbsp; public synchronized void increment() {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; c++;<br />
+&nbsp; &nbsp; }&nbsp;</blockquote>
+<blockquote>
+&nbsp; &nbsp; public synchronized void decrement() {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; c--;<br />
+&nbsp; &nbsp; }&nbsp;</blockquote>
+<blockquote>
+&nbsp; &nbsp; public synchronized int value() {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return c;<br />
+&nbsp; &nbsp; }<br />
+}</blockquote>
+Making a method synchronized means it is not possible for two invocations of synchronized methods on the same object to interleave. When one thread is executing a synchronized method for an object, all other threads that invoke synchronized methods for the same object block (suspend execution) until the first thread is done with the object.<br />
+<br />
+In other words, each instance of the class has an intrinsic lock object and upon entering a method the lock is being acquired, with it subsequently being released when the method returns. The lock is what is called a re-entrant lock, meaning that a thread can while it holds the lock, acquire it again without blocking. This is so that from one synchronized method it is possible to call another synchronized method on the same object.<br />
+<br />
+The second way to create synchronized code in Java is with synchronized statements. Unlike synchronized methods, synchronized statements must specify the object that provides the intrinsic lock:<br />
+<blockquote class="tr_bq">
+public void addName(String name) {<br />
+&nbsp; &nbsp; synchronized(this) {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; lastName = name;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; nameCount++;<br />
+&nbsp; &nbsp; }<br />
+&nbsp; &nbsp; nameList.add(name);<br />
+}</blockquote>
+Of note is that in Java one can use any object as the source of the lock, it is not necessary to create an instance of a specific lock type to synchronize on. If more fined grained locking is required within a class one can simply create or use an existing arbitrary object to synchronize on.<br />
+<blockquote class="tr_bq">
+public class MsLunch {<br />
+&nbsp; &nbsp; private long c1 = 0;<br />
+&nbsp; &nbsp; private long c2 = 0;<br />
+&nbsp; &nbsp; private Object lock1 = new Object();<br />
+&nbsp; &nbsp; private Object lock2 = new Object();&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; public void inc1() {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; synchronized(lock1) {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; c1++;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; }<br />
+&nbsp; &nbsp; }&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; public void inc2() {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; synchronized(lock2) {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; c2++;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; }<br />
+&nbsp; &nbsp; }<br />
+}</blockquote>
+These synchronization primitives looks relatively simple to use, so how close did people come to actually achieving the level of simplicity by using decorators to do the same in Python.<br />
+<br />
+<h3>
+Synchronizing off a thread mutex</h3>
+<br />
+In Python it isn't possible to synchronize off an arbitrary object. Instead it is necessary to create a specific lock object which internally holds a thread mutex. Such a lock object provides an acquire() and release() method for manipulating the lock.<br />
+<br />
+Since context managers were introduced to Python however, locks also support being used in conjunction with the 'with' statement. Using this specific feature, the typical recipe given for implementing a @synchronized decorator for Python is:<br />
+<blockquote class="tr_bq">
+def synchronized(lock=None):<br />
+&nbsp; &nbsp; def _decorator(wrapped):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; @functools.wraps(wrapped)<br />
+&nbsp; &nbsp; &nbsp; &nbsp; def _wrapper(*args, **kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; with lock:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return _wrapper<br />
+&nbsp; &nbsp; return _decorator&nbsp;</blockquote>
+<blockquote class="tr_bq">
+lock = threading.RLock()&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@synchronized(lock)<br />
+def function():<br />
+&nbsp; &nbsp; pass</blockquote>
+Using this approach becomes annoying after a while because for every distinct function that needs to be synchronized, you have to first create a companion thread lock to go with it.<br />
+<br />
+The alternative to needing to pass in the lock object each time, is to create one automatically for each use of the decorator.<br />
+<blockquote class="tr_bq">
+def synchronized(wrapped):<br />
+&nbsp; &nbsp; lock = threading.RLock()&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @functools.wraps(wrapped)<br />
+&nbsp; &nbsp; def _wrapper(*args, **kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; with lock:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)<br />
+&nbsp; &nbsp; return _wrapper&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@synchronized<br />
+def function():<br />
+&nbsp; &nbsp; pass</blockquote>
+We can even use the pattern described previously for allowing optional decorator arguments to permit either approach.<br />
+<blockquote class="tr_bq">
+def synchronized(wrapped=None, lock=None):<br />
+&nbsp; &nbsp; if wrapped is None:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return functools.partial(synchronized, lock=lock)&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; if lock is None:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; lock = threading.RLock()&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @functools.wraps(wrapped)<br />
+&nbsp; &nbsp; def _wrapper(*args, **kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; with lock:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)<br />
+&nbsp; &nbsp; return _wrapper&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@synchronized<br />
+def function1():<br />
+&nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+lock = threading.Lock()&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@synchronized(lock=lock)<br />
+def function2():<br />
+&nbsp; &nbsp; pass</blockquote>
+Whatever the approach, the decorator being based on a function closure suffers all the problems we have already outlined. The first step we can therefore take is to update it to use our new decorator factory instead.<br />
+<blockquote class="tr_bq">
+def synchronized(wrapped=None, lock=None):<br />
+&nbsp; &nbsp; if wrapped is None:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return functools.partial(synchronized, lock=lock)&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; if lock is None:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; lock = threading.RLock()&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @decorator<br />
+&nbsp; &nbsp; def _wrapper(wrapped, instance, args, kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; with lock:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)<br />
+&nbsp; &nbsp; return _wrapper(wrapped)</blockquote>
+Because this is using our decorator factory, it also means that the same code is safe to use on instance, class or static methods as well.<br />
+<br />
+Using this on methods of a class though starts to highlight why this simplistic approach isn't particularly useful. This is because the locking only applies to calls made to the specific method which is wrapped. Plus that it will be across that one method on all instances of the class. This isn't really want we want and doesn't mirror how synchronized methods in Java work.<br />
+<br />
+Reiterating what we are after again, for all instance methods of a specific instance of a class, if they have been decorated as being synchronized, we want them to synchronize off a single lock object associated with the class instance.<br />
+<br />
+Now there have been posts describing how to improve on this in the past, including for example&nbsp;<a href="http://theorangeduck.com/page/synchronized-python">this</a>&nbsp;quite involved attempt. Personally though I find the way in which it is done is quite clumsy and even suspect it isn't actually thread safe, with a race condition over the creation of some of the locks.<br />
+<br />
+Because it used function closures and didn't have our concept of a universal decorator, it was also necessary to create a multitude of different decorators and then try and plaster them together under a single decorator entry point. Obviously, we should now be able to do a lot better than this.<br />
+<br />
+<h3>
+Storing the thread mutex on objects</h3>
+<br />
+Starting over, lets take a fresh look at how we can manage the thread locks we need to have. Rather than requiring the lock be passed in, or creating it within a function closure which is then available to the nested wrapper, lets try and manage the locks within the wrapper itself.<br />
+<br />
+In doing this the issue is where can we store the thread lock. The only options for storing any data between invocations of the wrapper are going to be on the wrapper itself, on the wrapped function object, in the case of wrapping an instance method, on the class instance, or for a class method, on the class.<br />
+<br />
+Lets first consider the case of a normal function. In that case what we can do is store the required thread lock on the wrapped function object itself.<br />
+<blockquote class="tr_bq">
+@decorator<br />
+def synchronized(wrapped, instance, args, kwargs):<br />
+&nbsp; &nbsp; lock = vars(wrapped).get('_synchronized_lock', None)&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; if lock is None:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; lock = vars(wrapped).setdefault('_synchronized_lock',&nbsp;threading.RLock())&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; with lock:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@synchronized<br />
+def function():<br />
+&nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; function()&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; function._synchronized_lock<br />
+&lt;_RLock owner=None count=0&gt;</blockquote>
+A key issue we have to deal with in doing this is how to create the thread lock the first time it is required. To do that the first thing we need do is to see if we already have created a thread lock.<br />
+<blockquote class="tr_bq">
+lock = vars(wrapped).get('_synchronized_lock', None)</blockquote>
+If this returns a valid thread lock object we are fine and can continue on to attempt to acquire the lock. If however it didn't exist we need to create it, but we have to be careful how we do this in order to avoid a race condition when two threads have entered this section of code at the same time and both believe it is responsible for creating the thread lock.<br />
+<br />
+The trick we use to solve this is to use:<br />
+<blockquote class="tr_bq">
+lock = vars(wrapped).setdefault('_synchronized_lock', threading.RLock())</blockquote>
+In the case of two threads trying to set the lock at the same time, they will both actually create an instance of a thread lock, but by virtue of using dict.setdefault(), only one of them will win and actually be able to set it to the instance of the thread lock it created.<br />
+<br />
+As dict.setdefault() then returns whichever is the first value to be stored, both threads will then continue on and attempt to acquire the same thread lock object. It doesn't matter here that one of the thread objects gets thrown away as it will only occur at the time of initialisation and only if there was actually a race to set it.<br />
+<br />
+We have therefore managed to replicate what we had originally, the difference though being that the thread lock is stored on the wrapped function, rather than on the stack of an enclosing function. We still have the issue that every instance method will have a distinct lock.<br />
+<br />
+The simple solution is that we use the fact that this is what we are calling a universal decorator and use the ability to detect in what context the decorator was used.<br />
+<br />
+Specifically, what we want to do is detect when we are being used on an instance method or class method, and store the lock on the object passed as the 'instance' argument instead.<br />
+<blockquote class="tr_bq">
+@decorator<br />
+def synchronized(wrapped, instance, args, kwargs):<br />
+&nbsp; &nbsp; if instance is None:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; context = vars(wrapped)<br />
+&nbsp; &nbsp; else:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; context = vars(instance)&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; lock = context.get('_synchronized_lock', None)&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; if lock is None:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; lock = context.setdefault('_synchronized_lock', threading.RLock())&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; with lock:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)</blockquote>
+<blockquote class="tr_bq">
+class Object(object):<br />
+&nbsp; &nbsp; @synchronized<br />
+&nbsp; &nbsp; def method_im(self):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @synchronized<br />
+&nbsp; &nbsp; @classmethod<br />
+&nbsp; &nbsp; def method_cm(cls):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass</blockquote>
+<blockquote class="tr_bq">
+o1 = Object()<br />
+o2 = Object()&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; o1.method_im()<br />
+&gt;&gt;&gt; o1._synchronized_lock<br />
+&lt;_RLock owner=None count=0&gt;<br />
+&gt;&gt;&gt; id(o1._synchronized_lock)<br />
+4386605392&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; o2.method_im()<br />
+&gt;&gt;&gt; o2._synchronized_lock<br />
+&lt;_RLock owner=None count=0&gt;<br />
+&gt;&gt;&gt; id(o2._synchronized_lock)<br />
+4386605456</blockquote>
+This simple change has actually achieved the result we desired. If the synchronized decorator is used on a normal function then the thread lock will be stored on the function itself and it will stand alone and only be synchronized with calls to the same function.<br />
+<br />
+For the case of the instance method, the thread lock will be stored on the instance of the class the instance methods are bound too and any instance methods marked as being synchronized on that class will all synchronize on that single thread lock, thus mimicking how Java behaves.<br />
+<br />
+Now what about that class method. In this case the instance argument is actually the class type. If the thread lock is stored on the type, then the result would be that if there were multiple class methods and they were all marked as synchronized, they would exclude each other. The thread lock in this case is distinct from any used by instance methods, but that is also actually what we want.<br />
+<br />
+Does the code work though for a class method?<br />
+<blockquote class="tr_bq">
+&gt;&gt;&gt; Object.method_cm()<br />
+Traceback (most recent call last):<br />
+&nbsp; File "&lt;stdin&gt;", line 1, in &lt;module&gt;<br />
+&nbsp; File "test.py", line 38, in __call__<br />
+&nbsp; &nbsp; return self.wrapper(self.wrapped, instance, args, kwargs)<br />
+&nbsp; File "synctest.py", line 176, in synchronized<br />
+&nbsp; &nbsp; lock = context.setdefault('_synchronized_lock',<br />
+AttributeError: 'dictproxy' object has no attribute 'setdefault'</blockquote>
+Unfortunately not.<br />
+<br />
+The reason this is the case is that the __dict__ of a class type is not a normal dictionary, but a dictproxy. A dictproxy doesn't share the same methods as a normal dict and in particular, it does not provide the setdefault() method.<br />
+<br />
+We therefore need a different way of synchronizing the creation of the thread lock the first time for the case where instance is a class.<br />
+<br />
+We also have another issue due to a dictproxy being used. That is that dictproxy doesn't support item assignment.<br />
+<blockquote class="tr_bq">
+&gt;&gt;&gt; vars(Object)['_synchronized_lock'] = threading.RLock()<br />
+Traceback (most recent call last):<br />
+&nbsp; File "&lt;stdin&gt;", line 1, in &lt;module&gt;<br />
+TypeError: 'dictproxy' object does not support item assignment</blockquote>
+What it does still support though is attribute assignment.<br />
+<blockquote class="tr_bq">
+&gt;&gt;&gt; setattr(Object, '_synchronized_lock', threading.RLock())<br />
+&gt;&gt;&gt; Object._synchronized_lock<br />
+&lt;_RLock owner=None count=0&gt;</blockquote>
+and since both function objects and class instances do as well, we will need to switch to that method of updating attributes.<br />
+<br />
+<h3>
+Storing a meta lock on the decorator</h3>
+<br />
+As to an alternative for using dict.setdefault() as an atomic way of setting the lock the first time, what we can do instead is use a meta thread lock stored on the @synchronized decorator itself. With this we still have the issue though of ensuring that only one thread can get to set it. We therefore use dict.setdefault() to control creation of the meta lock at least.<br />
+<blockquote class="tr_bq">
+@decorator<br />
+def synchronized(wrapped, instance, args, kwargs):<br />
+&nbsp; &nbsp; if instance is None:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; owner = wrapped<br />
+&nbsp; &nbsp; else:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; owner = instance&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; lock = vars(owner).get('_synchronized_lock', None)&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; if lock is None:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; meta_lock = vars(synchronized).setdefault(<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; '_synchronized_meta_lock', threading.Lock())&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; &nbsp; &nbsp; with meta_lock:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; lock = vars(owner).get('_synchronized_lock', None)&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if lock is None:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; lock = threading.RLock()<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; setattr(owner, '_synchronized_lock', lock)&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; with lock:<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)</blockquote>
+Note that because of the gap between checking for the existence of the lock for the wrapped function and creating the meta lock, after we have acquired the meta lock we need to once again check to see if the lock exists. This is to handle the case where two threads came into the code at the same time and are racing to be the first to create the lock.<br />
+<br />
+Now one thing which is very important in this change is that we only swapped to using attribute access for updating the lock for the wrapped function. We have not changed to using getattr() for looking up the lock in the first place and are still looking it up in __dict__ as returned by vars().<br />
+<br />
+This is necessary because when getattr() is used on an instance of a class, if that attribute doesn't exist on the instance of the class, then the lookup rules mean that if the attribute instead existed on the class type, then that would be returned instead.<br />
+<br />
+This would cause problems if a synchronized class method was the first to be called, because it would then leave a lock on the class type. When the instance method was subsequently called, if getattr() were used, it would find the lock on the class type and return it and it would be wrongly used. Thus we stay with looking for the lock via __dict__ as that will only contain what actually exists in the instance.<br />
+<br />
+With these changes we are now all done and all lock creation is now completely automatic, with an appropriate lock created for the different contexts the decorator is used in.<br />
+<blockquote class="tr_bq">
+@synchronized<br />
+def function():<br />
+&nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+class Object(object):<br />
+&nbsp; &nbsp; @synchronized<br />
+&nbsp; &nbsp; def method_im(self):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @synchronized<br />
+&nbsp; &nbsp; @classmethod<br />
+&nbsp; &nbsp; def method_cm(cls):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+o = Object()&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; function()<br />
+&gt;&gt;&gt; id(function._synchronized_lock)<br />
+4338158480&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; Object.method_cm()<br />
+&gt;&gt;&gt; id(Object._synchronized_lock)<br />
+4338904656&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; o.method_im()<br />
+&gt;&gt;&gt; id(o._synchronized_lock)<br />
+4338904592</blockquote>
+The code also works for where @synchronized is used on a static method or class type. In summary, the result for the different places @synchronized can be placed is:<br />
+<blockquote class="tr_bq">
+@synchronized # lock bound to function1<br />
+def function1():<br />
+&nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@synchronized # lock bound to function2<br />
+def function2():<br />
+&nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@synchronized # lock bound to Class<br />
+class Class(object):&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @synchronized # lock bound to instance of Class<br />
+&nbsp; &nbsp; def function_im(self):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @synchronized # lock bound to Class<br />
+&nbsp; &nbsp; @classmethod<br />
+&nbsp; &nbsp; def function_cm(cls):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @synchronized # lock bound to function_sm<br />
+&nbsp; &nbsp; @staticmethod<br />
+&nbsp; &nbsp; def function_sm():<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass</blockquote>
+<br />
+<h3>
+Implementing synchronized statements</h3>
+<br />
+So we are all done with implementing support for synchronized methods, but what about those synchronized statements. The goal here is that we want to be able to write:<br />
+<blockquote class="tr_bq">
+class Object(object):&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @synchronized<br />
+&nbsp; &nbsp; def function_im_1(self):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; def function_im_2(self):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; with synchronized(self):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; pass</blockquote>
+That is, we need for 'synchronized' to not only be usable as a decorator, but for it also be able to be used as a context manager.<br />
+<br />
+In this role, similar to with Java, it would be supplied the object on which synchronization is to occur, which for instance methods would be the 'self' object or instance of the class.<br />
+<br />
+For an explanation of how we can do this though, you will need to wait for the next instalment in this series of posts.<br />
+<br />
+<div style='clear: both;'></div>
+</div>
+<div class='post-footer'>
+<div class='post-footer-line post-footer-line-1'>
+<span class='post-author vcard'>
+Posted by
+<span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
+<meta content='https://www.blogger.com/profile/13609779138164842374' itemprop='url'/>
+<a class='g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' title='author profile'>
+<span itemprop='name'>Graham Dumpleton</span>
+</a>
+</span>
+</span>
+<span class='post-timestamp'>
+at
+<meta content='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html' itemprop='url'/>
+<a class='timestamp-link' href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html' rel='bookmark' title='permanent link'><abbr class='published' itemprop='datePublished' title='2014-01-14T22:03:00+11:00'>10:03&#8239;PM</abbr></a>
+</span>
+<span class='post-comment-link'>
+</span>
+<span class='post-icons'>
+<span class='item-action'>
+<a href='https://www.blogger.com/email-post/2363643920942057324/8848250866326062903' title='Email Post'>
+<img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
+</a>
+</span>
+</span>
+<div class='post-share-buttons goog-inline-block'>
+<a class='goog-inline-block share-button sb-email' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=8848250866326062903&target=email' target='_blank' title='Email This'><span class='share-button-link-text'>Email This</span></a><a class='goog-inline-block share-button sb-blog' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=8848250866326062903&target=blog' onclick='window.open(this.href, "_blank", "height=270,width=475"); return false;' target='_blank' title='BlogThis!'><span class='share-button-link-text'>BlogThis!</span></a><a class='goog-inline-block share-button sb-twitter' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=8848250866326062903&target=twitter' target='_blank' title='Share to X'><span class='share-button-link-text'>Share to X</span></a><a class='goog-inline-block share-button sb-facebook' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=8848250866326062903&target=facebook' onclick='window.open(this.href, "_blank", "height=430,width=640"); return false;' target='_blank' title='Share to Facebook'><span class='share-button-link-text'>Share to Facebook</span></a><a class='goog-inline-block share-button sb-pinterest' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=8848250866326062903&target=pinterest' target='_blank' title='Share to Pinterest'><span class='share-button-link-text'>Share to Pinterest</span></a>
+</div>
+</div>
+<div class='post-footer-line post-footer-line-2'>
+<span class='post-labels'>
+Labels:
+<a href='http://blog.dscpl.com.au/search/label/decorators' rel='tag'>decorators</a>,
+<a href='http://blog.dscpl.com.au/search/label/python' rel='tag'>python</a>
+</span>
+</div>
+<div class='post-footer-line post-footer-line-3'>
+<span class='post-location'>
+</span>
+</div>
+</div>
+</div>
+<div class='comments' id='comments'>
+<a name='comments'></a>
+<h4>12 comments:</h4>
+<div id='Blog1_comments-block-wrapper'>
+<dl class='avatar-comment-indent' id='comments-block'>
+<dt class='comment-author ' id='c6964263341898819717'>
+<a name='c6964263341898819717'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/12468789252148945129" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6964263341898819717-12468789252148945129"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Adam">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/12468789252148945129' rel='nofollow'>Adam</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6964263341898819717'>
+<p>
+Do note your code can leak locks considerably, which is OK on ref-counted implementations, but less so on garbage-collected ones.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389706036201#c6964263341898819717' title='comment permalink'>
+January 15, 2014 at 12:27&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1426850262'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6964263341898819717' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c7470848772883850249'>
+<a name='c7470848772883850249'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/14816448396815798412" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7470848772883850249-14816448396815798412"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Unknown">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/14816448396815798412' rel='nofollow'>Unknown</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7470848772883850249'>
+<span class='deleted-comment'>This comment has been removed by a blog administrator.</span>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389715235810#c7470848772883850249' title='comment permalink'>
+January 15, 2014 at 3:00&#8239;AM
+</a>
+<span class='item-control blog-admin '>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7470848772883850249' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c906760769881244325'>
+<a name='c906760769881244325'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/14816448396815798412" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-906760769881244325-14816448396815798412"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Unknown">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/14816448396815798412' rel='nofollow'>Unknown</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-906760769881244325'>
+<p>
+Decorating a class with this seems a bit unintuitive, as my understanding is that it would act like each class method was decorated without affecting either instance or static methods.<br /><br />Making it behave as I, as a naive user, would expect (applying to all methods, regardless of type, though I could also see still excluding static methods) seems unachievable with the current implementation.  However, perhaps it is doable when the decorator is converted to a class to double as a context manager.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389718348527#c906760769881244325' title='comment permalink'>
+January 15, 2014 at 3:52&#8239;AM
+</a>
+<span class='item-control blog-admin pid-661899692'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/906760769881244325' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c532556236721417259'>
+<a name='c532556236721417259'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/02038557558334568410" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-532556236721417259-02038557558334568410"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Wyatt">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/02038557558334568410' rel='nofollow'>Wyatt</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-532556236721417259'>
+<p>
+Could you create the meta_lock as a global or attach it to synchronize up front?
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389729381278#c532556236721417259' title='comment permalink'>
+January 15, 2014 at 6:56&#8239;AM
+</a>
+<span class='item-control blog-admin pid-23251508'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/532556236721417259' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c4203465876185095452'>
+<a name='c4203465876185095452'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4203465876185095452-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4203465876185095452'>
+<p>
+Decorating a class is an odd one and there isn&#39;t really an equivalent in Java. Overall I am not sure there is a valid use case and it could well cause issues with deriving classes. Important thing was just to make sure it didn&#39;t completely blow up if anyone tried it. Since once can detect that specific use case by seeing if the wrapped object is a class, then one could always raise a NotImplemented exception indicating that it isn&#39;t a supported use case.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389732506531#c4203465876185095452' title='comment permalink'>
+January 15, 2014 at 7:48&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4203465876185095452' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c4646128071296599625'>
+<a name='c4646128071296599625'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4646128071296599625-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4646128071296599625'>
+<p>
+For the meta lock, yes you could create it outside of the code for the wrapper function in a distinct global variable or assign it back to synchronized. I did it in the wrapper so that it was self contained, but also so I could show how in doing it that way that one needed to recheck whether the original lock had since been created once the meta lock had been acquired. So interesting technique that isn&#39;t often demonstrated from what I have seen.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389732899751#c4646128071296599625' title='comment permalink'>
+January 15, 2014 at 7:54&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4646128071296599625' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c137930840771698308'>
+<a name='c137930840771698308'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-137930840771698308-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-137930840771698308'>
+<p>
+@Adam Can you explain what you see as the issue when you say it would leak locks &#39;considerably&#39;? I don&#39; really get why you seem to be emphasising the point and think it is a big issue.<br /><br />The cases where locks would be redundantly created and discarded would be quite rare.<br /><br />As to other locks created they persist for the life of the object they are attached to and would be no different to any other way you created locks explicitly, such as in the constructor for a class with it being assigned to the instance.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389733325223#c137930840771698308' title='comment permalink'>
+January 15, 2014 at 8:02&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/137930840771698308' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c6465204646861144566'>
+<a name='c6465204646861144566'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6465204646861144566-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6465204646861144566'>
+<p>
+Actually, since the possibility of a redundant lock only occurs for the meta lock, it can only occur once.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389733451507#c6465204646861144566' title='comment permalink'>
+January 15, 2014 at 8:04&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6465204646861144566' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c4792783182105595135'>
+<a name='c4792783182105595135'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/12468789252148945129" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4792783182105595135-12468789252148945129"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Adam">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/12468789252148945129' rel='nofollow'>Adam</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4792783182105595135'>
+<p>
+I think I was not looking at the final version of the code.  You can still leak the meta lock (N-1) times, where N is the number of threads that enter the decorator for the first time simultaneously.   <br /><br />The underlying concern is bumping the resource limit for locks, which is generally not unlimited. As such, one probably shouldn&#39;t create them unnecessarily.<br /><br />In practice, it&#39;s not problematic since you should typically will  run out of threads first.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389759841503#c4792783182105595135' title='comment permalink'>
+January 15, 2014 at 3:24&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1426850262'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4792783182105595135' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c4964971669015428013'>
+<a name='c4964971669015428013'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4964971669015428013-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4964971669015428013'>
+<p>
+The situation with the meta lock is no different to the situation with any transient objects created on the stack of a function call. They are all going to be subject to the whims of the garbage collector in pypy.<br /><br />Important is that there are no function closure involved here so it isn&#39;t like a reference to a function closure is being held by anything thereby prevent cleanup of objects created in the context of the outer function for the closure.<br /><br />So to call it a leak is a bit misleading, as it is just like any other temporary object created.<br /><br />When such an object internally references an OS resource where there is limited number then sure you can have issues if lots are created, such as people who open files and never explicit close them, but that isn&#39;t happening here.<br />
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389761140474#c4964971669015428013' title='comment permalink'>
+January 15, 2014 at 3:45&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4964971669015428013' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c1440470960072815204'>
+<a name='c1440470960072815204'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/12468789252148945129" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1440470960072815204-12468789252148945129"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Adam">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/12468789252148945129' rel='nofollow'>Adam</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1440470960072815204'>
+<p>
+&quot;When such an object internally references an OS resource where there is limited number then sure you can have issues if lots are created, such as people who open files and never explicit close them, but that isn&#39;t happening here.&quot;<br /><br />That&#39;s my entire point... that very well may be happening here.  Synchronization primitives are not usually as precious as file descriptors, but they very well may be more precious than memory.  Windows, for example, only allows 2^24 kernel object handles.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389789339591#c1440470960072815204' title='comment permalink'>
+January 15, 2014 at 11:35&#8239;PM
+</a>
+<span class='item-control blog-admin pid-1426850262'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1440470960072815204' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c3853448338035839898'>
+<a name='c3853448338035839898'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-3853448338035839898-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-3853448338035839898'>
+<p>
+I still believe you are making a mountain out of a mole hill. The possibility can only occur once per process, it is not per use of the decorator.<br /><br />The way that Python handles thread switching also would contribute to making it a rare event. This is because in lieu of a thread yielding up control itself, Python only considers switching threads every so often based on the number of instructions executed.<br /><br />For CPython this interval (sys.getcheckinterval()) is 100. In pypy it is 10000, although I don&#39;t know for sure to what degree it uses that or uses other inputs to determine when to switch threads. Either way, the window in which the switch would need to occur is very small as there are going to be a very small number of instructions in the critical part when a switch would cause the creation of a redundant lock instance.<br /><br />Finally , the whole issue is also very easy to eliminate by changing the code to create the meta lock outside of the synchronized function as was asked by someone else. This way it would be created up front at the time the module is imported and no check would be required to create it from the thread itself.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html?showComment=1389821382867#c3853448338035839898' title='comment permalink'>
+January 16, 2014 at 8:29&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/3853448338035839898' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+</dl>
+</div>
+<p class='comment-footer'>
+<a href='https://www.blogger.com/comment/fullpage/post/2363643920942057324/8848250866326062903' onclick=''>Post a Comment</a>
+</p>
+</div>
+</div>
+
+        </div></div>
+      
+</div>
+<div class='blog-pager' id='blog-pager'>
+<span id='blog-pager-newer-link'>
+<a class='blog-pager-newer-link' href='http://blog.dscpl.com.au/2014/01/the-synchronized-decorator-as-context.html' id='Blog1_blog-pager-newer-link' title='Newer Post'>Newer Post</a>
+</span>
+<span id='blog-pager-older-link'>
+<a class='blog-pager-older-link' href='http://blog.dscpl.com.au/2014/01/maintaining-decorator-state-using-class.html' id='Blog1_blog-pager-older-link' title='Older Post'>Older Post</a>
+</span>
+<a class='home-link' href='http://blog.dscpl.com.au/'>Home</a>
+</div>
+<div class='clear'></div>
+<div class='post-feeds'>
+<div class='feed-links'>
+Subscribe to:
+<a class='feed-link' href='http://blog.dscpl.com.au/feeds/8848250866326062903/comments/default' target='_blank' type='application/atom+xml'>Post Comments (Atom)</a>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='column-left-outer'>
+<div class='column-left-inner'>
+<aside>
+</aside>
+</div>
+</div>
+<div class='column-right-outer'>
+<div class='column-right-inner'>
+<aside>
+<div class='sidebar section' id='sidebar-right-1'><div class='widget Profile' data-version='1' id='Profile1'>
+<h2>About Me</h2>
+<div class='widget-content'>
+<dl class='profile-datablock'>
+<dt class='profile-data'>
+<a class='profile-name-link g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' style='background-image: url(//www.blogger.com/img/logo-16.png);'>
+Graham Dumpleton
+</a>
+</dt>
+</dl>
+<a class='profile-link' href='https://www.blogger.com/profile/13609779138164842374' rel='author'>View my complete profile</a>
+<div class='clear'></div>
+</div>
+</div><div class='widget PageList' data-version='1' id='PageList1'>
+<h2>Quick Links</h2>
+<div class='widget-content'>
+<ul>
+<li>
+<a href='http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html'>Decorators and monkey patching.</a>
+</li>
+<li>
+<a href='http://blog.dscpl.com.au/p/using-python-with-docker.html'>Using Python with Docker.</a>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div><div class='widget BlogArchive' data-version='1' id='BlogArchive1'>
+<h2>Blog Archive</h2>
+<div class='widget-content'>
+<div id='ArchiveList'>
+<div id='BlogArchive1_ArchiveList'>
+<select id='BlogArchive1_ArchiveMenu'>
+<option value=''>Blog Archive</option>
+<option value='http://blog.dscpl.com.au/2019/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2018/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2018/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2018/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2018/01/'>January (1)</option>
+<option value='http://blog.dscpl.com.au/2017/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2016/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2016/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2016/07/'>July (1)</option>
+<option value='http://blog.dscpl.com.au/2016/04/'>April (2)</option>
+<option value='http://blog.dscpl.com.au/2016/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2016/02/'>February (2)</option>
+<option value='http://blog.dscpl.com.au/2016/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2015/12/'>December (6)</option>
+<option value='http://blog.dscpl.com.au/2015/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2015/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2015/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2015/06/'>June (5)</option>
+<option value='http://blog.dscpl.com.au/2015/05/'>May (7)</option>
+<option value='http://blog.dscpl.com.au/2015/04/'>April (4)</option>
+<option value='http://blog.dscpl.com.au/2015/03/'>March (4)</option>
+<option value='http://blog.dscpl.com.au/2015/01/'>January (2)</option>
+<option value='http://blog.dscpl.com.au/2014/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2014/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2014/09/'>September (7)</option>
+<option value='http://blog.dscpl.com.au/2014/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2014/05/'>May (1)</option>
+<option value='http://blog.dscpl.com.au/2014/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2014/02/'>February (4)</option>
+<option value='http://blog.dscpl.com.au/2014/01/'>January (8)</option>
+<option value='http://blog.dscpl.com.au/2013/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/10/'>October (4)</option>
+<option value='http://blog.dscpl.com.au/2012/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2011/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2011/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2011/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2011/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2011/01/'>January (5)</option>
+<option value='http://blog.dscpl.com.au/2010/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2010/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2010/08/'>August (2)</option>
+<option value='http://blog.dscpl.com.au/2010/06/'>June (2)</option>
+<option value='http://blog.dscpl.com.au/2010/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2010/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2010/03/'>March (3)</option>
+<option value='http://blog.dscpl.com.au/2009/11/'>November (4)</option>
+<option value='http://blog.dscpl.com.au/2009/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2009/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2009/08/'>August (3)</option>
+<option value='http://blog.dscpl.com.au/2009/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2009/04/'>April (5)</option>
+<option value='http://blog.dscpl.com.au/2009/03/'>March (5)</option>
+<option value='http://blog.dscpl.com.au/2009/02/'>February (1)</option>
+<option value='http://blog.dscpl.com.au/2008/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2008/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2008/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2007/11/'>November (2)</option>
+<option value='http://blog.dscpl.com.au/2007/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2007/09/'>September (3)</option>
+<option value='http://blog.dscpl.com.au/2007/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2007/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2007/03/'>March (2)</option>
+</select>
+</div>
+</div>
+<div class='clear'></div>
+</div>
+</div><div class='widget Label' data-version='1' id='Label1'>
+<h2>Labels</h2>
+<div class='widget-content list-label-widget-content'>
+<ul>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/python'>python</a>
+<span dir='ltr'>(111)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_wsgi'>mod_wsgi</a>
+<span dir='ltr'>(86)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wsgi'>wsgi</a>
+<span dir='ltr'>(58)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/apache'>apache</a>
+<span dir='ltr'>(35)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/docker'>docker</a>
+<span dir='ltr'>(34)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/openshift'>openshift</a>
+<span dir='ltr'>(26)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/decorators'>decorators</a>
+<span dir='ltr'>(15)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/django'>django</a>
+<span dir='ltr'>(13)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/kubernetes'>kubernetes</a>
+<span dir='ltr'>(12)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_python'>mod_python</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/red%20hat'>red hat</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/ipython'>ipython</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyterhub'>jupyterhub</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/new%20relic'>new relic</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wrapt'>wrapt</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/pycon'>pycon</a>
+<span dir='ltr'>(5)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/s2i'>s2i</a>
+<span dir='ltr'>(4)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/gunicorn'>gunicorn</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/uWSGI'>uWSGI</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/datadog'>datadog</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/nginx'>nginx</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/statsd'>statsd</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/web2py'>web2py</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/async'>async</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/dyndns53'>dyndns53</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/fastcgi'>fastcgi</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/heroku'>heroku</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyter'>jupyter</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/lektor'>lektor</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/php'>php</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/shiv'>shiv</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/testing'>testing</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/tornado'>tornado</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/warpdrive'>warpdrive</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/zipapp'>zipapp</a>
+<span dir='ltr'>(1)</span>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div></div>
+</aside>
+</div>
+</div>
+</div>
+<div style='clear: both'></div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+<div class='main-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<footer>
+<div class='footer-outer'>
+<div class='footer-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left footer-fauxborder-left'>
+<div class='fauxborder-right footer-fauxborder-right'></div>
+<div class='region-inner footer-inner'>
+<div class='foot section' id='footer-1'><div class='widget AdSense' data-version='1' id='AdSense1'>
+<div class='widget-content'>
+<script type="text/javascript"><!--
+google_ad_client="pub-6433235630058377";
+google_ad_host="pub-1556223355139109";
+google_ad_width=120;
+google_ad_height=600;
+google_ad_format="120x600_as";
+google_ad_type="text";
+google_ad_host_channel="0001";
+google_color_border="FFFFFF";
+google_color_bg="FFFFFF";
+google_color_link="999999";
+google_color_url="5588AA";
+google_color_text="666666";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<div class='clear'></div>
+</div>
+</div></div>
+<table border='0' cellpadding='0' cellspacing='0' class='section-columns columns-2'>
+<tbody>
+<tr>
+<td class='first columns-cell'>
+<div class='foot no-items section' id='footer-2-1'></div>
+</td>
+<td class='columns-cell'>
+<div class='foot no-items section' id='footer-2-2'></div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- outside of the include in order to lock Attribution widget -->
+<div class='foot section' id='footer-3' name='Footer'><div class='widget Attribution' data-version='1' id='Attribution1'>
+<div class='widget-content' style='text-align: center;'>
+Simple theme. Powered by <a href='https://www.blogger.com' target='_blank'>Blogger</a>.
+</div>
+<div class='clear'></div>
+</div></div>
+</div>
+</div>
+<div class='footer-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</footer>
+<!-- content -->
+</div>
+</div>
+<div class='content-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<script type='text/javascript'>
+    window.setTimeout(function() {
+        document.body.className = document.body.className.replace('loading', '');
+      }, 10);
+  </script>
+
+<script type="text/javascript" src="https://www.blogger.com/static/v1/widgets/552934507-widgets.js"></script>
+<script type='text/javascript'>
+window['__wavt'] = 'AOuZoY7rmEEoLojX4arHskLN77jLArxO9g:1757388548515';_WidgetManager._Init('//www.blogger.com/rearrange?blogID\x3d2363643920942057324','//blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html','2363643920942057324');
+_WidgetManager._SetDataContext([{'name': 'blog', 'data': {'blogId': '2363643920942057324', 'title': 'Graham Dumpleton', 'url': 'http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html', 'canonicalUrl': 'http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html', 'homepageUrl': 'http://blog.dscpl.com.au/', 'searchUrl': 'http://blog.dscpl.com.au/search', 'canonicalHomepageUrl': 'http://blog.dscpl.com.au/', 'blogspotFaviconUrl': 'http://blog.dscpl.com.au/favicon.ico', 'bloggerUrl': 'https://www.blogger.com', 'hasCustomDomain': true, 'httpsEnabled': false, 'enabledCommentProfileImages': true, 'gPlusViewType': 'FILTERED_POSTMOD', 'adultContent': false, 'analyticsAccountNumber': '', 'encoding': 'UTF-8', 'locale': 'en', 'localeUnderscoreDelimited': 'en', 'languageDirection': 'ltr', 'isPrivate': false, 'isMobile': false, 'isMobileRequest': false, 'mobileClass': '', 'isPrivateBlog': false, 'isDynamicViewsAvailable': true, 'feedLinks': '\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default\x22 /\x3e\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/rss+xml\x22 title\x3d\x22Graham Dumpleton - RSS\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default?alt\x3drss\x22 /\x3e\n\x3clink rel\x3d\x22service.post\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22https://www.blogger.com/feeds/2363643920942057324/posts/default\x22 /\x3e\n\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/8848250866326062903/comments/default\x22 /\x3e\n', 'meTag': '', 'adsenseClientId': 'ca-pub-6433235630058377', 'adsenseHostId': 'ca-host-pub-1556223355139109', 'adsenseHasAds': true, 'adsenseAutoAds': false, 'boqCommentIframeForm': true, 'loginRedirectParam': '', 'view': '', 'dynamicViewsCommentsSrc': '//www.blogblog.com/dynamicviews/4224c15c4e7c9321/js/comments.js', 'dynamicViewsScriptSrc': '//www.blogblog.com/dynamicviews/df4e7af2431b8786', 'plusOneApiSrc': 'https://apis.google.com/js/platform.js', 'disableGComments': true, 'interstitialAccepted': false, 'sharing': {'platforms': [{'name': 'Get link', 'key': 'link', 'shareMessage': 'Get link', 'target': ''}, {'name': 'Facebook', 'key': 'facebook', 'shareMessage': 'Share to Facebook', 'target': 'facebook'}, {'name': 'BlogThis!', 'key': 'blogThis', 'shareMessage': 'BlogThis!', 'target': 'blog'}, {'name': 'X', 'key': 'twitter', 'shareMessage': 'Share to X', 'target': 'twitter'}, {'name': 'Pinterest', 'key': 'pinterest', 'shareMessage': 'Share to Pinterest', 'target': 'pinterest'}, {'name': 'Email', 'key': 'email', 'shareMessage': 'Email', 'target': 'email'}], 'disableGooglePlus': true, 'googlePlusShareButtonWidth': 0, 'googlePlusBootstrap': '\x3cscript type\x3d\x22text/javascript\x22\x3ewindow.___gcfg \x3d {\x27lang\x27: \x27en\x27};\x3c/script\x3e'}, 'hasCustomJumpLinkMessage': false, 'jumpLinkMessage': 'Read more', 'pageType': 'item', 'postId': '8848250866326062903', 'pageName': 'The missing @synchronized decorator.', 'pageTitle': 'Graham Dumpleton: The missing @synchronized decorator.'}}, {'name': 'features', 'data': {}}, {'name': 'messages', 'data': {'edit': 'Edit', 'linkCopiedToClipboard': 'Link copied to clipboard!', 'ok': 'Ok', 'postLink': 'Post Link'}}, {'name': 'template', 'data': {'name': 'Simple', 'localizedName': 'Simple', 'isResponsive': false, 'isAlternateRendering': false, 'isCustom': false, 'variant': 'pale', 'variantId': 'pale'}}, {'name': 'view', 'data': {'classic': {'name': 'classic', 'url': '?view\x3dclassic'}, 'flipcard': {'name': 'flipcard', 'url': '?view\x3dflipcard'}, 'magazine': {'name': 'magazine', 'url': '?view\x3dmagazine'}, 'mosaic': {'name': 'mosaic', 'url': '?view\x3dmosaic'}, 'sidebar': {'name': 'sidebar', 'url': '?view\x3dsidebar'}, 'snapshot': {'name': 'snapshot', 'url': '?view\x3dsnapshot'}, 'timeslide': {'name': 'timeslide', 'url': '?view\x3dtimeslide'}, 'isMobile': false, 'title': 'The missing @synchronized decorator.', 'description': ' This is the seventh post in my series of blog posts about Python decorators and how I believe they are generally poorly implemented. It fol...', 'url': 'http://blog.dscpl.com.au/2014/01/the-missing-synchronized-decorator.html', 'type': 'item', 'isSingleItem': true, 'isMultipleItems': false, 'isError': false, 'isPage': false, 'isPost': true, 'isHomepage': false, 'isArchive': false, 'isLabelSearch': false, 'postId': 8848250866326062903}}]);
+_WidgetManager._RegisterWidget('_NavbarView', new _WidgetInfo('Navbar1', 'navbar', document.getElementById('Navbar1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_HeaderView', new _WidgetInfo('Header1', 'header', document.getElementById('Header1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogView', new _WidgetInfo('Blog1', 'main', document.getElementById('Blog1'), {'cmtInteractionsEnabled': false, 'lightboxEnabled': true, 'lightboxModuleUrl': 'https://www.blogger.com/static/v1/jsbin/3842676126-lbx.js', 'lightboxCssUrl': 'https://www.blogger.com/static/v1/v-css/828616780-lightbox_bundle.css'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_ProfileView', new _WidgetInfo('Profile1', 'sidebar-right-1', document.getElementById('Profile1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_PageListView', new _WidgetInfo('PageList1', 'sidebar-right-1', document.getElementById('PageList1'), {'title': 'Quick Links', 'links': [{'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html', 'id': '3350721465154129789', 'title': 'Decorators and monkey patching.'}, {'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/using-python-with-docker.html', 'id': '5591286857776935907', 'title': 'Using Python with Docker.'}], 'mobile': false, 'showPlaceholder': true, 'hasCurrentPage': false}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogArchiveView', new _WidgetInfo('BlogArchive1', 'sidebar-right-1', document.getElementById('BlogArchive1'), {'languageDirection': 'ltr', 'loadingMessage': 'Loading\x26hellip;'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_LabelView', new _WidgetInfo('Label1', 'sidebar-right-1', document.getElementById('Label1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AdSenseView', new _WidgetInfo('AdSense1', 'footer-1', document.getElementById('AdSense1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AttributionView', new _WidgetInfo('Attribution1', 'footer-3', document.getElementById('Attribution1'), {}, 'displayModeFull'));
+</script>
+</body>
+</html>

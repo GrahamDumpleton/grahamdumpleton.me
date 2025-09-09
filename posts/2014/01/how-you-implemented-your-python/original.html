@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html class='v2' dir='ltr' lang='en'>
+<head>
+<link href='https://www.blogger.com/static/v1/widgets/2508126174-css_bundle_v2.css' rel='stylesheet' type='text/css'/>
+<meta content='width=1100' name='viewport'/>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='blogger' name='generator'/>
+<link href='http://blog.dscpl.com.au/favicon.ico' rel='icon' type='image/x-icon'/>
+<link href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html' rel='canonical'/>
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Graham Dumpleton - RSS" href="http://blog.dscpl.com.au/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Graham Dumpleton - Atom" href="https://www.blogger.com/feeds/2363643920942057324/posts/default" />
+
+<link rel="alternate" type="application/atom+xml" title="Graham Dumpleton - Atom" href="http://blog.dscpl.com.au/feeds/4875313059401974659/comments/default" />
+<!--Can't find substitution for tag [blog.ieCssRetrofitLinks]-->
+<meta content='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html' property='og:url'/>
+<meta content='How you implemented your Python decorator is wrong.' property='og:title'/>
+<meta content='The rest of the Python community is currently doing lots of navel gazing over the issue of Python 3 adoption and the whole unicode/bytes div...' property='og:description'/>
+<title>Graham Dumpleton: How you implemented your Python decorator is wrong.</title>
+<style id='page-skin-1' type='text/css'><!--
+/*
+-----------------------------------------------
+Blogger Template Style
+Name:     Simple
+Designer: Blogger
+URL:      www.blogger.com
+----------------------------------------------- */
+/* Content
+----------------------------------------------- */
+body {
+font: normal normal 12px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #222222;
+background: #66bbdd none repeat scroll top left;
+padding: 0 40px 40px 40px;
+}
+html body .region-inner {
+min-width: 0;
+max-width: 100%;
+width: auto;
+}
+h2 {
+font-size: 22px;
+}
+a:link {
+text-decoration:none;
+color: #2187bb;
+}
+a:visited {
+text-decoration:none;
+color: #888888;
+}
+a:hover {
+text-decoration:underline;
+color: #32aaff;
+}
+.body-fauxcolumn-outer .fauxcolumn-inner {
+background: transparent none repeat scroll top left;
+_background-image: none;
+}
+.body-fauxcolumn-outer .cap-top {
+position: absolute;
+z-index: 1;
+height: 400px;
+width: 100%;
+}
+.body-fauxcolumn-outer .cap-top .cap-left {
+width: 100%;
+background: transparent none repeat-x scroll top left;
+_background-image: none;
+}
+.content-outer {
+-moz-box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+-webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .15);
+-goog-ms-box-shadow: 0 0 10px #333333;
+box-shadow: 0 0 40px rgba(0, 0, 0, .15);
+margin-bottom: 1px;
+}
+.content-inner {
+padding: 10px 10px;
+}
+.content-inner {
+background-color: #ffffff;
+}
+/* Header
+----------------------------------------------- */
+.header-outer {
+background: transparent none repeat-x scroll 0 -400px;
+_background-image: none;
+}
+.Header h1 {
+font: normal normal 60px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #3299bb;
+text-shadow: -1px -1px 1px rgba(0, 0, 0, .2);
+}
+.Header h1 a {
+color: #3299bb;
+}
+.Header .description {
+font-size: 140%;
+color: #777777;
+}
+.header-inner .Header .titlewrapper {
+padding: 22px 30px;
+}
+.header-inner .Header .descriptionwrapper {
+padding: 0 30px;
+}
+/* Tabs
+----------------------------------------------- */
+.tabs-inner .section:first-child {
+border-top: 1px solid #eeeeee;
+}
+.tabs-inner .section:first-child ul {
+margin-top: -1px;
+border-top: 1px solid #eeeeee;
+border-left: 0 solid #eeeeee;
+border-right: 0 solid #eeeeee;
+}
+.tabs-inner .widget ul {
+background: #f5f5f5 url(https://resources.blogblog.com/blogblog/data/1kt/simple/gradients_light.png) repeat-x scroll 0 -800px;
+_background-image: none;
+border-bottom: 1px solid #eeeeee;
+margin-top: 0;
+margin-left: -30px;
+margin-right: -30px;
+}
+.tabs-inner .widget li a {
+display: inline-block;
+padding: .6em 1em;
+font: normal normal 14px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #999999;
+border-left: 1px solid #ffffff;
+border-right: 1px solid #eeeeee;
+}
+.tabs-inner .widget li:first-child a {
+border-left: none;
+}
+.tabs-inner .widget li.selected a, .tabs-inner .widget li a:hover {
+color: #000000;
+background-color: #eeeeee;
+text-decoration: none;
+}
+/* Columns
+----------------------------------------------- */
+.main-outer {
+border-top: 0 solid #eeeeee;
+}
+.fauxcolumn-left-outer .fauxcolumn-inner {
+border-right: 1px solid #eeeeee;
+}
+.fauxcolumn-right-outer .fauxcolumn-inner {
+border-left: 1px solid #eeeeee;
+}
+/* Headings
+----------------------------------------------- */
+div.widget > h2,
+div.widget h2.title {
+margin: 0 0 1em 0;
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+color: #000000;
+}
+/* Widgets
+----------------------------------------------- */
+.widget .zippy {
+color: #999999;
+text-shadow: 2px 2px 1px rgba(0, 0, 0, .1);
+}
+.widget .popular-posts ul {
+list-style: none;
+}
+/* Posts
+----------------------------------------------- */
+h2.date-header {
+font: normal bold 11px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+}
+.date-header span {
+background-color: transparent;
+color: #222222;
+padding: inherit;
+letter-spacing: inherit;
+margin: inherit;
+}
+.main-inner {
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.main-inner .column-center-inner {
+padding: 0 15px;
+}
+.main-inner .column-center-inner .section {
+margin: 0 15px;
+}
+.post {
+margin: 0 0 25px 0;
+}
+h3.post-title, .comments h4 {
+font: normal normal 22px Arial, Tahoma, Helvetica, FreeSans, sans-serif;
+margin: .75em 0 0;
+}
+.post-body {
+font-size: 110%;
+line-height: 1.4;
+position: relative;
+}
+.post-body img, .post-body .tr-caption-container, .Profile img, .Image img,
+.BlogList .item-thumbnail img {
+padding: 2px;
+background: #ffffff;
+border: 1px solid #eeeeee;
+-moz-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+-webkit-box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+box-shadow: 1px 1px 5px rgba(0, 0, 0, .1);
+}
+.post-body img, .post-body .tr-caption-container {
+padding: 5px;
+}
+.post-body .tr-caption-container {
+color: #222222;
+}
+.post-body .tr-caption-container img {
+padding: 0;
+background: transparent;
+border: none;
+-moz-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+-webkit-box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+box-shadow: 0 0 0 rgba(0, 0, 0, .1);
+}
+.post-header {
+margin: 0 0 1.5em;
+line-height: 1.6;
+font-size: 90%;
+}
+.post-footer {
+margin: 20px -2px 0;
+padding: 5px 10px;
+color: #666666;
+background-color: #f9f9f9;
+border-bottom: 1px solid #eeeeee;
+line-height: 1.6;
+font-size: 90%;
+}
+#comments .comment-author {
+padding-top: 1.5em;
+border-top: 1px solid #eeeeee;
+background-position: 0 1.5em;
+}
+#comments .comment-author:first-child {
+padding-top: 0;
+border-top: none;
+}
+.avatar-image-container {
+margin: .2em 0 0;
+}
+#comments .avatar-image-container img {
+border: 1px solid #eeeeee;
+}
+/* Comments
+----------------------------------------------- */
+.comments .comments-content .icon.blog-author {
+background-repeat: no-repeat;
+background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9sLFwMeCjjhcOMAAAD+SURBVDjLtZSvTgNBEIe/WRRnm3U8RC1neQdsm1zSBIU9VVF1FkUguQQsD9ITmD7ECZIJSE4OZo9stoVjC/zc7ky+zH9hXwVwDpTAWWLrgS3QAe8AZgaAJI5zYAmc8r0G4AHYHQKVwII8PZrZFsBFkeRCABYiMh9BRUhnSkPTNCtVXYXURi1FpBDgArj8QU1eVXUzfnjv7yP7kwu1mYrkWlU33vs1QNu2qU8pwN0UpKoqokjWwCztrMuBhEhmh8bD5UDqur75asbcX0BGUB9/HAMB+r32hznJgXy2v0sGLBcyAJ1EK3LFcbo1s91JeLwAbwGYu7TP/3ZGfnXYPgAVNngtqatUNgAAAABJRU5ErkJggg==);
+}
+.comments .comments-content .loadmore a {
+border-top: 1px solid #999999;
+border-bottom: 1px solid #999999;
+}
+.comments .comment-thread.inline-thread {
+background-color: #f9f9f9;
+}
+.comments .continue {
+border-top: 2px solid #999999;
+}
+/* Accents
+---------------------------------------------- */
+.section-columns td.columns-cell {
+border-left: 1px solid #eeeeee;
+}
+.blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.blog-pager-older-link, .home-link,
+.blog-pager-newer-link {
+background-color: #ffffff;
+padding: 5px;
+}
+.footer-outer {
+border-top: 0 dashed #bbbbbb;
+}
+/* Mobile
+----------------------------------------------- */
+body.mobile  {
+background-size: auto;
+}
+.mobile .body-fauxcolumn-outer {
+background: transparent none repeat scroll top left;
+}
+.mobile .body-fauxcolumn-outer .cap-top {
+background-size: 100% auto;
+}
+.mobile .content-outer {
+-webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+box-shadow: 0 0 3px rgba(0, 0, 0, .15);
+}
+.mobile .tabs-inner .widget ul {
+margin-left: 0;
+margin-right: 0;
+}
+.mobile .post {
+margin: 0;
+}
+.mobile .main-inner .column-center-inner .section {
+margin: 0;
+}
+.mobile .date-header span {
+padding: 0.1em 10px;
+margin: 0 -10px;
+}
+.mobile h3.post-title {
+margin: 0;
+}
+.mobile .blog-pager {
+background: transparent none no-repeat scroll top center;
+}
+.mobile .footer-outer {
+border-top: none;
+}
+.mobile .main-inner, .mobile .footer-inner {
+background-color: #ffffff;
+}
+.mobile-index-contents {
+color: #222222;
+}
+.mobile-link-button {
+background-color: #2187bb;
+}
+.mobile-link-button a:link, .mobile-link-button a:visited {
+color: #ffffff;
+}
+.mobile .tabs-inner .section:first-child {
+border-top: none;
+}
+.mobile .tabs-inner .PageList .widget-content {
+background-color: #eeeeee;
+color: #000000;
+border-top: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+}
+.mobile .tabs-inner .PageList .widget-content .pagelist-arrow {
+border-left: 1px solid #eeeeee;
+}
+
+--></style>
+<style id='template-skin-1' type='text/css'><!--
+body {
+min-width: 1020px;
+}
+.content-outer, .content-fauxcolumn-outer, .region-inner {
+min-width: 1020px;
+max-width: 1020px;
+_width: 1020px;
+}
+.main-inner .columns {
+padding-left: 0px;
+padding-right: 200px;
+}
+.main-inner .fauxcolumn-center-outer {
+left: 0px;
+right: 200px;
+/* IE6 does not respect left and right together */
+_width: expression(this.parentNode.offsetWidth -
+parseInt("0px") -
+parseInt("200px") + 'px');
+}
+.main-inner .fauxcolumn-left-outer {
+width: 0px;
+}
+.main-inner .fauxcolumn-right-outer {
+width: 200px;
+}
+.main-inner .column-left-outer {
+width: 0px;
+right: 100%;
+margin-left: -0px;
+}
+.main-inner .column-right-outer {
+width: 200px;
+margin-right: -200px;
+}
+#layout {
+min-width: 0;
+}
+#layout .content-outer {
+min-width: 0;
+width: 800px;
+}
+#layout .region-inner {
+min-width: 0;
+width: auto;
+}
+body#layout div.add_widget {
+padding: 8px;
+}
+body#layout div.add_widget a {
+margin-left: 32px;
+}
+--></style>
+<link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' media='none' onload='if(media!=&#39;all&#39;)media=&#39;all&#39;' rel='stylesheet'/><noscript><link href='https://www.blogger.com/dyn-css/authorization.css?targetBlogID=2363643920942057324&amp;zx=8e425bf4-e933-49a5-a874-6a5d9cccad39' rel='stylesheet'/></noscript>
+<meta name='google-adsense-platform-account' content='ca-host-pub-1556223355139109'/>
+<meta name='google-adsense-platform-domain' content='blogspot.com'/>
+
+<!-- data-ad-client=ca-pub-6433235630058377 -->
+
+</head>
+<body class='loading variant-pale'>
+<div class='navbar section' id='navbar' name='Navbar'><div class='widget Navbar' data-version='1' id='Navbar1'><script type="text/javascript">
+    function setAttributeOnload(object, attribute, val) {
+      if(window.addEventListener) {
+        window.addEventListener('load',
+          function(){ object[attribute] = val; }, false);
+      } else {
+        window.attachEvent('onload', function(){ object[attribute] = val; });
+      }
+    }
+  </script>
+<div id="navbar-iframe-container"></div>
+<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+<script type="text/javascript">
+      gapi.load("gapi.iframes:gapi.iframes.style.bubble", function() {
+        if (gapi.iframes && gapi.iframes.getContext) {
+          gapi.iframes.getContext().openChild({
+              url: 'https://www.blogger.com/navbar/2363643920942057324?po\x3d4875313059401974659\x26origin\x3dhttp://blog.dscpl.com.au',
+              where: document.getElementById("navbar-iframe-container"),
+              id: "navbar-iframe"
+          });
+        }
+      });
+    </script><script type="text/javascript">
+(function() {
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = '//pagead2.googlesyndication.com/pagead/js/google_top_exp.js';
+var head = document.getElementsByTagName('head')[0];
+if (head) {
+head.appendChild(script);
+}})();
+</script>
+</div></div>
+<div class='body-fauxcolumns'>
+<div class='fauxcolumn-outer body-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content'>
+<div class='content-fauxcolumns'>
+<div class='fauxcolumn-outer content-fauxcolumn-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<div class='content-outer'>
+<div class='content-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left content-fauxborder-left'>
+<div class='fauxborder-right content-fauxborder-right'></div>
+<div class='content-inner'>
+<header>
+<div class='header-outer'>
+<div class='header-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left header-fauxborder-left'>
+<div class='fauxborder-right header-fauxborder-right'></div>
+<div class='region-inner header-inner'>
+<div class='header section' id='header' name='Header'><div class='widget Header' data-version='1' id='Header1'>
+<div id='header-inner'>
+<div class='titlewrapper'>
+<h1 class='title'>
+<a href='http://blog.dscpl.com.au/'>
+Graham Dumpleton
+</a>
+</h1>
+</div>
+<div class='descriptionwrapper'>
+<p class='description'><span>
+</span></p>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='header-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</header>
+<div class='tabs-outer'>
+<div class='tabs-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left tabs-fauxborder-left'>
+<div class='fauxborder-right tabs-fauxborder-right'></div>
+<div class='region-inner tabs-inner'>
+<div class='tabs no-items section' id='crosscol' name='Cross-Column'></div>
+<div class='tabs no-items section' id='crosscol-overflow' name='Cross-Column 2'></div>
+</div>
+</div>
+<div class='tabs-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='main-outer'>
+<div class='main-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left main-fauxborder-left'>
+<div class='fauxborder-right main-fauxborder-right'></div>
+<div class='region-inner main-inner'>
+<div class='columns fauxcolumns'>
+<div class='fauxcolumn-outer fauxcolumn-center-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-left-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<div class='fauxcolumn-outer fauxcolumn-right-outer'>
+<div class='cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left'>
+<div class='fauxborder-right'></div>
+<div class='fauxcolumn-inner'>
+</div>
+</div>
+<div class='cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<!-- corrects IE6 width calculation -->
+<div class='columns-inner'>
+<div class='column-center-outer'>
+<div class='column-center-inner'>
+<div class='main section' id='main' name='Main'><div class='widget Blog' data-version='1' id='Blog1'>
+<div class='blog-posts hfeed'>
+
+          <div class="date-outer">
+        
+<h2 class='date-header'><span>Tuesday, January 7, 2014</span></h2>
+
+          <div class="date-posts">
+        
+<div class='post-outer'>
+<div class='post hentry uncustomized-post-template' itemprop='blogPost' itemscope='itemscope' itemtype='http://schema.org/BlogPosting'>
+<meta content='2363643920942057324' itemprop='blogId'/>
+<meta content='4875313059401974659' itemprop='postId'/>
+<a name='4875313059401974659'></a>
+<h3 class='post-title entry-title' itemprop='name'>
+How you implemented your Python decorator is wrong.
+</h3>
+<div class='post-header'>
+<div class='post-header-line-1'></div>
+</div>
+<div class='post-body entry-content' id='post-body-4875313059401974659' itemprop='description articleBody'>
+The rest of the Python community is currently doing lots of navel gazing over the issue of Python 3 adoption and the whole unicode/bytes divide. I am so over that and gave up caring when my will to work on WSGI stuff was leached away by how long it took to get the WSGI specification updated for Python 3.<br />
+<br />
+Instead my current favourite gripe these days is about how people implement Python decorators. Unfortunately, it appears to be a favourite topic for blogging by Python developers. It is like how when WSGI was all the rage and everyone wanted to write their own WSGI server or framework. Now it is like a rite of passage that one must blog about how to implement Python decorators as a way of showing that you understand Python. As such, I get lots of opportunity to grumble and wince. If only they did truly understand what they were describing and what problems exist with the approach they use.<br />
+<br />
+So what is my gripe then. My gripe is that although one can write a very simple decorator using a function closure, the scope it can be used in is usually limited. The most basic pattern for implementing a Python decorator also breaks various stuff related to introspection.<br />
+<br />
+Now most people will say who cares, it does the job I want to do and I don't have time to care whether it is correct in all situations.<br />
+<br />
+As people will know from when I did care more about WSGI, I am a pedantic arse though and when one does something, I like to see it done correctly.<br />
+<br />
+Besides my overly obsessive personal trait, it actually does also affect me in my day job as well. This is because I write tools which are dependent upon being able to introspect into code and I need the results I get back to be correct. If they aren't, then the data I generate becomes useless as information can get grouped against the wrong thing.<br />
+<br />
+As well as using introspection, I also do lots of evil stuff with monkey patching. As it happens, monkey patching and the function wrappers one applies aren't much different to decorators, it is just how they get applied which is different. Because though monkey patching entails going in and modifying other peoples code when they were not expecting it, or designing for it, means that when you do go in and wrap a function that how you do it is very important. If you do not do it correctly then you can crash the users application or inadvertently change how it runs.<br />
+<br />
+The first thing that is vitally important is preserving introspection for the wrapped function. Another not so obvious thing though is that you need to ensure that you do not mess with how the execution model for the Python object model works.<br />
+<br />
+Now I can in my own function wrappers that are used when performing monkey patching ensure that these two requirements are met so as to ensure that the function wrapper is transparent, but it can all fall in a heap when one needs to monkey patch functions which already have other decorators applied.<br />
+<br />
+So when you implement a Python decorator and do it poorly it can affect me and what I want to do. If I have to subsequently work around when you do it wrong, I get somewhat annoyed and grumpy as more often than not that entails a lot of pain.<br />
+<br />
+To cover everything there is to know about what is wrong with your typical Python decorators and wrapping of functions, plus how to fix it, will take a lot of explaining, so one blog post isn't going to be enough. See this blog post therefore as just part one of an extended discussion.<br />
+<br />
+For this first instalment I will simply go through the various ways in which your typical Python decorator can cause problems.<br />
+<br />
+<h3>
+Basics of a Python decorator</h3>
+<br />
+Everyone should know what the Python decorator syntax is.<br />
+<blockquote class="tr_bq">
+@function_wrapper<br />
+def function():<br />
+&nbsp; &nbsp; pass</blockquote>
+The '@' annotation to denote the application of a decorator was only added in Python 2.4. It is actually though only fancy syntactic sugar. It is actually equivalent to writing:<br />
+<blockquote class="tr_bq">
+def function():<br />
+&nbsp; &nbsp; pass<br />
+function = function_wrapper(function)</blockquote>
+and what you would have done prior to Python 2.4.<br />
+<br />
+The decorator syntax is therefore just a short hand way of being able to apply a wrapper around an existing function, or otherwise modify the existing function in place, while the definition of the function is being setup.<br />
+<br />
+What is referred to as monkey patching achieves pretty much the same outcome, the difference being that when monkey patching the wrapper isn't being applied at the time the definition of the function is being setup, but is applied retrospectively from a different context after the fact.<br />
+<br />
+<h3>
+Anatomy of a function wrapper</h3>
+<br />
+Although I mentioned using function closures to implement a decorator, to understand how the more generic case of a function wrapper works it is more illustrative to show how to implement it using a class.<br />
+<blockquote class="tr_bq">
+class function_wrapper(object):<br />
+&nbsp; &nbsp; def __init__(self, wrapped):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; self.wrapped = wrapped<br />
+&nbsp; &nbsp; def __call__(self, *args, **kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return self.wrapped(*args, **kwargs)</blockquote>
+<blockquote class="tr_bq">
+@function_wrapper<br />
+def function():<br />
+&nbsp; &nbsp; pass</blockquote>
+The class instance in this example is initialised with and records the original function object. When the now wrapped function is called, it is actually the __call__() method of the wrapper object which is invoked. This in turn would then call the original wrapped function.<br />
+<br />
+Simply passing through the call to the wrapper alone isn&#8217;t particularly useful, so normally you would actually want to do some work either before or after the wrapped function is called. Or you may want to modify the input arguments or the result as they pass through the wrapper. This is just a matter of modifying the __call__() method appropriately to do what you want.<br />
+<br />
+Using a class to implement the wrapper for a decorator isn't actually that popular. Instead a function closure is more often used. In this case a nested function is used as the wrapper and it is that which is returned by the decorator function. When the now wrapped function is called, the nested function is actually being called. This in turn would again then call the original wrapped function.<br />
+<blockquote class="tr_bq">
+def function_wrapper(wrapped):<br />
+&nbsp; &nbsp; def _wrapper(*args, **kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)<br />
+&nbsp; &nbsp; return _wrapper&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@function_wrapper<br />
+def function():<br />
+&nbsp; &nbsp; pass</blockquote>
+In this example the nested function doesn't actually get passed the original wrapped function explicitly. But it will still have access to it via the arguments given to the outer function call. This does away with the need to create a class to hold what was the wrapped function and thus why it is convenient and generally more popular.<br />
+<br />
+<h3>
+Introspecting a function</h3>
+<br />
+Now when we talk about functions, we expect them to specify properties which describe them as well as document what they do. These include the __name__ and __doc__ attributes. When we use a wrapper though, this no longer works as we expect as in the case of using a function closure, the details of the nested function are returned.<br />
+<blockquote class="tr_bq">
+def function_wrapper(wrapped):<br />
+&nbsp; &nbsp; def _wrapper(*args, **kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)<br />
+&nbsp; &nbsp; return _wrapper&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@function_wrapper<br />
+def function():<br />
+&nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; print(function.__name__)<br />
+_wrapper</blockquote>
+If we use a class to implement the wrapper, as class instances do not normally have a __name__ attribute, attempting to access the name of the function will actually result in an AttributeError exception.<br />
+<blockquote class="tr_bq">
+class function_wrapper(object):<br />
+&nbsp; &nbsp; def __init__(self, wrapped):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; self.wrapped = wrapped<br />
+&nbsp; &nbsp; def __call__(self, *args, **kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return self.wrapped(*args, **kwargs)&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@function_wrapper<br />
+def function():<br />
+&nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; print(function.__name__)<br />
+Traceback (most recent call last):<br />
+&nbsp; File "&lt;stdin&gt;", line 1, in &lt;module&gt;<br />
+AttributeError: 'function_wrapper' object&nbsp;has no attribute '__name__'</blockquote>
+The solution here when using a function closure is to copy the attributes of interest from the wrapped function to the nested wrapper function. This will then result in the function name and documentation strings being correct.<br />
+<blockquote class="tr_bq">
+def function_wrapper(wrapped):<br />
+&nbsp; &nbsp; def _wrapper(*args, **kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)<br />
+&nbsp; &nbsp; _wrapper.__name__ = wrapped.__name__<br />
+&nbsp; &nbsp; _wrapper.__doc__ = wrapped.__doc__<br />
+&nbsp; &nbsp; return _wrapper&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@function_wrapper<br />
+def function():<br />
+&nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; print(function.__name__)<br />
+function</blockquote>
+Needing to manually copy the attributes is laborious, and would need to be updated if any further special attributes were added which needed to be copied. For example, we should also copy the __module__ attribute, and in Python 3 the __qualname__ and __annotations__ attributes were added. To aid in getting this right, the Python standard library provides the functools.wraps() decorator which does this task for you.<br />
+<blockquote class="tr_bq">
+import functools&nbsp;</blockquote>
+<blockquote class="tr_bq">
+def function_wrapper(wrapped):<br />
+&nbsp; &nbsp; @functools.wraps(wrapped)<br />
+&nbsp; &nbsp; def _wrapper(*args, **kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return wrapped(*args, **kwargs)<br />
+&nbsp; &nbsp; return _wrapper&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@function_wrapper<br />
+def function():<br />
+&nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; print(function.__name__)<br />
+function</blockquote>
+If using a class to implement the wrapper, instead of the functools.wraps() decorator, we would use the functools.update_wrapper() function.<br />
+<blockquote class="tr_bq">
+import functools&nbsp;</blockquote>
+<blockquote class="tr_bq">
+class function_wrapper(object):<br />
+&nbsp; &nbsp; def __init__(self, wrapped):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; self.wrapped = wrapped<br />
+&nbsp; &nbsp; &nbsp; &nbsp; functools.update_wrapper(self, wrapped)<br />
+&nbsp; &nbsp; def __call__(self, *args, **kwargs):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; return self.wrapped(*args, **kwargs)</blockquote>
+So we might have a solution to ensuring the function name and any documentation string is correct in the form of functools.wraps(), but actually we don't and this will not always work as I will show below.<br />
+<br />
+Now what if we want to query the argument specification for a function. This also fails and instead of returning the argument specification for the wrapped function, it returns that of the wrapper. In the case of using a function closure, this is the nested function. The decorator is therefore not signature preserving.<br />
+<blockquote class="tr_bq">
+import inspect&nbsp;</blockquote>
+<blockquote class="tr_bq">
+def function_wrapper(wrapped): ...<br />
+@function_wrapper<br />
+def function(arg1, arg2): pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; print(inspect.getargspec(function))<br />
+ArgSpec(args=[], varargs='args',&nbsp;keywords='kwargs', defaults=None)</blockquote>
+A worse situation again occurs with the class based wrapper. This time we get an exception complaining that the wrapped function isn't actually a function. As a result it isn't possible to derive an argument specification at all, even though the wrapped function is actually still callable.<br />
+<blockquote class="tr_bq">
+class function_wrapper(object): ...&nbsp;</blockquote>
+<blockquote class="tr_bq">
+@function_wrapper<br />
+def function(arg1, arg2): pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&gt;&gt;&gt; print(inspect.getargspec(function))<br />
+Traceback (most recent call last):<br />
+&nbsp; File "...", line XXX, in &lt;module&gt;<br />
+&nbsp; &nbsp; print(inspect.getargspec(function))<br />
+&nbsp; File ".../inspect.py", line 813, in getargspec<br />
+&nbsp; &nbsp; raise TypeError('{!r} is not a Python&nbsp;function'.format(func))<br />
+TypeError: &lt;__main__.function_wrapper object at&nbsp;0x107e0ac90&gt; is not a Python function</blockquote>
+Another example of introspection one can do is to use inspect.getsource() to get back the source code related to a function. This also will fail, with it giving the source code for the nested wrapper function in the case of a function closure and again failing outright with an exception in the case of the class based wrapper.<br />
+<br />
+<h3>
+Wrapping class methods</h3>
+<br />
+Now, as well as normal functions, decorators can also be applied to methods of classes. Python even includes a couple of special decorators called @classmethod and @staticmethod for converting normal instance methods into these special method types. Methods of classes do provide a number of potential problems though.<br />
+<blockquote class="tr_bq">
+class Class(object):&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @function_wrapper<br />
+&nbsp; &nbsp; def method(self):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @classmethod<br />
+&nbsp; &nbsp; def cmethod(cls):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+&nbsp; &nbsp; @staticmethod<br />
+&nbsp; &nbsp; def smethod():<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass</blockquote>
+The first is that even if using functools.wraps() or functools.update_wrapper() in your decorator, when the decorator is applied around @classmethod or @staticmethod, it can fail with an exception. This is because the wrappers created by these, do not have some of the attributes being copied.<br />
+<blockquote class="tr_bq">
+class Class(object):<br />
+&nbsp; &nbsp; @function_wrapper<br />
+&nbsp; &nbsp; @classmethod<br />
+&nbsp; &nbsp; def cmethod(cls):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+Traceback (most recent call last):<br />
+&nbsp; File "&lt;stdin&gt;", line 1, in &lt;module&gt;<br />
+&nbsp; File "&lt;stdin&gt;", line 3, in Class<br />
+&nbsp; File "&lt;stdin&gt;", line 2, in wrapper<br />
+&nbsp; File ".../functools.py", line 33, in update_wrapper<br />
+&nbsp; &nbsp; setattr(wrapper, attr, getattr(wrapped, attr))<br />
+AttributeError: 'classmethod' object has no&nbsp;attribute '__module__'</blockquote>
+As it happens, this is a Python 2 bug and it is fixed in Python 3 by ignoring missing attributes.<br />
+<br />
+Even when we run it under Python 3, we still hit trouble though. This is because both wrapper types assume that the wrapped function is directly callable. This need not actually be the case. A wrapped function can actually be what is called a descriptor, meaning that in order to get back a callable, the descriptor has to be correctly bound to the instance first.<br />
+<blockquote class="tr_bq">
+class Class(object):<br />
+&nbsp; &nbsp; @function_wrapper<br />
+&nbsp; &nbsp; @classmethod<br />
+&nbsp; &nbsp; def cmethod(cls):<br />
+&nbsp; &nbsp; &nbsp; &nbsp; pass&nbsp;</blockquote>
+<blockquote class="tr_bq">
+Class.cmethod()&nbsp;</blockquote>
+<blockquote class="tr_bq">
+Traceback (most recent call last):<br />
+&nbsp; File "classmethod.py", line 15, in &lt;module&gt;<br />
+&nbsp; &nbsp; Class.cmethod()<br />
+&nbsp; File "classmethod.py", line 6, in _wrapper<br />
+&nbsp; &nbsp; return wrapped(*args, **kwargs)<br />
+TypeError: 'classmethod' object is not callable</blockquote>
+<br />
+<h3>
+Simple does not imply correctness</h3>
+<br />
+So although the usual way that people implement decorators is simple, that doesn't mean they are necessarily correct and will always work.<br />
+<br />
+The issues highlighted so far are:<br />
+<br />
+<ul>
+<li>Preservation of function __name__ and __doc__.</li>
+<li>Preservation of function argument specification.</li>
+<li>Preservation of ability to get function source code.</li>
+<li>Ability to apply decorators on top of other decorators that are implemented as descriptors.</li>
+</ul>
+<br />
+The functools.wraps() function is given as a solution to the first but doesn't always work, at least in Python 2. It doesn't help at all though with preserving the introspection of a functions argument specification and ability to get the source code for a function.<br />
+<br />
+Even if one could solve the introspection problem, the simple decorator implementation that is generally offered up as the way to do things, breaks the execution model for the Python object model, not honouring the descriptor protocol of anything which is wrapped by the decorator.<br />
+<br />
+Third party packages do exist which try and solve these issues, such as the <a href="https://pypi.python.org/pypi/decorator">decorator</a> module available on PyPi. This module in particular though only helps with the first two and still has potential issues with how it works that may cause problems when trying to dynamically apply function wrappers via monkey patching.<br />
+<br />
+This doesn't mean these problems aren't solvable, and solvable in a way that doesn't sacrifice performance. In my search at least, I could not actually find any one who has described a comprehensive solution or offered up a package which performs all the required magic so you don't have to worry about it yourself.<br />
+<br />
+This blog post is therefore the first step in me explaining how it can be all made to work. I have stated the problems to be solved and in subsequent posts I will explain how they can be solved and what extra capabilities that gives you which enables the ability to write even more magic decorators than what is possible now with traditional ways that decorators have been implemented.<br />
+<br />
+So stay tuned for the next instalment. Hopefully I can keep the momentum up and keep them coming. Pester me if I don't.<br />
+<br />
+<div style='clear: both;'></div>
+</div>
+<div class='post-footer'>
+<div class='post-footer-line post-footer-line-1'>
+<span class='post-author vcard'>
+Posted by
+<span class='fn' itemprop='author' itemscope='itemscope' itemtype='http://schema.org/Person'>
+<meta content='https://www.blogger.com/profile/13609779138164842374' itemprop='url'/>
+<a class='g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' title='author profile'>
+<span itemprop='name'>Graham Dumpleton</span>
+</a>
+</span>
+</span>
+<span class='post-timestamp'>
+at
+<meta content='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html' itemprop='url'/>
+<a class='timestamp-link' href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html' rel='bookmark' title='permanent link'><abbr class='published' itemprop='datePublished' title='2014-01-07T17:40:00+11:00'>5:40&#8239;PM</abbr></a>
+</span>
+<span class='post-comment-link'>
+</span>
+<span class='post-icons'>
+<span class='item-action'>
+<a href='https://www.blogger.com/email-post/2363643920942057324/4875313059401974659' title='Email Post'>
+<img alt='' class='icon-action' height='13' src='https://resources.blogblog.com/img/icon18_email.gif' width='18'/>
+</a>
+</span>
+</span>
+<div class='post-share-buttons goog-inline-block'>
+<a class='goog-inline-block share-button sb-email' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=4875313059401974659&target=email' target='_blank' title='Email This'><span class='share-button-link-text'>Email This</span></a><a class='goog-inline-block share-button sb-blog' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=4875313059401974659&target=blog' onclick='window.open(this.href, "_blank", "height=270,width=475"); return false;' target='_blank' title='BlogThis!'><span class='share-button-link-text'>BlogThis!</span></a><a class='goog-inline-block share-button sb-twitter' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=4875313059401974659&target=twitter' target='_blank' title='Share to X'><span class='share-button-link-text'>Share to X</span></a><a class='goog-inline-block share-button sb-facebook' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=4875313059401974659&target=facebook' onclick='window.open(this.href, "_blank", "height=430,width=640"); return false;' target='_blank' title='Share to Facebook'><span class='share-button-link-text'>Share to Facebook</span></a><a class='goog-inline-block share-button sb-pinterest' href='https://www.blogger.com/share-post.g?blogID=2363643920942057324&postID=4875313059401974659&target=pinterest' target='_blank' title='Share to Pinterest'><span class='share-button-link-text'>Share to Pinterest</span></a>
+</div>
+</div>
+<div class='post-footer-line post-footer-line-2'>
+<span class='post-labels'>
+Labels:
+<a href='http://blog.dscpl.com.au/search/label/decorators' rel='tag'>decorators</a>,
+<a href='http://blog.dscpl.com.au/search/label/python' rel='tag'>python</a>
+</span>
+</div>
+<div class='post-footer-line post-footer-line-3'>
+<span class='post-location'>
+</span>
+</div>
+</div>
+</div>
+<div class='comments' id='comments'>
+<a name='comments'></a>
+<h4>9 comments:</h4>
+<div id='Blog1_comments-block-wrapper'>
+<dl class='avatar-comment-indent' id='comments-block'>
+<dt class='comment-author ' id='c3423011433813124050'>
+<a name='c3423011433813124050'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/16756650978984594796" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-3423011433813124050-16756650978984594796"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Maximilien Riehl">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/16756650978984594796' rel='nofollow'>Maximilien Riehl</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-3423011433813124050'>
+<p>
+Thanks a lot for writing this. I look forward to writing better decorators that play well with introspection!
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html?showComment=1389123061379#c3423011433813124050' title='comment permalink'>
+January 8, 2014 at 6:31&#8239;AM
+</a>
+<span class='item-control blog-admin pid-579940193'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/3423011433813124050' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c1133224554120166895'>
+<a name='c1133224554120166895'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/15701789783736396136" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1133224554120166895-15701789783736396136"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Unknown">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/15701789783736396136' rel='nofollow'>Unknown</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1133224554120166895'>
+<p>
+I have been a long advocate of the decorator package [1] and would go as far as to support its inclusion in the standard library.<br /><br />[1] https://pypi.python.org/pypi/decorator
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html?showComment=1389190471115#c1133224554120166895' title='comment permalink'>
+January 9, 2014 at 1:14&#8239;AM
+</a>
+<span class='item-control blog-admin pid-823373897'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1133224554120166895' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c4503671214756567597'>
+<a name='c4503671214756567597'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-4503671214756567597-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-4503671214756567597'>
+<p>
+The &#39;decorator&#39; package only addresses introspection of the name, doc strings etc, plus argument specification. From memory it doesn&#39;t handle getting to source code. It also fails as far as ensuring that Python execution model isn&#39;t broken as it still uses function closures. The way it uses on the fly source code compilation also means that it is no good in certain cases for more generic case of monkey patching where one needs to dynamically apply a customised function wrapper on a per call basis. This is because the runtime overhead of the compilation is too great. So in my mind the &#39;decorator&#39; package falls far short of actually solving all the problems.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html?showComment=1389218381743#c4503671214756567597' title='comment permalink'>
+January 9, 2014 at 8:59&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/4503671214756567597' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c962354333044276318'>
+<a name='c962354333044276318'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/00481523876497446983" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-962354333044276318-00481523876497446983"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="pydanny">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/00481523876497446983' rel='nofollow'>pydanny</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-962354333044276318'>
+<p>
+Is it possible for you to link to the follow up articles in the series from this awesome blog post?
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html?showComment=1396103158847#c962354333044276318' title='comment permalink'>
+March 30, 2014 at 1:25&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1430900323'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/962354333044276318' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c1761060142371701884'>
+<a name='c1761060142371701884'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1761060142371701884-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1761060142371701884'>
+<p>
+I am collecting all the related posts to decorators and the wrapt module at https://github.com/GrahamDumpleton/wrapt/tree/master/blog
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html?showComment=1396224430571#c1761060142371701884' title='comment permalink'>
+March 31, 2014 at 11:07&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1761060142371701884' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c7648978922714021742'>
+<a name='c7648978922714021742'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/04921010772838901449" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-7648978922714021742-04921010772838901449"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Unknown">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/04921010772838901449' rel='nofollow'>Unknown</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-7648978922714021742'>
+<p>
+Thank you for this fantastic post, I have just recently run into this problem, and I am glad there is a solution.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html?showComment=1416688040927#c7648978922714021742' title='comment permalink'>
+November 23, 2014 at 7:27&#8239;AM
+</a>
+<span class='item-control blog-admin pid-2038945492'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/7648978922714021742' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author blog-author' id='c1120560876985964962'>
+<a name='c1120560876985964962'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/13609779138164842374" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-1120560876985964962-13609779138164842374"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Graham Dumpleton">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/13609779138164842374' rel='nofollow'>Graham Dumpleton</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-1120560876985964962'>
+<p>
+Just please make sure you don&#39;t duplicate what I have done; Use the &#39;wrapt&#39; module instead. http://wrapt.readthedocs.org
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html?showComment=1416702011996#c1120560876985964962' title='comment permalink'>
+November 23, 2014 at 11:20&#8239;AM
+</a>
+<span class='item-control blog-admin pid-1526776468'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/1120560876985964962' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c6103026497624788133'>
+<a name='c6103026497624788133'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/05528331106743629593" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-6103026497624788133-05528331106743629593"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="smentek">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/05528331106743629593' rel='nofollow'>smentek</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-6103026497624788133'>
+<p>
+inspect.getsource is fixed in  python 3.5.2 and inspect.signature() replaced  deprecated inspect.getargspec()<br />
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html?showComment=1486992826850#c6103026497624788133' title='comment permalink'>
+February 14, 2017 at 12:33&#8239;AM
+</a>
+<span class='item-control blog-admin pid-2044252517'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/6103026497624788133' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+<dt class='comment-author ' id='c5075861921940468276'>
+<a name='c5075861921940468276'></a>
+<div class="avatar-image-container avatar-stock"><span dir="ltr"><a href="https://www.blogger.com/profile/14388300496767287418" target="" rel="nofollow" onclick="" class="avatar-hovercard" id="av-5075861921940468276-14388300496767287418"><img src="//www.blogger.com/img/blogger_logo_round_35.png" width="35" height="35" alt="" title="Unknown">
+
+</a></span></div>
+<a href='https://www.blogger.com/profile/14388300496767287418' rel='nofollow'>Unknown</a>
+said...
+</dt>
+<dd class='comment-body' id='Blog1_cmt-5075861921940468276'>
+<p>
+Wow!! you sir, and a few other genuises are the reason that people like us,who stumble across a new language , find themselves being guided in the right direction. Could not thank you enough.
+</p>
+</dd>
+<dd class='comment-footer'>
+<span class='comment-timestamp'>
+<a href='http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html?showComment=1504867965354#c5075861921940468276' title='comment permalink'>
+September 8, 2017 at 8:52&#8239;PM
+</a>
+<span class='item-control blog-admin pid-578667773'>
+<a class='comment-delete' href='https://www.blogger.com/comment/delete/2363643920942057324/5075861921940468276' title='Delete Comment'>
+<img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+</a>
+</span>
+</span>
+</dd>
+</dl>
+</div>
+<p class='comment-footer'>
+<a href='https://www.blogger.com/comment/fullpage/post/2363643920942057324/4875313059401974659' onclick=''>Post a Comment</a>
+</p>
+</div>
+</div>
+
+        </div></div>
+      
+</div>
+<div class='blog-pager' id='blog-pager'>
+<span id='blog-pager-newer-link'>
+<a class='blog-pager-newer-link' href='http://blog.dscpl.com.au/2014/01/the-interaction-between-decorators-and.html' id='Blog1_blog-pager-newer-link' title='Newer Post'>Newer Post</a>
+</span>
+<span id='blog-pager-older-link'>
+<a class='blog-pager-older-link' href='http://blog.dscpl.com.au/2013/12/a-dynamic-dns-service-using-aws.html' id='Blog1_blog-pager-older-link' title='Older Post'>Older Post</a>
+</span>
+<a class='home-link' href='http://blog.dscpl.com.au/'>Home</a>
+</div>
+<div class='clear'></div>
+<div class='post-feeds'>
+<div class='feed-links'>
+Subscribe to:
+<a class='feed-link' href='http://blog.dscpl.com.au/feeds/4875313059401974659/comments/default' target='_blank' type='application/atom+xml'>Post Comments (Atom)</a>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class='column-left-outer'>
+<div class='column-left-inner'>
+<aside>
+</aside>
+</div>
+</div>
+<div class='column-right-outer'>
+<div class='column-right-inner'>
+<aside>
+<div class='sidebar section' id='sidebar-right-1'><div class='widget Profile' data-version='1' id='Profile1'>
+<h2>About Me</h2>
+<div class='widget-content'>
+<dl class='profile-datablock'>
+<dt class='profile-data'>
+<a class='profile-name-link g-profile' href='https://www.blogger.com/profile/13609779138164842374' rel='author' style='background-image: url(//www.blogger.com/img/logo-16.png);'>
+Graham Dumpleton
+</a>
+</dt>
+</dl>
+<a class='profile-link' href='https://www.blogger.com/profile/13609779138164842374' rel='author'>View my complete profile</a>
+<div class='clear'></div>
+</div>
+</div><div class='widget PageList' data-version='1' id='PageList1'>
+<h2>Quick Links</h2>
+<div class='widget-content'>
+<ul>
+<li>
+<a href='http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html'>Decorators and monkey patching.</a>
+</li>
+<li>
+<a href='http://blog.dscpl.com.au/p/using-python-with-docker.html'>Using Python with Docker.</a>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div><div class='widget BlogArchive' data-version='1' id='BlogArchive1'>
+<h2>Blog Archive</h2>
+<div class='widget-content'>
+<div id='ArchiveList'>
+<div id='BlogArchive1_ArchiveList'>
+<select id='BlogArchive1_ArchiveMenu'>
+<option value=''>Blog Archive</option>
+<option value='http://blog.dscpl.com.au/2019/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2018/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2018/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2018/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2018/01/'>January (1)</option>
+<option value='http://blog.dscpl.com.au/2017/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2016/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2016/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2016/07/'>July (1)</option>
+<option value='http://blog.dscpl.com.au/2016/04/'>April (2)</option>
+<option value='http://blog.dscpl.com.au/2016/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2016/02/'>February (2)</option>
+<option value='http://blog.dscpl.com.au/2016/01/'>January (3)</option>
+<option value='http://blog.dscpl.com.au/2015/12/'>December (6)</option>
+<option value='http://blog.dscpl.com.au/2015/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2015/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2015/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2015/06/'>June (5)</option>
+<option value='http://blog.dscpl.com.au/2015/05/'>May (7)</option>
+<option value='http://blog.dscpl.com.au/2015/04/'>April (4)</option>
+<option value='http://blog.dscpl.com.au/2015/03/'>March (4)</option>
+<option value='http://blog.dscpl.com.au/2015/01/'>January (2)</option>
+<option value='http://blog.dscpl.com.au/2014/12/'>December (4)</option>
+<option value='http://blog.dscpl.com.au/2014/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2014/09/'>September (7)</option>
+<option value='http://blog.dscpl.com.au/2014/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2014/05/'>May (1)</option>
+<option value='http://blog.dscpl.com.au/2014/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2014/02/'>February (4)</option>
+<option value='http://blog.dscpl.com.au/2014/01/'>January (8)</option>
+<option value='http://blog.dscpl.com.au/2013/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/12/'>December (1)</option>
+<option value='http://blog.dscpl.com.au/2012/10/'>October (4)</option>
+<option value='http://blog.dscpl.com.au/2012/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2011/11/'>November (1)</option>
+<option value='http://blog.dscpl.com.au/2011/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2011/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2011/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2011/01/'>January (5)</option>
+<option value='http://blog.dscpl.com.au/2010/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2010/10/'>October (1)</option>
+<option value='http://blog.dscpl.com.au/2010/08/'>August (2)</option>
+<option value='http://blog.dscpl.com.au/2010/06/'>June (2)</option>
+<option value='http://blog.dscpl.com.au/2010/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2010/04/'>April (1)</option>
+<option value='http://blog.dscpl.com.au/2010/03/'>March (3)</option>
+<option value='http://blog.dscpl.com.au/2009/11/'>November (4)</option>
+<option value='http://blog.dscpl.com.au/2009/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2009/09/'>September (1)</option>
+<option value='http://blog.dscpl.com.au/2009/08/'>August (3)</option>
+<option value='http://blog.dscpl.com.au/2009/05/'>May (2)</option>
+<option value='http://blog.dscpl.com.au/2009/04/'>April (5)</option>
+<option value='http://blog.dscpl.com.au/2009/03/'>March (5)</option>
+<option value='http://blog.dscpl.com.au/2009/02/'>February (1)</option>
+<option value='http://blog.dscpl.com.au/2008/12/'>December (2)</option>
+<option value='http://blog.dscpl.com.au/2008/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2008/03/'>March (1)</option>
+<option value='http://blog.dscpl.com.au/2007/11/'>November (2)</option>
+<option value='http://blog.dscpl.com.au/2007/10/'>October (3)</option>
+<option value='http://blog.dscpl.com.au/2007/09/'>September (3)</option>
+<option value='http://blog.dscpl.com.au/2007/08/'>August (1)</option>
+<option value='http://blog.dscpl.com.au/2007/07/'>July (2)</option>
+<option value='http://blog.dscpl.com.au/2007/03/'>March (2)</option>
+</select>
+</div>
+</div>
+<div class='clear'></div>
+</div>
+</div><div class='widget Label' data-version='1' id='Label1'>
+<h2>Labels</h2>
+<div class='widget-content list-label-widget-content'>
+<ul>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/python'>python</a>
+<span dir='ltr'>(111)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_wsgi'>mod_wsgi</a>
+<span dir='ltr'>(86)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wsgi'>wsgi</a>
+<span dir='ltr'>(58)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/apache'>apache</a>
+<span dir='ltr'>(35)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/docker'>docker</a>
+<span dir='ltr'>(34)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/openshift'>openshift</a>
+<span dir='ltr'>(26)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/decorators'>decorators</a>
+<span dir='ltr'>(15)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/django'>django</a>
+<span dir='ltr'>(13)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/kubernetes'>kubernetes</a>
+<span dir='ltr'>(12)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/mod_python'>mod_python</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/red%20hat'>red hat</a>
+<span dir='ltr'>(9)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/ipython'>ipython</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyterhub'>jupyterhub</a>
+<span dir='ltr'>(7)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/new%20relic'>new relic</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/wrapt'>wrapt</a>
+<span dir='ltr'>(6)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/pycon'>pycon</a>
+<span dir='ltr'>(5)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/s2i'>s2i</a>
+<span dir='ltr'>(4)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/gunicorn'>gunicorn</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/uWSGI'>uWSGI</a>
+<span dir='ltr'>(3)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/datadog'>datadog</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/nginx'>nginx</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/statsd'>statsd</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/web2py'>web2py</a>
+<span dir='ltr'>(2)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/async'>async</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/dyndns53'>dyndns53</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/fastcgi'>fastcgi</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/heroku'>heroku</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/jupyter'>jupyter</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/lektor'>lektor</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/php'>php</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/shiv'>shiv</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/testing'>testing</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/tornado'>tornado</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/warpdrive'>warpdrive</a>
+<span dir='ltr'>(1)</span>
+</li>
+<li>
+<a dir='ltr' href='http://blog.dscpl.com.au/search/label/zipapp'>zipapp</a>
+<span dir='ltr'>(1)</span>
+</li>
+</ul>
+<div class='clear'></div>
+</div>
+</div></div>
+</aside>
+</div>
+</div>
+</div>
+<div style='clear: both'></div>
+<!-- columns -->
+</div>
+<!-- main -->
+</div>
+</div>
+<div class='main-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+<footer>
+<div class='footer-outer'>
+<div class='footer-cap-top cap-top'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+<div class='fauxborder-left footer-fauxborder-left'>
+<div class='fauxborder-right footer-fauxborder-right'></div>
+<div class='region-inner footer-inner'>
+<div class='foot section' id='footer-1'><div class='widget AdSense' data-version='1' id='AdSense1'>
+<div class='widget-content'>
+<script type="text/javascript"><!--
+google_ad_client="pub-6433235630058377";
+google_ad_host="pub-1556223355139109";
+google_ad_width=120;
+google_ad_height=600;
+google_ad_format="120x600_as";
+google_ad_type="text";
+google_ad_host_channel="0001";
+google_color_border="FFFFFF";
+google_color_bg="FFFFFF";
+google_color_link="999999";
+google_color_url="5588AA";
+google_color_text="666666";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<div class='clear'></div>
+</div>
+</div></div>
+<table border='0' cellpadding='0' cellspacing='0' class='section-columns columns-2'>
+<tbody>
+<tr>
+<td class='first columns-cell'>
+<div class='foot no-items section' id='footer-2-1'></div>
+</td>
+<td class='columns-cell'>
+<div class='foot no-items section' id='footer-2-2'></div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- outside of the include in order to lock Attribution widget -->
+<div class='foot section' id='footer-3' name='Footer'><div class='widget Attribution' data-version='1' id='Attribution1'>
+<div class='widget-content' style='text-align: center;'>
+Simple theme. Powered by <a href='https://www.blogger.com' target='_blank'>Blogger</a>.
+</div>
+<div class='clear'></div>
+</div></div>
+</div>
+</div>
+<div class='footer-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</footer>
+<!-- content -->
+</div>
+</div>
+<div class='content-cap-bottom cap-bottom'>
+<div class='cap-left'></div>
+<div class='cap-right'></div>
+</div>
+</div>
+</div>
+<script type='text/javascript'>
+    window.setTimeout(function() {
+        document.body.className = document.body.className.replace('loading', '');
+      }, 10);
+  </script>
+
+<script type="text/javascript" src="https://www.blogger.com/static/v1/widgets/552934507-widgets.js"></script>
+<script type='text/javascript'>
+window['__wavt'] = 'AOuZoY7MepahkqGS56htp2K2HjWKI5yWrQ:1757390279041';_WidgetManager._Init('//www.blogger.com/rearrange?blogID\x3d2363643920942057324','//blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html','2363643920942057324');
+_WidgetManager._SetDataContext([{'name': 'blog', 'data': {'blogId': '2363643920942057324', 'title': 'Graham Dumpleton', 'url': 'http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html', 'canonicalUrl': 'http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html', 'homepageUrl': 'http://blog.dscpl.com.au/', 'searchUrl': 'http://blog.dscpl.com.au/search', 'canonicalHomepageUrl': 'http://blog.dscpl.com.au/', 'blogspotFaviconUrl': 'http://blog.dscpl.com.au/favicon.ico', 'bloggerUrl': 'https://www.blogger.com', 'hasCustomDomain': true, 'httpsEnabled': false, 'enabledCommentProfileImages': true, 'gPlusViewType': 'FILTERED_POSTMOD', 'adultContent': false, 'analyticsAccountNumber': '', 'encoding': 'UTF-8', 'locale': 'en', 'localeUnderscoreDelimited': 'en', 'languageDirection': 'ltr', 'isPrivate': false, 'isMobile': false, 'isMobileRequest': false, 'mobileClass': '', 'isPrivateBlog': false, 'isDynamicViewsAvailable': true, 'feedLinks': '\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default\x22 /\x3e\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/rss+xml\x22 title\x3d\x22Graham Dumpleton - RSS\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/posts/default?alt\x3drss\x22 /\x3e\n\x3clink rel\x3d\x22service.post\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22https://www.blogger.com/feeds/2363643920942057324/posts/default\x22 /\x3e\n\n\x3clink rel\x3d\x22alternate\x22 type\x3d\x22application/atom+xml\x22 title\x3d\x22Graham Dumpleton - Atom\x22 href\x3d\x22http://blog.dscpl.com.au/feeds/4875313059401974659/comments/default\x22 /\x3e\n', 'meTag': '', 'adsenseClientId': 'ca-pub-6433235630058377', 'adsenseHostId': 'ca-host-pub-1556223355139109', 'adsenseHasAds': true, 'adsenseAutoAds': false, 'boqCommentIframeForm': true, 'loginRedirectParam': '', 'view': '', 'dynamicViewsCommentsSrc': '//www.blogblog.com/dynamicviews/4224c15c4e7c9321/js/comments.js', 'dynamicViewsScriptSrc': '//www.blogblog.com/dynamicviews/b4594f574ba3c273', 'plusOneApiSrc': 'https://apis.google.com/js/platform.js', 'disableGComments': true, 'interstitialAccepted': false, 'sharing': {'platforms': [{'name': 'Get link', 'key': 'link', 'shareMessage': 'Get link', 'target': ''}, {'name': 'Facebook', 'key': 'facebook', 'shareMessage': 'Share to Facebook', 'target': 'facebook'}, {'name': 'BlogThis!', 'key': 'blogThis', 'shareMessage': 'BlogThis!', 'target': 'blog'}, {'name': 'X', 'key': 'twitter', 'shareMessage': 'Share to X', 'target': 'twitter'}, {'name': 'Pinterest', 'key': 'pinterest', 'shareMessage': 'Share to Pinterest', 'target': 'pinterest'}, {'name': 'Email', 'key': 'email', 'shareMessage': 'Email', 'target': 'email'}], 'disableGooglePlus': true, 'googlePlusShareButtonWidth': 0, 'googlePlusBootstrap': '\x3cscript type\x3d\x22text/javascript\x22\x3ewindow.___gcfg \x3d {\x27lang\x27: \x27en\x27};\x3c/script\x3e'}, 'hasCustomJumpLinkMessage': false, 'jumpLinkMessage': 'Read more', 'pageType': 'item', 'postId': '4875313059401974659', 'pageName': 'How you implemented your Python decorator is wrong.', 'pageTitle': 'Graham Dumpleton: How you implemented your Python decorator is wrong.'}}, {'name': 'features', 'data': {}}, {'name': 'messages', 'data': {'edit': 'Edit', 'linkCopiedToClipboard': 'Link copied to clipboard!', 'ok': 'Ok', 'postLink': 'Post Link'}}, {'name': 'template', 'data': {'name': 'Simple', 'localizedName': 'Simple', 'isResponsive': false, 'isAlternateRendering': false, 'isCustom': false, 'variant': 'pale', 'variantId': 'pale'}}, {'name': 'view', 'data': {'classic': {'name': 'classic', 'url': '?view\x3dclassic'}, 'flipcard': {'name': 'flipcard', 'url': '?view\x3dflipcard'}, 'magazine': {'name': 'magazine', 'url': '?view\x3dmagazine'}, 'mosaic': {'name': 'mosaic', 'url': '?view\x3dmosaic'}, 'sidebar': {'name': 'sidebar', 'url': '?view\x3dsidebar'}, 'snapshot': {'name': 'snapshot', 'url': '?view\x3dsnapshot'}, 'timeslide': {'name': 'timeslide', 'url': '?view\x3dtimeslide'}, 'isMobile': false, 'title': 'How you implemented your Python decorator is wrong.', 'description': 'The rest of the Python community is currently doing lots of navel gazing over the issue of Python 3 adoption and the whole unicode/bytes div...', 'url': 'http://blog.dscpl.com.au/2014/01/how-you-implemented-your-python.html', 'type': 'item', 'isSingleItem': true, 'isMultipleItems': false, 'isError': false, 'isPage': false, 'isPost': true, 'isHomepage': false, 'isArchive': false, 'isLabelSearch': false, 'postId': 4875313059401974659}}]);
+_WidgetManager._RegisterWidget('_NavbarView', new _WidgetInfo('Navbar1', 'navbar', document.getElementById('Navbar1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_HeaderView', new _WidgetInfo('Header1', 'header', document.getElementById('Header1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogView', new _WidgetInfo('Blog1', 'main', document.getElementById('Blog1'), {'cmtInteractionsEnabled': false, 'lightboxEnabled': true, 'lightboxModuleUrl': 'https://www.blogger.com/static/v1/jsbin/3842676126-lbx.js', 'lightboxCssUrl': 'https://www.blogger.com/static/v1/v-css/828616780-lightbox_bundle.css'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_ProfileView', new _WidgetInfo('Profile1', 'sidebar-right-1', document.getElementById('Profile1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_PageListView', new _WidgetInfo('PageList1', 'sidebar-right-1', document.getElementById('PageList1'), {'title': 'Quick Links', 'links': [{'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html', 'id': '3350721465154129789', 'title': 'Decorators and monkey patching.'}, {'isCurrentPage': false, 'href': 'http://blog.dscpl.com.au/p/using-python-with-docker.html', 'id': '5591286857776935907', 'title': 'Using Python with Docker.'}], 'mobile': false, 'showPlaceholder': true, 'hasCurrentPage': false}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_BlogArchiveView', new _WidgetInfo('BlogArchive1', 'sidebar-right-1', document.getElementById('BlogArchive1'), {'languageDirection': 'ltr', 'loadingMessage': 'Loading\x26hellip;'}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_LabelView', new _WidgetInfo('Label1', 'sidebar-right-1', document.getElementById('Label1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AdSenseView', new _WidgetInfo('AdSense1', 'footer-1', document.getElementById('AdSense1'), {}, 'displayModeFull'));
+_WidgetManager._RegisterWidget('_AttributionView', new _WidgetInfo('Attribution1', 'footer-3', document.getElementById('Attribution1'), {}, 'displayModeFull'));
+</script>
+</body>
+</html>
