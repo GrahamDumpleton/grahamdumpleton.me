@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2019/01/dashboard-combining-workshop-notes-and.ht
 post_id: "5396190016335275071"
 blog_id: "2363643920942057324"
 tags: ['docker', 'jupyterhub', 'kubernetes', 'openshift', 'red hat']
-images: ['1546339449.png']
+images: ['image_0838c249.png']
 comments: 0
 published_timestamp: "2019-01-02T10:18:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -64,7 +64,7 @@ $ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-terminal/
 
 This uses the same approach before of relying on the OpenShift cluster to perform user authentication, and only an admin of the project can access it. Once user authentication has been completed, a user is redirected back to the dashboard.
 
-![img-alternative-text](1546339449.png)
+![img-alternative-text](image_0838c249.png)
 
 Although the dashboard image doesn't have any pre-loaded content for a specific workshop yet, you can see how on the left you have the workshop notes. On the right you have a pair of terminals.
 

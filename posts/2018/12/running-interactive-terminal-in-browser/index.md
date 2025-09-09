@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2018/12/running-interactive-terminal-in-browser.h
 post_id: "4752903760878541512"
 blog_id: "2363643920942057324"
 tags: ['docker', 'jupyterhub', 'kubernetes', 'openshift', 'red hat']
-images: ['1546042593.png', '1546043104.png', '1546045651.png', '1546046024.png']
+images: ['image_d2604970.png', 'image_b386ab1d.png', 'image_975c7154.png', 'image_cc372038.png']
 comments: 0
 published_timestamp: "2018-12-29T13:58:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -59,7 +59,7 @@ $ oc get route terminal
 
 to determine the public URL for accessing the terminal in your web browser. With access to the terminal, then login to the OpenShift cluster from the command line using your username and password, or with a token, and start working with the cluster.
 
-![img-alternative-text](1546042593.png)
+![img-alternative-text](image_d2604970.png)
 
 This method of deployment is quick, but is not protected in any way. That is, you are not challenged to supply any login credentials to get to the terminal, nor is the connection secure. This means that if someone else knew the URL, they could also access it.
 
@@ -76,7 +76,7 @@ $ oc create route edge terminal --service=terminal
 
 This activates the requirement to provide login credentials using HTTP Basic authentication. A secure connection is also used so no one can sniff your session traffic.
 
-![img-alternative-text](1546043104.png)
+![img-alternative-text](image_b386ab1d.png)
 
 This ability to secure access to the terminal works as use of HTTP Basic authentication was added as one option to the auth proxy, in addition to the support added for using the terminal in conjunction with JupyterHub.
 
@@ -117,11 +117,11 @@ The service account is necessary as part of the mechanism for using OpenShift fo
 
 With this in place and the auth proxy configured to use it, it means that when you visit the public URL for the terminal, you will be redirected to OpenShift to authenticate.
 
-![img-alternative-text](1546045651.png)
+![img-alternative-text](image_975c7154.png)
 
 You then login using the same credentials as the OpenShift cluster. Once that is successful, you will be redirected back to your terminal.
 
-![img-alternative-text](1546046024.png)
+![img-alternative-text](image_cc372038.png)
 
 One difference using this deployment method is that since OpenShift is used to handle user authentication, and so can be viewed with a little bit more trust, as a convenience so you don't then have to login to the OpenShift cluster from the command line, this will be done for you automatically. This means you can immediately start working in the current project.
 

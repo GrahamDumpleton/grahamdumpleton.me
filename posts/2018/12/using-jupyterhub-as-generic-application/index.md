@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2018/12/using-jupyterhub-as-generic-application.h
 post_id: "4077865766228744556"
 blog_id: "2363643920942057324"
 tags: ['docker', 'jupyterhub', 'kubernetes', 'openshift', 'red hat']
-images: ['1545969322.png']
+images: ['image_175dda1e.png']
 comments: 0
 published_timestamp: "2018-12-28T17:05:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -42,7 +42,7 @@ JupyterHub calls itself a "multi-user server for Jupyter notebooks". It is made 
 
 The architecture diagram from the [JupyterHub documentation](https://jupyterhub.readthedocs.io/) is shown as:
 
-![img-alternative-text](1545969322.png)
+![img-alternative-text](image_175dda1e.png)
 
 As already noted, you aren't restricted to spawning Jupyter notebooks, it can be used to spawn any long running application, albeit usually a web application. That said, to integrate properly with JupyterHub as the spawner and proxy, the application you run does need to satisfy a couple of conditions. We'll get to what those are later.
 

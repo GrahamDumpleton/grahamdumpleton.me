@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2013/12/a-dynamic-dns-service-using-aws.html"
 post_id: "3681351111058400567"
 blog_id: "2363643920942057324"
 tags: ['new relic', 'python']
-images: ['DynamicDNSServiceSampleTransaction.jpg']
+images: ['image_ee418db0.jpg']
 comments: 1
 published_timestamp: "2013-12-02T13:06:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -61,7 +61,7 @@ If you dig around in the code you will therefore also find how I hooked New Reli
   
 
 
-[![](DynamicDNSServiceSampleTransaction.jpg)](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1x5Ubq2D9IU1niqwtqipLJLXpy5cMz0LxfL17c3THYZUlAL7mbr_tV0L0dFJqv-trUPXbOYEvs9Q5FUSYgJvC090_Tu9i-hM9LNIfFkCvfu6OI8ovTt8bRhhxNiSuAo-qll4voxf1neO/s1600/DynamicDNSServiceSampleTransaction.jpg)
+[![](image_ee418db0.jpg)](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjx1x5Ubq2D9IU1niqwtqipLJLXpy5cMz0LxfL17c3THYZUlAL7mbr_tV0L0dFJqv-trUPXbOYEvs9Q5FUSYgJvC090_Tu9i-hM9LNIfFkCvfu6OI8ovTt8bRhhxNiSuAo-qll4voxf1neO/s1600/DynamicDNSServiceSampleTransaction.jpg)
 
   
 

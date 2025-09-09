@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2018/12/deploying-multi-user-workshop.html"
 post_id: "8956043283573161906"
 blog_id: "2363643920942057324"
 tags: ['docker', 'jupyterhub', 'kubernetes', 'openshift', 'red hat']
-images: ['1546165929.png', '1546166229.png', '1546167006.png']
+images: ['image_84a6b009.png', 'image_19a67f03.png', 'image_2ca871f2.png']
 comments: 0
 published_timestamp: "2018-12-31T13:57:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -65,15 +65,15 @@ $ oc get route terminals
 
 The template being used for the deployment in this case is setup to use OpenShift for performing user authentication. The workshop attendee when visiting the URL will therefore be redirected to the user login page for the OpenShift cluster, where they should enter the user credentials they were provided for the workshop.
 
-![img-alternative-text](1546165929.png)
+![img-alternative-text](image_84a6b009.png)
 
 Once login has been completed, they will be redirected back to JupyterHub. If they are one of the first users to login and the terminal image hasn't yet been pulled to the node in the OpenShift cluster, they may briefly see a JupyterHub page which tracks progress as their instance is started.
 
-![img-alternative-text](1546166229.png)
+![img-alternative-text](image_19a67f03.png)
 
 When it is ready, they will end up in the interactive terminal session in their browser. They will still need to login from the command line using their user credentials, but they will not need to indicate the address of the OpenShift cluster, as that has already been setup.
 
-![img-alternative-text](1546167006.png)
+![img-alternative-text](image_2ca871f2.png)
 
 If projects have been pre-created for users, these will be visible, otherwise the user would need to create any projects as the workshop notes describe.
 

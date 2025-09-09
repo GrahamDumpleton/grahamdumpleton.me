@@ -36,17 +36,19 @@ def download_image(image_url, output_dir, overwrite=False):
         str: Local filename of the downloaded image, or None if download failed
     """
     try:
-        # Parse the URL to get the filename
+        # Parse the URL to get the original file extension
         parsed_url = urlparse(image_url)
-        filename = Path(parsed_url.path).name
+        original_filename = Path(parsed_url.path).name
         
-        # If no filename in URL, generate one using MD5 hash for consistency
-        if not filename or '.' not in filename:
-            url_hash = hashlib.md5(image_url.encode('utf-8')).hexdigest()[:8]
-            filename = f"image_{url_hash}.png"
+        # Extract file extension, default to .png if none found
+        if original_filename and '.' in original_filename:
+            file_extension = Path(original_filename).suffix
+        else:
+            file_extension = '.png'
         
-        # Ensure the filename is safe
-        filename = re.sub(r'[^\w\-_\.]', '_', filename)
+        # Always generate filename using MD5 hash for consistency, but preserve extension
+        url_hash = hashlib.md5(image_url.encode('utf-8')).hexdigest()[:8]
+        filename = f"image_{url_hash}{file_extension}"
         
         # Check if file already exists
         output_path = output_dir / filename

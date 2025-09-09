@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2019/01/administration-features-of-jupyterhub.htm
 post_id: "672559659319831819"
 blog_id: "2363643920942057324"
 tags: ['docker', 'jupyterhub', 'kubernetes', 'openshift', 'red hat']
-images: ['1546248636.png', '1546252170.png']
+images: ['image_9dd15d83.png', 'image_cfecce1f.png']
 comments: 0
 published_timestamp: "2019-01-01T14:22:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -34,7 +34,7 @@ The list of admin users can also be set after deployment by updating the `ADMIN_
 
 When a user is designated as an administrator, they can access the JupyterHub admin panel using the `/hub/admin` URL path.
 
-![img-alternative-text](1546248636.png)
+![img-alternative-text](image_9dd15d83.png)
 
 From the admin panel, a course instructor is able to see all the users who have logged in and whether that users instance is currently running. If necessary they can stop or start a users instance.
 
@@ -50,7 +50,7 @@ In the case where the application deployment is called `terminals` the name of t
 
 One example of what you can use the config map for, is to define a user whitelist. A user whitelist is used where you don't want any user in the OpenShift cluster to be able to access the workshop environment, but instead want to limit it to a set list of users.
 
-![img-alternative-text](1546252170.png)
+![img-alternative-text](image_cfecce1f.png)
 
 # Culling of idle user terminal sessions
 

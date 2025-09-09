@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2011/10/what-excited-me-about-new-relic.html"
 post_id: "3388641564808002381"
 blog_id: "2363643920942057324"
 tags: ['mod_wsgi', 'new relic', 'python']
-images: ['SafariScreenSnapz116.gif', 'SafariScreenSnapz117.gif']
+images: ['image_5f1bdf27.gif', 'image_f734aa0f.gif']
 comments: 0
 published_timestamp: "2011-10-28T17:53:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -26,7 +26,7 @@ So how did I see New Relic even being able to help? Well the best way to illustr
   
 
 
-[![](SafariScreenSnapz116.gif)](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgk8xz-Yw795KbiODGtjHmdeOymE3ciA8YOD2fRVTemWd_f57elAuvYtzXS4txfdm3PikC3NkOPGnO-Z33BfXsZ0soG81qPy69hvXYeFCDTZk7FMIy0rNSxoARGIfLKJhnHWgXODZum1sIm/s1600/SafariScreenSnapz116.gif)
+[![](image_5f1bdf27.gif)](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgk8xz-Yw795KbiODGtjHmdeOymE3ciA8YOD2fRVTemWd_f57elAuvYtzXS4txfdm3PikC3NkOPGnO-Z33BfXsZ0soG81qPy69hvXYeFCDTZk7FMIy0rNSxoARGIfLKJhnHWgXODZum1sIm/s1600/SafariScreenSnapz116.gif)
 
   
 This is the main overview chart in the New Relic UI and gives a good heads up break down of where time is being spent in your application. Straight away in this example we can already start to ponder why so much time is being spent doing database queries and memcache calls. Is it because of the number being made within any one request or are there network delays or performance issues with the database and memcache system.  
@@ -39,7 +39,7 @@ This specific chart, insightful as it is, leaves off one thing that got me quite
   
 
 
-[![](SafariScreenSnapz117.gif)](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhbCLZbcORVp4gZ9_mObjMlvd2XQ9p7ZRGg3N7-pgfoVI0hcsWMW7VtHsAFU29KJr3EHIgONeu1VOp1uX4pFUUVUfnCDxLeO2zIhay7NydYpHOcNS4V0pI8n-fxTdGXAsA9uWK5SvEUVTpd/s1600/SafariScreenSnapz117.gif)
+[![](image_f734aa0f.gif)](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhbCLZbcORVp4gZ9_mObjMlvd2XQ9p7ZRGg3N7-pgfoVI0hcsWMW7VtHsAFU29KJr3EHIgONeu1VOp1uX4pFUUVUfnCDxLeO2zIhay7NydYpHOcNS4V0pI8n-fxTdGXAsA9uWK5SvEUVTpd/s1600/SafariScreenSnapz117.gif)
 
   
 In this chart we are also displaying what is labelled as request queueing time. This isn't actually time spent in the web application itself, but is recording the time the request spent waiting to be handled by the web application.  

@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2018/04/book-2-deploying-to-openshift.html"
 post_id: "8841838093478428804"
 blog_id: "2363643920942057324"
 tags: ['openshift']
-images: ['deploying-to-openshift_1.png']
+images: ['image_b43f1a2e.png']
 comments: 0
 published_timestamp: "2018-04-13T19:53:00+10:00"
 blog_title: "Graham Dumpleton"
@@ -28,7 +28,7 @@ To download the free electronic version, you can visit:
 
 The book aims to be a practical guide which describes in detail how OpenShift, building on Kubernetes, enables you to automate the way you create, ship, and run applications in a containerized environment, be they cloud-native applications, or more traditional stateful applications.
 
-![](deploying-to-openshift_1.png)In the book, you will learn the following concepts:
+![](image_b43f1a2e.png)In the book, you will learn the following concepts:
 
   * Create a project and deploy pre-existing application container images
   * Build application container images from source and deploy them

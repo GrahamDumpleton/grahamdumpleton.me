@@ -6,7 +6,7 @@ url: "http://blog.dscpl.com.au/2018/12/creating-your-own-custom-terminal-image.h
 post_id: "5054528339561113300"
 blog_id: "2363643920942057324"
 tags: ['docker', 'jupyterhub', 'kubernetes', 'openshift', 'red hat']
-images: ['1546146845.png']
+images: ['image_baf248b9.png']
 comments: 0
 published_timestamp: "2018-12-30T17:42:00+11:00"
 blog_title: "Graham Dumpleton"
@@ -100,7 +100,7 @@ docker run --rm -p 10080:10080 my-workshop-terminal
 
 and accessing http://localhost:10080.
 
-![img-alternative-text](1546146845.png)
+![img-alternative-text](image_baf248b9.png)
 
 If you were using OpenShift, and wanted to do the build in the same project where a workshop will be run from, you can use:
     
