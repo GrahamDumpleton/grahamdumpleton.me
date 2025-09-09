@@ -1,7 +1,7 @@
 ---
 layout: base
 title: All Guides
-permalink: /pages/
+permalink: /guides/
 ---
 
 <div class="row">
@@ -16,7 +16,7 @@ permalink: /pages/
         </div>
         
         <p class="text-muted mb-4">
-            Browse all {{ collections.pages | length }} topic guides covering various aspects of development, deployment, and best practices.
+            Browse all {{ collections.guides | length }} topic guides covering various aspects of development, deployment, and best practices.
         </p>
     </div>
 </div>
@@ -33,9 +33,9 @@ permalink: /pages/
     </div>
 </div>
 
-<!-- Pages Grid -->
-<div class="row" id="pagesContainer">
-    {% for page in collections.pages | reverse %}
+<!-- Guides Grid -->
+<div class="row" id="guidesContainer">
+    {% for page in collections.guides | reverse %}
     <div class="col-lg-6 mb-4 page-item" data-title="{{ page.data.title | downcase }}" data-content="{{ page.content | strip_html | downcase | escape }}" data-tags="{% if page.data.tags %}{{ page.data.tags | join: ' ' | downcase }}{% endif %}">
         <article class="card h-100 border-0 shadow-sm post-list-item">
             <div class="card-body p-4">

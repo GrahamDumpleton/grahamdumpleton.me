@@ -1,0 +1,109 @@
+---
+layout: base
+---
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-11 col-xl-10 col-xxl-9">
+        <article class="card border-0 shadow-sm">
+            <div class="card-body p-4 p-md-5">
+                <!-- Post Header -->
+                <header class="mb-4">
+                    <h1 class="display-4 fw-bold text-primary mb-3">{{ title }}</h1>
+                    
+                    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="bi bi-calendar3 me-2"></i>
+                            <time datetime="{{ date | date: 'iso' }}" class="fw-medium">
+                                {{ date | date }}
+                            </time>
+                        </div>
+                        
+                        {% if author %}
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="bi bi-person me-2"></i>
+                            <span class="fw-medium">{{ author }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if originalUrl %}
+                        <div class="d-flex align-items-center">
+                            <a href="{{ originalUrl }}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Original Post
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if tags and tags.length > 0 %}
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for tag in tags %}
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi bi-tag me-1"></i>{{ tag }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </header>
+                
+                <!-- Post Content -->
+                <div class="post-content">
+                    {{ content | safe }}
+                </div>
+                
+                <!-- Post Footer -->
+                <footer class="mt-5 pt-4 border-top">
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="bi bi-clock me-2"></i>
+                        <small>Published {{ date | date }}</small>
+                    </div>
+                </footer>
+            </div>
+        </article>
+        
+        <!-- Comments Section -->
+        {% if comments and comments.size > 0 %}
+        <section class="mt-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-chat-dots me-2"></i>Comments ({{ comments.size }})
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    {% for comment in comments %}
+                    <div class="comment mb-4 {% if not loop.last %}border-bottom pb-4{% endif %}">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div>
+                                <strong class="d-block">{{ comment.author.name }}</strong>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    {{ comment.published | date }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="comment-content ms-5">
+                            {{ comment.content | safe }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+        
+        <!-- Related Posts or Navigation -->
+        <div class="mt-5">
+            <div class="d-flex justify-content-between">
+                <a href="/guides/" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to All Guides
+                </a>
+                <a href="/" class="btn btn-outline-secondary">
+                    <i class="bi bi-house me-2"></i>Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

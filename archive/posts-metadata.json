@@ -753,5 +753,13 @@
     "originalUrl": "http://blog.dscpl.com.au/2019/01/integrating-workshop-notes-with-image.html",
     "title": "Integrating  the workshop notes with the image",
     "date": "2019-01-03T06:48:00.004Z"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html",
+    "title": "Decorators and monkey patching"
+  },
+  {
+    "originalUrl": "http://blog.dscpl.com.au/p/using-python-with-docker.html",
+    "title": "Using Python with Docker"
   }
 ]
