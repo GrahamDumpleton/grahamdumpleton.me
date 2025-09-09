@@ -172,7 +172,7 @@ def main():
     project_root = script_dir.parent
     
     # Define paths
-    metadata_file = project_root / 'posts-metadata.json'
+    metadata_file = project_root / 'archive/posts-metadata.json'
     posts_dir = project_root / 'posts'
     
     # Check for command line arguments

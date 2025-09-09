@@ -12,26 +12,26 @@ Downloads web pages from URLs in the posts metadata and saves them to organized 
 
 Download all posts from metadata:
 ```bash
-uv run python scripts/download_posts.py
+uv run python archive/download_posts.py
 ```
 
 Download a single URL:
 ```bash
-uv run python scripts/download_posts.py <URL>
+uv run python archive/download_posts.py <URL>
 ```
 
 Download a single URL with overwrite:
 ```bash
-uv run python scripts/download_posts.py <URL> --overwrite
+uv run python archive/download_posts.py <URL> --overwrite
 ```
 
 Show help:
 ```bash
-uv run python scripts/download_posts.py --help
+uv run python archive/download_posts.py --help
 ```
 
 **Features:**
-- Reads URLs from `posts-metadata.json`
+- Reads URLs from `archive/posts-metadata.json`
 - Creates organized directory structure (`posts/YYYY/MM/`)
 - Downloads HTML content using the `requests` library
 - Skips existing files (unless `--overwrite` is used)
@@ -62,26 +62,26 @@ Extracts blog post data from Google Blogger HTML files and converts them to stru
 
 Process all posts from metadata (batch mode):
 ```bash
-uv run python scripts/extract_post.py
+uv run python archive/extract_post.py
 ```
 
 Process a single HTML file:
 ```bash
-uv run python scripts/extract_post.py <html_file_path>
+uv run python archive/extract_post.py <html_file_path>
 ```
 
 Process a single HTML file with image overwrite:
 ```bash
-uv run python scripts/extract_post.py <html_file_path> --overwrite
+uv run python archive/extract_post.py <html_file_path> --overwrite
 ```
 
 Show help:
 ```bash
-uv run python scripts/extract_post.py --help
+uv run python archive/extract_post.py --help
 ```
 
 **Features:**
-- **Batch Processing**: Automatically processes all posts from `posts-metadata.json`
+- **Batch Processing**: Automatically processes all posts from `archive/posts-metadata.json`
 - **Single File Processing**: Process individual HTML files
 - **Image Download**: Downloads and localizes images from blog posts
 - **Overwrite Control**: `--overwrite` flag controls whether existing images are replaced
