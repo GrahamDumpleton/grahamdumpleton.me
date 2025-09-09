@@ -21,7 +21,9 @@ No problems were reported with last release candidate and no one took issue with
 
 It seems 2.7 reacts weirdly to the Gentoo way of building it, at least...  
   
->>> Compiling source in /var/tmp/portage/www-apache/mod\_wsgi-2.7/work/mod\_wsgi-2.7 ...  
+```javascript
+>> Compiling source in /var/tmp/portage/www-apache/mod\_wsgi-2.7/work/mod\_wsgi-2.7 ...  
+```
 make -j2   
 /usr/sbin/apxs2 -c -I/usr/include/python2.6 -DNDEBUG -Os -march=native -pipe mod\_wsgi.c -Wl,-O1 -L/usr/lib -L/usr/lib/python2.6/config -lpython2.6 -lpthread -ldl -lutil -lm  
 apxs:Error: Unknown option: O.  

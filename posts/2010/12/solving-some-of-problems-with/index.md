@@ -23,48 +23,38 @@ The WSGI specification provides an example of this special file wrapper class ty
 
     
     
-```
-class FileWrapper:  
-    def __init__(self, filelike, blksize=8192):  
-        self.filelike = filelike  
-        self.blksize = blksize  
-        if hasattr(filelike, 'close'):  
-            self.close = filelike.close  
-    def __getitem__(self, key):  
-        data = self.filelike.read(self.blksize)  
-        if data:  
-            return data  
-        raise IndexError
-```
+    class FileWrapper:  
+        def __init__(self, filelike, blksize=8192):  
+            self.filelike = filelike  
+            self.blksize = blksize  
+            if hasattr(filelike, 'close'):  
+                self.close = filelike.close  
+        def __getitem__(self, key):  
+            data = self.filelike.read(self.blksize)  
+            if data:  
+                return data  
+            raise IndexError
 
 with the WSGI server performing a check something like:  
 
     
     
-```
-environ['wsgi.file_wrapper'] = FileWrapper  
-result = application(environ, start_response)  
-```
+    environ['wsgi.file_wrapper'] = FileWrapper  
+    result = application(environ, start_response)  
       
-```
-try:  
-    if isinstance(result, FileWrapper):  
-        # check if result.filelike is usable w/platform-specific  
-        # API, and if so, use that API to transmit the result.  
-        # If not, fall through to normal iterable handling  
-        # loop below.  
-```
+    try:  
+        if isinstance(result, FileWrapper):  
+            # check if result.filelike is usable w/platform-specific  
+            # API, and if so, use that API to transmit the result.  
+            # If not, fall through to normal iterable handling  
+            # loop below.  
       
-```
-    for data in result:  
-        # etc.  
-```
+        for data in result:  
+            # etc.  
       
-```
-finally:  
-    if hasattr(result, 'close'):  
-        result.close()
-```
+    finally:  
+        if hasattr(result, 'close'):  
+            result.close()
 
 In this case the value associated with the 'wsgi.file\_wrapper' key in the WSGI environ dictionary is the special 'FileWrapper' class type itself and as you should know, when a class type is executed, it has the result of creating an instance of that type.  
   
@@ -84,30 +74,22 @@ A naive programmer may approach this problem by using code such as:
 
     
     
-```
-def _application(environ, start_response):  
-    status = '200 OK'  
-    output = 'Hello World!'  
-```
+    def _application(environ, start_response):  
+        status = '200 OK'  
+        output = 'Hello World!'  
       
-```
-    response_headers = [('Content-type', 'text/plain'),  
-                        ('Content-Length', str(len(output)))]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain'),  
+                            ('Content-Length', str(len(output)))]  
+        start_response(status, response_headers)  
       
-```
-    return [output]  
-```
+        return [output]  
       
-```
-def application(environ, start_response):  
-    try:  
-        return _application(environ, start_response)  
-    finally:  
-        # Perform required cleanup task.  
-        ...
-```
+    def application(environ, start_response):  
+        try:  
+            return _application(environ, start_response)  
+        finally:  
+            # Perform required cleanup task.  
+            ...
 
 That is, invoke the inner WSGI application component inside of a try/finally block and perform the cleanup action with the finally block.  
   
@@ -115,17 +97,15 @@ This might even be refactored into a reusable WSGI middleware as:
 
     
     
-```
-class ExecuteOnCompletion1:  
-    def __init__(self, application, callback):  
-        self.__application = application  
-        self.__callback = callback  
-    def __call__(self, environ, start_response):  
-        try:  
-            return self.__application(environ, start_response)  
-        finally:  
-            self.__callback(environ)
-```
+    class ExecuteOnCompletion1:  
+        def __init__(self, application, callback):  
+            self.__application = application  
+            self.__callback = callback  
+        def __call__(self, environ, start_response):  
+            try:  
+                return self.__application(environ, start_response)  
+            finally:  
+                self.__callback(environ)
 
 The WSGI environment passed in the 'environ' argument to the application could even be supplied to the cleanup callback as shown in case it needed to look at any configuration information or information passed back in the environment from the application.  
   
@@ -133,15 +113,11 @@ The application would then be replaced with an instance of this class initialise
 
     
     
-```
-def cleanup(environ):  
-    # Perform required cleanup task.  
-    ...  
-```
+    def cleanup(environ):  
+        # Perform required cleanup task.  
+        ...  
       
-```
-application = ExecuteOnCompletion1(_application, cleanup)
-```
+    application = ExecuteOnCompletion1(_application, cleanup)
 
 All this though will not have the desired affect as the cleanup task would run when the WSGI application component returns, but before any data from the iterable has been consumed by the underlying WSGI server and written back to the HTTP client. Because the iterable can be a generator and so yielding of the next value could actually involve more work on the part of the WSGI application, the cleanup actions could release resources that are still going to be required to generate the content for the response.  
   
@@ -149,72 +125,56 @@ In order to have the cleanup task only executed after the complete response has 
 
     
     
-```
-class Generator2:  
-    def __init__(self, iterable, callback, environ):  
-        self.__iterable = iterable  
-        self.__callback = callback  
-        self.__environ = environ  
-    def __iter__(self):  
-        for item in self.__iterable:  
-            yield item  
-    def close(self):  
-        try:  
-            if hasattr(self.__iterable, 'close'):  
-                self.__iterable.close()  
-        finally:  
-            self.__callback(self.__environ)  
-```
+    class Generator2:  
+        def __init__(self, iterable, callback, environ):  
+            self.__iterable = iterable  
+            self.__callback = callback  
+            self.__environ = environ  
+        def __iter__(self):  
+            for item in self.__iterable:  
+                yield item  
+        def close(self):  
+            try:  
+                if hasattr(self.__iterable, 'close'):  
+                    self.__iterable.close()  
+            finally:  
+                self.__callback(self.__environ)  
       
-```
-class ExecuteOnCompletion2:  
-    def __init__(self, application, callback):  
-        self.__application = application  
-        self.__callback = callback  
-    def __call__(self, environ, start_response):  
-        try:  
-            result = self.__application(environ, start_response)  
-        except:  
-            self.__callback(environ)  
-            raise  
-        return Generator2(result, self.__callback, environ)
-```
+    class ExecuteOnCompletion2:  
+        def __init__(self, application, callback):  
+            self.__application = application  
+            self.__callback = callback  
+        def __call__(self, environ, start_response):  
+            try:  
+                result = self.__application(environ, start_response)  
+            except:  
+                self.__callback(environ)  
+                raise  
+            return Generator2(result, self.__callback, environ)
 
 Now imagine that our original WSGI application was doing the following and you might start to see the problem.  
 
     
     
-```
-def _application(environ, start_response):  
-    status = '200 OK'  
-```
+    def _application(environ, start_response):  
+        status = '200 OK'  
       
-```
-    response_headers = [('Content-type', 'text/plain'),]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain'),]  
+        start_response(status, response_headers)  
       
-```
-    filelike = file('/usr/share/dict/words', 'r')  
-    blksize = 8192  
-```
+        filelike = file('/usr/share/dict/words', 'r')  
+        blksize = 8192  
       
-```
-    if 'wsgi.file_wrapper' in environ:  
-        return environ['wsgi.file_wrapper'](filelike, blksize)  
-    else:  
-        return iter(lambda: filelike.read(blksize), '')  
-```
+        if 'wsgi.file_wrapper' in environ:  
+            return environ['wsgi.file_wrapper'](filelike, blksize)  
+        else:  
+            return iter(lambda: filelike.read(blksize), '')  
       
-```
-def cleanup(environ):  
-    # Perform required cleanup task.  
-    ...  
-```
+    def cleanup(environ):  
+        # Perform required cleanup task.  
+        ...  
       
-```
-application = ExecuteOnCompletion2(_application, cleanup)
-```
+    application = ExecuteOnCompletion2(_application, cleanup)
 
 In this case what is happening is that the inner WSGI application, where the wsgi.file\_wrapper key exists in the WSGI environ dictionary, is creating an instance of the file wrapper object and returning it. The WSGI middleware wrapper however, in order to replace the close\(\) method to trigger its own cleanup action, has replaced the return iterable with its own. This results in the WSGI server not seeing that wsgi.file\_wrapper was used.  
   
@@ -228,11 +188,9 @@ By making this change, it would firstly allow for a WSGI application to accurate
 
     
     
-```
-file_wrapper = environ.get('wsgi.file_wrapper', None)  
-if file_wrapper and isinstance(result, file_wrapper):  
-    ...
-```
+    file_wrapper = environ.get('wsgi.file_wrapper', None)  
+    if file_wrapper and isinstance(result, file_wrapper):  
+        ...
 
 Based on that, the WSGI middleware could do something different based on whether it knew it was dealing with an instance of a file wrapper iterable.  
   
@@ -240,16 +198,12 @@ With the way the WSGI specification is currently written, there is no guarantee 
 
     
     
-```
-file_wrapper = environ.get('wsgi.file_wrapper', None)  
-```
+    file_wrapper = environ.get('wsgi.file_wrapper', None)  
       
-```
-if file_wrapper:  
-    file_wrapper_instance = file_wrapper(StringIO(‘’))  
-    if type(result) == type(file_wrapper_instance)  
-        ...
-```
+    if file_wrapper:  
+        file_wrapper_instance = file_wrapper(StringIO(‘’))  
+        if type(result) == type(file_wrapper_instance)  
+            ...
 
 Although this may work it is clumsy and your are dependent on WSGI servers implementing support correctly such that they don’t get confused when wsgi.file\_wrapper is used more than once in the context of a specific request. For that reason, requiring that wsgi.file\_wrapper be the class type for the iterable is a better solution.  
   
@@ -257,27 +211,21 @@ By ensuring that wsgi.file\_wrapper is a class type, it also guarantees that one
 
     
     
-```
-def FileWrapper1(iterable, callback, environ):  
-    class _FileWrapper(type(iterable)):  
-        def close(self):  
-            try:  
-                iterable.close()  
-            finally:  
-                callback(environ)  
-    return _FileWrapper(iterable.filelike, iterable.blksize)  
-```
+    def FileWrapper1(iterable, callback, environ):  
+        class _FileWrapper(type(iterable)):  
+            def close(self):  
+                try:  
+                    iterable.close()  
+                finally:  
+                    callback(environ)  
+        return _FileWrapper(iterable.filelike, iterable.blksize)  
       
-```
-file_wrapper = environ.get('wsgi.file_wrapper', None)  
-```
+    file_wrapper = environ.get('wsgi.file_wrapper', None)  
       
-```
-if file_wrapper and isinstance(result, file_wrapper):  
-    return FileWrapper1(result, cleanup, environ)  
-else:  
-    ...
-```
+    if file_wrapper and isinstance(result, file_wrapper):  
+        return FileWrapper1(result, cleanup, environ)  
+    else:  
+        ...
 
 What we have done here is create a new file wrapper iterable, but one which is an instance of a class derived from the type of the file wrapper iterable returned by the inner WSGI application component.  
   
@@ -288,23 +236,21 @@ Combining this together with our original WSGI middleware to trigger cleanup act
 
     
     
-```
-class ExecuteOnCompletion2:  
-    def __init__(self, application, callback):  
-        self.__application = application  
-        self.__callback = callback  
-    def __call__(self, environ, start_response):  
-        try:  
-            result = self.__application(environ, start_response)  
-        except:  
-            self.__callback(environ)  
-            raise  
-        file_wrapper = environ.get('wsgi.file_wrapper', None)  
-        if file_wrapper and isinstance(result, file_wrapper):  
-            return FileWrapper1(result, self.__callback, environ)  
-        else:  
-            return Generator2(result, self.__callback, environ)
-```
+    class ExecuteOnCompletion2:  
+        def __init__(self, application, callback):  
+            self.__application = application  
+            self.__callback = callback  
+        def __call__(self, environ, start_response):  
+            try:  
+                result = self.__application(environ, start_response)  
+            except:  
+                self.__callback(environ)  
+                raise  
+            file_wrapper = environ.get('wsgi.file_wrapper', None)  
+            if file_wrapper and isinstance(result, file_wrapper):  
+                return FileWrapper1(result, self.__callback, environ)  
+            else:  
+                return Generator2(result, self.__callback, environ)
 
 If you would like to play with this, then the code in the subversion repository for mod\_wsgi 4.X has been modified to conform to these new requirements for wsgi.file\_wrapper. Previously the mod\_wsgi code had wsgi.file\_wrapper be a function which returned the file wrapper iterable, rather than it being the class type. As a consequence, the above code should also be safe to use with older mod\_wsgi versions, in which case it will fallback to the old way of doing things.  
   

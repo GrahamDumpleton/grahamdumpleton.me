@@ -28,32 +28,22 @@ To install certbot is easy enough and can be done with pip. The problem is, that
 For this case of certbot, to create a single executable file for certbot, you can run shiv as:
     
     
-```
-$ shiv certbot -o certbot.pyz -c certbot
-```
+    $ shiv certbot -o certbot.pyz -c certbot
     
     
 
 The result is a single `certbot.pyz` file, which you can run like any other executable.
     
     
-```
-$ ./certbot.pyz --help
-```
+    $ ./certbot.pyz --help
     
-```
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-```
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     
-```
-  certbot [SUBCOMMAND] [options] [-d DOMAIN] [-d DOMAIN] ...
-```
+      certbot [SUBCOMMAND] [options] [-d DOMAIN] [-d DOMAIN] ...
     
-```
-Certbot can obtain and install HTTPS/TLS/SSL certificates.  By default,
-it will attempt to use a webserver both for obtaining and installing the
-certificate. The most common SUBCOMMANDS and flags are ...
-```
+    Certbot can obtain and install HTTPS/TLS/SSL certificates.  By default,
+    it will attempt to use a webserver both for obtaining and installing the
+    certificate. The most common SUBCOMMANDS and flags are ...
     
     
 
@@ -64,29 +54,23 @@ Being a single file, which includes both the code for certbot itself, and all th
 Trying this with `mod_wsgi-express` things weren't quite as successful. The building of the executable file ran okay:
     
     
-```
-$ shiv 'mod_wsgi==4.6.4' -o mod_wsgi-express.pyz -c mod_wsgi-express
-```
+    $ shiv 'mod_wsgi==4.6.4' -o mod_wsgi-express.pyz -c mod_wsgi-express
     
     
 
 But running:
     
     
-```
-$ ./mod_wsgi-express.pyz start-server --log-to-terminal
-```
+    $ ./mod_wsgi-express.pyz start-server --log-to-terminal
     
     
 
 yielded the error:
     
     
-```
-File "/var/tmp/mod_wsgi-localhost:8000:501/handler.wsgi", line 7, in 
-     import mod_wsgi.server
-ModuleNotFoundError: No module named 'mod_wsgi.server'; 'mod_wsgi' is not a package
-```
+    File "/var/tmp/mod_wsgi-localhost:8000:501/handler.wsgi", line 7, in 
+         import mod_wsgi.server
+    ModuleNotFoundError: No module named 'mod_wsgi.server'; 'mod_wsgi' is not a package
     
     
 
@@ -101,24 +85,20 @@ Unfortunately, it doesn't seem that the shiv bootstrap code leaves any global st
 Getting access to the directory therefore relies on a bit of black magic.
     
     
-```
-    site_packages = []
-```
+        site_packages = []
     
-```
-    if '_bootstrap' in sys.modules:
-        bootstrap = sys.modules['_bootstrap']
-        if 'bootstrap' in dir(bootstrap):
-            frame = inspect.currentframe()
-            while frame is not None:
-                code = frame.f_code
-                if (code and code.co_filename == bootstrap.__file__ and
-                        code.co_name == 'bootstrap' and
-                        'site_packages' in frame.f_locals):
-                    site_packages.append(str(frame.f_locals['site_packages']))
-                    break
-                frame = frame.f_back
-```
+        if '_bootstrap' in sys.modules:
+            bootstrap = sys.modules['_bootstrap']
+            if 'bootstrap' in dir(bootstrap):
+                frame = inspect.currentframe()
+                while frame is not None:
+                    code = frame.f_code
+                    if (code and code.co_filename == bootstrap.__file__ and
+                            code.co_name == 'bootstrap' and
+                            'site_packages' in frame.f_locals):
+                        site_packages.append(str(frame.f_locals['site_packages']))
+                        break
+                    frame = frame.f_back
     
     
 
@@ -129,9 +109,7 @@ Knowing that shiv was used, and what the directory with the required Python pack
 Sure this is a hack, but unless shiv provides a better way of knowing when it is being run and what the directory with the Python packages was, we don't have much choice. Good thing at least is you don't have to care, as this fiddle is hidden away in `mod_wsgi-express` and you just need to use the right version of the `mod_wsgi` package, which is version 4.6.5 or newer.
     
     
-```
-$ shiv 'mod_wsgi==4.6.5' -o mod_wsgi-express.pyz -c mod_wsgi-express
-```
+    $ shiv 'mod_wsgi==4.6.5' -o mod_wsgi-express.pyz -c mod_wsgi-express
     
     
 
@@ -144,9 +122,7 @@ In the case of `mod_wsgi-express`, we also need the Apache httpd server. With th
 Unlike with the Python interpreter, there is a way around this for the Apache httpd server, and it can instead be bundled in the executable as well. This is by virtue of a little known companion package for `mod_wsgi` called `mod_wsgi-httpd`. Like with `mod_wsgi`, the `mod_wsgi-httpd` package exists on PyPi and can be installed using `pip`. When installed, it will build the Apache httpd server from source code. When `mod_wsgi` is then subsequently installed, it will use it instead.
     
     
-```
-$ shiv 'mod_wsgi-httpd==2.4.35.*' 'mod_wsgi==4.6.5' -o mod_wsgi-express.pyz -c mod_wsgi-express
-```
+    $ shiv 'mod_wsgi-httpd==2.4.35.*' 'mod_wsgi==4.6.5' -o mod_wsgi-express.pyz -c mod_wsgi-express
     
     
 

@@ -16,23 +16,19 @@ When you run the Python interpreter on the command line as an interactive consol
 How can this be though, as we haven't done anything to add the current working directory into 'sys.path', nor has the Python interpreter itself done so?
     
     
-```
->>> import os, sys  
->>> os.getcwd() in sys.path  
-False
-```
+    >>> import os, sys  
+    >>> os.getcwd() in sys.path  
+    False
 
 What does get put in 'sys.path' then and does that give us a clue to why it is being found?
     
     
-```
->>> sys.path  
-['', '/Library/Frameworks/Python.framework/Versions/3.4/lib/python34.zip',  
-'/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4',  
-'/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/plat-darwin',  
-'/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/lib-dynload',  
-'/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages']
-```
+    >>> sys.path  
+    ['', '/Library/Frameworks/Python.framework/Versions/3.4/lib/python34.zip',  
+    '/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4',  
+    '/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/plat-darwin',  
+    '/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/lib-dynload',  
+    '/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages']
 
 As you can see we have a whole bunch of directories related to our actual Python installation.
 
@@ -41,59 +37,49 @@ We can also see that 'sys.path' includes an empty string. What is that about?
 On the assumption that it is there for a reason, in order to work out what it might be for, lets try and delete that entry and see if it affects our attempt to import a module.
     
     
-```
-$ touch example.py
-```
+    $ touch example.py
     
     
-```
-$ python3.4  
-Python 3.4.1 (v3.4.1:c0e311e010fc, May 18 2014, 00:54:21)  
-[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin  
-Type "help", "copyright", "credits" or "license" for more information.  
->>> import example
-```
+    $ python3.4  
+    Python 3.4.1 (v3.4.1:c0e311e010fc, May 18 2014, 00:54:21)  
+    [GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin  
+    Type "help", "copyright", "credits" or "license" for more information.  
+    >>> import example
     
     
-```
-$ python3.4  
-Python 3.4.1 (v3.4.1:c0e311e010fc, May 18 2014, 00:54:21)  
-[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin  
-Type "help", "copyright", "credits" or "license" for more information.  
->>> import sys  
->>> del sys.path[0]  
->>> import example  
-Traceback (most recent call last):  
- File "<stdin>", line 1, in <module>  
-ImportError: No module named 'example'
-```
+    $ python3.4  
+    Python 3.4.1 (v3.4.1:c0e311e010fc, May 18 2014, 00:54:21)  
+    [GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin  
+    Type "help", "copyright", "credits" or "license" for more information.  
+    >>> import sys  
+    >>> del sys.path[0]  
+    >>> import example  
+    Traceback (most recent call last):  
+     File "<stdin>", line 1, in <module>  
+    ImportError: No module named 'example'
 
 As you can see it is significant. When we delete the empty string from 'sys.path' we can no longer import any modules from the current working directory.
 
 As it turns out, what this magic value of an empty string does is tell Python that when performing a module import, it should look in the current working directory. That is, the directory that would be returned by:
     
     
-```
->>> import os  
->>> os.getcwd()  
-'/private/tmp'
-```
+    >>> import os  
+    >>> os.getcwd()  
+    '/private/tmp'
 
 Initially this would be the directory in which you ran the 'python' executable, but if you so happened to use 'os.chdir\(\)' to change the working directory, the current working directory will change and thus where Python looks for modules when imported will also change, instead now using the directory you changed to.
 
 What about when executing Python against a script file instead of running an interactive console?
     
     
-```
-$ python3.4 -i example.py  
->>> import sys  
->>> sys.path  
-['/private/tmp', '/Library/Frameworks/Python.framework/Versions/3.4/lib/python34.zip',  
-'/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4',  
-'/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/plat-darwin',  
-'/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/lib-dynload',  
-'/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages']
-```
+    $ python3.4 -i example.py  
+    >>> import sys  
+    >>> sys.path  
+    ['/private/tmp', '/Library/Frameworks/Python.framework/Versions/3.4/lib/python34.zip',  
+    '/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4',  
+    '/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/plat-darwin',  
+    '/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/lib-dynload',  
+    '/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages']
 
 This time there is no empty string. Instead of the empty string, Python has calculated the name of the directory which the script is located in and added that to 'sys.path'.
 
@@ -112,16 +98,12 @@ For a Django application, that means adding the project base directory and this 
 If using embedded mode what you would need to do to have it search the base directory for the Django projects is:
     
     
-```
-WSGIPythonPath /path/to/mysite.com
-```
+    WSGIPythonPath /path/to/mysite.com
 
 If using daemon mode, you would instead use:
     
     
-```
-WSGIDaemonProcess example python-path=/path/to/mysite.com
-```
+    WSGIDaemonProcess example python-path=/path/to/mysite.com
 
 If you leave it at that, then although your project modules will be found, the current working directory of your application is a bit of an unknown. What it will actually be set to is up to the mercy of Apache, with it usually being set to the '/' directory.
 
@@ -132,9 +114,7 @@ This is because all the attempts to access files by a relative path name will fa
 Although it is still preferable to always use absolute path names, if for some reason that cannot be done, then with mod\_wsgi daemon mode at least, you can also tell mod\_wsgi to use a specific directory as the current working directory. This can be done using the 'home' option to the 'WSGIDaemonProcess' directive.
     
     
-```
-WSGIDaemonProcess example home=/path/to/mysite.com python-path=/path/to/mysite.com
-```
+    WSGIDaemonProcess example home=/path/to/mysite.com python-path=/path/to/mysite.com
 
 As had occurred before, this shows out embedded mode to be a bit of a second class citizen, as there is no equivalent configuration for when using embedded mode.
 
@@ -147,16 +127,12 @@ In using the 'home' option the way it has worked in the past is that it only set
 This means that from mod\_wsgi 4.1.0 onwards you can actually simplify the options for daemon mode to:
     
     
-```
-WSGIDaemonProcess example home=/path/to/mysite.com
-```
+    WSGIDaemonProcess example home=/path/to/mysite.com
 
 Combining this with a Python virtual environment which you want to use just for that daemon process group, you would use:
     
     
-```
-WSGIDaemonProcess example python-home=/path/to/venv home=/path/to/mysite.com
-```
+    WSGIDaemonProcess example python-home=/path/to/venv home=/path/to/mysite.com
 
 We therefore have a simpler way to setup the current working directory of the WSGI application so that relative paths do still work if you have managed not to ensure they are all absolute. The need to add that working directory separately to the Python module search is gone as it will be done automatically. And finally we don't have to dig down to the 'site-packages' directory and can just specify the root of the Python virtual environment.
 

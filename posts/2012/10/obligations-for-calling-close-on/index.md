@@ -30,8 +30,10 @@ class Sentry\(object\):
 A WSGI middleware which will attempt to capture any  
 uncaught exceptions and send them to Sentry.  
   
->>> from raven.base import Client  
->>> application = Sentry\(application, Client\(\)\)  
+```python
+>> from raven.base import Client  
+>> application = Sentry\(application, Client\(\)\)  
+```
 """  
 def \_\_init\_\_\(self, application, client\):  
 self.application = application  

@@ -41,19 +41,15 @@ Discussion up till now has been focused on providing interactive terminals to mu
 This can be done in OpenShift using:
     
     
-```
-$ oc new-app --docker-image quay.io/openshiftlabs/workshop-terminal:latest --name terminal
-$ oc expose svc terminal
-```
+    $ oc new-app --docker-image quay.io/openshiftlabs/workshop-terminal:latest --name terminal
+    $ oc expose svc terminal
     
     
 
 You can then use:
     
     
-```
-$ oc get route terminal
-```
+    $ oc get route terminal
     
     
 
@@ -66,11 +62,9 @@ This method of deployment is quick, but is not protected in any way. That is, yo
 A slightly better way is to use:
     
     
-```
-$ oc new-app --docker-image quay.io/openshiftlabs/workshop-terminal:latest --name terminal \
-    --env AUTH_USERNAME=grumpy --env AUTH_PASSWORD=password
-$ oc create route edge terminal --service=terminal
-```
+    $ oc new-app --docker-image quay.io/openshiftlabs/workshop-terminal:latest --name terminal \
+        --env AUTH_USERNAME=grumpy --env AUTH_PASSWORD=password
+    $ oc create route edge terminal --service=terminal
     
     
 
@@ -91,23 +85,19 @@ Because of the benefits, this particular scenario is also supported, but because
 To deploy the terminal in your OpenShift project using this method use:
     
     
-```
-$ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-terminal/develop/templates/production.json
-```
+    $ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-terminal/develop/templates/production.json
     
     
 
 This will create the following resources.
     
     
-```
-serviceaccount "terminal-user" created
-rolebinding.authorization.openshift.io "terminal-admin" created
-imagestream.image.openshift.io "terminal" created
-deploymentconfig.apps.openshift.io "terminal" created
-service "terminal" created
-route.route.openshift.io "terminal" created
-```
+    serviceaccount "terminal-user" created
+    rolebinding.authorization.openshift.io "terminal-admin" created
+    imagestream.image.openshift.io "terminal" created
+    deploymentconfig.apps.openshift.io "terminal" created
+    service "terminal" created
+    route.route.openshift.io "terminal" created
     
     
 

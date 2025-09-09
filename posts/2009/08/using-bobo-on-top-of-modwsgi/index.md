@@ -19,23 +19,17 @@ From the little I have looked at it, I like [bobo](http://bobo.digicool.com/). I
 As example, consider the simple bobo application as follows:
     
     
-```
-import bobo  
-```
+    import bobo  
       
-```
-@bobo.query  
-def hello():  
- return "Hello world!"  
-```
+    @bobo.query  
+    def hello():  
+     return "Hello world!"  
     
 
 All one has to do to turn this into a WSGI script file suitable for use with mod\_wsgi is add the single line:
     
     
-```
-application = bobo.Application(bobo_resources=__name__)
-```
+    application = bobo.Application(bobo_resources=__name__)
 
 This one line creates an instance of the bobo WSGI application object and assigns it to 'application', the name of the WSGI application entry point which mod\_wsgi expects to exist.
 

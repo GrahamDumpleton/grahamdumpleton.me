@@ -23,36 +23,35 @@ The primary path for switching from a non privileged user to the ‘root’ user
 
 To illustrate how a setuid executable works, lets look at the UNIX utility called ‘id', which is normally used to display information about what user and group the invoking process runs as. If run normally in our Docker container, we might see:
 
-> 
->     $ id  
->     > uid=1001(app) gid=1001(app) groups=1001(app)
+```bash
+    $ id  
+    uid=1001(app) gid=1001(app) groups=1001(app)
+```
 
 Lets create a setuid version of the executable which is owned by ‘root' and bundle that in our image.
 
-> 
->     FROM centos:centos7
->     
->     
->     RUN groupadd --gid 1001 app  
->     > RUN useradd --uid 1001 --gid app --home /app app
->     
->     
->     RUN cp /usr/bin/id /usr/bin/id-setuid-root  
->     > RUN chmod 4711 /usr/bin/id-setuid-root
->     
->     
->     WORKDIR /app  
->     > USER 1001
+```dockerfile
+    FROM centos:centos7
+
+    RUN groupadd --gid 1001 app  
+    RUN useradd --uid 1001 --gid app --home /app app
+
+    RUN cp /usr/bin/id /usr/bin/id-setuid-root  
+    RUN chmod 4711 /usr/bin/id-setuid-root
+
+    WORKDIR /app  
+    USER 1001
+```
 
 Running the original version of ‘id’ and the setuid version, we get:
 
-> 
->     $ id  
->     > uid=1001(app) gid=1001(app) groups=1001(app)
->     
->     
->     $ id-setuid-root  
->     > uid=1001(app) gid=1001(app) euid=0(root) groups=1001(app)
+```bash
+    $ id  
+    uid=1001(app) gid=1001(app) groups=1001(app)
+
+    $ id-setuid-root  
+    uid=1001(app) gid=1001(app) euid=0(root) groups=1001(app)
+```
 
 As can be seen, the result is that although the real user ID is the same, the effective user ID is that of the ‘root’ user. This means that by using a setuid executable, we gain the rights to run something as if we are ‘root’, or at least very close to being ‘root’. I say very close to being ‘root’ as it is only the effective user ID which is ‘root’ and not the real user ID. In most cases it doesn’t matter, but it hardly matters anyway, as we could also switch our real identify to the ‘root’ user relatively easily from a custom setuid executable of our own.
 
@@ -64,33 +63,30 @@ You might think that is simple. All we need to do is make a copy of ‘/bin/bash
 
 So this time to create the image we use:
 
-> 
->     FROM centos:centos7
->     
->     
->     RUN groupadd --gid 1001 app  
->     > RUN useradd --uid 1001 --gid app --home /app app
->     
->     
->     RUN cp /bin/bash /bin/bash-setuid-root  
->     > RUN chmod 4711 /bin/bash-setuid-root
->     
->     
->     WORKDIR /app  
->     > USER 1001
+```dockerfile
+    FROM centos:centos7
+
+    RUN groupadd --gid 1001 app  
+    RUN useradd --uid 1001 --gid app --home /app app
+
+    RUN cp /bin/bash /bin/bash-setuid-root  
+    RUN chmod 4711 /bin/bash-setuid-root
+
+    WORKDIR /app  
+    USER 1001
+```
 
 Running our setuid version of bash though, we don’t get what we expected.
 
-> 
->     bash-4.2$ id  
->     > uid=1001(app) gid=1001(app) groups=1001(app)
->     
->     
->     bash-4.2$ bash-setuid-root
->     
->     
->     bash-setuid-root-4.2$ id  
->     > uid=1001(app) gid=1001(app) groups=1001(app)
+```bash
+    bash-4.2$ id  
+    uid=1001(app) gid=1001(app) groups=1001(app)
+
+    bash-4.2$ bash-setuid-root
+
+    bash-setuid-root-4.2$ id  
+    uid=1001(app) gid=1001(app) groups=1001(app)
+```
 
 This doesn’t work because modern implementations of shells have checks builtin which look for the specific case of where they are executed with an effective user ID of ‘root’, but a non ‘root’ real user ID. In this case, just to make it harder to use this sort of backdoor, they will revert back to running as the real user ID for the effective user ID.
 
@@ -100,54 +96,48 @@ The first method we would normally use to execute a command as the ‘root’ us
 
 Because in a Docker image we can install and configure anything we want, there is no reason why we can’t just set these up and use them.
 
-> 
->     FROM centos:centos7
->     
->     
->     RUN yum install -y sudo
->     
->     
->     RUN groupadd --gid 1001 app  
->     > RUN useradd --uid 1001 --gid app --home /app app
->     
->     
->     # Allow anyone in group 'app' to use 'sudo' without a password.  
->     > RUN echo '%app ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
->     
->     
->     # Set the password for the 'root' user to be an empty string.  
->     > RUN echo 'root:' | chpasswd
->     
->     
->     WORKDIR /app  
->     > USER 1001
+```python
+    FROM centos:centos7
+
+    RUN yum install -y sudo
+
+    RUN groupadd --gid 1001 app  
+    RUN useradd --uid 1001 --gid app --home /app app
+
+    # Allow anyone in group 'app' to use 'sudo' without a password.  
+    RUN echo '%app ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+    # Set the password for the 'root' user to be an empty string.  
+    RUN echo 'root:' | chpasswd
+
+    WORKDIR /app  
+    USER 1001
+```
 
 With this we can very easily get an interactive shell as the ‘root’ user using ’sudo’, not even requiring a password.
 
-> 
->     $ id  
->     > uid=1001(app) gid=1001(app) groups=1001(app)
->     
->     
->     $ sudo -s
->     
->     
->     # id  
->     > uid=0(root) gid=0(root) groups=0(root)
+```bash
+    $ id  
+    uid=1001(app) gid=1001(app) groups=1001(app)
+
+    $ sudo -s
+
+    # id  
+    uid=0(root) gid=0(root) groups=0(root)
+```
 
 We can also just login as the ‘root’ user, supplying our empty password.
 
-> 
->     $ id  
->     > uid=1001(app) gid=1001(app) groups=1001(app)
->     
->     
->     $ su root  
->     > Password:
->     
->     
->     # id  
->     > uid=0(root) gid=0(root) groups=0(root)
+```bash
+    $ id  
+    uid=1001(app) gid=1001(app) groups=1001(app)
+
+    $ su root  
+    Password:
+
+    # id  
+    uid=0(root) gid=0(root) groups=0(root)
+```
 
 In both cases the real user ID is that of the ‘root’ user and not just the effective user ID.
 

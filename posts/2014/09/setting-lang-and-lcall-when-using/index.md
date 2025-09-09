@@ -18,51 +18,41 @@ Now this should not really be an issue with WSGI at least, because you should al
 Take for example a simple case in a command line interpreter of printing out the value of a Unicode string into the Apache error log:
     
     
-```
->>> print(u'\u292e')  
-⤮
-```
+    >>> print(u'\u292e')  
+    ⤮
 
 On a system with a sane configuration, this would display as you expect. The reason for this is that the your login shell environment would typically set an environment value such as the 'LANG' environment variable. On my MacOS X system for example I have:
     
     
-```
-LANG=en_AU.UTF-8
-```
+    LANG=en_AU.UTF-8
 
 When I use the 'locale' module to see what Python sees, we get:
     
     
-```
->>> import locale  
->>> locale.getdefaultlocale()  
-('en_AU', 'UTF-8')  
->>> locale.getpreferredencoding()  
-'UTF-8'
-```
+    >>> import locale  
+    >>> locale.getdefaultlocale()  
+    ('en_AU', 'UTF-8')  
+    >>> locale.getpreferredencoding()  
+    'UTF-8'
 
 UTF-8 is generally the magic value that solves all problems. With that you should generally be okay.
 
 The problem now is that when using Apache/mod\_wsgi on many Linux systems, the Apache process doesn't inherit any environment variables which override the default locale or language settings. So what the Python code running under Apache/mod\_wsgi sees is:
     
     
-```
->>> import locale  
->>> locale.getdefaultlocale()  
-(None, None)  
->>> locale.getpreferredencoding()  
-'US-ASCII'
-```
+    >>> import locale  
+    >>> locale.getdefaultlocale()  
+    (None, None)  
+    >>> locale.getpreferredencoding()  
+    'US-ASCII'
 
 With the Python interpreter now using these values, if we try and print out a Unicode value, we can encounter problems.
     
     
-```
->>> print(u'\u292e')  
-Traceback (most recent call last):  
- File "<stdin>", line 1, in <module>  
-UnicodeEncodeError: 'ascii' codec can't encode character u'\u292e' in position 0: ordinal not in range(128)
-```
+    >>> print(u'\u292e')  
+    Traceback (most recent call last):  
+     File "<stdin>", line 1, in <module>  
+    UnicodeEncodeError: 'ascii' codec can't encode character u'\u292e' in position 0: ordinal not in range(128)
 
 And this is the trap that people encounter when using Apache/mod\_wsgi. They will run up their Python WSGI application with a development server, such as that provided by Django, and everything will work fine. Host Apache/mod\_wsgi on a Linux system though, and if they have not ensured that encodings are always being used explicitly when converting from Unicode to bytes, they can start to get 'UnicodeEncoderError' exceptions.
 
@@ -71,10 +61,8 @@ What is the solution then?
 As is detailed in the [Django documentation](https://code.djangoproject.com/wiki/django_apache_and_mod_wsgi#AdditionalTweaking), you can set the environment variables yourself.
     
     
-```
-export LANG='en_US.UTF-8'  
-export LC_ALL='en_US.UTF-8'
-```
+    export LANG='en_US.UTF-8'  
+    export LC_ALL='en_US.UTF-8'
 
 The problem now is where do you set them. This is because they need to be set in the environment under which the initial Apache process starts up.
 
@@ -101,9 +89,7 @@ For mod\_wsgi daemon mode then, what can be done?
 For this way of using mod\_wsgi what you can do is set the 'lang' and 'locale' options to the 'WSGIDaemonProcess' directive.
     
     
-```
-WSGIDaemonProcess my-django-site lang='en_US.UTF-8' locale='en_US.UTF-8'
-```
+    WSGIDaemonProcess my-django-site lang='en_US.UTF-8' locale='en_US.UTF-8'
 
 For daemon mode of mod\_wsgi at least, that is the solution for this particular pain point.
 

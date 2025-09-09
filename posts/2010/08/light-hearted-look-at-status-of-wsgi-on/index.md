@@ -14,28 +14,18 @@ blog_title: "Graham Dumpleton"
 From the \#pocoo [IRC logs](http://dev.pocoo.org/irclogs/%23pocoo.2010-08-01.log). We can only hope it doesn't come to that. :-\)
     
     
-```
-2010-08-01T18:06:29  <jokey> mm what's the state of current wsgi for python3 btw? what are the open points?
-```
+    2010-08-01T18:06:29  <jokey> mm what's the state of current wsgi for python3 btw? what are the open points?
     
     
-```
-2010-08-01T18:09:17  <DasIch> jokey: str vs. bytes
-```
+    2010-08-01T18:09:17  <DasIch> jokey: str vs. bytes
     
     
-```
-2010-08-01T18:10:43  <DasIch> jokey: one side says everything should be str, the other says everything should be bytes, another side says it should be a mix of the two and all of those sides don't have anything to show which is the best solution
-```
+    2010-08-01T18:10:43  <DasIch> jokey: one side says everything should be str, the other says everything should be bytes, another side says it should be a mix of the two and all of those sides don't have anything to show which is the best solution
     
     
-```
-2010-08-01T18:11:33  <DasIch> jokey: then there is also the group of people that says that wsgi was even in python 2.x not that good in certain points and wants to create something else altogether
-```
+    2010-08-01T18:11:33  <DasIch> jokey: then there is also the group of people that says that wsgi was even in python 2.x not that good in certain points and wants to create something else altogether
     
     
-```
-2010-08-01T18:12:28  <DasIch> jokey: as you can see it's only a slight disagreement which should resolve once we have only one side because everybody else died
-```
+    2010-08-01T18:12:28  <DasIch> jokey: as you can see it's only a slight disagreement which should resolve once we have only one side because everybody else died
 
 Oh and please don't let this start up another discussion just yet. I am still trying to find some time to do one of my state of the union summary posts which covers in detail the issues around the use of % encoding with SCRIPT\_NAME and PATH\_INFO.

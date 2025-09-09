@@ -47,19 +47,13 @@ In addition to any files from the build directory or Git repository being availa
 One use for the build script might be to checkout copies of a remote Git repository so that it is included in the image and thus available to the user immediately they access the terminal session. You might also pre-compile any build artifacts from the source code.
     
     
-```
-#!/bin/bash
-```
+    #!/bin/bash
     
-```
-set -x
-set -eo pipefail
-```
+    set -x
+    set -eo pipefail
     
-```
-git clone https://github.com/openshift-evangelists/Wild-West-Backend.git backend
-git clone https://github.com/openshift-evangelists/Wild-West-Frontend.git frontend
-```
+    git clone https://github.com/openshift-evangelists/Wild-West-Backend.git backend
+    git clone https://github.com/openshift-evangelists/Wild-West-Frontend.git frontend
     
     
 
@@ -68,9 +62,7 @@ By pre-compiling build artifacts once as part of the image build, it avoids the 
 Note that to ensure that the S2I build of the image fails if any build step fails, you should include the line:
     
     
-```
-set -eo pipefail
-```
+    set -eo pipefail
     
     
 
@@ -81,9 +73,7 @@ By including this line, the whole build will fail immediately any time one speci
 With any files you want to include in place, or any build script, if you had them in the current directory, you run `s2i` as:
     
     
-```
-s2i build . quay.io/openshiftlabs/workshop-terminal:latest my-workshop-terminal
-```
+    s2i build . quay.io/openshiftlabs/workshop-terminal:latest my-workshop-terminal
     
     
 
@@ -92,9 +82,7 @@ If you had the files in a hosted Git repository, replace the directory path "`.`
 Once the build has finished, you can verify that the image has been built correctly using docker by running:
     
     
-```
-docker run --rm -p 10080:10080 my-workshop-terminal
-```
+    docker run --rm -p 10080:10080 my-workshop-terminal
     
     
 
@@ -105,10 +93,8 @@ and accessing http://localhost:10080.
 If you were using OpenShift, and wanted to do the build in the same project where a workshop will be run from, you can use:
     
     
-```
-oc new-build quay.io/openshiftlabs/workshop-terminal:latest~https://your-repository-url \
-  --name my-workshop-terminal
-```
+    oc new-build quay.io/openshiftlabs/workshop-terminal:latest~https://your-repository-url \
+      --name my-workshop-terminal
     
     
 
@@ -121,32 +107,20 @@ If you don't want to use the `s2i` tool, but want to use `buildah build` or `doc
 When using a `Dockerfile` you could manually perform all the steps yourself, but it is usually better to setup everything as if an S2I build was triggered and then run the S2I assemble script. In this case the `Dockerfile` would be:
     
     
-```
-FROM quay.io/openshiftlabs/workshop-terminal:latest
-```
+    FROM quay.io/openshiftlabs/workshop-terminal:latest
     
-```
-USER root
-```
+    USER root
     
-```
-COPY . /tmp/src
-```
+    COPY . /tmp/src
     
-```
-RUN rm -rf /tmp/src/.git* && \
-    chown -R 1001 /tmp/src && \
-    chgrp -R 0 /tmp/src && \
-    chmod -R g+w /tmp/src
-```
+    RUN rm -rf /tmp/src/.git* && \
+        chown -R 1001 /tmp/src && \
+        chgrp -R 0 /tmp/src && \
+        chmod -R g+w /tmp/src
     
-```
-USER 1001
-```
+    USER 1001
     
-```
-RUN /usr/libexec/s2i/assemble
-```
+    RUN /usr/libexec/s2i/assemble
     
     
 
@@ -163,9 +137,7 @@ The `.workshop/build` script is run during the build phase when using an S2I bui
 Note that the `.workshop/setup` script can only define commands to run, it cannot be used to set environment variables that would be inherited by the users terminal session. If you need to set environment variables, you can create a shell script file in the directory `/opt/app-root/etc/profile.d`. For example, if using a `Dockerfile` build you had installed the Ruby package from the Software Collections Library \(SCL\), you would create the file `/opt/app-root/etc/profile.d/ruby.sh` which contained:
     
     
-```
-source scl_source enable rh-ruby25
-```
+    source scl_source enable rh-ruby25
     
     
 

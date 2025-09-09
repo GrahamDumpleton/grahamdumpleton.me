@@ -21,24 +21,26 @@ What I want to start discussing with this post is mechanisms one can use from wr
 
 In PEP 369, a primary use case presented was illustrated by the example:
 
-> 
->     import imp  
->     >   
->     > @imp.when_imported('decimal')  
->     > def register(decimal):  
->     >     Inexact.register(decimal.Decimal)
+```python
+    import imp  
+    
+    @imp.when_imported('decimal')  
+    def register(decimal):  
+    Inexact.register(decimal.Decimal)
+```
 
 The basic idea is that when this code was seen it would cause a callback to be registered within the Python import system such that when the 'decimal' module was imported, that the 'register\(\)' function which the decorator had been applied to, would be called. The argument to the 'register\(\)' function would be the reference to the module the registration had been against. The function could then perform some action against the module before it was returned to whatever code originally requested the import.
 
 Instead of using the decorator '@imp.when\_imported' decorator, one could also explicitly use the 'imp.register\_post\_import\_hook\(\)' function to register a post import hook.
 
-> 
->     import imp  
->     >   
->     > def register(decimal):  
->     >     Inexact.register(decimal.Decimal)  
->     >   
->     > imp.register_post_import_hook(register, 'decimal')
+```python
+    import imp  
+    
+    def register(decimal):  
+    Inexact.register(decimal.Decimal)  
+    
+    imp.register_post_import_hook(register, 'decimal')
+```
 
 Although PEP 369 was never incorporated into Python, the wrapt module provides implementations for both the decorator and the function, but within the 'wrapt' module rather than 'imp'.
 
@@ -50,47 +52,45 @@ Even if you are able to do this, because though the registration functions requi
 
 They say though that one level of indirection can solve all problems and this is an example of where that principle can be applied. That is, rather than import the monkey patching code, you can setup a registration which would only lazily load the monkey patching code itself if the module to be patched was imported, and then execute it.
 
-> 
->     import sys
->     
->     
->     from wrapt import register_post_import_hook
->     
->     
->     def load_and_execute(name):  
->     >     def _load_and_execute(target_module):  
->     >         __import__(name)  
->     >         patch_module = sys.modules[name]  
->     >         getattr(patch_module, 'apply_patch')(target_module)  
->     >     return _load_and_execute
->     
->     
->     register_post_import_hook(load_and_execute('patch_tempfile'), 'tempfile')
+```python
+    import sys
+
+    from wrapt import register_post_import_hook
+
+    def load_and_execute(name):  
+    def _load_and_execute(target_module):  
+    __import__(name)  
+    patch_module = sys.modules[name]  
+    getattr(patch_module, 'apply_patch')(target_module)  
+    return _load_and_execute
+
+    register_post_import_hook(load_and_execute('patch_tempfile'), 'tempfile')
+```
 
 In the module file 'patch\_tempfile.py' we would now have:
 
-> 
->     from wrapt import wrap_function_wrapper
->     
->     
->     def _mkdtemp_wrapper(wrapped, instance, args, kwargs):  
->     >     print 'calling', wrapped.__name__  
->     >     return wrapped(*args, **kwargs)
->     
->     
->     def apply_patch(module):  
->     >     print 'patching', module.__name__  
->     >     wrap_function_wrapper(module, 'mkdtemp', _mkdtemp_wrapper)
+```python
+    from wrapt import wrap_function_wrapper
+
+    def _mkdtemp_wrapper(wrapped, instance, args, kwargs):  
+    print 'calling', wrapped.__name__  
+    return wrapped(*args, **kwargs)
+
+    def apply_patch(module):  
+    print 'patching', module.__name__  
+    wrap_function_wrapper(module, 'mkdtemp', _mkdtemp_wrapper)
+```
 
 Running the first script with the interactive interpreter so as to leave us in the interpreter, we can then show what happens when we import the 'tempfile' module and execute the 'mkdtemp\(\)' function.
 
-> 
->     $ python -i lazyloader.py  
->     > >>> import tempfile  
->     > patching tempfile  
->     > >>> tempfile.mkdtemp()  
->     > calling mkdtemp  
->     > '/var/folders/0p/4vcv19pj5d72m_bx0h40sw340000gp/T/tmpfB8r20'
+```python
+    $ python -i lazyloader.py  
+    >>> import tempfile  
+    patching tempfile  
+    >>> tempfile.mkdtemp()  
+    calling mkdtemp  
+    '/var/folders/0p/4vcv19pj5d72m_bx0h40sw340000gp/T/tmpfB8r20'
+```
 
 In other words, unlike how most monkey patching is done, we aren't forcibly importing a module in order to apply the monkey patches on the basis it might be used. Instead the monkey patching code stays dormant and unused until the target module is later imported. If the target module is never imported, the monkey patch code for that module is itself not even imported.
 
@@ -104,40 +104,37 @@ A solution to the latter issue is to separate out monkey patches into separately
 
 One particular registration mechanism which can be used here is 'setuptools' entry points. Using this we can package up monkey patches so they could be separately installed ready for use. The structure of such a package would be:
 
-> 
->     setup.py  
->     > src/__init__.py  
->     > src/tempfile_debugging.py
+```
+    setup.py  
+    src/__init__.py  
+    src/tempfile_debugging.py
+```
 
 The 'setup.py' file for this package will be:
 
-> 
->     from setuptools import setup
->     
->     
->     NAME = 'wrapt_patches.tempfile_debugging'
->     
->     
->     def patch_module(module, function=None):  
->     >     function = function or 'patch_%s' % module.replace('.', '_')  
->     >     return '%s = %s:%s' % (module, NAME, function)
->     
->     
->     ENTRY_POINTS = [  
->     >     patch_module('tempfile'),  
->     > ]
->     
->     
->     setup_kwargs = dict(  
->     >     name = NAME,  
->     >     version = '0.1',  
->     >     packages = ['wrapt_patches'],  
->     >     package_dir = {'wrapt_patches': 'src'},  
->     >     entry_points = { NAME: ENTRY_POINTS },  
->     > )
->     
->     
->     setup(**setup_kwargs)
+```python
+    from setuptools import setup
+
+    NAME = 'wrapt_patches.tempfile_debugging'
+
+    def patch_module(module, function=None):  
+    function = function or 'patch_%s' % module.replace('.', '_')  
+    return '%s = %s:%s' % (module, NAME, function)
+
+    ENTRY_POINTS = [  
+    patch_module('tempfile'),  
+    ]
+
+    setup_kwargs = dict(  
+    name = NAME,  
+    version = '0.1',  
+    packages = ['wrapt_patches'],  
+    package_dir = {'wrapt_patches': 'src'},  
+    entry_points = { NAME: ENTRY_POINTS },  
+    )
+
+    setup(**setup_kwargs)
+```
 
 As a convention so that our monkey patch modules are easily identifiable we use a namespace package. The parent package in this case will be 'wrapt\_patches' since we are working with wrapt specifically.
 
@@ -147,55 +144,54 @@ The key part of the 'setup.py' file is the definition of the 'entry\_points'. Th
 
 The 'src/\_\_init\_\_.py' file will then contain:
 
-> 
->     import pkgutil  
->     > __path__ = pkgutil.extend_path(__path__, __name__)
+```python
+    import pkgutil  
+    __path__ = pkgutil.extend_path(__path__, __name__)
+```
 
 as is required when creating a namespace package.
 
 Finally, the monkey patches will actually be contained in 'src/tempfile\_debugging.py' and for now is much like what we had before.
 
-> 
->     from wrapt import wrap_function_wrapper
->     
->     
->     def _mkdtemp_wrapper(wrapped, instance, args, kwargs):  
->     >     print 'calling', wrapped.__name__  
->     >     return wrapped(*args, **kwargs)
->     
->     
->     def patch_tempfile(module):  
->     >     print 'patching', module.__name__  
->     >     wrap_function_wrapper(module, 'mkdtemp', _mkdtemp_wrapper)
+```python
+    from wrapt import wrap_function_wrapper
+
+    def _mkdtemp_wrapper(wrapped, instance, args, kwargs):  
+    print 'calling', wrapped.__name__  
+    return wrapped(*args, **kwargs)
+
+    def patch_tempfile(module):  
+    print 'patching', module.__name__  
+    wrap_function_wrapper(module, 'mkdtemp', _mkdtemp_wrapper)
+```
 
 With the package defined we would install it into the Python installation or virtual environment being used.
 
 In place now of the explicit registrations which we previously added at the very start of the Python application main script file, we would instead add:
 
-> 
->     import os
->     
->     
->     from wrapt import discover_post_import_hooks
->     
->     
->     patches = os.environ.get('WRAPT_PATCHES')
->     
->     
->     if patches:  
->     >     for name in patches.split(','):  
->     >         name = name.strip()  
->     >         if name:  
->     >             print 'discover', name  
->     >             discover_post_import_hooks(name)
+```python
+    import os
+
+    from wrapt import discover_post_import_hooks
+
+    patches = os.environ.get('WRAPT_PATCHES')
+
+    if patches:  
+    for name in patches.split(','):  
+    name = name.strip()  
+    if name:  
+    print 'discover', name  
+    discover_post_import_hooks(name)
+```
 
 If we were to run the application with no specific configuration to enable the monkey patches then nothing would happen. If however they were enabled, then they would be automatically discovered and applied as necessary.
 
-> 
->     $ WRAPT_PATCHES=wrapt_patches.tempfile_debugging python -i entrypoints.py  
->     > discover wrapt_patches.tempfile_debugging  
->     > >>> import tempfile  
->     > patching tempfile
+```python
+    $ WRAPT_PATCHES=wrapt_patches.tempfile_debugging python -i entrypoints.py  
+    discover wrapt_patches.tempfile_debugging  
+    >>> import tempfile  
+    patching tempfile
+```
 
 What would be ideal is if PEP 369 ever did make it into the core of Python that a similar bootstrapping mechanism be incorporated into Python itself so that it was possible to force registration of monkey patches very early during interpreter initialisation. Having this in place we would have a guaranteed way of addressing the ordering issue when doing monkey patching.
 

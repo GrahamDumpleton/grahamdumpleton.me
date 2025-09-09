@@ -27,17 +27,19 @@ To understand this better lets first look at how the host names themselves would
 
 Imagine to start with that you had acquired a VPS from a service provider which you then setup to run a web server. This VPS would have its own specific IP address allocated to it. In DNS this would have a name associated with it using what is called an A record.
 
-> 
->     host-1234.webhostingservice.com. A 1.2.3.4
+```
+    host-1234.webhostingservice.com. A 1.2.3.4
+```
 
 The host name here could be a generic one which the hosting service would have setup to map to the IP address, it wouldn’t be related to the specific name of the site you want to run.
 
 For the multiple web sites you now want to host, you need to create a name alias, which says that if your site name is accessed, that the request should actually be sent to the above host on that IP address. This is done in DNS using a CNAME record.
 
-> 
->     www.example.com. CNAME host-1234.webhostingservice.com.  
->     > blog.example.com. CNAME host-1234.webhostingservice.com.  
->     > wiki.example.com. CNAME host-1234.webhostingservice.com.
+```
+    www.example.com. CNAME host-1234.webhostingservice.com.  
+    blog.example.com. CNAME host-1234.webhostingservice.com.  
+    wiki.example.com. CNAME host-1234.webhostingservice.com.
+```
 
 So it doesn’t now matter whether the site ‘www.example.com’, ‘blog.example.com’ or ‘wiki.example.com’ is accessed, the requests are all sent to the host with name ‘host-1234.webhostingservice.com’, listening on IP address ‘1.2.3.4’.
 
@@ -45,8 +47,9 @@ As we are going to access all these sites using HTTP, then the requests will all
 
 In order that the web server can distinguish between requests for the three different sites, the HTTP request needs to include the ‘Host’ header. Thus, if the web request was destined for ‘blog.example.com’, the HTTP request headers would include:
 
-> 
->     Host: blog.example.com
+```
+    Host: blog.example.com
+```
 
 # Apache virtual hosts
 
@@ -54,73 +57,62 @@ The next part of the puzzle is how Apache deals with these requests and knows wh
 
 This is managed in Apache by setting up multiple ‘VirtualHost’ definitions. Within each of the ‘VirtualHost’ definitions would be placed the configuration specific to that site. In the case of using mod\_wsgi, you would then end up with something like:
 
-> 
->     <VirtualHost _default_:80>  
->     > Require all denied  
->     > </VirtualHost>
->     
->     
->     # www.example.com  
->     >   
->     > <VirtualHost *:80>  
->     > ServerName www.example.com
->     
->     
->     WSGIDaemonProcess www.example.com
->     
->     
->     WSGIScriptAlias / /some/path/www.example.com/site.wsgi \  
->     >     process-group=www.example.com application-group=%{GLOBAL}
->     
->     
->     <Directory /some/path/www.example.com>  
->     > <Files site.wsgi>  
->     > Require all granted  
->     > </Files>  
->     > </Directory>  
->     > </VirtualHost>
->     
->     
->     # blog.example.com  
->     >   
->     > <VirtualHost *:80>  
->     > ServerName blog.example.com
->     
->     
->     WSGIDaemonProcess blog.example.com
->     
->     
->     WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
->     >     process-group=blog.example.com application-group=%{GLOBAL}
->     
->     
->     <Directory /some/path/blog.example.com>  
->     > <Files site.wsgi>  
->     > Require all granted  
->     > </Files>  
->     > </Directory>  
->     > </VirtualHost>
->     
->     
->     # wiki.example.com  
->     >   
->     > <VirtualHost *:80>  
->     > ServerName wiki.example.com
->     
->     
->     WSGIDaemonProcess wiki.example.com
->     
->     
->     WSGIScriptAlias / /some/path/wiki.example.com/site.wsgi \  
->     >     process-group=wiki.example.com application-group=%{GLOBAL}
->     
->     
->     <Directory /some/path/wiki.example.com>  
->     > <Files site.wsgi>  
->     > Require all granted  
->     > </Files>  
->     > </Directory>  
->     > </VirtualHost>
+```bash
+    <VirtualHost _default_:80>  
+    Require all denied  
+    </VirtualHost>
+
+    # www.example.com  
+    
+    <VirtualHost *:80>  
+    ServerName www.example.com
+
+    WSGIDaemonProcess www.example.com
+
+    WSGIScriptAlias / /some/path/www.example.com/site.wsgi \  
+    process-group=www.example.com application-group=%{GLOBAL}
+
+    <Directory /some/path/www.example.com>  
+    <Files site.wsgi>  
+    Require all granted  
+    </Files>  
+    </Directory>  
+    </VirtualHost>
+
+    # blog.example.com  
+    
+    <VirtualHost *:80>  
+    ServerName blog.example.com
+
+    WSGIDaemonProcess blog.example.com
+
+    WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
+    process-group=blog.example.com application-group=%{GLOBAL}
+
+    <Directory /some/path/blog.example.com>  
+    <Files site.wsgi>  
+    Require all granted  
+    </Files>  
+    </Directory>  
+    </VirtualHost>
+
+    # wiki.example.com  
+    
+    <VirtualHost *:80>  
+    ServerName wiki.example.com
+
+    WSGIDaemonProcess wiki.example.com
+
+    WSGIScriptAlias / /some/path/wiki.example.com/site.wsgi \  
+    process-group=wiki.example.com application-group=%{GLOBAL}
+
+    <Directory /some/path/wiki.example.com>  
+    <Files site.wsgi>  
+    Require all granted  
+    </Files>  
+    </Directory>  
+    </VirtualHost>
+```
 
 That is, we have three ‘VirtualHost’ definitions corresponding to each site, with all of them being setup as being linked to port 80, the default HTTP port.
 
@@ -150,19 +142,22 @@ There are multiple versions of the image for Python 2.7, 3.3 and 3.4. There is a
 
 For our above sites, the ‘Dockerfile’ to build our Docker image would be as simple as:
 
-> 
->     FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
->     > CMD [ "site.wsgi" ]
+```dockerfile
+    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+    CMD [ "site.wsgi" ]
+```
 
 If the WSGI application had a list of Python modules that needed to be available, they would be listed in the ‘requirements.txt’ file in the root of the application directory along side the ‘Dockerfile’. The image can then be built by running:
 
-> 
->     docker build -t blog.example.com .
+```
+    docker build -t blog.example.com .
+```
 
 We can then run the image manually using:
 
-> 
->     docker run --rm -p 8002:80 blog.example.com
+```
+    docker run --rm -p 8002:80 blog.example.com
+```
 
 When using the ‘mod\_wsgi-docker’ image, within the Docker container the Apache instance will listen on port 80. As we are going to be running a container for each site, they can’t all be exported as port 80 on the Docker host. As a result we need to map the internal port 80 to a different external port in each case. Thus we map ‘www.example.com’ to port 8001, ‘blog.example.com’ to port 8002 and ‘wiki.example.com’ to port 8003.
 
@@ -170,39 +165,36 @@ With the sites now running inside of a Docker container on our Docker host, we n
 
 Previously the Apache configuration was:
 
-> 
->     # blog.example.com  
->     >   
->     > <VirtualHost *:80>  
->     > ServerName blog.example.com
->     
->     
->     WSGIDaemonProcess blog.example.com
->     
->     
->     WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
->     >     process-group=blog.example.com application-group=%{GLOBAL}
->     
->     
->     <Directory /some/path/blog.example.com>  
->     > <Files site.wsgi>  
->     > Require all granted  
->     > </Files>  
->     > </Directory>  
->     > </VirtualHost>
+```bash
+    # blog.example.com  
+    
+    <VirtualHost *:80>  
+    ServerName blog.example.com
+
+    WSGIDaemonProcess blog.example.com
+
+    WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
+    process-group=blog.example.com application-group=%{GLOBAL}
+
+    <Directory /some/path/blog.example.com>  
+    <Files site.wsgi>  
+    Require all granted  
+    </Files>  
+    </Directory>  
+    </VirtualHost>
+```
 
 This now needs to be changed to:
 
-> 
->     # blog.example.com
->     
->     
->     <VirtualHost *:80>  
->     > ServerName blog.example.com
->     
->     
->     ProxyPass / http://docker.example.com:8002/  
->     > </VirtualHost>
+```bash
+    # blog.example.com
+
+    <VirtualHost *:80>  
+    ServerName blog.example.com
+
+    ProxyPass / http://docker.example.com:8002/  
+    </VirtualHost>
+```
 
 We have therefore removed the mod\_wsgi related configuration from the ‘VirtualHost’ and replaced it with a configuration which instead proxies any request for that specific ‘VirtualHost’, through to the port exported for that site on the Docker host.
 
@@ -210,73 +202,67 @@ We have therefore removed the mod\_wsgi related configuration from the ‘Virtua
 
 The proxy changes above are enough to at least have HTTP requests originally intended for ‘blog.example.com’, to be proxied through to the new home for the site running under the Docker container. The use of a proxy in this way will however cause a few problems. This is because the WSGI application will now instead think it is running at ‘http://docker.example.com:8002'. This is reflected in the values passed through to the WSGI application for each request in the WSGI environ dictionary.
 
-> 
->     HTTP_HOST: 'docker.example.com:8002'  
->     > PATH_INFO: '/'  
->     > QUERY_STRING: ''  
->     > SERVER_NAME: 'docker.example.com'  
->     > SERVER_PORT: '8002'  
->     > SCRIPT_NAME: ''  
->     > wsgi.url_scheme: 'http'
+```
+    HTTP_HOST: 'docker.example.com:8002'  
+    PATH_INFO: '/'  
+    QUERY_STRING: ''  
+    SERVER_NAME: 'docker.example.com'  
+    SERVER_PORT: '8002'  
+    SCRIPT_NAME: ''  
+    wsgi.url_scheme: 'http'
+```
 
 We can see the affects of the problem by creating a test WSGI application which implements the algorithm for [URL reconstruction](https://www.python.org/dev/peps/pep-3333/#url-reconstruction) as outlined in the WSGI specification \(PEP 3333\).
 
-> 
->     from urllib import quote
->     
->     
->     def reconstruct_url(environ):  
->     >     url = environ['wsgi.url_scheme']+'://'
->     
->     
->         if environ.get('HTTP_HOST'):  
->     >         url += environ['HTTP_HOST']  
->     >     else:  
->     >         url += environ['SERVER_NAME']
->     
->     
->         if environ['wsgi.url_scheme'] == 'https':  
->     >         if environ['SERVER_PORT'] != '443':  
->     >             url += ':' + environ['SERVER_PORT']  
->     >     else:  
->     >         if environ['SERVER_PORT'] != '80':  
->     >             url += ':' + environ['SERVER_PORT']
->     
->     
->         url += quote(environ.get('SCRIPT_NAME', ''))  
->     >     url += quote(environ.get('PATH_INFO', ''))
->     
->     
->         if environ.get('QUERY_STRING'):  
->     >         url += '?' + environ['QUERY_STRING']
->     
->     
->         return url
->     
->     
->     def application(environ, start_response):  
->     >     status = '200 OK'
->     
->     
->         output = reconstruct_url(environ)
->     
->     
->         response_headers = [('Content-type', 'text/plain'),  
->     >                         ('Content-Length', str(len(output)))]  
->     >     start_response(status, response_headers)
->     
->     
->         return [output]
+```python
+    from urllib import quote
+
+    def reconstruct_url(environ):  
+    url = environ['wsgi.url_scheme']+'://'
+
+        if environ.get('HTTP_HOST'):  
+    url += environ['HTTP_HOST']  
+    else:  
+    url += environ['SERVER_NAME']
+
+        if environ['wsgi.url_scheme'] == 'https':  
+    if environ['SERVER_PORT'] != '443':  
+    url += ':' + environ['SERVER_PORT']  
+    else:  
+    if environ['SERVER_PORT'] != '80':  
+    url += ':' + environ['SERVER_PORT']
+
+        url += quote(environ.get('SCRIPT_NAME', ''))  
+    url += quote(environ.get('PATH_INFO', ''))
+
+        if environ.get('QUERY_STRING'):  
+    url += '?' + environ['QUERY_STRING']
+
+        return url
+
+    def application(environ, start_response):  
+    status = '200 OK'
+
+        output = reconstruct_url(environ)
+
+        response_headers = [('Content-type', 'text/plain'),  
+    ('Content-Length', str(len(output)))]  
+    start_response(status, response_headers)
+
+        return [output]
+```
 
 The result from this will be:
 
-> 
->     http://docker.example.com:8002/
+```
+    http://docker.example.com:8002/
+```
 
 What we want to see here though is the public facing URL and not the URL used internally by the proxy. Thus we want:
 
-> 
->     http://blog.example.com/
+```
+    http://blog.example.com/
+```
 
 The consequences of this are that when a WSGI application constructs a URL for use in links within a HTML page response, or in any HTTP response header such as the ‘Location’ header, the URL returned will be wrong.
 
@@ -286,10 +272,11 @@ If the internal site is actually publicly accessible via the URL, then it will w
 
 The solution to this problem is in what additional HTTP request headers the front end Apache will send along with the request when the ‘ProxyPass’ directive is used. These headers appear in the WSGI environ dictionary passed with each request as:
 
-> 
->     HTTP_X_FORWARDED_FOR: '127.0.0.1'  
->     > HTTP_X_FORWARDED_HOST: 'blog.example.com'  
->     > HTTP_X_FORWARDED_SERVER: 'blog.example.com'
+```
+    HTTP_X_FORWARDED_FOR: '127.0.0.1'  
+    HTTP_X_FORWARDED_HOST: 'blog.example.com'  
+    HTTP_X_FORWARDED_SERVER: 'blog.example.com'
+```
 
 Some Python web frameworks provide inbuilt support or extensions which can be used to take such request headers and use them to override the values set for key values in the WSGI environ dictionary.
 
@@ -301,36 +288,34 @@ What the use of the ‘ProxyPass’ directive doesn’t provide us with though i
 
 The first way is to use the Apache ‘mod\_headers’ module to set the request header and hard wire it to be port 80.
 
-> 
->     # blog.example.com
->     
->     
->     <VirtualHost *:80>  
->     > ServerName blog.example.com
->     
->     
->     ProxyPass / http://docker.example.com:8002/  
->     >   
->     > RequestHeader set X-Forwarded-Port 80  
->     > </VirtualHost>
+```bash
+    # blog.example.com
+
+    <VirtualHost *:80>  
+    ServerName blog.example.com
+
+    ProxyPass / http://docker.example.com:8002/  
+    
+    RequestHeader set X-Forwarded-Port 80  
+    </VirtualHost>
+```
 
 The second also uses ‘mod\_headers’, but with the port number being calculated dynamically using ‘mod\_rewrite’.
 
-> 
->     # blog.example.com
->     
->     
->     <VirtualHost *:80>  
->     > ServerName blog.example.com
->     
->     
->     ProxyPass / http://docker.example.com:8002/  
->     >   
->     > RewriteEngine On  
->     > RewriteRule .* - [E=SERVER_PORT:%{SERVER_PORT},NE]  
->     >   
->     > RequestHeader set X-Forwarded-Port %{SERVER_PORT}e  
->     > </VirtualHost>
+```bash
+    # blog.example.com
+
+    <VirtualHost *:80>  
+    ServerName blog.example.com
+
+    ProxyPass / http://docker.example.com:8002/  
+    
+    RewriteEngine On  
+    RewriteRule .* - [E=SERVER_PORT:%{SERVER_PORT},NE]  
+    
+    RequestHeader set X-Forwarded-Port %{SERVER_PORT}e  
+    </VirtualHost>
+```
 
 In either case, the request header is passed in the WSGI environ dictionary of the back end WSGI application as ‘HTTP\_X\_FORWARDED\_PORT’ and similar to how ‘HTTP\_FORWARDED\_HOST’ was used to override ‘HTTP\_HOST’, can be used to override ‘SERVER\_PORT’.
 
@@ -344,18 +329,20 @@ Because of the fact that Python web frameworks may not provide a feature to hand
 
 In this case where we are using the ‘mod\_wsgi-docker’ image, we would change:
 
-> 
->     FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
->     > CMD [ "site.wsgi" ]
+```dockerfile
+    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+    CMD [ "site.wsgi" ]
+```
 
 to:
 
-> 
->     FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
->     > CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
->     >       "--trust-proxy-header", "X-Forwarded-Port", \  
->     >       "--trust-proxy-header", "X-Forwarded-For", \  
->     >       "site.wsgi" ]
+```dockerfile
+    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+    CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
+    "--trust-proxy-header", "X-Forwarded-Port", \  
+    "--trust-proxy-header", "X-Forwarded-For", \  
+    "site.wsgi" ]
+```
 
 Built in to mod\_wsgi is knowledge of what the different headers are used for and when they are marked as being trusted, the appropriate override will be done. In this case, as a result of the headers which were listed as trusted, we update ‘HTTP\_HOST’, ‘SERVER\_PORT’ and ‘REMOTE\_ADDR’.
 
@@ -375,21 +362,23 @@ If this scenario is a concern, then mod\_wsgi supports an additional feature whe
 
 Imagining therefore that the IP address of the host where the front end Apache was running was ‘192.168.59.3’, we would use the ‘—trust-proxy’ option to ‘mod\_wsgi-express’ as:
 
-> 
->     FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
->     > CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
->     >       "--trust-proxy-header", "X-Forwarded-Port", \  
->     >       "--trust-proxy-header", "X-Forwarded-For", \  
->     >       "--trust-proxy", "192.168.59.3", "site.wsgi" ]
+```dockerfile
+    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+    CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
+    "--trust-proxy-header", "X-Forwarded-Port", \  
+    "--trust-proxy-header", "X-Forwarded-For", \  
+    "--trust-proxy", "192.168.59.3", "site.wsgi" ]
+```
 
 If multiple proxies were being used, then the ‘—trust-proxy’ option can be supplied more than once. Alternatively, an IP subnet description can be used.
 
-> 
->     FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
->     > CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
->     >       "--trust-proxy-header", "X-Forwarded-Port", \  
->     >       "--trust-proxy-header", "X-Forwarded-For", \  
->     >       "--trust-proxy", "192.168.59.0/24", "site.wsgi" ]
+```dockerfile
+    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+    CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
+    "--trust-proxy-header", "X-Forwarded-Port", \  
+    "--trust-proxy-header", "X-Forwarded-For", \  
+    "--trust-proxy", "192.168.59.0/24", "site.wsgi" ]
+```
 
 In addition to being able to list an immediate proxy, you can supply IP addresses of other proxies if the request needs to traverse through more than one. These would come into play with determining how far back in the proxy chain, the value of the ‘X-Fowarded-For’ header can be trusted in determining the true client IP address. In other words, the client IP address will be interpreted as being that immediately before the forward most trusted host.
 
@@ -401,71 +390,69 @@ The changes described above cover the situation of a normal HTTP connection. Wha
 
 The original Apache configuration in this case for each site would have been something like:
 
-> 
->     # blog.example.com
->     
->     
->     <VirtualHost *:80>  
->     > ServerName blog.example.com  
->     >   
->     > WSGIDaemonProcess blog.example.com  
->     >   
->     > WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
->     >     process-group=blog.example.com application-group=%{GLOBAL}  
->     >   
->     > <Directory /some/path/blog.example.com>  
->     > <Files site.wsgi>  
->     > Require all granted  
->     > </Files>  
->     > </Directory>  
->     > </VirtualHost>  
->     >   
->     > <VirtualHost *:443>  
->     > ServerName blog.example.com  
->     >   
->     > SSLEngine On  
->     > SSLCertificateFile /some/path/blog.example.com/server.crt  
->     > SSLCertificateKeyFile /some/path/blog.example.com/server.key  
->     >   
->     > WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
->     >     process-group=blog.example.com application-group=%{GLOBAL}
->     
->     
->     <Directory /some/path/blog.example.com>  
->     > <Files site.wsgi>  
->     > Require all granted  
->     > </Files>  
->     > </Directory>  
->     > </VirtualHost>
+```bash
+    # blog.example.com
+
+    <VirtualHost *:80>  
+    ServerName blog.example.com  
+    
+    WSGIDaemonProcess blog.example.com  
+    
+    WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
+    process-group=blog.example.com application-group=%{GLOBAL}  
+    
+    <Directory /some/path/blog.example.com>  
+    <Files site.wsgi>  
+    Require all granted  
+    </Files>  
+    </Directory>  
+    </VirtualHost>  
+    
+    <VirtualHost *:443>  
+    ServerName blog.example.com  
+    
+    SSLEngine On  
+    SSLCertificateFile /some/path/blog.example.com/server.crt  
+    SSLCertificateKeyFile /some/path/blog.example.com/server.key  
+    
+    WSGIScriptAlias / /some/path/blog.example.com/site.wsgi \  
+    process-group=blog.example.com application-group=%{GLOBAL}
+
+    <Directory /some/path/blog.example.com>  
+    <Files site.wsgi>  
+    Require all granted  
+    </Files>  
+    </Directory>  
+    </VirtualHost>
+```
 
 In separating out the site into a separate Docker container, as the front end Apache is still the initial termination point, it will still be necessary for it to also handle the secure connections. So long as connections through to the site running under Docker are in a secure non public network, then we can stick with just using a normal HTTP connection between the front end and the site running under Docker.
 
 The updated Apache configuration when it is changed to proxy the site through to the Docker instance will be:
 
-> 
->     # blog.example.com
->     
->     
->     <VirtualHost *:80>  
->     > ServerName blog.example.com
->     
->     
->     ProxyPass / http://docker.example.com:8002/  
->     >   
->     > RequestHeader set X-Forwarded-Port 80  
->     > </VirtualHost>  
->     >   
->     > <VirtualHost *:443>  
->     > ServerName blog.example.com  
->     >   
->     > SSLEngine On  
->     > SSLCertificateFile /some/path/blog.example.com/server.crt  
->     > SSLCertificateKeyFile /some/path/blog.example.com/server.key  
->     >   
->     > ProxyPass / http://docker.example.com:8002/  
->     >   
->     > RequestHeader set X-Forwarded-Port 443  
->     > </VirtualHost>
+```bash
+    # blog.example.com
+
+    <VirtualHost *:80>  
+    ServerName blog.example.com
+
+    ProxyPass / http://docker.example.com:8002/  
+    
+    RequestHeader set X-Forwarded-Port 80  
+    </VirtualHost>  
+    
+    <VirtualHost *:443>  
+    ServerName blog.example.com  
+    
+    SSLEngine On  
+    SSLCertificateFile /some/path/blog.example.com/server.crt  
+    SSLCertificateKeyFile /some/path/blog.example.com/server.key  
+    
+    ProxyPass / http://docker.example.com:8002/  
+    
+    RequestHeader set X-Forwarded-Port 443  
+    </VirtualHost>
+```
 
 Checking access to our site over the secure connection with our test script which reconstructs the URL and we find though we are not getting the desired result. Specifically, the reconstructed URL is using ‘http’ as the protocol scheme and not ‘https’. This would mean any URLs generated in HTML responses or in a response header such as ‘Location’, would cause users to start using an insecure connection.
 
@@ -473,43 +460,43 @@ The problem in this case is that the ‘wsgi.url\_scheme’ value in the WSGI en
 
 For passing information about whether a secure connection was used, there is no one HTTP header which is universally accepted as a de-facto standard. There are actually about five different headers which different software packages have supported. In our example here we will use the ‘X-Forwarded-Scheme’ header, setting it to be ‘https’ when that protocol scheme is being used.
 
-> 
->     # blog.example.com
->     
->     
->     <VirtualHost *:80>  
->     > ServerName blog.example.com
->     
->     
->     ProxyPass / http://docker.example.com:8002/  
->     >   
->     > RequestHeader set X-Forwarded-Port 80  
->     > </VirtualHost>  
->     >   
->     > <VirtualHost *:443>  
->     > ServerName blog.example.com  
->     >   
->     > SSLEngine On  
->     > SSLCertificateFile /some/path/blog.example.com/server.crt  
->     > SSLCertificateKeyFile /some/path/blog.example.com/server.key  
->     >   
->     > ProxyPass / http://docker.example.com:8002/  
->     >   
->     > RequestHeader set X-Forwarded-Port 443  
->     > RequestHeader set X-Forwarded-Scheme https  
->     > </VirtualHost>
+```bash
+    # blog.example.com
+
+    <VirtualHost *:80>  
+    ServerName blog.example.com
+
+    ProxyPass / http://docker.example.com:8002/  
+    
+    RequestHeader set X-Forwarded-Port 80  
+    </VirtualHost>  
+    
+    <VirtualHost *:443>  
+    ServerName blog.example.com  
+    
+    SSLEngine On  
+    SSLCertificateFile /some/path/blog.example.com/server.crt  
+    SSLCertificateKeyFile /some/path/blog.example.com/server.key  
+    
+    ProxyPass / http://docker.example.com:8002/  
+    
+    RequestHeader set X-Forwarded-Port 443  
+    RequestHeader set X-Forwarded-Scheme https  
+    </VirtualHost>
+```
 
 Determining the value for this header could also have been done using mod\_rewrite, but we will stick with hard wiring the value. We only need to do this for the ‘VirtualHost’ corresponding to the secure connection, i.e., port 443, as the lack of the header will be taken as meaning a HTTP connection was used.
 
 In the Dockerfile where the options to mod\_wsgi-express are being supplied, we now add this header as an additional trusted proxy header and mod\_wsgi will ensure that the correct thing is done.
 
-> 
->     FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
->     > CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
->     >       "--trust-proxy-header", "X-Forwarded-Port", \  
->     >       "--trust-proxy-header", "X-Forwarded-For", \  
->     >       "--trust-proxy-header", "X-Forwarded-Scheme", \  
->     >       "site.wsgi" ]
+```dockerfile
+    FROM grahamdumpleton/mod-wsgi-docker:python-2.7-onbuild  
+    CMD [ "--trust-proxy-header", "X-Forwarded-Host", \  
+    "--trust-proxy-header", "X-Forwarded-Port", \  
+    "--trust-proxy-header", "X-Forwarded-For", \  
+    "--trust-proxy-header", "X-Forwarded-Scheme", \  
+    "site.wsgi" ]
+```
 
 The end result will be that where a secure connection was used at the front end Apache, then mod\_wsgi running in the Docker instance will override ‘wsgi.url\_scheme’ to be ‘https’ and URL reconstruction will then be correct.
 

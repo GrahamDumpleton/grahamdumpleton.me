@@ -24,17 +24,13 @@ What happened therefore is that documentation for some Python web frameworks and
 For some more background on this issue you can read my prior [blog post](/posts/2009/04/wsgi-and-printing-to-standard-output/) back in 2009 about it. In short though, if you are using:
     
     
-```
-WSGIRestrictStdout Off
-```
+    WSGIRestrictStdout Off
 
 in the Apache configuration file, or using:
     
     
-```
-import sys  
-sys.stdout = sys.stderr
-```
+    import sys  
+    sys.stdout = sys.stderr
 
 in the WSGI script file, you do not need to if using mod\_wsgi version 3.0 or later. 
 
@@ -57,18 +53,14 @@ The next thing you need to do is if you are using the worker or event MPMs of Ap
 Finally, you then need to manually start the Apache server from a shell, giving it the '-DONE\_PROCESS' or -X' option.
     
     
-```
-/usr/sbin/httpd -X
-```
+    /usr/sbin/httpd -X
 
 If you are on a Linux system, it is possible you will also need to set the 'APACHE\_RUN\_USER' and 'APACHE\_RUN\_GROUP' environment variables as well. This is because on some Linux systems, the standard Apache configuration is dependent on these environment variables having been set by the 'apachectl' script. If needing to set them, they should be set to the user and group of the standard Apache user.
 
 Do all that and you can now place in your code:
     
     
-```
-import pdb; pdb.set_trace()
-```
+    import pdb; pdb.set_trace()
 
 and when that code is executed you will be thrown into an interactive pdb session where you can interact with your WSGI application. To exit out of the pdb session enter 'cont' and it will continue with the request.
 

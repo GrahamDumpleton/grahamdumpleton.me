@@ -16,9 +16,10 @@ We are getting close to the end of this initial [series of posts](/posts/2015/12
 
 Although we covered various issues and had to make changes to the existing ‘Dockerfile’ used with the ‘jupyter/notebook’ image to get it all working correctly, there was one issue that the Docker image for ‘jupyter/notebook’ had already addressed which needs a bit of explanation. This related to the existing ‘ENTRYPOINT’ statement used in the ‘Dockerfile’ for ‘jupyter/notebook’.
 
-> 
->     ENTRYPOINT ["tini", "--"]  
->     > CMD ["jupyter", "notebook"]
+```dockerfile
+    ENTRYPOINT ["tini", "--"]  
+    CMD ["jupyter", "notebook"]
+```
 
 Specifically, the ‘Dockerfile’ was wrapping the running of the ‘jupyter notebook’ command with the ‘tini’ command.
 
@@ -58,59 +59,52 @@ Logically it isn’t therefore possible to reparent an orphaned process created 
 
 In order to delve more into this issue and in particular its relevance to when running a Python web server, as a next step lets create a simple Python WSGI application which can be used to trigger orphan processes. Initially we will use the WSGI server implemented by the ‘wsgiref’ module in the Python standard library, but we can also run it up with other WSGI servers to see how they behave as well.
 
-> 
->     from __future__ import print_function
->     
->     
->     import os
->     
->     
->     def orphan():  
->     >     print('orphan: %d' % os.getpid())  
->     >     os._exit(0)
->     
->     
->     def child():  
->     >     print('child: %d' % os.getpid())  
->     >     newpid = os.fork()  
->     >     pids = (os.getpid(), newpid)  
->     >     if newpid == 0:  
->     >         orphan()  
->     >     else:  
->     >         pids = (os.getpid(), newpid)  
->     >         print("child: %d, orphan: %d" % pids)  
->     >         os._exit(0)
->     
->     
->     def parent():  
->     >      newpid = os.fork()  
->     >      if newpid == 0:  
->     >          child()  
->     >      else:  
->     >          pids = (os.getpid(), newpid)  
->     >          print("parent: %d, child: %d" % pids)  
->     >          os.waitpid(newpid, 0)  
->     >   
->     > def application(environ, start_response):  
->     >     status = '200 OK'  
->     >     output = b'Hello World!'  
->     >     response_headers = [('Content-type', 'text/plain'),  
->     >                         ('Content-Length', str(len(output)))]
->     
->     
->         start_response(status, response_headers)
->     
->     
->         parent()
->     
->     
->         return [output]  
->     >   
->     > from wsgiref.simple_server import make_server
->     
->     
->     httpd = make_server('', 8000, application)  
->     > httpd.serve_forever()
+```python
+    from __future__ import print_function
+
+    import os
+
+    def orphan():  
+    print('orphan: %d' % os.getpid())  
+    os._exit(0)
+
+    def child():  
+    print('child: %d' % os.getpid())  
+    newpid = os.fork()  
+    pids = (os.getpid(), newpid)  
+    if newpid == 0:  
+    orphan()  
+    else:  
+    pids = (os.getpid(), newpid)  
+    print("child: %d, orphan: %d" % pids)  
+    os._exit(0)
+
+    def parent():  
+    newpid = os.fork()  
+    if newpid == 0:  
+    child()  
+    else:  
+    pids = (os.getpid(), newpid)  
+    print("parent: %d, child: %d" % pids)  
+    os.waitpid(newpid, 0)  
+    
+    def application(environ, start_response):  
+    status = '200 OK'  
+    output = b'Hello World!'  
+    response_headers = [('Content-type', 'text/plain'),  
+    ('Content-Length', str(len(output)))]
+
+        start_response(status, response_headers)
+
+        parent()
+
+        return [output]  
+    
+    from wsgiref.simple_server import make_server
+
+    httpd = make_server('', 8000, application)  
+    httpd.serve_forever()
+```
 
 The way the test runs is that each time a web request is received, the web application process will fork twice. The web application process itself will be made to wait on the exit of the child process it created. That child process though will not wait on the further child process it had created, thus creating an orphaned process as a result.
 
@@ -173,18 +167,19 @@ For example, if the application process were using the ‘wait\(\)’ system cal
 
 Finally getting back to the IPython example we have been working with, it has been found that when running the ‘jupyter notebook’ application as process ID ‘1’, it fails to start up properly kernel processes for running of individual notebook instances. The logged messages in this case are:
 
-> 
->     [I 10:19:33.566 NotebookApp] Kernel started: 1ac58cd9-c717-44ef-b0bd-80a377177918  
->     > [I 10:19:36.566 NotebookApp] KernelRestarter: restarting kernel (1/5)  
->     > [I 10:19:39.573 NotebookApp] KernelRestarter: restarting kernel (2/5)  
->     > [I 10:19:42.582 NotebookApp] KernelRestarter: restarting kernel (3/5)  
->     > [W 10:19:43.578 NotebookApp] Timeout waiting for kernel_info reply from 1ac58cd9-c717-44ef-b0bd-80a377177918  
->     > [I 10:19:45.589 NotebookApp] KernelRestarter: restarting kernel (4/5)  
->     > WARNING:root:kernel 1ac58cd9-c717-44ef-b0bd-80a377177918 restarted  
->     > [W 10:19:48.596 NotebookApp] KernelRestarter: restart failed  
->     > [W 10:19:48.597 NotebookApp] Kernel 1ac58cd9-c717-44ef-b0bd-80a377177918 died, removing from map.  
->     > ERROR:root:kernel 1ac58cd9-c717-44ef-b0bd-80a377177918 restarted failed!  
->     > [W 10:19:48.610 NotebookApp] Kernel deleted before session
+```python
+    [I 10:19:33.566 NotebookApp] Kernel started: 1ac58cd9-c717-44ef-b0bd-80a377177918  
+    [I 10:19:36.566 NotebookApp] KernelRestarter: restarting kernel (1/5)  
+    [I 10:19:39.573 NotebookApp] KernelRestarter: restarting kernel (2/5)  
+    [I 10:19:42.582 NotebookApp] KernelRestarter: restarting kernel (3/5)  
+    [W 10:19:43.578 NotebookApp] Timeout waiting for kernel_info reply from 1ac58cd9-c717-44ef-b0bd-80a377177918  
+    [I 10:19:45.589 NotebookApp] KernelRestarter: restarting kernel (4/5)  
+    WARNING:root:kernel 1ac58cd9-c717-44ef-b0bd-80a377177918 restarted  
+    [W 10:19:48.596 NotebookApp] KernelRestarter: restart failed  
+    [W 10:19:48.597 NotebookApp] Kernel 1ac58cd9-c717-44ef-b0bd-80a377177918 died, removing from map.  
+    ERROR:root:kernel 1ac58cd9-c717-44ef-b0bd-80a377177918 restarted failed!  
+    [W 10:19:48.610 NotebookApp] Kernel deleted before session
+```
 
 I have been unable to find that anyone has been able to work out the specific cause, but I suspect it is falling foul of the second issue above. That is, the exit statuses from those orphaned processes are confusing the code managing the startup of the kernel processes, making it think the kernel processes are in fact failing, causing it to attempt to restart them repeatedly.
 
@@ -206,8 +201,9 @@ As to the quick or inadvertent hack that some rely on, lets look at how a ‘CMD
 
 The recommended way of using ‘CMD’ in a ‘Dockerfile’ would be to write:
 
-> 
->     CMD [ "python", "server_wsgiref.py" ]
+```dockerfile
+    CMD [ "python", "server_wsgiref.py" ]
+```
 
 This is what was used above where we saw within the Docker container.
 
@@ -217,8 +213,9 @@ As has already been explained, this results in our application running as proces
 
 Another way of using ‘CMD’ in a ‘Dockerfile’ is to write:
 
-> 
->     CMD python server_wsgiref.py
+```dockerfile
+    CMD python server_wsgiref.py
+```
 
 Our application still runs, but this isn’t doing the same thing as when we supplied a list of arguments to ‘CMD’.
 
@@ -230,8 +227,9 @@ With this way of specifying the ‘CMD’ our application is no longer running a
 
 This has occurred because supplying the plain command line to ‘CMD’ actually results in the equivalent of:
 
-> 
->     CMD [ "sh", "-c", "python server_wsgiref.py" ]
+```dockerfile
+    CMD [ "sh", "-c", "python server_wsgiref.py" ]
+```
 
 Thus the reason for a shell process being introduced into the process hierarchy as process ID ‘1’.
 
@@ -243,16 +241,17 @@ Now this isn’t the only way you might end up with an instance of ‘/bin/sh’
 
 Another common scenario where this ends up occurring is where someone using Docker uses a shell script with the ‘CMD’ statement so that they can do special setup prior to actually running their application. You thus can often find something like:
 
-> 
->     CMD [ "/app/start.sh" ]
+```dockerfile
+    CMD [ "/app/start.sh" ]
+```
 
 The contents of the ’start.sh’ script might then be:
 
-> 
->     #!/bin/sh
->     
->     
->     python server_wsgiref.py
+```
+    #!/bin/sh
+
+    python server_wsgiref.py
+```
 
 Using this approach, what we end up with is:
 
@@ -264,11 +263,11 @@ The reason our application didn’t end up as process ID ‘1’ in this case is
 
 Whenever using a shell script as a ‘CMD’ like this, you should always ensure that when running your actual application from the shell script, that you do so using ‘exec’. That is:
 
-> 
->     #!/bin/sh
->     
->     
->     exec python server_wsgiref.py
+```
+    #!/bin/sh
+
+    exec python server_wsgiref.py
+```
 
 By using ‘exec’ you ensure that your application process takes over and replaces the script process, thus resulting in it running as process ID ‘1’.
 
@@ -286,24 +285,21 @@ It is therefore important that signals always be received by the main applicatio
 
 One can attempt to catch signals in the shell script and forward them on, but this does get a bit tricky as you also have to ensure that you wait for the wrapped application process to shutdown properly when it is passed a signal that would cause it to exit. As I have previously shown in an [earlier post](/posts/2015/01/using-alternative-wsgi-servers-with/) for other reasons, you might be able to use in such circumstances the shell script:
 
-> 
->     #!/bin/sh
->     
->     
->     trap 'kill -TERM $PID' TERM INT
->     
->     
->     python server_wsgiref.py &
->     
->     
->     PID=$!  
->     > wait $PID  
->     > trap - TERM INT  
->     > wait $PID  
->     > STATUS=$?
->     
->     
->     exit $STATUS
+```
+    #!/bin/sh
+
+    trap 'kill -TERM $PID' TERM INT
+
+    python server_wsgiref.py &
+
+    PID=$!  
+    wait $PID  
+    trap - TERM INT  
+    wait $PID  
+    STATUS=$?
+
+    exit $STATUS
+```
 
 To be frank though, rather than hoping this will work reliably, you are better off using a purpose built monitoring process for this particular task.
 
@@ -315,8 +311,9 @@ The folks at Phusion in that [blog post](https://blog.phusion.nl/2015/01/20/dock
 
 Because of the overheads of bringing in additional packages where you don’t necessarily want them, my preferred solution for a minimal ‘init’ process for handling reaping of zombies and the propagation of signals to the managed process is the ‘[tini](https://github.com/krallin/tini)’ program. This is the same program that the ‘jupyter/notebook’ also makes use of and we saw mentioned in the ‘ENTRYPOINT’ statement of the ‘Dockerfile’.
 
-> 
->     ENTRYPOINT ["tini", "--"]
+```dockerfile
+    ENTRYPOINT ["tini", "--"]
+```
 
 All ’tini' does is spawn your application and wait for it to exit, all the while reaping zombies and performing signal forwarding. In other words, it is specifically built for this task, relieving you of worrying about whether your own application is going to do the correct thing in relation to reaping of zombie processes.
 

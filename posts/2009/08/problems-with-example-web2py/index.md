@@ -24,34 +24,32 @@ I still don't get much free time these days, but a couple of weeks back I did fi
 Not necessarily the original source of the broken configuration, but the web2py book sample paragraphs available at this time lists the following as configuration for HTTP only configuration:
     
     
-```
-1  ### for requests on port 80  
-2  NameVirtualHost*:80  
-3  <virualhost *:80>  
-4    ### set the servername  
-5    ServerName example.com  
-6    ### alias the location of applications (for static files)  
-7    Alias / /home/web2py/applications/  
-8    ### setup WSGI  
-9    WSGIScriptAlias / /home/web2py/wsgihandler.py  
-10   WSGIDaemonProcess web2py user=www-data group=www-data \  
-11     home=/home/web2py/ \  
-12     processes=10 maximum-requests=500  
-13   ### static files do not need WSGI  
-14   <locationmatch "ˆ(/[\w_]*/static/.*)">  
-15     Order Allow,Deny  
-16     Allow from all  
-17   <locationmatch>  
-18   ### everything else goes over WSGI  
-19   <location "/">  
-20     Order deny,allow  
-21     Allow from all  
-22     WSGIProcessGroup web2py  
-23   </location>  
-24   LogFormat "%h %l %u %t \"%r\" %>s %b" common  
-25   CustomLog /var/log/apache2/access.log common  
-26 </virtualhost>  
-```
+    1  ### for requests on port 80  
+    2  NameVirtualHost*:80  
+    3  <virualhost *:80>  
+    4    ### set the servername  
+    5    ServerName example.com  
+    6    ### alias the location of applications (for static files)  
+    7    Alias / /home/web2py/applications/  
+    8    ### setup WSGI  
+    9    WSGIScriptAlias / /home/web2py/wsgihandler.py  
+    10   WSGIDaemonProcess web2py user=www-data group=www-data \  
+    11     home=/home/web2py/ \  
+    12     processes=10 maximum-requests=500  
+    13   ### static files do not need WSGI  
+    14   <locationmatch "ˆ(/[\w_]*/static/.*)">  
+    15     Order Allow,Deny  
+    16     Allow from all  
+    17   <locationmatch>  
+    18   ### everything else goes over WSGI  
+    19   <location "/">  
+    20     Order deny,allow  
+    21     Allow from all  
+    22     WSGIProcessGroup web2py  
+    23   </location>  
+    24   LogFormat "%h %l %u %t \"%r\" %>s %b" common  
+    25   CustomLog /var/log/apache2/access.log common  
+    26 </virtualhost>  
     
 
 There are four principal things that are being attempted here. These are:
@@ -92,14 +90,12 @@ Under normal circumstances the setting up of access controls as to what files in
 The overall principal therefore is that you deny access to the whole file system and then only allow access to specific parts of the file system that need to be accessed. The directives in main Apache configuration file that enforce this are:
     
     
-```
-<Directory />  
-Options FollowSymLinks  
-AllowOverride None  
-Order deny,allow  
-Deny from all  
-</Directory>
-```
+    <Directory />  
+    Options FollowSymLinks  
+    AllowOverride None  
+    Order deny,allow  
+    Deny from all  
+    </Directory>
 
   
 

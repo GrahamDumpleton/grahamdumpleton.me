@@ -43,16 +43,20 @@ For this first instalment I will simply go through the various ways in which you
 Everyone should know what the Python decorator syntax is.  
 
 
-> @function\_wrapper  
->  def function\(\):  
->  pass
+```python
+@function\_wrapper  
+ def function\(\):  
+ pass
+```
 
 The '@' annotation to denote the application of a decorator was only added in Python 2.4. It is actually though only fancy syntactic sugar. It is actually equivalent to writing:  
 
 
-> def function\(\):  
->  pass  
->  function = function\_wrapper\(function\)
+```python
+def function\(\):  
+ pass  
+ function = function\_wrapper\(function\)
+```
 
 and what you would have done prior to Python 2.4.  
   
@@ -68,15 +72,19 @@ What is referred to as monkey patching achieves pretty much the same outcome, th
 Although I mentioned using function closures to implement a decorator, to understand how the more generic case of a function wrapper works it is more illustrative to show how to implement it using a class.  
 
 
-> class function\_wrapper\(object\):  
->  def \_\_init\_\_\(self, wrapped\):  
->  self.wrapped = wrapped  
->  def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
->  return self.wrapped\(\*args, \*\*kwargs\)
+```python
+class function\_wrapper\(object\):  
+ def \_\_init\_\_\(self, wrapped\):  
+ self.wrapped = wrapped  
+ def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
+ return self.wrapped\(\*args, \*\*kwargs\)
+```
 
-> @function\_wrapper  
->  def function\(\):  
->  pass
+```python
+@function\_wrapper  
+ def function\(\):  
+ pass
+```
 
 The class instance in this example is initialised with and records the original function object. When the now wrapped function is called, it is actually the \_\_call\_\_\(\) method of the wrapper object which is invoked. This in turn would then call the original wrapped function.  
   
@@ -85,14 +93,18 @@ Simply passing through the call to the wrapper alone isn’t particularly useful
 Using a class to implement the wrapper for a decorator isn't actually that popular. Instead a function closure is more often used. In this case a nested function is used as the wrapper and it is that which is returned by the decorator function. When the now wrapped function is called, the nested function is actually being called. This in turn would again then call the original wrapped function.  
 
 
-> def function\_wrapper\(wrapped\):  
->  def \_wrapper\(\*args, \*\*kwargs\):  
->  return wrapped\(\*args, \*\*kwargs\)  
->  return \_wrapper 
+```python
+def function\_wrapper\(wrapped\):  
+ def \_wrapper\(\*args, \*\*kwargs\):  
+ return wrapped\(\*args, \*\*kwargs\)  
+ return \_wrapper 
+```
 
-> @function\_wrapper  
->  def function\(\):  
->  pass
+```python
+@function\_wrapper  
+ def function\(\):  
+ pass
+```
 
 In this example the nested function doesn't actually get passed the original wrapped function explicitly. But it will still have access to it via the arguments given to the outer function call. This does away with the need to create a class to hold what was the wrapped function and thus why it is convenient and generally more popular.  
   
@@ -104,112 +116,154 @@ In this example the nested function doesn't actually get passed the original wra
 Now when we talk about functions, we expect them to specify properties which describe them as well as document what they do. These include the \_\_name\_\_ and \_\_doc\_\_ attributes. When we use a wrapper though, this no longer works as we expect as in the case of using a function closure, the details of the nested function are returned.  
 
 
-> def function\_wrapper\(wrapped\):  
->  def \_wrapper\(\*args, \*\*kwargs\):  
->  return wrapped\(\*args, \*\*kwargs\)  
->  return \_wrapper 
+```python
+def function\_wrapper\(wrapped\):  
+ def \_wrapper\(\*args, \*\*kwargs\):  
+ return wrapped\(\*args, \*\*kwargs\)  
+ return \_wrapper 
+```
 
-> @function\_wrapper  
->  def function\(\):  
->  pass 
+```python
+@function\_wrapper  
+ def function\(\):  
+ pass 
+```
 
-> >>> print\(function.\_\_name\_\_\)  
->  \_wrapper
+```bash
+>>> print\(function.\_\_name\_\_\)  
+ \_wrapper
+```
 
 If we use a class to implement the wrapper, as class instances do not normally have a \_\_name\_\_ attribute, attempting to access the name of the function will actually result in an AttributeError exception.  
 
 
-> class function\_wrapper\(object\):  
->  def \_\_init\_\_\(self, wrapped\):  
->  self.wrapped = wrapped  
->  def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
->  return self.wrapped\(\*args, \*\*kwargs\) 
+```python
+class function\_wrapper\(object\):  
+ def \_\_init\_\_\(self, wrapped\):  
+ self.wrapped = wrapped  
+ def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
+ return self.wrapped\(\*args, \*\*kwargs\) 
+```
 
-> @function\_wrapper  
->  def function\(\):  
->  pass 
+```python
+@function\_wrapper  
+ def function\(\):  
+ pass 
+```
 
-> >>> print\(function.\_\_name\_\_\)  
->  Traceback \(most recent call last\):  
->  File "<stdin>", line 1, in <module>  
->  AttributeError: 'function\_wrapper' object has no attribute '\_\_name\_\_'
+```bash
+>>> print\(function.\_\_name\_\_\)  
+ Traceback \(most recent call last\):  
+ File "<stdin>", line 1, in <module>  
+ AttributeError: 'function\_wrapper' object has no attribute '\_\_name\_\_'
+```
 
 The solution here when using a function closure is to copy the attributes of interest from the wrapped function to the nested wrapper function. This will then result in the function name and documentation strings being correct.  
 
 
-> def function\_wrapper\(wrapped\):  
->  def \_wrapper\(\*args, \*\*kwargs\):  
->  return wrapped\(\*args, \*\*kwargs\)  
->  \_wrapper.\_\_name\_\_ = wrapped.\_\_name\_\_  
->  \_wrapper.\_\_doc\_\_ = wrapped.\_\_doc\_\_  
->  return \_wrapper 
+```python
+def function\_wrapper\(wrapped\):  
+ def \_wrapper\(\*args, \*\*kwargs\):  
+ return wrapped\(\*args, \*\*kwargs\)  
+ \_wrapper.\_\_name\_\_ = wrapped.\_\_name\_\_  
+ \_wrapper.\_\_doc\_\_ = wrapped.\_\_doc\_\_  
+ return \_wrapper 
+```
 
-> @function\_wrapper  
->  def function\(\):  
->  pass 
+```python
+@function\_wrapper  
+ def function\(\):  
+ pass 
+```
 
-> >>> print\(function.\_\_name\_\_\)  
->  function
+```bash
+>>> print\(function.\_\_name\_\_\)  
+ function
+```
 
 Needing to manually copy the attributes is laborious, and would need to be updated if any further special attributes were added which needed to be copied. For example, we should also copy the \_\_module\_\_ attribute, and in Python 3 the \_\_qualname\_\_ and \_\_annotations\_\_ attributes were added. To aid in getting this right, the Python standard library provides the functools.wraps\(\) decorator which does this task for you.  
 
 
-> import functools 
+```python
+import functools 
+```
 
-> def function\_wrapper\(wrapped\):  
->  @functools.wraps\(wrapped\)  
->  def \_wrapper\(\*args, \*\*kwargs\):  
->  return wrapped\(\*args, \*\*kwargs\)  
->  return \_wrapper 
+```python
+def function\_wrapper\(wrapped\):  
+ @functools.wraps\(wrapped\)  
+ def \_wrapper\(\*args, \*\*kwargs\):  
+ return wrapped\(\*args, \*\*kwargs\)  
+ return \_wrapper 
+```
 
-> @function\_wrapper  
->  def function\(\):  
->  pass 
+```python
+@function\_wrapper  
+ def function\(\):  
+ pass 
+```
 
-> >>> print\(function.\_\_name\_\_\)  
->  function
+```bash
+>>> print\(function.\_\_name\_\_\)  
+ function
+```
 
 If using a class to implement the wrapper, instead of the functools.wraps\(\) decorator, we would use the functools.update\_wrapper\(\) function.  
 
 
-> import functools 
+```python
+import functools 
+```
 
-> class function\_wrapper\(object\):  
->  def \_\_init\_\_\(self, wrapped\):  
->  self.wrapped = wrapped  
->  functools.update\_wrapper\(self, wrapped\)  
->  def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
->  return self.wrapped\(\*args, \*\*kwargs\)
+```python
+class function\_wrapper\(object\):  
+ def \_\_init\_\_\(self, wrapped\):  
+ self.wrapped = wrapped  
+ functools.update\_wrapper\(self, wrapped\)  
+ def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
+ return self.wrapped\(\*args, \*\*kwargs\)
+```
 
 So we might have a solution to ensuring the function name and any documentation string is correct in the form of functools.wraps\(\), but actually we don't and this will not always work as I will show below.  
   
 Now what if we want to query the argument specification for a function. This also fails and instead of returning the argument specification for the wrapped function, it returns that of the wrapper. In the case of using a function closure, this is the nested function. The decorator is therefore not signature preserving.  
 
 
-> import inspect 
+```python
+import inspect 
+```
 
-> def function\_wrapper\(wrapped\): ...  
->  @function\_wrapper  
->  def function\(arg1, arg2\): pass 
+```python
+def function\_wrapper\(wrapped\): ...  
+ @function\_wrapper  
+ def function\(arg1, arg2\): pass 
+```
 
-> >>> print\(inspect.getargspec\(function\)\)  
->  ArgSpec\(args=\[\], varargs='args', keywords='kwargs', defaults=None\)
+```bash
+>>> print\(inspect.getargspec\(function\)\)  
+ ArgSpec\(args=\[\], varargs='args', keywords='kwargs', defaults=None\)
+```
 
 A worse situation again occurs with the class based wrapper. This time we get an exception complaining that the wrapped function isn't actually a function. As a result it isn't possible to derive an argument specification at all, even though the wrapped function is actually still callable.  
 
 
-> class function\_wrapper\(object\): ... 
+```python
+class function\_wrapper\(object\): ... 
+```
 
-> @function\_wrapper  
->  def function\(arg1, arg2\): pass 
+```python
+@function\_wrapper  
+ def function\(arg1, arg2\): pass 
+```
 
-> >>> print\(inspect.getargspec\(function\)\)  
->  Traceback \(most recent call last\):  
->  File "...", line XXX, in <module>  
->  print\(inspect.getargspec\(function\)\)  
->  File ".../inspect.py", line 813, in getargspec  
->  raise TypeError\('\{\!r\} is not a Python function'.format\(func\)\)  
->  TypeError: <\_\_main\_\_.function\_wrapper object at 0x107e0ac90> is not a Python function
+```bash
+>>> print\(inspect.getargspec\(function\)\)  
+ Traceback \(most recent call last\):  
+ File "...", line XXX, in <module>  
+ print\(inspect.getargspec\(function\)\)  
+ File ".../inspect.py", line 813, in getargspec  
+ raise TypeError\('\{\!r\} is not a Python function'.format\(func\)\)  
+ TypeError: <\_\_main\_\_.function\_wrapper object at 0x107e0ac90> is not a Python function
+```
 
 Another example of introspection one can do is to use inspect.getsource\(\) to get back the source code related to a function. This also will fail, with it giving the source code for the nested wrapper function in the case of a function closure and again failing outright with an exception in the case of the class based wrapper.  
   
@@ -221,28 +275,38 @@ Another example of introspection one can do is to use inspect.getsource\(\) to g
 Now, as well as normal functions, decorators can also be applied to methods of classes. Python even includes a couple of special decorators called @classmethod and @staticmethod for converting normal instance methods into these special method types. Methods of classes do provide a number of potential problems though.  
 
 
-> class Class\(object\): 
+```python
+class Class\(object\): 
+```
 
-> @function\_wrapper  
->  def method\(self\):  
->  pass 
+```python
+@function\_wrapper  
+ def method\(self\):  
+ pass 
+```
 
-> @classmethod  
->  def cmethod\(cls\):  
->  pass 
+```python
+@classmethod  
+ def cmethod\(cls\):  
+ pass 
+```
 
-> @staticmethod  
->  def smethod\(\):  
->  pass
+```python
+@staticmethod  
+ def smethod\(\):  
+ pass
+```
 
 The first is that even if using functools.wraps\(\) or functools.update\_wrapper\(\) in your decorator, when the decorator is applied around @classmethod or @staticmethod, it can fail with an exception. This is because the wrappers created by these, do not have some of the attributes being copied.  
 
 
-> class Class\(object\):  
->  @function\_wrapper  
->  @classmethod  
->  def cmethod\(cls\):  
->  pass 
+```python
+class Class\(object\):  
+ @function\_wrapper  
+ @classmethod  
+ def cmethod\(cls\):  
+ pass 
+```
 
 > Traceback \(most recent call last\):  
 >  File "<stdin>", line 1, in <module>  
@@ -257,11 +321,13 @@ As it happens, this is a Python 2 bug and it is fixed in Python 3 by ignoring mi
 Even when we run it under Python 3, we still hit trouble though. This is because both wrapper types assume that the wrapped function is directly callable. This need not actually be the case. A wrapped function can actually be what is called a descriptor, meaning that in order to get back a callable, the descriptor has to be correctly bound to the instance first.  
 
 
-> class Class\(object\):  
->  @function\_wrapper  
->  @classmethod  
->  def cmethod\(cls\):  
->  pass 
+```python
+class Class\(object\):  
+ @function\_wrapper  
+ @classmethod  
+ def cmethod\(cls\):  
+ pass 
+```
 
 > Class.cmethod\(\) 
 

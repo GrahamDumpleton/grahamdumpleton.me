@@ -21,48 +21,41 @@ Previously I presented a decorator which could be applied to a WSGI application 
 
 The code for the decorator was:
 
-> 
->     from __future__ import print_function
->     
->     
->     from wrapt import decorator, ObjectProxy  
->     > from timeit import default_timer  
->     >   
->     > class WSGIApplicationIterable1(ObjectProxy):
->     
->     
->         def __init__(self, wrapped, name, start):  
->     >         super(WSGIApplicationIterable1, self).__init__(wrapped)  
->     >         self._self_name = name  
->     >         self._self_start = start
->     
->     
->         def close(self):  
->     >         if hasattr(self.__wrapped__, 'close'):  
->     >             self.__wrapped__.close()
->     
->     
->             duration = default_timer() - self._self_start  
->     >         print('finish %s %.3fms' % (self._self_name, duration*1000.0))
->     
->     
->     @decorator  
->     > def timed_wsgi_application1(wrapped, instance, args, kwargs):  
->     >     name = wrapped.__name__
->     
->     
->         start = default_timer()  
->     >     print('start', name)
->     
->     
->         try:  
->     >         return WSGIApplicationIterable1(wrapped(*args, **kwargs), name, start)
->     
->     
->         except:  
->     >         duration = default_timer() - start  
->     >         print('finish %s %.3fms' % (name, duration*1000.0))  
->     >         raise
+```python
+    from __future__ import print_function
+
+    from wrapt import decorator, ObjectProxy  
+    from timeit import default_timer  
+    
+    class WSGIApplicationIterable1(ObjectProxy):
+
+        def __init__(self, wrapped, name, start):  
+    super(WSGIApplicationIterable1, self).__init__(wrapped)  
+    self._self_name = name  
+    self._self_start = start
+
+        def close(self):  
+    if hasattr(self.__wrapped__, 'close'):  
+    self.__wrapped__.close()
+
+            duration = default_timer() - self._self_start  
+    print('finish %s %.3fms' % (self._self_name, duration*1000.0))
+
+    @decorator  
+    def timed_wsgi_application1(wrapped, instance, args, kwargs):  
+    name = wrapped.__name__
+
+        start = default_timer()  
+    print('start', name)
+
+        try:  
+    return WSGIApplicationIterable1(wrapped(*args, **kwargs), name, start)
+
+        except:  
+    duration = default_timer() - start  
+    print('finish %s %.3fms' % (name, duration*1000.0))  
+    raise
+```
 
 Although described as a decorator, this is actually implementing a form of WSGI middleware. In this case the middleware was intercepting the act of calling the WSGI application to handle the request and the finalisation of the request through the calling of any 'close\(\)' method of the returned iterable.
 
@@ -74,21 +67,20 @@ To understand what is now needed to intercept the response content we need to lo
 
 The key part of the sample code presented in the WSGI specification is as follows and has three parts.
 
-> 
->         result = application(environ, start_response)
->     
->     
->         try:  
->     >         for data in result:  
->     >             if data:  
->     >                 write(data)  
->     >             if not headers_sent:  
->     >                 write('')
->     
->     
->         finally:  
->     >         if hasattr(result, 'close'):  
->     >             result.close()
+```python
+        result = application(environ, start_response)
+
+        try:  
+    for data in result:  
+    if data:  
+    write(data)  
+    if not headers_sent:  
+    write('')
+
+        finally:  
+    if hasattr(result, 'close'):  
+    result.close()
+```
 
 The first part is the calling of the WSGI application. It is the result of this call which has been wrapped by our timing wrapper.
 
@@ -102,16 +94,18 @@ In order to now intercept the response content we need to intercept the creation
 
 To do that, we need to intercept the special '\_\_iter\_\_\(\)' method of the iterable. As it stands right now, due to the wrapper for the iterable being implemented as a derived class of the 'ObjectProxy' class from the 'wrapt' package, the call of the '\_\_iter\_\_\(\)' method is being automatically applied to the original wrapped iterable. In effect the object proxy is doing:
 
-> 
->         def __iter__(self):  
->     >         return iter(self.__wrapped__)
+```python
+        def __iter__(self):  
+    return iter(self.__wrapped__)
+```
 
 We want to do more than simply process in some way the iterator object itself. Instead we want to process each yielded item. For this we need to iterate over the original wrapped iterable object ourselves, turning the '\_\_iter\_\_\(\)' method into a generator function. This can be done as:
 
-> 
->         def __iter__(self):  
->     >         for data in self.__wrapped__:  
->     >             yield data
+```python
+        def __iter__(self):  
+    for data in self.__wrapped__:  
+    yield data
+```
 
 # The archaic write\(\) callback
 
@@ -149,41 +143,42 @@ You could well at this point remove the monitoring and so eliminate the overhead
 
 That all said, let's try and continue by calculating a baseline to gauge how much overhead any monitoring may be adding. For that we can first try to use our prior test example whereby we returned a large string as the iterable.
 
-> 
->     from timer1 import timed_wsgi_application1
->     
->     
->     @timed_wsgi_application1  
->     > def application(environ, start_response):  
->     >     status = '200 OK'  
->     >     output = 100000 * b'Hello World!'
->     
->     
->        response_headers = [('Content-type', 'text/plain'),  
->     >        ('Content-Length', str(len(output)))]  
->     >     start_response(status, response_headers)
->     
->     
->        return output
+```python
+    from timer1 import timed_wsgi_application1
+
+    @timed_wsgi_application1  
+    def application(environ, start_response):  
+    status = '200 OK'  
+    output = 100000 * b'Hello World!'
+
+       response_headers = [('Content-type', 'text/plain'),  
+    ('Content-Length', str(len(output)))]  
+    start_response(status, response_headers)
+
+       return output
+```
 
 With our original decorator which measures just the length of time spent in the WSGI application, when we use mod\_wsgi-express this time we get:
 
-> 
->     start application  
->     > finish application 6269.062ms
+```
+    start application  
+    finish application 6269.062ms
+```
 
 If we override the '\_\_iter\_\_\(\)' method to introduce the loop but not do any processing:
 
-> 
->         def __iter__(self):  
->     >         for data in self.__wrapped__:  
->     >             yield data
+```python
+        def __iter__(self):  
+    for data in self.__wrapped__:  
+    yield data
+```
 
 we now get:
 
-> 
->     start application  
->     > finish application 6291.978ms
+```
+    start application  
+    finish application 6291.978ms
+```
 
 Not much difference, but a further big warning has to be made.
 
@@ -205,53 +200,52 @@ So trying to gauge overheads at this point is partly a pointless exercise with t
 
 The initial change we were therefore after was tracking how much data is actually being returned in a response and how many blocks it was broken up into. Overriding the '\_\_iter\_\_\(\)' method we can do this using:
 
-> 
->     class WSGIApplicationIterable2(ObjectProxy):
->     
->     
->         def __init__(self, wrapped, name, start):  
->     >         super(WSGIApplicationIterable2, self).__init__(wrapped)  
->     >         self._self_name = name  
->     >         self._self_start = start  
->     >         self._self_count = 0  
->     >         self._self_bytes = 0
->     
->     
->         def __iter__(self):  
->     >         count = 0  
->     >         bytes = 0  
->     >         try:  
->     >             for data in self.__wrapped__:  
->     >                 yield data  
->     >                 count += 1  
->     >                 bytes += len(data)  
->     >         finally:  
->     >             self._self_count = count  
->     >             self._self_bytes = bytes
->     
->     
->         def close(self):  
->     >         if hasattr(self.__wrapped__, 'close'):  
->     >             self.__wrapped__.close()
->     
->     
->             duration = default_timer() - self._self_start  
->     >         print('write %s blocks %s bytes' % (self._self_count, self._self_bytes))  
->     >         print('finish %s %.3fms' % (self._self_name, duration*1000.0))
+```python
+    class WSGIApplicationIterable2(ObjectProxy):
+
+        def __init__(self, wrapped, name, start):  
+    super(WSGIApplicationIterable2, self).__init__(wrapped)  
+    self._self_name = name  
+    self._self_start = start  
+    self._self_count = 0  
+    self._self_bytes = 0
+
+        def __iter__(self):  
+    count = 0  
+    bytes = 0  
+    try:  
+    for data in self.__wrapped__:  
+    yield data  
+    count += 1  
+    bytes += len(data)  
+    finally:  
+    self._self_count = count  
+    self._self_bytes = bytes
+
+        def close(self):  
+    if hasattr(self.__wrapped__, 'close'):  
+    self.__wrapped__.close()
+
+            duration = default_timer() - self._self_start  
+    print('write %s blocks %s bytes' % (self._self_count, self._self_bytes))  
+    print('finish %s %.3fms' % (self._self_name, duration*1000.0))
+```
 
 Run this with our test example where a string was returned as the iterable rather than a list of strings, we get:
 
-> 
->     start application  
->     > write 1200000 blocks 1200000 bytes  
->     > finish application 5499.676ms
+```
+    start application  
+    write 1200000 blocks 1200000 bytes  
+    finish application 5499.676ms
+```
 
 This is in contrast to what we would hope to see, which is a small as possible number of blocks, and even just the one block if that was achievable without blowing out memory usage.
 
-> 
->     start application  
->     > write 1 blocks 1200000 bytes  
->     > finish application 4.867ms
+```
+    start application  
+    write 1 blocks 1200000 bytes  
+    finish application 4.867ms
+```
 
 What we are obviously hoping for here is a low number of blocks, or at least a high average number of bytes per block. If the average number of bytes per block is very low, then it would be worthy of further inspection.
 
@@ -259,64 +253,61 @@ What we are obviously hoping for here is a low number of blocks, or at least a h
 
 Tracking the number of bytes written and the number of blocks can highlight potential issues, but it doesn't actually tell us how long was spent writing the data back to the HTTP client. Knowing the time taken will help us confirm whether the response being returned as a large number of blocks is an issue or not. To capture information about the amount of time taken we can use:
 
-> 
->     class WSGIApplicationIterable3(ObjectProxy):
->     
->     
->         def __init__(self, wrapped, name, start):  
->     >         super(WSGIApplicationIterable3, self).__init__(wrapped)  
->     >         self._self_name = name  
->     >         self._self_start = start  
->     >         self._self_time = 0.0  
->     >         self._self_count = 0  
->     >         self._self_bytes = 0
->     
->     
->         def __iter__(self):  
->     >         time = 0.0  
->     >         start = 0.0  
->     >         count = 0  
->     >         bytes = 0  
->     >         try:  
->     >             for data in self.__wrapped__:  
->     >                 start = default_timer()  
->     >                 yield data  
->     >                 finish = default_timer()   
->     >                 if finish > start:  
->     >                     time += (finish - start)  
->     >                 start = 0.0  
->     >                 count += 1  
->     >                 bytes += len(data)  
->     >         finally:  
->     >             if start:  
->     >                 finish = default_timer()  
->     >                 if finish > start:  
->     >                     time += (finish - start)
->     
->     
->             self._self_time = time  
->     >         self._self_count = count  
->     >         self._self_bytes = bytes
->     
->     
->         def close(self):  
->     >         if hasattr(self.__wrapped__, 'close'):  
->     >               self.__wrapped__.close()
->     
->     
->             duration = default_timer() - self._self_start  
->     >         print('write %s blocks %s bytes %.3fms' % (self._self_count,  
->     >                 self._self_bytes, self._self_time*1000.0))  
->     >         print('finish %s %.3fms' % (self._self_name, duration*1000.0))
+```python
+    class WSGIApplicationIterable3(ObjectProxy):
+
+        def __init__(self, wrapped, name, start):  
+    super(WSGIApplicationIterable3, self).__init__(wrapped)  
+    self._self_name = name  
+    self._self_start = start  
+    self._self_time = 0.0  
+    self._self_count = 0  
+    self._self_bytes = 0
+
+        def __iter__(self):  
+    time = 0.0  
+    start = 0.0  
+    count = 0  
+    bytes = 0  
+    try:  
+    for data in self.__wrapped__:  
+    start = default_timer()  
+    yield data  
+    finish = default_timer()   
+    if finish > start:  
+    time += (finish - start)  
+    start = 0.0  
+    count += 1  
+    bytes += len(data)  
+    finally:  
+    if start:  
+    finish = default_timer()  
+    if finish > start:  
+    time += (finish - start)
+
+            self._self_time = time  
+    self._self_count = count  
+    self._self_bytes = bytes
+
+        def close(self):  
+    if hasattr(self.__wrapped__, 'close'):  
+    self.__wrapped__.close()
+
+            duration = default_timer() - self._self_start  
+    print('write %s blocks %s bytes %.3fms' % (self._self_count,  
+    self._self_bytes, self._self_time*1000.0))  
+    print('finish %s %.3fms' % (self._self_name, duration*1000.0))
+```
 
 In this version of the wrapper we time how long it took to yield each value from the loop. This has the affect of timing how long it took any outer layer, in this case how long the WSGI server took, to process and write the block of data back to the HTTP client.
 
 Running our test example now we get:
 
-> 
->     start application  
->     > write 1200000 blocks 1200000 bytes 6654.018ms  
->     > finish application 7812.504ms
+```
+    start application  
+    write 1200000 blocks 1200000 bytes 6654.018ms  
+    finish application 7812.504ms
+```
 
 We can therefore see that the time taken in writing out the actual data took a large proportion of the overall response time. In this case the actual test example wasn't itself doing much work so that would have been the case anyway, but the magnitude of the amount of time spent writing the response in conjunction with the number of blocks is the concern.
 

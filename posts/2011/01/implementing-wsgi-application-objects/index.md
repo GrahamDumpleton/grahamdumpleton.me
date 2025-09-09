@@ -32,159 +32,115 @@ So, that sets the scene of what to expect, now for the examples.
 The simplest example is where the application object is a function. For this case we would have:
     
     
-```
-def application(environ, start_response):  
-    status = '200 OK'   
-    response_headers = [('Content-type', 'text/plain')]  
-    start_response(status, response_headers)   
-```
+    def application(environ, start_response):  
+        status = '200 OK'   
+        response_headers = [('Content-type', 'text/plain')]  
+        start_response(status, response_headers)   
               
-```
-    return ["1\n", "2\n", "3\n", "4\n", "5\n"]
-```
+        return ["1\n", "2\n", "3\n", "4\n", "5\n"]
 
 The result returned must be an iterable yielding zero or more byte strings. Here we have used a list but as the specification outlines the application object itself can be a generator.
     
     
-```
-def application(environ, start_response):  
-    status = '200 OK'   
-    response_headers = [('Content-type', 'text/plain')]  
-    start_response(status, response_headers)   
-```
+    def application(environ, start_response):  
+        status = '200 OK'   
+        response_headers = [('Content-type', 'text/plain')]  
+        start_response(status, response_headers)   
               
-```
-    yield "1\n"  
-    yield "2\n"  
-    yield "3\n"  
-    yield "4\n"  
-    yield "5\n"
-```
-
-A class instance could also be returned so long as it supports the iterator protocol.
-    
-    
-```
-class Iterable:  
-    def __iter__(self):  
         yield "1\n"  
         yield "2\n"  
         yield "3\n"  
         yield "4\n"  
-        yield "5\n"  
-```
+        yield "5\n"
+
+A class instance could also be returned so long as it supports the iterator protocol.
+    
+    
+    class Iterable:  
+        def __iter__(self):  
+            yield "1\n"  
+            yield "2\n"  
+            yield "3\n"  
+            yield "4\n"  
+            yield "5\n"  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-    response_headers = [('Content-type', 'text/plain')]  
-    start_response(status, response_headers)  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
+        response_headers = [('Content-type', 'text/plain')]  
+        start_response(status, response_headers)  
           
-```
-    return Iterable()
-```
+        return Iterable()
 
 or:
     
     
-```
-class Iterable:  
-    def __init__(self):  
-        self.__count = 0  
-```
+    class Iterable:  
+        def __init__(self):  
+            self.__count = 0  
       
-```
-    def __iter__(self):  
-        return self  
-```
+        def __iter__(self):  
+            return self  
       
-```
-    def next(self):  
-        if self.__count <= 4:  
-            self.__count += 1  
-            return '%s\n' % self.__count  
-        raise StopIteration  
-```
+        def next(self):  
+            if self.__count <= 4:  
+                self.__count += 1  
+                return '%s\n' % self.__count  
+            raise StopIteration  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-    response_headers = [('Content-type', 'text/plain')]  
-    start_response(status, response_headers)  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
+        response_headers = [('Content-type', 'text/plain')]  
+        start_response(status, response_headers)  
       
-```
-    return Iterable()
-```
+        return Iterable()
 
 or finally:
     
     
-```
-class Iterable:  
-    def __getitem__(self, index):  
-        if index <= 4:  
-            return '%s\n' % (index+1)  
-        raise IndexError  
-```
+    class Iterable:  
+        def __getitem__(self, index):  
+            if index <= 4:  
+                return '%s\n' % (index+1)  
+            raise IndexError  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-    response_headers = [('Content-type', 'text/plain')]  
-    start_response(status, response_headers)  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
+        response_headers = [('Content-type', 'text/plain')]  
+        start_response(status, response_headers)  
       
-```
-    return Iterable()
-```
+        return Iterable()
 
 Important to note is that although a byte string itself is an iterable value, you should never return that explicitly as the result from the WSGI application. It will work if you do that, but the consequence of doing that will be that the underlying WSGI gateway or adapter will still iterate over it. This will result in a single byte being yielded each time, with that single byte being written and then flushed back to the HTTP client. The result of this will obviously be absolutely dreadful performance. So, if you are having performance issues, make sure you are not inadvertently returning a byte string rather than returning a list containing a single byte string value.  
   
 The next thing that the application object can be is an instance of a class. In this case as the class instance itself is being executed, it must provide a ‘\_\_call\_\_\(\)’ method with an appropriate signature.
     
     
-```
-class Application:  
-    def __call__(self, environ, start_response):  
-        status = '200 OK'  
-        response_headers = [('Content-type', 'text/plain')]  
-        start_response(status, response_headers)  
-```
+    class Application:  
+        def __call__(self, environ, start_response):  
+            status = '200 OK'  
+            response_headers = [('Content-type', 'text/plain')]  
+            start_response(status, response_headers)  
       
-```
-        return ["1\n", "2\n", "3\n", "4\n", "5\n"]  
-```
+            return ["1\n", "2\n", "3\n", "4\n", "5\n"]  
           
-```
-application = Application()
-```
+    application = Application()
 
 We have again returned a list here, but as before when using a normal function, the ‘\_\_call\_\_\(\)’ method could be a generator function, or return any sort of iterable object.  
   
 When using a class instance as the application object, if for some reason it doesn’t provide a ‘\_\_call\_\_\(\)’ method and instead has named the entry point another name then one could instead also write:
     
     
-```
-class Application:  
-    def execute(self, environ, start_response):  
-        status = '200 OK'   
-        response_headers = [('Content-type', 'text/plain')]  
-        start_response(status, response_headers)  
-```
+    class Application:  
+        def execute(self, environ, start_response):  
+            status = '200 OK'   
+            response_headers = [('Content-type', 'text/plain')]  
+            start_response(status, response_headers)  
       
-```
-        return ["1\n", "2\n", "3\n", "4\n", "5\n"]  
-```
+            return ["1\n", "2\n", "3\n", "4\n", "5\n"]  
               
-```
-_application = Application()  
-```
+    _application = Application()  
       
-```
-application = _application.execute
-```
+    application = _application.execute
 
 In other words, a reference to an arbitrary bound method of an instance of a class can be used as the application object. This works the same as if the method were called ‘\_\_call\_\_\(\)’, or if a ‘\_\_call\_\_\(\)’ method were provided which in turned called this second method and returned its result.  
   
@@ -199,31 +155,23 @@ Either way, because a hosting environment may support multithreading, that is, t
 If for some reason you didn’t need to share data across requests, but did need to share data across multiple functions implementing a WSGI application, then one can use the ‘environ’ dictionary to pass data around. Often this is frowned upon and can get messy for complex data. An alternative to using the ‘environ’ dictionary is to still use a class instance but create an instance of the class per request. To do this, one can use:
     
     
-```
-class Application:  
-    def __init__(self, environ, start_response):  
-        self.__environ = environ  
-        self.__start_response = start_response  
-```
+    class Application:  
+        def __init__(self, environ, start_response):  
+            self.__environ = environ  
+            self.__start_response = start_response  
               
-```
-    def __iter__(self):  
-        status = '200 OK'   
-        response_headers = [('Content-type', 'text/plain')]  
-        self.__start_response(status, response_headers)  
-```
+        def __iter__(self):  
+            status = '200 OK'   
+            response_headers = [('Content-type', 'text/plain')]  
+            self.__start_response(status, response_headers)  
       
-```
-        yield "1\n"  
-        yield "2\n"  
-        yield "3\n"  
-        yield "4\n"  
-        yield "5\n"  
-```
+            yield "1\n"  
+            yield "2\n"  
+            yield "3\n"  
+            yield "4\n"  
+            yield "5\n"  
       
-```
-application = Application
-```
+    application = Application
 
 For this scenario, the application object is actually the class object itself rather than an instance of the class. The result of this is that for each request a new instance of the class is created, with the ‘environ’ and ‘start\_response’ parameters being passed to the constructor of the class.  
   
@@ -232,71 +180,49 @@ The result of calling the class object like this to create an instance of the cl
 Here the instance is made iterable by implementing the ‘\_\_iter\_\_\(\)’ method as a generator function. It could though use other methods for making an iterable as shown before, such as:
     
     
-```
-class Application:  
-    def __init__(self, environ, start_response):  
-        self.__environ = environ  
-        self.__start_response = start_response  
-        self.__count = 0  
-```
+    class Application:  
+        def __init__(self, environ, start_response):  
+            self.__environ = environ  
+            self.__start_response = start_response  
+            self.__count = 0  
           
-```
-    def __iter__(self):  
-        status = '200 OK'   
-        response_headers = [('Content-type', 'text/plain')]  
-        self.__start_response(status, response_headers)  
-        return self  
-```
+        def __iter__(self):  
+            status = '200 OK'   
+            response_headers = [('Content-type', 'text/plain')]  
+            self.__start_response(status, response_headers)  
+            return self  
                   
-```
-    def next(self):  
-        if self.__count <= 4:  
-            self.__count += 1  
-            return "%d\n" % self.__count  
-```
+        def next(self):  
+            if self.__count <= 4:  
+                self.__count += 1  
+                return "%d\n" % self.__count  
               
-```
-        raise StopIteration  
-```
+            raise StopIteration  
       
-```
-application = Application
-```
+    application = Application
 
 or:
     
     
-```
-class Application:  
-    def __init__(self, environ, start_response):  
-        self.__environ = environ  
-        self.__start_response = start_response  
-```
+    class Application:  
+        def __init__(self, environ, start_response):  
+            self.__environ = environ  
+            self.__start_response = start_response  
               
-```
-    def __getitem__(self, index):  
-        if index == 0:  
-            status = '200 OK'  
-            response_headers = [('Content-type', 'text/plain')]  
-            self.__start_response(status, response_headers)  
-```
+        def __getitem__(self, index):  
+            if index == 0:  
+                status = '200 OK'  
+                response_headers = [('Content-type', 'text/plain')]  
+                self.__start_response(status, response_headers)  
               
-```
-            return "%d\n" % (index+1)  
-```
+                return "%d\n" % (index+1)  
           
-```
-        elif index <= 4:  
-            return "%d\n" % (index+1)  
-```
+            elif index <= 4:  
+                return "%d\n" % (index+1)  
                   
-```
-        raise IndexError  
-```
+            raise IndexError  
               
-```
-application = Application
-```
+    application = Application
 
 What does all this mean? Not much except that there are lots of ways of implementing the skeleton for a WSGI application object.  
   

@@ -36,20 +36,22 @@ By using an event notification system in this way, the WSGI server itself doesn'
 
 For what was implemented in the mod\_wsgi prototype, the per request event notification callback to print out the response time for each request would be implemented as:
 
-> 
->     def event_handler(name, **kwargs):  
->     >     if name == 'request_finished':  
->     >         application_time = kwargs.get('application_time')  
->     >         print('finish %.3fms' % (1000.0 * application_time))
+```python
+    def event_handler(name, **kwargs):  
+    if name == 'request_finished':  
+    application_time = kwargs.get('application_time')  
+    print('finish %.3fms' % (1000.0 * application_time))
+```
 
 If wishing to report the metric data to statsd, one could instead use:
 
-> 
->     def event_handler(name, **kwargs):  
->     >     if name == 'request_finished':  
->     >         application_time = kwargs.get('application_time')  
->     >         statsd.timing('mod_wsgi.application.requests.application_time',  
->     >                 1000.0 * application_time)
+```python
+    def event_handler(name, **kwargs):  
+    if name == 'request_finished':  
+    application_time = kwargs.get('application_time')  
+    statsd.timing('mod_wsgi.application.requests.application_time',  
+    1000.0 * application_time)
+```
 
 For the prototype implementation, the amount of time spent in the WSGI application for the web request wasn't the only information available, nor was the notification that the request is finished the only type of event.
 

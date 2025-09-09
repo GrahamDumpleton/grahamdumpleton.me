@@ -34,50 +34,34 @@ Actual setup instructions for using Django with mod\_wsgi are described in the [
 The example configuration give in the Django integration guide for using daemon mode is:
     
     
-```
-WSGIDaemonProcess site-1 user=user-1 group=user-1 threads=25  
-WSGIProcessGroup site-1  
-```
+    WSGIDaemonProcess site-1 user=user-1 group=user-1 threads=25  
+    WSGIProcessGroup site-1  
       
-```
-Alias /media/ /usr/local/django/mysite/media/  
-```
+    Alias /media/ /usr/local/django/mysite/media/  
       
-```
-<Directory /usr/local/django/mysite/media>  
-Order deny,allow  
-Allow from all  
-</Directory>  
-```
+    <Directory /usr/local/django/mysite/media>  
+    Order deny,allow  
+    Allow from all  
+    </Directory>  
       
-```
-WSGIScriptAlias / /usr/local/django/mysite/apache/django.wsgi  
-```
+    WSGIScriptAlias / /usr/local/django/mysite/apache/django.wsgi  
       
-```
-<Directory /usr/local/django/mysite/apache>  
-Order deny,allow  
-Allow from all  
-</Directory>  
-```
+    <Directory /usr/local/django/mysite/apache>  
+    Order deny,allow  
+    Allow from all  
+    </Directory>  
     
 
 The corresponding example WSGI script file is:
     
     
-```
-import os, sys  
-sys.path.append('/usr/local/django')  
-os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
-```
+    import os, sys  
+    sys.path.append('/usr/local/django')  
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
       
-```
-import django.core.handlers.wsgi  
-```
+    import django.core.handlers.wsgi  
       
-```
-application = django.core.handlers.wsgi.WSGIHandler()  
-```
+    application = django.core.handlers.wsgi.WSGIHandler()  
     
 
 It is this latter WSGI script file to which we need to make an addition. Rather than make all the changes to this file though, we will add a new Python code file into the Django site directory and put the bulk of the code in it.
@@ -88,10 +72,8 @@ It is this latter WSGI script file to which we need to make an addition. Rather 
 So, in the same directory as where the 'settings.py' file is for your Django site, add a file called 'monitor.py'. In this file place the code recipe for implementing an automatic restart mechanism from the mod\_wsgi documentation on [reloading source code](http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode#Restarting_Daemon_Processes). Then go back to the WSGI script file and at the end of the file add:
     
     
-```
-import mysite.monitor  
-mysite.monitor.start(interval=1.0)  
-```
+    import mysite.monitor  
+    mysite.monitor.start(interval=1.0)  
     
 
 Obviously, the name of your site being different, you should substitute 'mysite' with the actual name of your site. Anyway, that is all that is required.

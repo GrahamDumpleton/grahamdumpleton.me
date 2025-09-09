@@ -31,35 +31,36 @@ Problems will arise though when these two different methods are used in the one 
 
 To illustrate the problem, consider the scenario where you are using the SCL repository for CentOS.
 
-> 
->     Installing:  
->     >  python27 x86_64 1.1-20.el7 centos-sclo-rh 4.8 k  
->     > Installing for dependencies:  
->     >  dwz x86_64 0.11-3.el7 base 99 k  
->     >  iso-codes noarch 3.46-2.el7 base 2.7 M  
->     >  perl-srpm-macros noarch 1-8.el7 base 4.6 k  
->     >  python27-python x86_64 2.7.8-3.el7 centos-sclo-rh 81 k  
->     >  python27-python-babel noarch 0.9.6-8.el7 centos-sclo-rh 1.4 M  
->     >  python27-python-devel x86_64 2.7.8-3.el7 centos-sclo-rh 384 k  
->     >  python27-python-docutils noarch 0.11-1.el7 centos-sclo-rh 1.5 M  
->     >  python27-python-jinja2 noarch 2.6-11.el7 centos-sclo-rh 518 k  
->     >  python27-python-libs x86_64 2.7.8-3.el7 centos-sclo-rh 5.6 M  
->     >  python27-python-markupsafe x86_64 0.11-11.el7 centos-sclo-rh 25 k  
->     >  python27-python-nose noarch 1.3.0-2.el7 centos-sclo-rh 274 k  
->     >  python27-python-pip noarch 1.5.6-5.el7 centos-sclo-rh 1.3 M  
->     >  python27-python-pygments noarch 1.5-2.el7 centos-sclo-rh 774 k  
->     >  python27-python-setuptools noarch 0.9.8-5.el7 centos-sclo-rh 400 k  
->     >  python27-python-simplejson x86_64 3.2.0-3.el7 centos-sclo-rh 173 k  
->     >  python27-python-sphinx noarch 1.1.3-8.el7 centos-sclo-rh 1.1 M  
->     >  python27-python-sqlalchemy x86_64 0.7.9-3.el7 centos-sclo-rh 2.0 M  
->     >  python27-python-virtualenv noarch 1.10.1-2.el7 centos-sclo-rh 1.3 M  
->     >  python27-python-werkzeug noarch 0.8.3-5.el7 centos-sclo-rh 534 k  
->     >  python27-python-wheel noarch 0.24.0-2.el7 centos-sclo-rh 76 k  
->     >  python27-runtime x86_64 1.1-20.el7 centos-sclo-rh 1.1 M  
->     >  redhat-rpm-config noarch 9.1.0-68.el7.centos base 77 k  
->     >  scl-utils-build x86_64 20130529-17.el7_1 base 17 k  
->     >  xml-common noarch 0.6.3-39.el7 base 26 k  
->     >  zip x86_64 3.0-10.el7 base 260 k
+```python
+    Installing:  
+    python27 x86_64 1.1-20.el7 centos-sclo-rh 4.8 k  
+    Installing for dependencies:  
+    dwz x86_64 0.11-3.el7 base 99 k  
+    iso-codes noarch 3.46-2.el7 base 2.7 M  
+    perl-srpm-macros noarch 1-8.el7 base 4.6 k  
+    python27-python x86_64 2.7.8-3.el7 centos-sclo-rh 81 k  
+    python27-python-babel noarch 0.9.6-8.el7 centos-sclo-rh 1.4 M  
+    python27-python-devel x86_64 2.7.8-3.el7 centos-sclo-rh 384 k  
+    python27-python-docutils noarch 0.11-1.el7 centos-sclo-rh 1.5 M  
+    python27-python-jinja2 noarch 2.6-11.el7 centos-sclo-rh 518 k  
+    python27-python-libs x86_64 2.7.8-3.el7 centos-sclo-rh 5.6 M  
+    python27-python-markupsafe x86_64 0.11-11.el7 centos-sclo-rh 25 k  
+    python27-python-nose noarch 1.3.0-2.el7 centos-sclo-rh 274 k  
+    python27-python-pip noarch 1.5.6-5.el7 centos-sclo-rh 1.3 M  
+    python27-python-pygments noarch 1.5-2.el7 centos-sclo-rh 774 k  
+    python27-python-setuptools noarch 0.9.8-5.el7 centos-sclo-rh 400 k  
+    python27-python-simplejson x86_64 3.2.0-3.el7 centos-sclo-rh 173 k  
+    python27-python-sphinx noarch 1.1.3-8.el7 centos-sclo-rh 1.1 M  
+    python27-python-sqlalchemy x86_64 0.7.9-3.el7 centos-sclo-rh 2.0 M  
+    python27-python-virtualenv noarch 1.10.1-2.el7 centos-sclo-rh 1.3 M  
+    python27-python-werkzeug noarch 0.8.3-5.el7 centos-sclo-rh 534 k  
+    python27-python-wheel noarch 0.24.0-2.el7 centos-sclo-rh 76 k  
+    python27-runtime x86_64 1.1-20.el7 centos-sclo-rh 1.1 M  
+    redhat-rpm-config noarch 9.1.0-68.el7.centos base 77 k  
+    scl-utils-build x86_64 20130529-17.el7_1 base 17 k  
+    xml-common noarch 0.6.3-39.el7 base 26 k  
+    zip x86_64 3.0-10.el7 base 260 k
+```
 
 The only package we installed here was ‘python27’, yet because of dependencies listed for that package, Python modules for Jinja2, Werkzeug, SQLAlchemy and others, often used in Python web applications, were also installed.
 
@@ -69,26 +70,26 @@ Take ‘Jinja2' for instance, the most up to date version available at this time
 
 Remember now that this Docker image is intended to be used as a base image and users will install any Python modules on top. If one of the Python modules they required was ‘Jinja2’ and they installed it, they may not get what they expect.
 
-> 
->     $ pip install Jinja2  
->     > Requirement already satisfied (use --upgrade to upgrade): Jinja2 in /opt/rh/python27/root/usr/lib/python2.7/site-packages  
->     > Cleaning up...
->     
->     
->     $ pip freeze  
->     > Babel==0.9.6  
->     > Jinja2==2.6  
->     > MarkupSafe==0.11  
->     > Pygments==1.5  
->     > SQLAlchemy==0.7.9  
->     > Sphinx==1.1.3  
->     > Werkzeug==0.8.3  
->     > docutils==0.11  
->     > nose==1.3.0  
->     > simplejson==3.2.0  
->     > virtualenv==1.10.1  
->     > wheel==0.24.0  
->     > wsgiref==0.1.2
+```bash
+    $ pip install Jinja2  
+    Requirement already satisfied (use --upgrade to upgrade): Jinja2 in /opt/rh/python27/root/usr/lib/python2.7/site-packages  
+    Cleaning up...
+
+    $ pip freeze  
+    Babel==0.9.6  
+    Jinja2==2.6  
+    MarkupSafe==0.11  
+    Pygments==1.5  
+    SQLAlchemy==0.7.9  
+    Sphinx==1.1.3  
+    Werkzeug==0.8.3  
+    docutils==0.11  
+    nose==1.3.0  
+    simplejson==3.2.0  
+    virtualenv==1.10.1  
+    wheel==0.24.0  
+    wsgiref==0.1.2
+```
 
 What happened was that when ‘pip’ was run, it already found that ‘Jinja2’ had been installed and so skipped installing it again.
 
@@ -100,38 +101,37 @@ Because the fact that installing a newer version was skipped was only a warning 
 
 One possible solution to this problem is to always ensure that you supply the ‘-U’ or ‘--upgrade’ option to ‘pip’ when it is run. This will force an update and reinstallation of the Python modules being installed to the latest version even if they are already installed.
 
-> 
->     $ pip install -U Jinja2  
->     > Downloading/unpacking Jinja2 from https://pypi.python.org/packages/2.7/J/Jinja2/Jinja2-2.8-py2.py3-none-any.whl#md5=75acb6f1abfc46ed75f4fd392f321ac2  
->     >  Downloading Jinja2-2.8-py2.py3-none-any.whl (263kB): 263kB downloaded  
->     > Downloading/unpacking MarkupSafe from https://pypi.python.org/packages/source/M/MarkupSafe/MarkupSafe-0.23.tar.gz#md5=f5ab3deee4c37cd6a922fb81e730da6e (from Jinja2)  
->     >  Downloading MarkupSafe-0.23.tar.gz  
->     >  Running setup.py (path:/tmp/pip-build-Sd86kU/MarkupSafe/setup.py) egg_info for package MarkupSafe
->     
->     
->     Installing collected packages: Jinja2, MarkupSafe  
->     >  Running setup.py install for MarkupSafe
->     
->     
->     building 'markupsafe._speedups' extension  
->     > ...  
->     > Successfully installed Jinja2 MarkupSafe  
->     > Cleaning up...  
->     >    
->     > $ pip freeze  
->     > Babel==0.9.6  
->     > Jinja2==2.8  
->     > MarkupSafe==0.23  
->     > Pygments==1.5  
->     > SQLAlchemy==0.7.9  
->     > Sphinx==1.1.3  
->     > Werkzeug==0.8.3  
->     > docutils==0.11  
->     > nose==1.3.0  
->     > simplejson==3.2.0  
->     > virtualenv==1.10.1  
->     > wheel==0.24.0  
->     > wsgiref==0.1.2
+```python
+    $ pip install -U Jinja2  
+    Downloading/unpacking Jinja2 from https://pypi.python.org/packages/2.7/J/Jinja2/Jinja2-2.8-py2.py3-none-any.whl#md5=75acb6f1abfc46ed75f4fd392f321ac2  
+    Downloading Jinja2-2.8-py2.py3-none-any.whl (263kB): 263kB downloaded  
+    Downloading/unpacking MarkupSafe from https://pypi.python.org/packages/source/M/MarkupSafe/MarkupSafe-0.23.tar.gz#md5=f5ab3deee4c37cd6a922fb81e730da6e (from Jinja2)  
+    Downloading MarkupSafe-0.23.tar.gz  
+    Running setup.py (path:/tmp/pip-build-Sd86kU/MarkupSafe/setup.py) egg_info for package MarkupSafe
+
+    Installing collected packages: Jinja2, MarkupSafe  
+    Running setup.py install for MarkupSafe
+
+    building 'markupsafe._speedups' extension  
+    ...  
+    Successfully installed Jinja2 MarkupSafe  
+    Cleaning up...  
+    
+    $ pip freeze  
+    Babel==0.9.6  
+    Jinja2==2.8  
+    MarkupSafe==0.23  
+    Pygments==1.5  
+    SQLAlchemy==0.7.9  
+    Sphinx==1.1.3  
+    Werkzeug==0.8.3  
+    docutils==0.11  
+    nose==1.3.0  
+    simplejson==3.2.0  
+    virtualenv==1.10.1  
+    wheel==0.24.0  
+    wsgiref==0.1.2
+```
 
 Although this will ensure we have the latest version, it has the potential to cause other problems.
 
@@ -151,17 +151,19 @@ When using ‘pip’ this can be achieved using the ‘--user’ option. There i
 
 In both cases, rather than the Python modules being installed into the main ‘site-packages’ directory of the Python installation, they are installed into a special directory in the users home directory. For Linux this directory is located at:
 
-> 
->     $HOME/.local/lib/pythonX.Y/site-packages
+```
+    $HOME/.local/lib/pythonX.Y/site-packages
+```
 
 The ‘X.Y’ will depend on the version of Python being used.
 
 Although this at least eliminates conflicts where ‘pip’ could replace files installed by the system packaging tools, it doesn’t resolve the issue with the version of a package being updated without again having to resort to using the ‘-U’ or ‘--update’ option to ‘pip’.
 
-> 
->     $ pip install --user Jinja2  
->     > Requirement already satisfied (use --upgrade to upgrade): Jinja2 in /opt/rh/python27/root/usr/lib/python2.7/site-packages  
->     > Cleaning up...
+```bash
+    $ pip install --user Jinja2  
+    Requirement already satisfied (use --upgrade to upgrade): Jinja2 in /opt/rh/python27/root/usr/lib/python2.7/site-packages  
+    Cleaning up...
+```
 
 Per user package directories are therefore not really a solution either.
 
@@ -171,47 +173,44 @@ It is in part because of the problems arising when trying to use a single common
 
 Although the intent with Docker is that it would only hold and run the one application, could we still use a Python virtual environment anyway, thus avoiding the problems described.
 
-> 
->     $ virtualenv venv  
->     > New python executable in venv/bin/python2  
->     > Also creating executable in venv/bin/python  
->     > Installing Setuptools...done.  
->     > Installing Pip...done.
->     
->     
->     $ source venv/bin/activate
->     
->     
->     (venv)$ pip install Jinja2  
->     > Downloading/unpacking Jinja2  
->     >  Downloading Jinja2-2.8.tar.gz (357kB): 357kB downloaded  
->     >  Running setup.py egg_info for package Jinja2
->     
->     
->     Downloading/unpacking MarkupSafe (from Jinja2)  
->     >  Downloading MarkupSafe-0.23.tar.gz  
->     >  Running setup.py egg_info for package MarkupSafe
->     
->     
->     Installing collected packages: Jinja2, MarkupSafe  
->     >  Running setup.py install for Jinja2  
->     >  Running setup.py install for MarkupSafe
->     
->     
->     building 'markupsafe._speedups' extension  
->     >  ...  
->     > Successfully installed Jinja2 MarkupSafe  
->     > Cleaning up...
+```python
+    $ virtualenv venv  
+    New python executable in venv/bin/python2  
+    Also creating executable in venv/bin/python  
+    Installing Setuptools...done.  
+    Installing Pip...done.
+
+    $ source venv/bin/activate
+
+    (venv)$ pip install Jinja2  
+    Downloading/unpacking Jinja2  
+    Downloading Jinja2-2.8.tar.gz (357kB): 357kB downloaded  
+    Running setup.py egg_info for package Jinja2
+
+    Downloading/unpacking MarkupSafe (from Jinja2)  
+    Downloading MarkupSafe-0.23.tar.gz  
+    Running setup.py egg_info for package MarkupSafe
+
+    Installing collected packages: Jinja2, MarkupSafe  
+    Running setup.py install for Jinja2  
+    Running setup.py install for MarkupSafe
+
+    building 'markupsafe._speedups' extension  
+    ...  
+    Successfully installed Jinja2 MarkupSafe  
+    Cleaning up...
+```
 
 And the answer is a most definite yes.
 
 The reason that the Python virtual environment works is because it creates its own fresh ‘site-packages’ directory for installing new Python modules which is independent of the ‘site-packages’ directory of the main Python installation.
 
-> 
->     $ pip freeze  
->     > Jinja2==2.8  
->     > MarkupSafe==0.23  
->     > wsgiref==0.1.2
+```bash
+    $ pip freeze  
+    Jinja2==2.8  
+    MarkupSafe==0.23  
+    wsgiref==0.1.2
+```
 
 The only Python packages that will be found in the ‘site-packages’ directory will be ‘pip’ itself, and the couple of packages it requires such as ‘setuptools’, and the additional packages that we install. There is therefore no danger of conflicts with any packages that were installed into the main Python installation by virtue of operating system packages.
 

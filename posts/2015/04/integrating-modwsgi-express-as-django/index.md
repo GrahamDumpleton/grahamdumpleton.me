@@ -17,28 +17,31 @@ The next step therefore was to avoid this requirement by integrating mod\_wsgi-e
 
 In short, instead of having to run:
 
-> 
->     mod_wsgi-express start-server --url-alias /static static --application-type module mysite.wsgi
+```
+    mod_wsgi-express start-server --url-alias /static static --application-type module mysite.wsgi
+```
 
 our goal is to be able to run:
 
-> 
->     python manage.py runmodwsgi
+```
+    python manage.py runmodwsgi
+```
 
 # Updating installed applications
 
 The actual integration of mod\_wsgi-express into the Django project is actually a quite simple matter. This is because the mod\_wsgi package implements the Django application abstraction. We therefore need only list the appropriate mod\_wsgi sub package in ‘INSTALLED\_APPS’ in the Django settings file.
 
-> 
->     INSTALLED_APPS = (  
->     >  'django.contrib.admin',  
->     >  'django.contrib.auth',  
->     >  'django.contrib.contenttypes',  
->     >  'django.contrib.sessions',  
->     >  'django.contrib.messages',  
->     >  'django.contrib.staticfiles',  
->     >  'mod_wsgi.server',  
->     > )
+```
+    INSTALLED_APPS = (  
+    'django.contrib.admin',  
+    'django.contrib.auth',  
+    'django.contrib.contenttypes',  
+    'django.contrib.sessions',  
+    'django.contrib.messages',  
+    'django.contrib.staticfiles',  
+    'mod_wsgi.server',  
+    )
+```
 
 In particular we have added ‘mod\_wsgi.server’ to ‘INSTALLED\_APPS’.
 
@@ -58,8 +61,9 @@ Finally, we use the values of ‘STATIC\_URL’ and ‘STATIC\_ROOT’ to determ
 
 With this information being automatically picked up, we can now say:
 
-> 
->     python manage.py runmodwsgi
+```
+    python manage.py runmodwsgi
+```
 
 So we have achieved our goal, but there is at least one more change that you might make to improve the experience when using mod\_wsgi-express with the Django site. Or at least when using it in a development environment.
 
@@ -69,37 +73,40 @@ When using Django, by default the details of any exceptions occurring in your co
 
 The two primary mechanisms often used are to configure Django to send you an email for each exception which occurred, or to simply log the details in the error log for your WSGI server. It is this latter mechanism which we are going to set up here. For this we are going to add to the Django settings file:
 
-> 
->     LOGGING = {  
->     >     'version': 1,  
->     >     'disable_existing_loggers': False,  
->     >     'handlers': {  
->     >         'console': {  
->     >             'class': 'logging.StreamHandler',  
->     >         },  
->     >     },  
->     >     'loggers': {  
->     >         'django': {  
->     >             'handlers': ['console'],  
->     >             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),  
->     >         },  
->     >     },  
->     > }
+```
+    LOGGING = {  
+    'version': 1,  
+    'disable_existing_loggers': False,  
+    'handlers': {  
+    'console': {  
+    'class': 'logging.StreamHandler',  
+    },  
+    },  
+    'loggers': {  
+    'django': {  
+    'handlers': ['console'],  
+    'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),  
+    },  
+    },  
+    }
+```
 
 With this in place the details of any exceptions will be logged to the Apache error log for mod\_wsgi-express. The path to the error log will be displayed to the terminal when running mod\_wsgi-express so you know where it is.
 
 As the Apache error log is a distinct file, when using mod\_wsgi-express during development, the need to consult the separate error log file may be inconvenient. In this case one can instead tell mod\_wsgi-express to log all information to the terminal instead.
 
-> 
->     python manage.py runmodwsgi --log-to-terminal
+```
+    python manage.py runmodwsgi --log-to-terminal
+```
 
 If you are using mod\_wsgi-express in a development environment but are using a different WSGI server in production, even if a normal Apache/mod\_wsgi installation, having the exceptions logged to the error log may not always be appropriate. If this is the case and you would only want the exception details logged to the error log when using mod\_wsgi-express, you can check for the existence of an environment variable which tells you if mod\_wsgi-express is being used.
 
-> 
->     if os.environ.get('MOD_WSGI_EXPRESS'):  
->     >     LOGGING = {  
->     >         …  
->     >     } 
+```python
+    if os.environ.get('MOD_WSGI_EXPRESS'):  
+    LOGGING = {  
+    …  
+    } 
+```
 
 # Use as a development server
 
@@ -117,8 +124,9 @@ The first reason as noted above is that mod\_wsgi-express runs in a multithreade
 
 By using a production capable WSGI server such as mod\_wsgi-express during development, where both multi process and multithreaded configurations can be setup, you are able to better replicate the environment you will expect to run under in production. So although mod\_wsgi-express does use multithreading by default, to encourage the creation of thread safe code, if you truly did want to avoid multithreading and wanted to use single threaded processes, you could use:
 
-> 
->     python manage.py runmodwsgi —processes 3 --threads 1
+```
+    python manage.py runmodwsgi —processes 3 --threads 1
+```
 
 The benefits of using mod\_wsgi-express also extend to the serving up of static media files as these are now also being handled by a proper web server. You can therefore get a better idea of how your web application is going to perform in production because you can do load testing against mod\_wsgi-express and know that it isn’t going to be too different to what you would expect in a production environment, ignoring of course differences in hardware or operating system.
 
@@ -126,8 +134,9 @@ The benefits of using mod\_wsgi-express also extend to the serving up of static 
 
 You might be saying at this point though that one of the benefits of using the Django development server is that it offers automatic source code reloading. Well, mod\_wsgi-express has that as well.
 
-> 
->     python manage.py runmodwsgi --reload-on-changes
+```
+    python manage.py runmodwsgi --reload-on-changes
+```
 
 With the ‘—reload-on-changes’ option to mod\_wsgi-express, any code files associated with modules that have been loaded into the running Python web application will be monitored for changes. If any of those files on disk change in between the time it was loaded and when the check was made, then the web application process\(es\) will be automatically shutdown and restarted. In this way, when the next request is made it will see the more recent code changes.
 

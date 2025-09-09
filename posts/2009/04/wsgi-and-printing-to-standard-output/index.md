@@ -24,9 +24,7 @@ Although CGI may not be the most popular platform to host WSGI applications, wit
 The result of doing this is that when 'print' was used in a WSGI application hosted by mod\_wsgi, a Python exception would be raised of the type:
     
     
-```
-IOError: sys.stdout access restricted by mod_wsgi
-```
+    IOError: sys.stdout access restricted by mod_wsgi
 
 This was all done with good intention, but what has been found is that people can't be bothered reading the [documentation](http://code.google.com/p/modwsgi/wiki/ApplicationIssues#Writing_To_Standard_Output) which explains why it was done and even when they do, they still can't be bothered fixing up the code not to use 'print'. It seems the convenience of using 'print' out weighs the ideal of writing code that may actually work across different WSGI hosting mechanisms.
 
@@ -36,9 +34,7 @@ This was all done with good intention, but what has been found is that people ca
 More annoying is that whenever questions arise about this error on the irc channels, rather than people being told to read the documentation and/or fix their code not to use 'print', voodoo is summoned and they are instead told to use the magic incantation of:
     
     
-```
-sys.stdout = sys.stderr
-```
+    sys.stdout = sys.stderr
 
 Yes this is given as one of the workarounds in the documentation, the other being to disable the restriction using the configuration directive specifically for the purpose, but the only reason the workaround is given is for where you have no choice because you cannot change the code to remove the 'print' statement. People aren't told this though, all they are told is to make that change and effectively ignore the whole issue.
 
@@ -53,9 +49,7 @@ The whole mythology that is developing around this is now getting to the extent 
 So, what is the real answer? Well, if you care about writing portable WSGI application code, then do not use 'print' by itself, instead redirect it to 'sys.stderr' by writing:
     
     
-```
-print >> sys.stderr, 'message ...'
-```
+    print >> sys.stderr, 'message ...'
 
 This is especially important if you are writing framework libraries or plugins to be used in some other application or by other users. You shouldn't be making an assumption that 'sys.stdout' can always be used. If it is a debug or error message, then use 'sys.stderr' as it is meant to be.
 
@@ -65,10 +59,8 @@ This is especially important if you are writing framework libraries or plugins t
 If for some reason you really don't want to care about the issue, then rather than use the magic voodoo above, you should simply disable the restrictions that mod\_wsgi puts into place altogether. This is done by putting in the main Apache configuration file:
     
     
-```
-WSGIRestrictStdin Off  
-WSGIRestrictStdout Off
-```
+    WSGIRestrictStdin Off  
+    WSGIRestrictStdout Off
 
 Anyway, because of all the contention arising over all of this, in [mod\_wsgi 3.0](http://code.google.com/p/modwsgi/wiki/ChangesInVersion0300) I will be giving up and will be making the restrictions off by default. If you want to write non portable WSGI application, you can quite happily do so. If you do care about portable WSGI application code, then you will be able to optionally reenable the restriction using the same directives above.
 

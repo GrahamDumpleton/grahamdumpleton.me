@@ -24,35 +24,23 @@ Because it is so important that embedded mode not be used, to ensure you get thi
 The configuration for mod\_wsgi in the Apache configuration where running a single Python web application should therefore include something like:
     
     
-```
-# Define a mod_wsgi daemon process group.
-```
+    # Define a mod_wsgi daemon process group.
     
     
-```
-WSGIDaemonProcess my-python-web-application display-name=%{GROUP}
-```
+    WSGIDaemonProcess my-python-web-application display-name=%{GROUP}
     
     
-```
-# Force the Python web application to run in the mod_wsgi daemon process group.
-```
+    # Force the Python web application to run in the mod_wsgi daemon process group.
     
     
-```
-WSGIProcessGroup my-python-web-application  
-WSGIApplicationGroup %{GLOBAL}
-```
+    WSGIProcessGroup my-python-web-application  
+    WSGIApplicationGroup %{GLOBAL}
     
     
-```
-# Disable embedded mode of mod_wsgi.
-```
+    # Disable embedded mode of mod_wsgi.
     
     
-```
-WSGIRestrictEmbedded On 
-```
+    WSGIRestrictEmbedded On 
 
 Obviously if running more than one Python web application then you may need to use a more complicated configuration. Either way, ensure you aren't using embedded mode and that any Python web applications are running in daemon mode instead. All the following discussion will assume that you have got this in place.
 
@@ -63,13 +51,11 @@ For this we now need to delve into the typical ways that each is hosted by Apach
 In the case of PHP, the typical approach involves having Apache handle the primary URL routing by matching a URL to actual files in the file system. So if the default Apache web server document directory contains the files:
     
     
-```
-favicon.ico  
-index.php  
-page-1.php  
-page-2.php  
-robots.txt 
-```
+    favicon.ico  
+    index.php  
+    page-1.php  
+    page-2.php  
+    robots.txt 
 
 then if a request arrives which uses a URL of '/robots.txt', then Apache will return the contents of that file. If however a URL of '/page-1.php' arrives, then Apache will actually load the code in the file called 'page-1.php' and execute it as PHP code. That PHP code will then be responsible for generating the actual response content.
 
@@ -80,36 +66,28 @@ The way things typically work for PHP then is that any PHP code files are simply
 This is all achieved by using an Apache configuration of:
     
     
-```
-DocumentRoot /var/www/html
-```
+    DocumentRoot /var/www/html
     
     
-```
-<Directory /var/www/html>  
-DirectoryIndex index.php  
-AddHandler application/x-httpd-php .php  
-</Directory>
-```
+    <Directory /var/www/html>  
+    DirectoryIndex index.php  
+    AddHandler application/x-httpd-php .php  
+    </Directory>
 
 In this you can start to see why people say PHP is so easy to use as all you need to do is drop the PHP code files in the right directory and they work. In this simple configuration, there is no need for users to worry about URL routing as that is done for them by the web server.
 
 Now you can actually do a similar thing with mod\_wsgi for Python script files by extending this to:
     
     
-```
-DocumentRoot /var/www/html
-```
+    DocumentRoot /var/www/html
     
     
-```
-<Directory /var/www/html>  
-Options ExecCGI  
-DirectoryIndex index.py index.php  
-AddHandler application/x-httpd-php .php  
-AddHandler wsgi-script .py  
-</Directory>
-```
+    <Directory /var/www/html>  
+    Options ExecCGI  
+    DirectoryIndex index.py index.php  
+    AddHandler application/x-httpd-php .php  
+    AddHandler wsgi-script .py  
+    </Directory>
 
 That is, you can now simply drop Python code files with a '.py' extension into the directory and they would be executed as Python code when a URL mapped to that file. So if instead of 'index.php' you had 'index.py', accessing the URL for the directory, Apache in seeing that 'index.py' now exists, would use that to serve the request rather than 'index.php'. If the URL instead explicitly referenced a '.py' file by name, then that would be executed to handle the request instead.
 
@@ -150,36 +128,28 @@ One can still use the above method as the gateway into a WSGI application using 
 To get things to work properly, for a Python web application we can use a different type of configuration.
     
     
-```
-Alias / /var/www/wsgi/main.py
-```
+    Alias / /var/www/wsgi/main.py
     
     
-```
-<Directory /var/www/wsgi>  
-Options ExecCGI  
-AddHandler wsgi-script .py  
-Order allow,deny  
-Allow from all  
-</Directory>
-```
+    <Directory /var/www/wsgi>  
+    Options ExecCGI  
+    AddHandler wsgi-script .py  
+    Order allow,deny  
+    Allow from all  
+    </Directory>
 
 Specifically, the 'Alias' directive allows us to say that all requests that fall under the URL starting with '/', in this case the whole site, will be routed to the resource specified. As that resources maps to a Python code file, it will then be executed as Python code, thus providing the gateway into our WSGI application, with it being able to then perform the actual URL routing required to map a request to a specific handler function.
 
 Because for Python web applications this will be a common idiom, mod\_wsgi provides a simpler way of doing the same thing:
     
     
-```
-WSGIScriptAlias / /var/www/wsgi/main.py
-```
+    WSGIScriptAlias / /var/www/wsgi/main.py
     
     
-```
-<Directory /var/www/wsgi>  
-Order allow,deny  
-Allow from all  
-</Directory>
-```
+    <Directory /var/www/wsgi>  
+    Order allow,deny  
+    Allow from all  
+    </Directory>
 
 Using the 'WSGIScriptAlias' directive from mod\_wsgi in this case means that we do not need to worry about setting the 'ExecCGI' option, or map that the file with a '.py' extension should be executed as a WSGI script.
 
@@ -192,9 +162,7 @@ The primary problem if it isn't obvious is that using 'WSGIScriptAlias' for '/' 
 The simplest thing which can be done at this point is to host the Python web application at a sub URL instead of the root of the site.
     
     
-```
-WSGIScriptAlias /suburl /var/www/wsgi/main.py
-```
+    WSGIScriptAlias /suburl /var/www/wsgi/main.py
 
 The result will be that all requests prefixed with that sub URL will then go to that Python web application. Anything else will be mapped against the document directory of the server and thus potentially to the PHP web application.
 
@@ -207,35 +175,25 @@ The answer is that is possible, but we have to rely on a little magic. This magi
 Our starting point in this case will be the prior example we had whereby we could drop both PHP and Python code files in the document directory for the server. To that we are going to add our mod\_rewrite rules.
     
     
-```
-DocumentRoot /var/www/html
-```
+    DocumentRoot /var/www/html
     
     
-```
-<Directory /var/www/html>
-```
+    <Directory /var/www/html>
     
     
-```
-Options ExecCGI  
-DirectoryIndex index.php  
-AddHandler application/x-httpd-php .php  
-AddHandler wsgi-script .py
-```
+    Options ExecCGI  
+    DirectoryIndex index.php  
+    AddHandler application/x-httpd-php .php  
+    AddHandler wsgi-script .py
     
     
-```
-RewriteEngine On  
-RewriteCond %{REQUEST_FILENAME} !-f  
-RewriteCond %{REQUEST_FILENAME} !-d  
-RewriteRule ^(.*)$ /main.py/$1 [QSA,PT,L]
-```
+    RewriteEngine On  
+    RewriteCond %{REQUEST_FILENAME} !-f  
+    RewriteCond %{REQUEST_FILENAME} !-d  
+    RewriteRule ^(.*)$ /main.py/$1 [QSA,PT,L]
     
     
-```
-</Directory>
-```
+    </Directory>
 
 What this magic rewrite rule will do is look at each request as it comes in and determine if Apache was able to map the URL to a file within the document directory. If Apache was able to successfully map the URL to a file, then the request will be processed normally.
 
@@ -256,23 +214,17 @@ This is because when we use the mod\_rewrite rules above to trigger the internal
 This comes about because normally where your Python web application would see a URL as:
     
     
-```
-/some/url
-```
+    /some/url
 
 it will instead see it as:
     
     
-```
-/main.py/some/url
-```
+    /main.py/some/url
 
 Or more specifically, the 'SCRIPT\_NAME' variable will be passed into the WSGI environ dictionary as:
     
     
-```
-/main.py
-```
+    /main.py
 
 rather than an empty string.
 
@@ -281,38 +233,26 @@ The consequences of this is that when your Python web application creates a full
 Exposing this internal detail of how we are hosting the Python web application part of the site isn't what we want to do, so we want to strip that out. That way any full URLs which are constructed will make it appear that the Python web application is still hosted at the root of the site and a user will be none the wiser.
     
     
-```
-def _application(environ, start_response):  
- # The original application entry point.  
- ...
-```
+    def _application(environ, start_response):  
+     # The original application entry point.  
+     ...
     
     
-```
-import posixpath
-```
+    import posixpath
     
     
-```
-def application(environ, start_response):  
-  # Wrapper to set SCRIPT_NAME to actual mount point.
-```
+    def application(environ, start_response):  
+      # Wrapper to set SCRIPT_NAME to actual mount point.
     
     
-```
-  environ['SCRIPT_NAME'] = posixpath.dirname(environ['SCRIPT_NAME'])
-```
+      environ['SCRIPT_NAME'] = posixpath.dirname(environ['SCRIPT_NAME'])
     
     
-```
-  if environ['SCRIPT_NAME'] == '/':  
-    environ['SCRIPT_NAME'] = ''
-```
+      if environ['SCRIPT_NAME'] == '/':  
+        environ['SCRIPT_NAME'] = ''
     
     
-```
-  return _application(environ, start_response)
-```
+      return _application(environ, start_response)
 
 Because we are hosting at the root of the site, we could have just set 'SCRIPT\_NAME' to an empty string and be done with it. I use here though a more durable solution in case the rewrite URLs were being used for a sub directory of the server document directory.
 
@@ -329,107 +269,71 @@ So summarising, there are two things that need to be done.
 The first step is changing the Apache configuration to use mod\_rewrite rules to fallback to sending requests through to the Python web application.
     
     
-```
-# Define a mod_wsgi daemon process group.
-```
+    # Define a mod_wsgi daemon process group.
     
     
-```
-WSGIDaemonProcess my-python-web-application display-name=%{GROUP}
-```
+    WSGIDaemonProcess my-python-web-application display-name=%{GROUP}
     
     
-```
-# Force the Python web application to run in the mod_wsgi daemon process group.
-```
+    # Force the Python web application to run in the mod_wsgi daemon process group.
     
     
-```
-WSGIProcessGroup my-python-web-application  
-WSGIApplicationGroup %{GLOBAL}
-```
+    WSGIProcessGroup my-python-web-application  
+    WSGIApplicationGroup %{GLOBAL}
     
     
-```
-# Disable embedded mode of mod_wsgi.
-```
+    # Disable embedded mode of mod_wsgi.
     
     
-```
-WSGIRestrictEmbedded On
-```
+    WSGIRestrictEmbedded On
     
     
-```
-# Set document root and rules for access.
-```
+    # Set document root and rules for access.
     
     
-```
-DocumentRoot /var/www/html
-```
+    DocumentRoot /var/www/html
     
     
-```
-<Directory /var/www/html>
-```
+    <Directory /var/www/html>
     
     
-```
-Options ExecCGI  
-DirectoryIndex index.php  
-AddHandler application/x-httpd-php .php  
-AddHandler wsgi-script .py
-```
+    Options ExecCGI  
+    DirectoryIndex index.php  
+    AddHandler application/x-httpd-php .php  
+    AddHandler wsgi-script .py
     
     
-```
-RewriteEngine On  
-RewriteCond %{REQUEST_FILENAME} !-f  
-RewriteCond %{REQUEST_FILENAME} !-d  
-RewriteRule ^(.*)$ /main.py/$1 [QSA,PT,L]
-```
+    RewriteEngine On  
+    RewriteCond %{REQUEST_FILENAME} !-f  
+    RewriteCond %{REQUEST_FILENAME} !-d  
+    RewriteRule ^(.*)$ /main.py/$1 [QSA,PT,L]
     
     
-```
-</Directory>
-```
+    </Directory>
 
 The second step is setting up the 'main.py' file for the entry point to the Python web application, and implement the fix up for 'SCRIPT\_NAME'.
     
     
-```
-def _application(environ, start_response):  
- # The original application entry point.  
- ...
-```
+    def _application(environ, start_response):  
+     # The original application entry point.  
+     ...
     
     
-```
-import posixpath
-```
+    import posixpath
     
     
-```
-def application(environ, start_response):  
-  # Wrapper to set SCRIPT_NAME to actual mount point.
-```
+    def application(environ, start_response):  
+      # Wrapper to set SCRIPT_NAME to actual mount point.
     
     
-```
-  environ['SCRIPT_NAME'] = posixpath.dirname(environ['SCRIPT_NAME'])
-```
+      environ['SCRIPT_NAME'] = posixpath.dirname(environ['SCRIPT_NAME'])
     
     
-```
-  if environ['SCRIPT_NAME'] == '/':  
-    environ['SCRIPT_NAME'] = ''
-```
+      if environ['SCRIPT_NAME'] == '/':  
+        environ['SCRIPT_NAME'] = ''
     
     
-```
-  return _application(environ, start_response)
-```
+      return _application(environ, start_response)
 
 Overall the concept is simple, it is just the detail of the implementation which may not be obvious and why some may think it is not possible.
 

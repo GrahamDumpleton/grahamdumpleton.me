@@ -25,43 +25,46 @@ Before you do that it is important though that you have at least installed the _
 
 To check that you have the Xcode command line tools you can run ‘xcode-select --install’. If you have them installed already, you should see the message below, otherwise you should be stepped through installation of the package.
 
-> 
->     $ xcode-select --install  
->     > xcode-select: error: command line tools are already installed, use "Software Update" to install updates
+```bash
+    $ xcode-select --install  
+    xcode-select: error: command line tools are already installed, use "Software Update" to install updates
+```
 
 Do ensure that you have run software update to get the latest version for your operating system revision if you don’t regularly update.
 
 With the Xcode command line tools installed, you can now run the ‘configure’ script found in the mod\_wsgi source directory.
 
-> 
->     $ ./configure
->     checking for apxs2... no
->     checking for apxs... /usr/sbin/apxs
->     checking for gcc... gcc
->     checking whether the C compiler works... yes
->     checking for C compiler default output file name... a.out
->     checking for suffix of executables...
->     checking whether we are cross compiling... no
->     checking for suffix of object files... o
->     checking whether we are using the GNU C compiler... yes
->     checking whether gcc accepts -g... yes
->     checking for gcc option to accept ISO C89... none needed
->     checking for prctl... no
->     checking Apache version... 2.4.18
->     checking for python... /usr/bin/python
->     configure: creating ./config.status
->     config.status: creating Makefile
+```python
+    $ ./configure
+    checking for apxs2... no
+    checking for apxs... /usr/sbin/apxs
+    checking for gcc... gcc
+    checking whether the C compiler works... yes
+    checking for C compiler default output file name... a.out
+    checking for suffix of executables...
+    checking whether we are cross compiling... no
+    checking for suffix of object files... o
+    checking whether we are using the GNU C compiler... yes
+    checking whether gcc accepts -g... yes
+    checking for gcc option to accept ISO C89... none needed
+    checking for prctl... no
+    checking Apache version... 2.4.18
+    checking for python... /usr/bin/python
+    configure: creating ./config.status
+    config.status: creating Makefile
+```
 
 Important to note here is that we want the ‘apxs’ version found to be ‘/usr/sbin/apxs’ and the ‘python’ version found to be ‘/usr/bin/python’. If these aren’t the versions found then it indicates that you have a Python or Apache httpd server installation which was installed separately and is not the native versions supplied with MacOS X. I am not going to cover using separate Python or Apache httpd server installations in this post and assume you only have the native tools.
 
 The next step is to run ‘make’.
 
-> 
->     $ make  
->     > ./apxs -c -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 -DENABLE_DTRACE -DMACOSX -DNDEBUG -DNDEBUG -DENABLE_DTRACE -Wc,-g -Wc,-O2 -Wc,'-arch x86_64' src/server/mod_wsgi.c src/server/wsgi_*.c -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config -arch x86_64 -lpython2.7 -ldl -framework CoreFoundation  
->     > ./libtool --silent --mode=compile /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -DDARWIN_10 -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.Internal.sdk/usr/include/apr-1 -I/usr/include/apache2 -I/usr/include/apr-1 -I/usr/include/apr-1 -g -O2 -arch x86_64 -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 -DENABLE_DTRACE -DMACOSX -DNDEBUG -DNDEBUG -DENABLE_DTRACE -c -o src/server/mod_wsgi.lo src/server/mod_wsgi.c && touch src/server/mod_wsgi.slo  
->     > ...  
->     > ./libtool --silent --mode=link /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc    -o src/server/mod_wsgi.la  -rpath /usr/libexec/apache2 -module -avoid-version    src/server/wsgi_validate.lo src/server/wsgi_thread.lo src/server/wsgi_stream.lo src/server/wsgi_server.lo src/server/wsgi_restrict.lo src/server/wsgi_metrics.lo src/server/wsgi_memory.lo src/server/wsgi_logger.lo src/server/wsgi_interp.lo src/server/wsgi_daemon.lo src/server/wsgi_convert.lo src/server/wsgi_buckets.lo src/server/wsgi_apache.lo src/server/mod_wsgi.lo -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config -arch x86_64 -lpython2.7 -ldl -framework CoreFoundation
+```bash
+    $ make  
+    ./apxs -c -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 -DENABLE_DTRACE -DMACOSX -DNDEBUG -DNDEBUG -DENABLE_DTRACE -Wc,-g -Wc,-O2 -Wc,'-arch x86_64' src/server/mod_wsgi.c src/server/wsgi_*.c -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config -arch x86_64 -lpython2.7 -ldl -framework CoreFoundation  
+    ./libtool --silent --mode=compile /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -DDARWIN_10 -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.Internal.sdk/usr/include/apr-1 -I/usr/include/apache2 -I/usr/include/apr-1 -I/usr/include/apr-1 -g -O2 -arch x86_64 -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 -DENABLE_DTRACE -DMACOSX -DNDEBUG -DNDEBUG -DENABLE_DTRACE -c -o src/server/mod_wsgi.lo src/server/mod_wsgi.c && touch src/server/mod_wsgi.slo  
+    ...  
+    ./libtool --silent --mode=link /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc    -o src/server/mod_wsgi.la  -rpath /usr/libexec/apache2 -module -avoid-version    src/server/wsgi_validate.lo src/server/wsgi_thread.lo src/server/wsgi_stream.lo src/server/wsgi_server.lo src/server/wsgi_restrict.lo src/server/wsgi_metrics.lo src/server/wsgi_memory.lo src/server/wsgi_logger.lo src/server/wsgi_interp.lo src/server/wsgi_daemon.lo src/server/wsgi_convert.lo src/server/wsgi_buckets.lo src/server/wsgi_apache.lo src/server/mod_wsgi.lo -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config -arch x86_64 -lpython2.7 -ldl -framework CoreFoundation
+```
 
 If you look closely you might note something strange in the output from running ‘make’. That is that rather than running ‘/usr/bin/apxs’ it is running a version of ‘apxs’ out of the directory where ‘make’ was run. Similarly, the system version of ‘libtool’ is ignored and a local copy used instead.
 
@@ -71,17 +74,18 @@ This issue with ‘apxs’ and ‘libtool’ being broken has been present for a
 
 With the build of mod\_wsgi now complete we just need to install it by running ‘sudo make install’. The result of this should be that the compiled ‘mod\_wsgi.so’ module will be installed into the Apache httpd server installation modules directory. Because though of the System Integrity Protection feature mentioned above, this isn’t what now occurs. Instead the installation fails.
 
-> 
->     $ sudo make install  
->     > Password:  
->     > ./apxs -i -S LIBEXECDIR=/usr/libexec/apache2 -n 'mod_wsgi' src/server/mod_wsgi.la  
->     > /usr/share/httpd/build/instdso.sh SH_LIBTOOL='./libtool' src/server/mod_wsgi.la /usr/libexec/apache2  
->     > ./libtool --mode=install install src/server/mod_wsgi.la /usr/libexec/apache2/  
->     > libtool: install: install src/server/.libs/mod_wsgi.so /usr/libexec/apache2/mod_wsgi.so  
->     > install: /usr/libexec/apache2/mod_wsgi.so: Operation not permitted  
->     > apxs:Error: Command failed with rc=4653056  
->     > .  
->     > make: *** [install] Error 1
+```python
+    $ sudo make install  
+    Password:  
+    ./apxs -i -S LIBEXECDIR=/usr/libexec/apache2 -n 'mod_wsgi' src/server/mod_wsgi.la  
+    /usr/share/httpd/build/instdso.sh SH_LIBTOOL='./libtool' src/server/mod_wsgi.la /usr/libexec/apache2  
+    ./libtool --mode=install install src/server/mod_wsgi.la /usr/libexec/apache2/  
+    libtool: install: install src/server/.libs/mod_wsgi.so /usr/libexec/apache2/mod_wsgi.so  
+    install: /usr/libexec/apache2/mod_wsgi.so: Operation not permitted  
+    apxs:Error: Command failed with rc=4653056  
+    .  
+    make: *** [install] Error 1
+```
 
 The rather obscure error message we get when this fails is ‘Operation not permitted’. This doesn’t exactly tell us a lot and is mighty confusing to anyone installing mod\_wsgi, or any other Apache module.
 
@@ -95,32 +99,35 @@ Since it is the cause of the problem, you might think about disabling the System
 
 The quickest solution therefore is to install the compiled ‘mod\_wsgi.so’ module in a different location that we can write to and setup the Apache httpd server to reference it from that location. To do that we need only override the location using the ‘make’ variable ‘LIBEXECDIR’ when we run ‘sudo make install’. For this example we will use the directory ‘/usr/local/httpd/modules’ instead of the default on MacOS X of ‘/usr/libexec/apache2’.
 
-> 
->     $ sudo make install LIBEXECDIR=/usr/local/httpd/modules  
->     > Password:  
->     > mkdir -p /usr/local/httpd/modules  
->     > ./apxs -i -S LIBEXECDIR=/usr/local/httpd/modules -n 'mod_wsgi' src/server/mod_wsgi.la  
->     > /usr/share/httpd/build/instdso.sh SH_LIBTOOL='./libtool' src/server/mod_wsgi.la /usr/local/httpd/modules  
->     > ./libtool --mode=install install src/server/mod_wsgi.la /usr/local/httpd/modules/  
->     > libtool: install: install src/server/.libs/mod_wsgi.so /usr/local/httpd/modules/mod_wsgi.so  
->     > libtool: install: install src/server/.libs/mod_wsgi.lai /usr/local/httpd/modules/mod_wsgi.la  
->     > libtool: install: install src/server/.libs/mod_wsgi.a /usr/local/httpd/modules/mod_wsgi.a  
->     > libtool: install: chmod 644 /usr/local/httpd/modules/mod_wsgi.a  
->     > libtool: install: ranlib /usr/local/httpd/modules/mod_wsgi.a  
->     > libtool: install: warning: remember to run `libtool --finish /usr/libexec/apache2'  
->     > chmod 755 /usr/local/httpd/modules/mod_wsgi.so
+```bash
+    $ sudo make install LIBEXECDIR=/usr/local/httpd/modules  
+    Password:  
+    mkdir -p /usr/local/httpd/modules  
+    ./apxs -i -S LIBEXECDIR=/usr/local/httpd/modules -n 'mod_wsgi' src/server/mod_wsgi.la  
+    /usr/share/httpd/build/instdso.sh SH_LIBTOOL='./libtool' src/server/mod_wsgi.la /usr/local/httpd/modules  
+    ./libtool --mode=install install src/server/mod_wsgi.la /usr/local/httpd/modules/  
+    libtool: install: install src/server/.libs/mod_wsgi.so /usr/local/httpd/modules/mod_wsgi.so  
+    libtool: install: install src/server/.libs/mod_wsgi.lai /usr/local/httpd/modules/mod_wsgi.la  
+    libtool: install: install src/server/.libs/mod_wsgi.a /usr/local/httpd/modules/mod_wsgi.a  
+    libtool: install: chmod 644 /usr/local/httpd/modules/mod_wsgi.a  
+    libtool: install: ranlib /usr/local/httpd/modules/mod_wsgi.a  
+    libtool: install: warning: remember to run `libtool --finish /usr/libexec/apache2'  
+    chmod 755 /usr/local/httpd/modules/mod_wsgi.so
+```
 
 Although the output from running this command shows a warning about running ‘libtool --finish’ you can ignore it. To be honest I am not actually sure how it even still knows about the directory ‘/usr/libexec/apache2’, but for MacOS X everything still works without doing that step.
 
 With the mod\_wsgi module installed, in the Apache httpd server configuration file you would then use:
 
-> 
->     LoadModule wsgi_module /usr/local/httpd/modules/mod_wsgi.so
+```
+    LoadModule wsgi_module /usr/local/httpd/modules/mod_wsgi.so
+```
 
 rather than the normal:
 
-> 
->     LoadModule wsgi_module libexec/apache2/mod_wsgi.so
+```
+    LoadModule wsgi_module libexec/apache2/mod_wsgi.so
+```
 
 This gets us beyond the System Integrity Protection problem caused by using MacOS X El Capitan. You would then configure and set up the Apache httpd server and mod\_wsgi for your specific WSGI application in the same way as you normally would.
 
@@ -132,13 +139,15 @@ The benefit of using mod\_wsgi-express is that it is easier to install, and give
 
 To install mod\_wsgi-express on MacOS X you still need to ensure you have installed the Xcode command line tools as explained above, but once you have done that it is a simple matter of running:
 
-> 
->     pip install mod_wsgi
+```
+    pip install mod_wsgi
+```
 
 Rather than the mod\_wsgi module being installed into your Apache httpd server installation, the module and ‘mod\_wsgi-express’ program will be installed into your Python installation. Hosting your WSGI application with mod\_wsgi can then be as simple as running:
 
-> 
->     mod_wsgi-express start-server hello.wsgi
+```
+    mod_wsgi-express start-server hello.wsgi
+```
 
 That mod\_wsgi-express installs into your Python installation makes it very easy to use mod\_wsgi with different Python installations, be they different Python versions or Python virtual environments, at the same time. You can therefore much more readily run mod\_wsgi for both Python 2 and Python 3 on the same system. Each mod\_wsgi-express instance is distinct and would need to run on different ports, but you can if need be use your main Apache httpd server installation as a proxy in front of these if needing to make both available on the standard port 80 at the same time.
 

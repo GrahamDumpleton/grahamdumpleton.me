@@ -13,17 +13,17 @@ blog_title: "Graham Dumpleton"
 
 In the [first post](/posts/2015/12/running-ipython-as-docker-container/) of this series looking at how to get IPython running on OpenShift I showed how taking the ‘jupyter/notebook’ Docker image and trying to use it results in failure. The error we encountered was:
 
-> 
->     $ oc logs --previous notebook-1-718ce  
->     > /usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/' is not a writable location, using a temp directory.  
->     >  " using a temp directory.".format(parent))  
->     > Traceback (most recent call last):  
->     >   ...
->     
->     
->     File "/usr/lib/python3.4/os.py", line 237, in makedirs  
->     >  mkdir(name, mode)  
->     > PermissionError: [Errno 13] Permission denied: '/.jupyter'
+```bash
+    $ oc logs --previous notebook-1-718ce  
+    /usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/' is not a writable location, using a temp directory.  
+    " using a temp directory.".format(parent))  
+    Traceback (most recent call last):  
+    ...
+
+    File "/usr/lib/python3.4/os.py", line 237, in makedirs  
+    mkdir(name, mode)  
+    PermissionError: [Errno 13] Permission denied: '/.jupyter'
+```
 
 The problem occurred because the ‘jupyter/notebook’ expects to run as the ‘root’ user, but OpenShift doesn’t permit that by default due to the increased security risks from allowing that with how Docker currently works.
 
@@ -49,17 +49,18 @@ The simplest course one might choose is to look at what system users an operatin
 
 On the ‘busybox’ image, if we do that we find:
 
-> 
->     root:x:0:0:root:/root:/bin/sh  
->     > daemon:x:1:1:daemon:/usr/sbin:/bin/false  
->     > bin:x:2:2:bin:/bin:/bin/false  
->     > sys:x:3:3:sys:/dev:/bin/false  
->     > sync:x:4:100:sync:/bin:/bin/sync  
->     > mail:x:8:8:mail:/var/spool/mail:/bin/false  
->     > www-data:x:33:33:www-data:/var/www:/bin/false  
->     > operator:x:37:37:Operator:/var:/bin/false  
->     > ftp:x:83:83:ftp:/home/ftp:/bin/false  
->     > nobody:x:99:99:nobody:/home:/bin/false
+```javascript
+    root:x:0:0:root:/root:/bin/sh  
+    daemon:x:1:1:daemon:/usr/sbin:/bin/false  
+    bin:x:2:2:bin:/bin:/bin/false  
+    sys:x:3:3:sys:/dev:/bin/false  
+    sync:x:4:100:sync:/bin:/bin/sync  
+    mail:x:8:8:mail:/var/spool/mail:/bin/false  
+    www-data:x:33:33:www-data:/var/www:/bin/false  
+    operator:x:37:37:Operator:/var:/bin/false  
+    ftp:x:83:83:ftp:/home/ftp:/bin/false  
+    nobody:x:99:99:nobody:/home:/bin/false
+```
 
 Of these the ‘www-data’ user looks like a good candidate, this being the user that would normally be used by a web server such as Apache. The ‘www-data’ user is also typically present on all Linux operating system variants.
 
@@ -67,30 +68,31 @@ The problem with the ‘www-data’ user is that although the ‘/etc/passwd’ 
 
 For example, on ‘busybox’ the home directory of ‘/var/www’ does exist, but on a Debian based image it may not.
 
-> 
->     $ docker run --rm -it busybox sh  
->     > / # echo ~www-data  
->     > /var/www  
->     > / # touch ~www-data/magic  
->     > / # exit
->     
->     
->     $ docker run --rm -it debian:jessie sh  
->     > # echo ~www-data  
->     > /var/www  
->     > # touch ~www-data/magic  
->     > touch: cannot touch '/var/www/magic': No such file or directory
+```bash
+    $ docker run --rm -it busybox sh  
+    / # echo ~www-data  
+    /var/www  
+    / # touch ~www-data/magic  
+    / # exit
+
+    $ docker run --rm -it debian:jessie sh  
+    # echo ~www-data  
+    /var/www  
+    # touch ~www-data/magic  
+    touch: cannot touch '/var/www/magic': No such file or directory
+```
 
 The lack of a home directory means that even if we update the IPython Docker image to run as the ‘www-data’ user, it will still fail on startup.
 
-> 
->     /usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/var/www' is not a writable location, using a temp directory.  
->     >  " using a temp directory.".format(parent))  
->     > Traceback (most recent call last):  
->     >  ...  
->     >  File "/usr/lib/python3.4/os.py", line 237, in makedirs  
->     >  mkdir(name, mode)  
->     > PermissionError: [Errno 13] Permission denied: '/var/www'
+```javascript
+    /usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/var/www' is not a writable location, using a temp directory.  
+    " using a temp directory.".format(parent))  
+    Traceback (most recent call last):  
+    ...  
+    File "/usr/lib/python3.4/os.py", line 237, in makedirs  
+    mkdir(name, mode)  
+    PermissionError: [Errno 13] Permission denied: '/var/www'
+```
 
 What happened this time is that since the home directory didn’t even exist, the Python code for the application tried to create it. The user ‘www-data’ didn’t though have permissions to create a directory under ‘/var’.
 
@@ -104,8 +106,9 @@ The exact command you use to add a new user account is going to depend on the Li
 
 The IPython Docker image for ‘jupyter/notebook’ is derived from Ubuntu and so is Debian based. To create a special user account called ‘ipython’ we would therefore use:
 
-> 
->     adduser --disabled-password --gecos "IPython" ipython
+```
+    adduser --disabled-password --gecos "IPython" ipython
+```
 
 The ‘--disabled-password’ option ensures that the ‘adduser’ command doesn’t attempt to prompt for a user password.
 
@@ -113,31 +116,30 @@ Having added our own user account, what changes would we need to make to the ‘
 
 Looking through it the bulk of the commands in the ‘Dockerfile’ relate to installing system or Python packages. It is only where we get to the end of the ‘Dockerfile’ that we come across anything that potentially needs to change.
 
-> 
->     # Add a notebook profile.  
->     > RUN mkdir -p -m 700 /root/.jupyter/ && \  
->     >  echo "c.NotebookApp.ip = '*'" >> /root/.jupyter/jupyter_notebook_config.py
->     
->     
->     VOLUME /notebooks  
->     > WORKDIR /notebooks
->     
->     
->     EXPOSE 8888
->     
->     
->     ENTRYPOINT ["tini", "--"]  
->     > CMD ["jupyter", "notebook"]
+```dockerfile
+    # Add a notebook profile.  
+    RUN mkdir -p -m 700 /root/.jupyter/ && \  
+    echo "c.NotebookApp.ip = '*'" >> /root/.jupyter/jupyter_notebook_config.py
+
+    VOLUME /notebooks  
+    WORKDIR /notebooks
+
+    EXPOSE 8888
+
+    ENTRYPOINT ["tini", "--"]  
+    CMD ["jupyter", "notebook"]
+```
 
 The first command here is creating a ‘.jupyter’ sub directory in what would be the home directory for the user, and adding to it a user configuration file for the Jupyter Notebook application. As it stands here, it is assuming that the user will be ‘root’, but we don’t want it to run as ‘root’ but the ‘ipython’ user we have created.
 
 When we used the ‘adduser’ command it automatically created a home directory for the ‘ipython’ user at ‘/home/ipython’. We therefore need to use the home directory for the ‘ipython’ user instead of ‘/root’, which was the home directory for the ‘root’ user.
 
-> 
->     # Add a notebook profile.  
->     > RUN mkdir -p -m 700 ~ipython/.jupyter/ && \  
->     >  echo "c.NotebookApp.ip = '*'" >> ~ipython/.jupyter/jupyter_notebook_config.py && \  
->     >  chown -R ipython:ipython ~ipython/.jupyter
+```dockerfile
+    # Add a notebook profile.  
+    RUN mkdir -p -m 700 ~ipython/.jupyter/ && \  
+    echo "c.NotebookApp.ip = '*'" >> ~ipython/.jupyter/jupyter_notebook_config.py && \  
+    chown -R ipython:ipython ~ipython/.jupyter
+```
 
 Also note that since commands are being run as root at this point in the ‘Dockerfile’, we also need to change the ownership on the ‘.jupyter’ subdirectory and the file created inside so they are owned by the ‘ipython’ user. If we do not do this and the IPython Notebook application wants to create additional files in that directory, it will fail, as the directory and files would still be owned by the ‘root’ user.
 
@@ -147,63 +149,62 @@ Directory permissions also become an issue with the ‘/notebooks’ directory. 
 
 The ‘/notebooks’ directory is actually created as a side effect of the ‘VOLUME ‘ statement. A directory created in that way will also be created with ‘root’ as the owner. We therefore need to manually create the ‘/notebooks’ directory ourselves and set the permissions appropriately, before marking it as being a volume mount point.
 
-> 
->     RUN mkdir /notebooks && chown ipython:ipython /notebooks
+```dockerfile
+    RUN mkdir /notebooks && chown ipython:ipython /notebooks
+```
 
 Finally, we can use the ‘USER’ statement to mark that the Docker container when run should be run as the ‘ipython’ user. The final result we end up with is:
 
-> 
->     # Add a notebook profile.  
->     > RUN mkdir -p -m 700 ~ipython/.jupyter/ && \  
->     >  echo "c.NotebookApp.ip = '*'" >> ~ipython/.jupyter/jupyter_notebook_config.py && \  
->     >  chown -R ipython:ipython ~ipython/.jupyter
->     
->     
->     RUN mkdir /notebooks && chown ipython:ipython /notebooks
->     
->     
->     VOLUME /notebooks  
->     > WORKDIR /notebooks
->     
->     
->     EXPOSE 8888
->     
->     
->     USER ipython
->     
->     
->     ENTRYPOINT ["tini", "--"]  
->     > CMD ["jupyter", "notebook"]
+```dockerfile
+    # Add a notebook profile.  
+    RUN mkdir -p -m 700 ~ipython/.jupyter/ && \  
+    echo "c.NotebookApp.ip = '*'" >> ~ipython/.jupyter/jupyter_notebook_config.py && \  
+    chown -R ipython:ipython ~ipython/.jupyter
+
+    RUN mkdir /notebooks && chown ipython:ipython /notebooks
+
+    VOLUME /notebooks  
+    WORKDIR /notebooks
+
+    EXPOSE 8888
+
+    USER ipython
+
+    ENTRYPOINT ["tini", "--"]  
+    CMD ["jupyter", "notebook"]
+```
 
 Running the Docker image after having made these changes and executing an interactive shell within the container, we can check the environment to see if it is what we expect.
 
-> 
->     ipython@f4665e7d63b7:/notebooks$ whoami  
->     > ipython  
->     > ipython@f4665e7d63b7:/notebooks$ id  
->     > uid=1000(ipython) gid=1000(ipython) groups=1000(ipython)  
->     > ipython@f4665e7d63b7:/notebooks$ pwd  
->     > /notebooks  
->     > ipython@f4665e7d63b7:/notebooks$ env | grep HOME  
->     > HOME=/home/ipython  
->     > ipython@f4665e7d63b7:/notebooks$ ls -las  
->     > total 8  
->     > 4 drwxr-xr-x 2 ipython ipython 4096 Dec 21 03:54 .  
->     > 4 drwxr-xr-x 58 root root 4096 Dec 21 03:54 ..
+```bash
+    ipython@f4665e7d63b7:/notebooks$ whoami  
+    ipython  
+    ipython@f4665e7d63b7:/notebooks$ id  
+    uid=1000(ipython) gid=1000(ipython) groups=1000(ipython)  
+    ipython@f4665e7d63b7:/notebooks$ pwd  
+    /notebooks  
+    ipython@f4665e7d63b7:/notebooks$ env | grep HOME  
+    HOME=/home/ipython  
+    ipython@f4665e7d63b7:/notebooks$ ls -las  
+    total 8  
+    4 drwxr-xr-x 2 ipython ipython 4096 Dec 21 03:54 .  
+    4 drwxr-xr-x 58 root root 4096 Dec 21 03:54 ..
+```
 
 All looks good and from the web interface for the IPython Notebook application we can create and save notebooks.
 
 Alas, even though we have now converted the IPython Docker image to not run as ‘root', it still will not run on OpenShift, again yielding an error message in the log output.
 
-> 
->     $ oc logs --previous ipython-2-yo557  
->     > /usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/' is not a writable location, using a temp directory.  
->     >  " using a temp directory.".format(parent))  
->     > Traceback (most recent call last):  
->     >  ...  
->     >  File "/usr/lib/python3.4/os.py", line 237, in makedirs  
->     >  mkdir(name, mode)  
->     > PermissionError: [Errno 13] Permission denied: '/.jupyter'
+```bash
+    $ oc logs --previous ipython-2-yo557  
+    /usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/' is not a writable location, using a temp directory.  
+    " using a temp directory.".format(parent))  
+    Traceback (most recent call last):  
+    ...  
+    File "/usr/lib/python3.4/os.py", line 237, in makedirs  
+    mkdir(name, mode)  
+    PermissionError: [Errno 13] Permission denied: '/.jupyter'
+```
 
 # Why the user ID is overridden
 
@@ -213,9 +214,10 @@ When we look at a hosting service which wants to prohibit Docker images from run
 
 The first issue is what the ‘USER’ was actually set to, which any hosting service can determine by inspecting the Docker image to be deployed.
 
-> 
->     $ docker inspect --format='{{.ContainerConfig.User}}’ jupyter/notebook  
->     > ipython
+```bash
+    $ docker inspect --format='{{.ContainerConfig.User}}’ jupyter/notebook  
+    ipython
+```
 
 In our updated Docker image you can see that when inspecting the image it has been setup to run as the ‘ipython’ user.
 
@@ -223,8 +225,9 @@ The problem with this is that because a user name was supplied, it is not actual
 
 Although you might think that so long as it doesn’t have ‘root’ you are good, that isn’t the case. This is because there is nothing to stop someone constructing a Docker image which has a ‘/etc/passwd’ file containing:
 
-> 
->     ipython:x:0:0:root:/root:/bin/sh
+```
+    ipython:x:0:0:root:/root:/bin/sh
+```
 
 In short, a hosting service cannot trust the user configured into a Docker image if it is not an integer user ID.
 
@@ -254,15 +257,16 @@ Without even using OpenShift we can therefore very quickly see if a Docker image
 
 Doing this for our IPython Docker image we get as we did before:
 
-> 
->     $ docker run --rm -u 100000 -p 8888:8888 jupyter-notebook  
->     > /usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/' is not a writable location, using a temp directory.  
->     >  " using a temp directory.".format(parent))  
->     > Traceback (most recent call last):  
->     >  ...  
->     >  File "/usr/lib/python3.4/os.py", line 237, in makedirs  
->     >  mkdir(name, mode)  
->     > PermissionError: [Errno 13] Permission denied: '/.jupyter'
+```bash
+    $ docker run --rm -u 100000 -p 8888:8888 jupyter-notebook  
+    /usr/local/lib/python3.4/dist-packages/IPython/paths.py:69: UserWarning: IPython parent '/' is not a writable location, using a temp directory.  
+    " using a temp directory.".format(parent))  
+    Traceback (most recent call last):  
+    ...  
+    File "/usr/lib/python3.4/os.py", line 237, in makedirs  
+    mkdir(name, mode)  
+    PermissionError: [Errno 13] Permission denied: '/.jupyter'
+```
 
 # Randomly assigned user ID
 
@@ -278,20 +282,21 @@ In addition, if our Docker image had been constructed such that the intended ‘
 
 This can be seen when we override the command that is run when starting the Docker container to get access to an interactive shell and running some manual checks.
 
-> 
->     $ docker run --rm -it -u 100000 -p 8888:8888 jupyter-notebook bash  
->     > I have no name!@78bdfa8dba92:/notebooks$ whoami  
->     > whoami: cannot find name for user ID 100000  
->     > I have no name!@78bdfa8dba92:/notebooks$ id  
->     > uid=100000 gid=0(root)  
->     > I have no name!@78bdfa8dba92:/notebooks$ pwd  
->     > /notebooks  
->     > I have no name!@78bdfa8dba92:/notebooks$ env | grep HOME  
->     > HOME=/  
->     > I have no name!@78bdfa8dba92:/notebooks$ touch $HOME/magic  
->     > touch: cannot touch ‘//magic’: Permission denied  
->     > I have no name!@78bdfa8dba92:/notebooks$ touch /notebooks/magic  
->     > touch: cannot touch ‘/notebooks/magic’: Permission denied
+```python
+    $ docker run --rm -it -u 100000 -p 8888:8888 jupyter-notebook bash  
+    I have no name!@78bdfa8dba92:/notebooks$ whoami  
+    whoami: cannot find name for user ID 100000  
+    I have no name!@78bdfa8dba92:/notebooks$ id  
+    uid=100000 gid=0(root)  
+    I have no name!@78bdfa8dba92:/notebooks$ pwd  
+    /notebooks  
+    I have no name!@78bdfa8dba92:/notebooks$ env | grep HOME  
+    HOME=/  
+    I have no name!@78bdfa8dba92:/notebooks$ touch $HOME/magic  
+    touch: cannot touch ‘//magic’: Permission denied  
+    I have no name!@78bdfa8dba92:/notebooks$ touch /notebooks/magic  
+    touch: cannot touch ‘/notebooks/magic’: Permission denied
+```
 
 We still therefore have some work to do before we can get this working.
 

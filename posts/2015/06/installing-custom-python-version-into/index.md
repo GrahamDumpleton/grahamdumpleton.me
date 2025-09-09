@@ -43,35 +43,38 @@ On Debian we can do this by using the 'apt-cache show' command to list the depen
 
 The first of these is the 'python2.7-stdlib' package. This lists the dependencies:
 
-> 
->     Depends: libpython2.7-minimal (= 2.7.9-2),  
->     >          mime-support,  
->     >          libbz2-1.0,  
->     >          libc6 (>= 2.15),  
->     >          libdb5.3,  
->     >          libexpat1 (>= 2.1~beta3),  
->     >          libffi6 (>= 3.0.4),  
->     >          libncursesw5 (>= 5.6+20070908),  
->     >          libreadline6 (>= 6.0),  
->     >          libsqlite3-0 (>= 3.5.9),  
->     >          libssl1.0.0 (>= 1.0.1),  
->     >          libtinfo5
+```
+    Depends: libpython2.7-minimal (= 2.7.9-2),  
+    mime-support,  
+    libbz2-1.0,  
+    libc6 (>= 2.15),  
+    libdb5.3,  
+    libexpat1 (>= 2.1~beta3),  
+    libffi6 (>= 3.0.4),  
+    libncursesw5 (>= 5.6+20070908),  
+    libreadline6 (>= 6.0),  
+    libsqlite3-0 (>= 3.5.9),  
+    libssl1.0.0 (>= 1.0.1),  
+    libtinfo5
+```
 
 Within the 'python2.7-minimal' package we also find:
 
-> 
->     Depends: libpython2.7-minimal (= 2.7.9-2),  
->     >          zlib1g (>= 1:1.2.0)
+```
+    Depends: libpython2.7-minimal (= 2.7.9-2),  
+    zlib1g (>= 1:1.2.0)
+```
 
 In these two lists it is the library packages which we are concerned with, as it is for those that we need to ensure that the corresponding developer package is installed so header files are available when compiling any Python modules which require that library.
 
 The command we can next use to try and determine what the developer packages are is the 'apt-cache search' command. Take for example the 'zlib1g' package:
 
-> 
->     # apt-cache search --names-only zlib1g  
->     > zlib1g - compression library - runtime  
->     > zlib1g-dbg - compression library - development  
->     > zlib1g-dev - compression library - development
+```bash
+    # apt-cache search --names-only zlib1g  
+    zlib1g - compression library - runtime  
+    zlib1g-dbg - compression library - development  
+    zlib1g-dev - compression library - development
+```
 
 The developer package we are interested in here is 'zlib1g-dev', which will include the header files we are looking for. We are not interested in 'zlib1g-dbg' as we do not need the debugging information for doing debugging with a C debugger, so we do not need versions of libraries including symbols.
 
@@ -79,38 +82,41 @@ We can therefore go through each of the library packages and see what we can fin
 
 Do note though that the developer packages for some libraries may not have the version number in the package name. This is the case for the SSL libraries for example:
 
-> 
->     # apt-cache search --names-only libssl  
->     > libssl-ocaml - OCaml bindings for OpenSSL (runtime)  
->     > libssl-ocaml-dev - OCaml bindings for OpenSSL  
->     > libssl-dev - Secure Sockets Layer toolkit - development files  
->     > libssl-doc - Secure Sockets Layer toolkit - development documentation  
->     > libssl1.0.0 - Secure Sockets Layer toolkit - shared libraries  
->     > libssl1.0.0-dbg - Secure Sockets Layer toolkit - debug information
+```python
+    # apt-cache search --names-only libssl  
+    libssl-ocaml - OCaml bindings for OpenSSL (runtime)  
+    libssl-ocaml-dev - OCaml bindings for OpenSSL  
+    libssl-dev - Secure Sockets Layer toolkit - development files  
+    libssl-doc - Secure Sockets Layer toolkit - development documentation  
+    libssl1.0.0 - Secure Sockets Layer toolkit - shared libraries  
+    libssl1.0.0-dbg - Secure Sockets Layer toolkit - debug information
+```
 
 For this we would use just 'libssl-dev'.
 
 Running through all these packages, the list of developer packages we likely need to have installed in order to be satisfied that we can build all Python packages included as part of the Python standard library are:
 
-> 
->     libbz2-1.0 ==> libbz2-dev  
->     > libc6 ==> libc6-dev  
->     > libdb5.3 => libdb-dev  
->     > libexpat1 ==> libexpat1-dev  
->     > libffi6 ==> libffi-dev  
->     > libncursesw5 ==> libncursesw5-dev  
->     > libreadline6 ==> libreadline-dev  
->     > libsqlite3-0 ==> libsqlite3-dev  
->     > libssl1.0.0 ==> libssl-dev  
->     > libtinfo5 ==> libtinfo-dev  
->     > zlib1g ==> zlib1g-dev
+```
+    libbz2-1.0 ==> libbz2-dev  
+    libc6 ==> libc6-dev  
+    libdb5.3 => libdb-dev  
+    libexpat1 ==> libexpat1-dev  
+    libffi6 ==> libffi-dev  
+    libncursesw5 ==> libncursesw5-dev  
+    libreadline6 ==> libreadline-dev  
+    libsqlite3-0 ==> libsqlite3-dev  
+    libssl1.0.0 ==> libssl-dev  
+    libtinfo5 ==> libtinfo-dev  
+    zlib1g ==> zlib1g-dev
+```
 
 Having worked out what developer packages we will likely need for all the possible libraries that modules in the Python standard library may require, we can construct the appropriate command to install them.
 
-> 
->     apt-get install -y libbz2-dev libc6-dev libdb-dev libexpat1-dev \  
->     >     libffi-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev \  
->     >     libtinfo-dev zlib1g-dev --no-install-recommends
+```
+    apt-get install -y libbz2-dev libc6-dev libdb-dev libexpat1-dev \  
+    libffi-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev \  
+    libtinfo-dev zlib1g-dev --no-install-recommends
+```
 
 Note that we only need to list the developer packages. If the base Docker image we used for Debian didn't provide the runtime variant of the packages, the developer packages express a dependency on the runtime package and so they will also be installed. Although we want such hard dependencies, we don't want suggested related packages being installed and so we use the '--no-install-recommends' option to 'apt-get install'. This is done to cut down on the amount of unnecessary packages being installed.
 
@@ -120,8 +126,9 @@ If you wanted to try and double check whether they are required by working out w
 
 For example, the entry in the 'Setup.dist' file for the 'zlib' Python module, which necessitates the availability of the 'zlib1g-dev' package, is:
 
-> 
->     #zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz
+```
+    #zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz
+```
 
 # Configure script options
 
@@ -131,34 +138,38 @@ This is because Python itself will save away the options supplied to the 'config
 
 You will obviously need to have Python installed in the target Linux operating system to work it out. You will also generally need to have both the runtime and developer variants of the Python packages. For Debian for example, you will need to have run:
 
-> 
->     apt-get install python2.7 python2.7-dev
+```
+    apt-get install python2.7 python2.7-dev
+```
 
 The developer package for Python is required as it is that package that contains the file in which the 'configure' args are saved away.
 
 With both packages installed, we can now from the Python interpreter do:
 
-> 
->     # python2.7  
->     > Python 2.7.9 (default, Mar 1 2015, 12:57:24)  
->     > [GCC 4.9.2] on linux2  
->     > Type "help", "copyright", "credits" or "license" for more information.  
->     > >>> from distutils.sysconfig import get_config_var  
->     > >>> print get_config_var('CONFIG_ARGS')
+```python
+    # python2.7  
+    Python 2.7.9 (default, Mar 1 2015, 12:57:24)  
+    [GCC 4.9.2] on linux2  
+    Type "help", "copyright", "credits" or "license" for more information.  
+    >>> from distutils.sysconfig import get_config_var  
+    >>> print get_config_var('CONFIG_ARGS')
+```
 
 On Debian and Python 2.7 this yields:
 
-> 
->     '--enable-shared' '--prefix=/usr' '--enable-ipv6' '--enable-unicode=ucs4'  
->     > '--with-dbmliborder=bdb:gdbm' '--with-system-expat' '--with-system-ffi'  
->     > '--with-fpectl' 'CC=x86_64-linux-gnu-gcc' 'CFLAGS=-D_FORTIFY_SOURCE=2 -g  
->     > -fstack-protector-strong -Wformat -Werror=format-security ' 'LDFLAGS=-Wl,-z,relro'
+```
+    '--enable-shared' '--prefix=/usr' '--enable-ipv6' '--enable-unicode=ucs4'  
+    '--with-dbmliborder=bdb:gdbm' '--with-system-expat' '--with-system-ffi'  
+    '--with-fpectl' 'CC=x86_64-linux-gnu-gcc' 'CFLAGS=-D_FORTIFY_SOURCE=2 -g  
+    -fstack-protector-strong -Wformat -Werror=format-security ' 'LDFLAGS=-Wl,-z,relro'
+```
 
 There are a couple of key options here to highlight and which need to be separately discussed. These along with their help descriptions from the 'configure' script are:
 
-> 
->       --enable-shared ==>  Disable/enable building shared python library  
->     >   --enable-unicode[=ucs[24]] ==> Enable Unicode strings (default is ucs2) 
+```
+      --enable-shared ==>  Disable/enable building shared python library  
+    --enable-unicode[=ucs[24]] ==> Enable Unicode strings (default is ucs2) 
+```
 
 # Shared Python library
 
@@ -196,10 +207,11 @@ Now although one could still manage with a static library back when 32 bit archi
 
 I can't say I remember or understand the exact reason, but when 64 bit Linux was introduced, attempting to link a static Python library into a dynamically loadable object would fail at compilation link time. The cryptic error message you would get, suggesting some issue related to mixing of 32 and 64 bit code, would be along the lines of:
 
-> 
->     libpython2.4.a(abstract.o): relocation R_X86_64_32 against `a local  
->     >  symbol' can not be used when making a shared object; recompile with -fPIC  
->     >  /usr/local/lib/python2.4/config/libpython2.4.a: could not read symbols: Bad value
+```python
+    libpython2.4.a(abstract.o): relocation R_X86_64_32 against `a local  
+    symbol' can not be used when making a shared object; recompile with -fPIC  
+    /usr/local/lib/python2.4/config/libpython2.4.a: could not read symbols: Bad value
+```
 
 This error derives from those fix ups I mentioned before to allow the static code to run in a dynamically loadable object. What was previously possible for just 32 bit object code, was now no longer possible under the 64 bit Linux systems of the time.
 
@@ -256,29 +268,30 @@ Possibly to satisfy these arguments, what some Linux distributions do is try and
 
 On a Linux system you can verify whether the Python installation you use is using a static or shared library for the Python executable by looking at the size of the executable, but also by running 'ldd' on the executable to see what shared libraries it is dependent on. If statically linked, the Python executable will be a few MB in size and will not have a dependency on a shared version of the Python library.
 
-> 
->     # ls -las /usr/bin/python2.7  
->     > 3700 -rwxr-xr-x 1 root root 3785928 Mar 1 13:58 /usr/bin/python2.7
->     
->     
->     # ldd /usr/bin/python2.7  
->     >  linux-vdso.so.1 (0x00007fff84fe5000)  
->     >  libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f309388d000)  
->     >  libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f3093689000)  
->     >  libutil.so.1 => /lib/x86_64-linux-gnu/libutil.so.1 (0x00007f3093486000)  
->     >  libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f309326b000)  
->     >  libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f3092f6a000)  
->     >  libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3092bc1000)  
->     >  /lib64/ld-linux-x86-64.so.2 (0x00007f3093aaa000)
+```bash
+    # ls -las /usr/bin/python2.7  
+    3700 -rwxr-xr-x 1 root root 3785928 Mar 1 13:58 /usr/bin/python2.7
+
+    # ldd /usr/bin/python2.7  
+    linux-vdso.so.1 (0x00007fff84fe5000)  
+    libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f309388d000)  
+    libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f3093689000)  
+    libutil.so.1 => /lib/x86_64-linux-gnu/libutil.so.1 (0x00007f3093486000)  
+    libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f309326b000)  
+    libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f3092f6a000)  
+    libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3092bc1000)  
+    /lib64/ld-linux-x86-64.so.2 (0x00007f3093aaa000)
+```
 
 Jump into the system library directory on a Debian system where using the system Python installation, we see however that a shared Python library does still exist even if the Python executable isn't using it.
 
-> 
->     # ls -o libpython2.7.*  
->     > lrwxrwxrwx 1 root 51 Mar 1 13:58 libpython2.7.a -> ../python2.7/config-x86_64-linux-gnu/libpython2.7.a  
->     > lrwxrwxrwx 1 root 17 Mar 1 13:58 libpython2.7.so -> libpython2.7.so.1  
->     > lrwxrwxrwx 1 root 19 Mar 1 13:58 libpython2.7.so.1 -> libpython2.7.so.1.0  
->     > -rw-r--r-- 1 root 3614896 Mar 1 13:58 libpython2.7.so.1.0
+```bash
+    # ls -o libpython2.7.*  
+    lrwxrwxrwx 1 root 51 Mar 1 13:58 libpython2.7.a -> ../python2.7/config-x86_64-linux-gnu/libpython2.7.a  
+    lrwxrwxrwx 1 root 17 Mar 1 13:58 libpython2.7.so -> libpython2.7.so.1  
+    lrwxrwxrwx 1 root 19 Mar 1 13:58 libpython2.7.so.1 -> libpython2.7.so.1.0  
+    -rw-r--r-- 1 root 3614896 Mar 1 13:58 libpython2.7.so.1.0
+```
 
 Hopefully in this case then both sides of the argument are happy. The command line Python executable will run as fast as it can, yet the existence of the shared library still allows embedding.
 
@@ -288,10 +301,11 @@ The answer is that it is possible, albeit that you will need to build Python twi
 
 Normally the process of building and installing Python would be to run the following in the Python source code.
 
-> 
->     ./configure --enable-shared  
->     > make  
->     > make install 
+```
+    ./configure --enable-shared  
+    make  
+    make install 
+```
 
 Note that I have left out most of the 'configure' arguments just to show the steps. I have also ignored the issue of whether you have rights to install to the target location.
 
@@ -299,16 +313,17 @@ These commands will build and install Python but where a shared library for Pyth
 
 If we want to have both a static and shared library and for the Python executable to use the static library, we can instead do:
 
-> 
->     ./configure --enable-shared  
->     > make  
->     > make install  
->     >   
->     > make distclean  
->     >   
->     > ./configure  
->     > make  
->     > make altbininstall
+```
+    ./configure --enable-shared  
+    make  
+    make install  
+    
+    make distclean  
+    
+    ./configure  
+    make  
+    make altbininstall
+```
 
 What we are doing here is build Python twice, first with the shared library enabled and then with just the static library. In the first case we will install everything and setup a fully functional Python installation.
 

@@ -26,34 +26,22 @@ Note that the tests assume that wsgi.file\_wrapper exists and the code doesn’t
 The standard use case is to open a file, wrap it using wsgi.file\_wrapper and return it.
     
     
-```
-import os  
-import string  
-```
+    import os  
+    import string  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
       
-```
-    response_headers = [('Content-type', 'text/plain')]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain')]  
+        start_response(status, response_headers)  
       
-```
-    filelike = file('/tmp/filetest.txt', 'w')  
-    filelike.write(string.ascii_lowercase)  
-    filelike.close()  
-```
+        filelike = file('/tmp/filetest.txt', 'w')  
+        filelike.write(string.ascii_lowercase)  
+        filelike.close()  
       
-```
-    filelike = file('/tmp/filetest.txt', 'r')  
-```
+        filelike = file('/tmp/filetest.txt', 'r')  
       
-```
-    return environ['wsgi.file_wrapper'](filelike)
-```
+        return environ['wsgi.file_wrapper'](filelike)
 
 In this case we have not supplied a Content-Length response header. As such, the expectation would be that the complete file should be returned.  
   
@@ -80,28 +68,18 @@ The Windows operating system is an example of the first, whereby the sendfile\(\
 On a UNIX system where an implementation is using sendfile\(\), the fallback can therefore be tested using an instance of StringIO.
     
     
-```
-import StringIO  
-import string  
-```
+    import StringIO  
+    import string  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
       
-```
-    response_headers = [('Content-type', 'text/plain')]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain')]  
+        start_response(status, response_headers)  
       
-```
-    filelike = StringIO.StringIO(string.ascii_lowercase)  
-```
+        filelike = StringIO.StringIO(string.ascii_lowercase)  
       
-```
-    return environ['wsgi.file_wrapper'](filelike)
-```
+        return environ['wsgi.file_wrapper'](filelike)
 
 Either way, the content accessible should still be written back to the client and the wsgi.file\_wrapper implementation should not fail.  
   
@@ -126,83 +104,55 @@ In other words, it doesn’t indicate that the Content-Length header should be t
 This scenario needs to be tested and for both a file object and the fallback case for any file like object. Thus would want to perform the test:
     
     
-```
-import os  
-import string  
-```
+    import os  
+    import string  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
       
-```
-    response_headers = [('Content-type', 'text/plain'),  
-                        ('Content-length', str(len(string.ascii_lowercase)/2))]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain'),  
+                            ('Content-length', str(len(string.ascii_lowercase)/2))]  
+        start_response(status, response_headers)  
       
-```
-    filelike = file('/tmp/filetest.txt', 'w+')  
-    filelike.write(string.ascii_lowercase)  
-    filelike.close()  
-```
+        filelike = file('/tmp/filetest.txt', 'w+')  
+        filelike.write(string.ascii_lowercase)  
+        filelike.close()  
       
-```
-    filelike = file('/tmp/filetest.txt', 'r')  
-```
+        filelike = file('/tmp/filetest.txt', 'r')  
       
-```
-    return environ['wsgi.file_wrapper'](filelike)
-```
+        return environ['wsgi.file_wrapper'](filelike)
 
 and:
     
     
-```
-import StringIO  
-import string  
-```
+    import StringIO  
+    import string  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
       
-```
-    response_headers = [('Content-type', 'text/plain'),  
-                        ('Content-length', str(len(string.ascii_lowercase)/2))]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain'),  
+                            ('Content-length', str(len(string.ascii_lowercase)/2))]  
+        start_response(status, response_headers)  
       
-```
-    filelike = StringIO.StringIO(string.ascii_lowercase)  
-```
+        filelike = StringIO.StringIO(string.ascii_lowercase)  
       
-```
-    return environ['wsgi.file_wrapper'](filelike)
-```
+        return environ['wsgi.file_wrapper'](filelike)
 
 Note that one can’t rely on using a web browser to validate the output in these cases. This is because a web browser will normally not display any additional data that has been sent beyond what the Content-Length indicated should exist. It is therefore necessary to use a network snooping tool or even telnet directly to the HTTP server port and enter the request and view the raw details of the HTTP response.
     
     
-```
-$ telnet localhost 8000  
-Trying 127.0.0.1...  
-Connected to localhost.  
-Escape character is '^]'.  
-GET / HTTP/1.0  
-```
+    $ telnet localhost 8000  
+    Trying 127.0.0.1...  
+    Connected to localhost.  
+    Escape character is '^]'.  
+    GET / HTTP/1.0  
       
-```
-HTTP/1.1 200 OK  
-Content-type: text/plain  
-Content-length: 13  
-```
+    HTTP/1.1 200 OK  
+    Content-type: text/plain  
+    Content-length: 13  
       
-```
-abcdefghijklmnopqrstuvwxyzConnection closed by foreign host.
-```
+    abcdefghijklmnopqrstuvwxyzConnection closed by foreign host.
 
 A valid implementation should only return the amount of data specified by the Content-Length header and no more, thus not what the above output shows.  
   
@@ -219,67 +169,43 @@ Normally when a file is opened the current seek position or file pointer will be
 Tests which validate the correct behaviour for these situations are:
     
     
-```
-import os  
-import string  
-```
+    import os  
+    import string  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'   
-```
+    def application(environ, start_response):  
+        status = '200 OK'   
           
-```
-    response_headers = [('Content-type', 'text/plain')]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain')]  
+        start_response(status, response_headers)  
           
-```
-    filelike = file('/tmp/filetest.txt', 'w+')  
-    filelike.write(string.ascii_lowercase)  
-    filelike.flush()  
-```
+        filelike = file('/tmp/filetest.txt', 'w+')  
+        filelike.write(string.ascii_lowercase)  
+        filelike.flush()  
           
-```
-    filelike.seek(len(string.ascii_lowercase)/2, os.SEEK_SET)  
-```
+        filelike.seek(len(string.ascii_lowercase)/2, os.SEEK_SET)  
       
-```
-    return environ['wsgi.file_wrapper'](filelike)
-```
+        return environ['wsgi.file_wrapper'](filelike)
 
 and:
     
     
-```
-import os  
-import string  
-```
+    import os  
+    import string  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'   
-```
+    def application(environ, start_response):  
+        status = '200 OK'   
           
-```
-    response_headers = [('Content-type', 'text/plain'),  
-                        ('Content-length', str(len(string.ascii_lowercase)/4))]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain'),  
+                            ('Content-length', str(len(string.ascii_lowercase)/4))]  
+        start_response(status, response_headers)  
           
-```
-    filelike = file('/tmp/filetest.txt', 'w+')  
-    filelike.write(string.ascii_lowercase)  
-    filelike.flush()  
-```
+        filelike = file('/tmp/filetest.txt', 'w+')  
+        filelike.write(string.ascii_lowercase)  
+        filelike.flush()  
           
-```
-    filelike.seek(len(string.ascii_lowercase)/2, os.SEEK_SET)  
-```
+        filelike.seek(len(string.ascii_lowercase)/2, os.SEEK_SET)  
       
-```
-    return environ['wsgi.file_wrapper'](filelike)
-```
+        return environ['wsgi.file_wrapper'](filelike)
 
 For the first test, from the middle of the file to the end of the file should be returned and if the Content-Length header is set automatically, should correctly reflect that reduced length. The second test should again start from the middle of the file, but should only return 6 characters from the 3rd section of the file.  
   
@@ -296,90 +222,58 @@ The first test that can be done is to use wsgi.file\_wrapper multiple times with
 We therefore first check for case where last instance of wsgi.file\_wrapper created is returned.
     
     
-```
-import os  
-import string  
-```
+    import os  
+    import string  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
           
-```
-    response_headers = [('Content-type', 'text/plain'),]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain'),]  
+        start_response(status, response_headers)  
           
-```
-    filelike1 = file('/tmp/filetest-a.txt', 'w+')  
-    filelike1.write(string.ascii_lowercase)  
-    filelike1.flush()  
-    filelike1.seek(0, os.SEEK_SET)  
-```
+        filelike1 = file('/tmp/filetest-a.txt', 'w+')  
+        filelike1.write(string.ascii_lowercase)  
+        filelike1.flush()  
+        filelike1.seek(0, os.SEEK_SET)  
       
-```
-    file_wrapper1 = environ['wsgi.file_wrapper'](filelike1)  
-```
+        file_wrapper1 = environ['wsgi.file_wrapper'](filelike1)  
       
-```
-    filelike2 = file('/tmp/filetest-b.txt', 'w+')  
-    filelike2.write(string.ascii_uppercase)  
-    filelike2.flush()  
-    filelike2.seek(0, os.SEEK_SET)  
-```
+        filelike2 = file('/tmp/filetest-b.txt', 'w+')  
+        filelike2.write(string.ascii_uppercase)  
+        filelike2.flush()  
+        filelike2.seek(0, os.SEEK_SET)  
       
-```
-    file_wrapper2 = environ['wsgi.file_wrapper'](filelike2)  
-```
+        file_wrapper2 = environ['wsgi.file_wrapper'](filelike2)  
       
-```
-    return file_wrapper2
-```
+        return file_wrapper2
 
 and then the for the case of returning instance of wsgi.file\_wrapper which wasn’t the last created.
     
     
-```
-import os  
-import string  
-```
+    import os  
+    import string  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
           
-```
-    response_headers = [('Content-type', 'text/plain'),]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain'),]  
+        start_response(status, response_headers)  
           
-```
-    filelike1 = file('/tmp/filetest-a.txt', 'w+')  
-    filelike1.write(string.ascii_lowercase)  
-    filelike1.flush()  
-    filelike1.seek(0, os.SEEK_SET)  
-```
+        filelike1 = file('/tmp/filetest-a.txt', 'w+')  
+        filelike1.write(string.ascii_lowercase)  
+        filelike1.flush()  
+        filelike1.seek(0, os.SEEK_SET)  
       
-```
-    file_wrapper1 = environ['wsgi.file_wrapper'](filelike1)  
-```
+        file_wrapper1 = environ['wsgi.file_wrapper'](filelike1)  
       
-```
-    filelike2 = file('/tmp/filetest-b.txt', 'w+')  
-    filelike2.write(string.ascii_uppercase)  
-    filelike2.flush()  
-    filelike2.seek(0, os.SEEK_SET)  
-```
+        filelike2 = file('/tmp/filetest-b.txt', 'w+')  
+        filelike2.write(string.ascii_uppercase)  
+        filelike2.flush()  
+        filelike2.seek(0, os.SEEK_SET)  
       
-```
-    file_wrapper2 = environ['wsgi.file_wrapper'](filelike2)  
-```
+        file_wrapper2 = environ['wsgi.file_wrapper'](filelike2)  
       
-```
-    return file_wrapper1
-```
+        return file_wrapper1
 
 What is being checked for here is that the implementation isn’t just caching the last inputs given to a call of wsgi.file\_wrapper and using that. The details must correspond to that used in the instance of wsgi.file\_wrapper actually returned.  
   
@@ -400,76 +294,48 @@ A correct implementation should delay to the last moment obtaining a reference t
 The test for this then is to use wsgi.file\_wrapper to create the result to return and before that is actually returned close the file object.
     
     
-```
-import os  
-import string  
-```
+    import os  
+    import string  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
           
-```
-    response_headers = [('Content-type', 'text/plain'),]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain'),]  
+        start_response(status, response_headers)  
           
-```
-    filelike = file('/tmp/filetest-a.txt', 'w+')  
-    filelike.write(string.ascii_lowercase)  
-    filelike.flush()  
-    filelike.seek(0, os.SEEK_SET)  
-```
+        filelike = file('/tmp/filetest-a.txt', 'w+')  
+        filelike.write(string.ascii_lowercase)  
+        filelike.flush()  
+        filelike.seek(0, os.SEEK_SET)  
       
-```
-    file_wrapper = environ['wsgi.file_wrapper'](filelike)  
-```
+        file_wrapper = environ['wsgi.file_wrapper'](filelike)  
       
-```
-    filelike.close()  
-```
+        filelike.close()  
       
-```
-    return file_wrapper
-```
+        return file_wrapper
 
 One should also test the variation of where the file object is closed before wsgi.file\_wrapper is invoked to create the return value for the WSGI application.
     
     
-```
-import os  
-import string  
-```
+    import os  
+    import string  
       
-```
-def application(environ, start_response):  
-    status = '200 OK'  
-```
+    def application(environ, start_response):  
+        status = '200 OK'  
           
-```
-    response_headers = [('Content-type', 'text/plain'),]  
-    start_response(status, response_headers)  
-```
+        response_headers = [('Content-type', 'text/plain'),]  
+        start_response(status, response_headers)  
           
-```
-    filelike = file('/tmp/filetest.txt', 'w+')  
-    filelike.write(string.ascii_lowercase)  
-    filelike.flush()  
-    filelike.seek(0, os.SEEK_SET)  
-```
+        filelike = file('/tmp/filetest.txt', 'w+')  
+        filelike.write(string.ascii_lowercase)  
+        filelike.flush()  
+        filelike.seek(0, os.SEEK_SET)  
       
-```
-    filelike.close()  
-```
+        filelike.close()  
       
-```
-    file_wrapper = environ['wsgi.file_wrapper'](filelike)  
-```
+        file_wrapper = environ['wsgi.file_wrapper'](filelike)  
       
-```
-    return file_wrapper
-```
+        return file_wrapper
 
 However wsgi.file\_wrapper is implemented, it should result in the error being detected. Because processing of the result is being done after having returned from the WSGI application, the fact that an error occurred would normally be logged in some way and the request terminated with the connection to HTTP client being abruptly closed. That is, there isn’t a way of raising an exception in the context of the original WSGI application.  
   

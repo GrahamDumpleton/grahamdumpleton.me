@@ -16,45 +16,48 @@ Every so often I get asked why when examining a [mod\_wsgi](http://code.google.c
 Consider therefore the Apache/mod\_wsgi configuration of:  
 
 
-> 
->     WSGIDaemonProcess mysite processes=3 threads=2 display-name=mod_wsgi
->     WSGIProcessGroup mysite
->     WSGIScriptAlias / /some/path/wsgi.py
+```
+    WSGIDaemonProcess mysite processes=3 threads=2 display-name=mod_wsgi
+    WSGIProcessGroup mysite
+    WSGIScriptAlias / /some/path/wsgi.py
+```
 
 What this results in is mod\_wsgi creating a set of three processes distinct from the main Apache child worker process. Multiple instances of the WSGI application will then be run, one in each process. The Apache child worker processes will automatically proxy the requests, with a request being picked up by one of the daemon processes and handed off to the WSGI application to handle. With the number of threads being specified as two, the most concurrent requests each process can handle is two. With a total of three processes, that is a total of six concurrent requests able to be handled across the whole WSGI application.  
   
 If we were to now look at the resulting process tree using something like htop tree view, we would see:  
 
 
-> 
->     20179 www-data 20 0 147M 76408 5680 S 28.0 0.9 10:17.85 │ ├─ mod-wsgi -k start
->     20240 www-data 20 0 147M 76408 5680 S  1.0 0.9  0:14.99 │ │ ├─ mod-wsgi -k start
->     20215 www-data 20 0 147M 76408 5680 S 12.0 0.9  5:05.16 │ │ ├─ mod-wsgi -k start
->     20214 www-data 20 0 147M 76408 5680 S 14.0 0.9  4:53.99 │ │ ├─ mod-wsgi -k start
->     20213 www-data 20 0 147M 76408 5680 S  0.0 0.9  0:00.63 │ │ ├─ mod-wsgi -k start
->     20212 www-data 20 0 147M 76408 5680 S  0.0 0.9  0:00.00 │ │ └─ mod-wsgi -k start
->     
->     20178 www-data 20 0 138M 67680 5212 S 52.0 0.8 11:01.62 │ ├─ mod-wsgi -k start
->     20241 www-data 20 0 138M 67680 5212 S  0.0 0.8  0:15.45 │ │ ├─ mod-wsgi -k start
->     20230 www-data 20 0 138M 67680 5212 S 15.0 0.8  5:17.81 │ │ ├─ mod-wsgi -k start
->     20229 www-data 20 0 138M 67680 5212 S 35.0 0.8  5:24.63 │ │ ├─ mod-wsgi -k start
->     20228 www-data 20 0 138M 67680 5212 S  0.0 0.8  0:00.71 │ │ ├─ mod-wsgi -k start
->     20227 www-data 20 0 138M 67680 5212 S  0.0 0.8  0:00.00 │ │ └─ mod-wsgi -k start
->     
->     20177 www-data 20 0 137M 67764 5428 S  7.0 0.8 10:47.27 │ ├─ mod-wsgi -k start
->     20207 www-data 20 0 137M 67764 5428 S  0.0 0.8  0:15.18 │ │ ├─ mod-wsgi -k start
->     20206 www-data 20 0 137M 67764 5428 S  7.0 0.8  5:16.82 │ │ ├─ mod-wsgi -k start
->     20205 www-data 20 0 137M 67764 5428 S  0.0 0.8  5:11.55 │ │ ├─ mod-wsgi -k start
->     20204 www-data 20 0 137M 67764 5428 S  0.0 0.8  0:00.69 │ │ ├─ mod-wsgi -k start
->     20203 www-data 20 0 137M 67764 5428 S  0.0 0.8  0:00.00 │ │ └─ mod-wsgi -k start
+```
+    20179 www-data 20 0 147M 76408 5680 S 28.0 0.9 10:17.85 │ ├─ mod-wsgi -k start
+    20240 www-data 20 0 147M 76408 5680 S  1.0 0.9  0:14.99 │ │ ├─ mod-wsgi -k start
+    20215 www-data 20 0 147M 76408 5680 S 12.0 0.9  5:05.16 │ │ ├─ mod-wsgi -k start
+    20214 www-data 20 0 147M 76408 5680 S 14.0 0.9  4:53.99 │ │ ├─ mod-wsgi -k start
+    20213 www-data 20 0 147M 76408 5680 S  0.0 0.9  0:00.63 │ │ ├─ mod-wsgi -k start
+    20212 www-data 20 0 147M 76408 5680 S  0.0 0.9  0:00.00 │ │ └─ mod-wsgi -k start
+
+    20178 www-data 20 0 138M 67680 5212 S 52.0 0.8 11:01.62 │ ├─ mod-wsgi -k start
+    20241 www-data 20 0 138M 67680 5212 S  0.0 0.8  0:15.45 │ │ ├─ mod-wsgi -k start
+    20230 www-data 20 0 138M 67680 5212 S 15.0 0.8  5:17.81 │ │ ├─ mod-wsgi -k start
+    20229 www-data 20 0 138M 67680 5212 S 35.0 0.8  5:24.63 │ │ ├─ mod-wsgi -k start
+    20228 www-data 20 0 138M 67680 5212 S  0.0 0.8  0:00.71 │ │ ├─ mod-wsgi -k start
+    20227 www-data 20 0 138M 67680 5212 S  0.0 0.8  0:00.00 │ │ └─ mod-wsgi -k start
+
+    20177 www-data 20 0 137M 67764 5428 S  7.0 0.8 10:47.27 │ ├─ mod-wsgi -k start
+    20207 www-data 20 0 137M 67764 5428 S  0.0 0.8  0:15.18 │ │ ├─ mod-wsgi -k start
+    20206 www-data 20 0 137M 67764 5428 S  7.0 0.8  5:16.82 │ │ ├─ mod-wsgi -k start
+    20205 www-data 20 0 137M 67764 5428 S  0.0 0.8  5:11.55 │ │ ├─ mod-wsgi -k start
+    20204 www-data 20 0 137M 67764 5428 S  0.0 0.8  0:00.69 │ │ ├─ mod-wsgi -k start
+    20203 www-data 20 0 137M 67764 5428 S  0.0 0.8  0:00.00 │ │ └─ mod-wsgi -k start
+```
 
 The question is, since we have configured the daemon process group to only have 2 threads per process, why are we seeing a total of 5 threads in each process?  
   
 The answer is that for a configuration of:  
 
 
-> 
->     WSGIDaemonProcess mysite threads=num ...
+```
+    WSGIDaemonProcess mysite threads=num ...
+```
 
 there will be num+3 threads, where 'num' is the number of request threads indicated by the 'threads' option to the WSGIDaemonProcess directive. If no 'threads' option was specified, then the number of request threads will be 15.  
   

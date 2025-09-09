@@ -27,68 +27,94 @@ In this post I will describe how we can take our @synchronized decorator and ext
 The implementation of our @synchronized decorator so far is:  
 
 
-> @decorator  
->  def synchronized\(wrapped, instance, args, kwargs\):  
->  if instance is None:  
->  owner = wrapped  
->  else:  
->  owner = instance 
+```python
+@decorator  
+ def synchronized\(wrapped, instance, args, kwargs\):  
+ if instance is None:  
+ owner = wrapped  
+ else:  
+ owner = instance 
+```
 
 > lock = vars\(owner\).get\('\_synchronized\_lock', None\) 
 
-> if lock is None:  
->  meta\_lock = vars\(synchronized\).setdefault\(  
->  '\_synchronized\_meta\_lock', threading.Lock\(\)\) 
+```python
+if lock is None:  
+ meta\_lock = vars\(synchronized\).setdefault\(  
+ '\_synchronized\_meta\_lock', threading.Lock\(\)\) 
+```
 
-> with meta\_lock:  
->  lock = vars\(owner\).get\('\_synchronized\_lock', None\)  
->  if lock is None:  
->  lock = threading.RLock\(\)  
->  setattr\(owner, '\_synchronized\_lock', lock\) 
+```python
+with meta\_lock:  
+ lock = vars\(owner\).get\('\_synchronized\_lock', None\)  
+ if lock is None:  
+ lock = threading.RLock\(\)  
+ setattr\(owner, '\_synchronized\_lock', lock\) 
+```
 
-> with lock:  
->  return wrapped\(\*args, \*\*kwargs\)
+```python
+with lock:  
+ return wrapped\(\*args, \*\*kwargs\)
+```
 
 By determining whether the decorator is being used to wrap a normal function, a method bound to a class instance or a class, and with the decorator changing behaviour as a result, we are able to use the one decorator implementation in a number of scenarios.  
 
 
-> @synchronized \# lock bound to function1  
->  def function1\(\):  
->  pass 
+```python
+@synchronized \# lock bound to function1  
+ def function1\(\):  
+ pass 
+```
 
-> @synchronized \# lock bound to function2  
->  def function2\(\):  
->  pass 
+```python
+@synchronized \# lock bound to function2  
+ def function2\(\):  
+ pass 
+```
 
-> @synchronized \# lock bound to Class  
->  class Class\(object\): 
+```python
+@synchronized \# lock bound to Class  
+ class Class\(object\): 
+```
 
-> @synchronized \# lock bound to instance of Class  
->  def function\_im\(self\):  
->  pass 
+```python
+@synchronized \# lock bound to instance of Class  
+ def function\_im\(self\):  
+ pass 
+```
 
-> @synchronized \# lock bound to Class  
->  @classmethod  
->  def function\_cm\(cls\):  
->  pass
+```python
+@synchronized \# lock bound to Class  
+ @classmethod  
+ def function\_cm\(cls\):  
+ pass
+```
 
-> @synchronized \# lock bound to function\_sm  
->  @staticmethod  
->  def function\_sm\(\):  
->  pass
+```python
+@synchronized \# lock bound to function\_sm  
+ @staticmethod  
+ def function\_sm\(\):  
+ pass
+```
 
 What we now want to do is modify the decorator to also allow:  
 
 
-> class Object\(object\): 
+```python
+class Object\(object\): 
+```
 
-> @synchronized  
->  def function\_im\_1\(self\):  
->  pass 
+```python
+@synchronized  
+ def function\_im\_1\(self\):  
+ pass 
+```
 
-> def function\_im\_2\(self\):  
->  with synchronized\(self\):  
->  pass
+```python
+def function\_im\_2\(self\):  
+ with synchronized\(self\):  
+ pass
+```
 
 That is, as well as being able to be used as a decorator, we enable it to be used as a context manager in conjunction with the 'with' statement. By doing this it then provides the ability to only acquire the corresponding lock for a selected number of statements within a function rather than the whole function.  
   
@@ -102,70 +128,98 @@ For the case of acquiring the same lock used by instance methods, we would pass 
 Right now with how the decorator is implemented, when we use 'synchronized' as a function call, it will return an instance of our function wrapper class.  
 
 
-> >>> synchronized\(None\)  
->  <\_\_main\_\_.function\_wrapper object at 0x107b7ea10>
+```bash
+>>> synchronized\(None\)  
+ <\_\_main\_\_.function\_wrapper object at 0x107b7ea10>
+```
 
 This function wrapper does not implement the \_\_enter\_\_\(\) and \_\_exit\_\_\(\) functions that are required for an object to be used as a context manager. Since the function wrapper type is our own class, all we need to do though is create a derived version of the class and use that instead. Because though the creation of that function wrapper is bound up within the definition of @decorator, we need to bypass @decorator and use the function wrapper directly.  
   
 The first step therefore is to rewrite our @synchronized decorator so it doesn't use @decorator.  
 
 
-> def synchronized\(wrapped\): 
+```python
+def synchronized\(wrapped\): 
+```
 
-> def \_synchronized\_lock\(owner\):  
->  lock = vars\(owner\).get\('\_synchronized\_lock', None\) 
+```python
+def \_synchronized\_lock\(owner\):  
+ lock = vars\(owner\).get\('\_synchronized\_lock', None\) 
+```
 
-> if lock is None:  
->  meta\_lock = vars\(synchronized\).setdefault\(  
->  '\_synchronized\_meta\_lock', threading.Lock\(\)\) 
+```python
+if lock is None:  
+ meta\_lock = vars\(synchronized\).setdefault\(  
+ '\_synchronized\_meta\_lock', threading.Lock\(\)\) 
+```
 
-> with meta\_lock:  
->  lock = vars\(owner\).get\('\_synchronized\_lock', None\)  
->  if lock is None:  
->  lock = threading.RLock\(\)  
->  setattr\(owner, '\_synchronized\_lock', lock\) 
+```python
+with meta\_lock:  
+ lock = vars\(owner\).get\('\_synchronized\_lock', None\)  
+ if lock is None:  
+ lock = threading.RLock\(\)  
+ setattr\(owner, '\_synchronized\_lock', lock\) 
+```
 
 > return lock 
 
-> def \_synchronized\_wrapper\(wrapped, instance, args, kwargs\):  
->  with \_synchronized\_lock\(instance or wrapped\):  
->  return wrapped\(\*args, \*\*kwargs\) 
+```python
+def \_synchronized\_wrapper\(wrapped, instance, args, kwargs\):  
+ with \_synchronized\_lock\(instance or wrapped\):  
+ return wrapped\(\*args, \*\*kwargs\) 
+```
 
 > return function\_wrapper\(wrapped, \_synchronized\_wrapper\)
 
 This works the same as our original implementation but we now have access to the point where the function wrapper was created. With that being the case, we can now create a class which derives from the function wrapper and adds the required methods to satisfy the context manager protocol.  
 
 
-> def synchronized\(wrapped\): 
+```python
+def synchronized\(wrapped\): 
+```
 
-> def \_synchronized\_lock\(owner\):  
->  lock = vars\(owner\).get\('\_synchronized\_lock', None\) 
+```python
+def \_synchronized\_lock\(owner\):  
+ lock = vars\(owner\).get\('\_synchronized\_lock', None\) 
+```
 
-> if lock is None:  
->  meta\_lock = vars\(synchronized\).setdefault\(  
->  '\_synchronized\_meta\_lock', threading.Lock\(\)\) 
+```python
+if lock is None:  
+ meta\_lock = vars\(synchronized\).setdefault\(  
+ '\_synchronized\_meta\_lock', threading.Lock\(\)\) 
+```
 
-> with meta\_lock:  
->  lock = vars\(owner\).get\('\_synchronized\_lock', None\)  
->  if lock is None:  
->  lock = threading.RLock\(\)  
->  setattr\(owner, '\_synchronized\_lock', lock\) 
+```python
+with meta\_lock:  
+ lock = vars\(owner\).get\('\_synchronized\_lock', None\)  
+ if lock is None:  
+ lock = threading.RLock\(\)  
+ setattr\(owner, '\_synchronized\_lock', lock\) 
+```
 
 > return lock 
 
-> def \_synchronized\_wrapper\(wrapped, instance, args, kwargs\):  
->  with \_synchronized\_lock\(instance or wrapped\):  
->  return wrapped\(\*args, \*\*kwargs\) 
+```python
+def \_synchronized\_wrapper\(wrapped, instance, args, kwargs\):  
+ with \_synchronized\_lock\(instance or wrapped\):  
+ return wrapped\(\*args, \*\*kwargs\) 
+```
 
-> class \_synchronized\_function\_wrapper\(function\_wrapper\): 
+```python
+class \_synchronized\_function\_wrapper\(function\_wrapper\): 
+```
 
-> def \_\_enter\_\_\(self\):  
->  self.\_lock = \_synchronized\_lock\(self.wrapped\)  
->  self.\_lock.acquire\(\)  
->  return self.\_lock 
+```python
+def \_\_enter\_\_\(self\):  
+ self.\_lock = \_synchronized\_lock\(self.wrapped\)  
+ self.\_lock.acquire\(\)  
+ return self.\_lock 
+```
 
-> def \_\_exit\_\_\(self, \*args\):  
->  self.\_lock.release\(\) 
+```python
+def \_\_exit\_\_\(self, \*args\):  
+ self.\_lock.release\(\) 
+```
 
 > return \_synchronized\_function\_wrapper\(wrapped, \_synchronized\_wrapper\)
 

@@ -32,24 +32,16 @@ As an example, imagine that one was running Django and wanted all the '/admin' p
     
     
       
-```
-WSGIDaemonProcess django processes=3 threads=10  
-WSGIDaemonProcess django-admin processes=1 threads=10  
-```
+    WSGIDaemonProcess django processes=3 threads=10  
+    WSGIDaemonProcess django-admin processes=1 threads=10  
       
-```
-WSGIProcessGroup django  
-```
+    WSGIProcessGroup django  
       
-```
-WSGIScriptAlias / /usr/local/django/mysite/apache/django.wsgi  
-```
+    WSGIScriptAlias / /usr/local/django/mysite/apache/django.wsgi  
       
-```
-<Location /admin>  
-WSGIProcessGroup django-admin  
-</Location>  
-```
+    <Location /admin>  
+    WSGIProcessGroup django-admin  
+    </Location>  
     
 
 This results in the bulk of the Django application being distributed across 3 multi thread processes. Using a combination of the 'Location' and 'WSGIProcessGroup' directives, the process group to be used for '/admin' URL is then overridden. The result is that any handlers related to '/admin', and URLs underneath that point, are instead executed by a different process.  

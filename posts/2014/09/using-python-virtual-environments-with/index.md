@@ -18,11 +18,9 @@ That said, the use of Python virtual environments was the next topic that came u
 When using mod\_wsgi embedded mode, one would use the 'WSGIPythonHome' directive, setting it to be the top level directory of the Python virtual environment you wish to use. If you don't know what that is supposed to be, then you can interrogate it using the command line Python interpreter:
     
     
-```
->>> import sys  
->>> sys.prefix  
-'/Users/graham/Projects/mod_wsgi/venv'
-```
+    >>> import sys  
+    >>> sys.prefix  
+    '/Users/graham/Projects/mod_wsgi/venv'
 
 Most important is that this should refer to a directory. It is an all too common mistake that I see that people set the 'WSGIPythonHome' directive to be the path to the 'python' executable from the virtual environment. That is plain wrong, so please do not do it, doing so will see the setting be ignored completely and the default algorithm for finding what Python installation to use will be used instead.
 
@@ -31,39 +29,29 @@ If using daemon mode of mod\_wsgi and you are hosting only the one Python WSGI a
 The mod\_wsgi documentation on this steers you towards a convoluted bit of code to include in your WSGI application to do this, explain in part why this is the safest option.
     
     
-```
-ALLDIRS = ['usr/local/pythonenv/PYLONS-1/lib/python2.5/site-packages']
-```
+    ALLDIRS = ['usr/local/pythonenv/PYLONS-1/lib/python2.5/site-packages']
     
     
-```
-import sys   
-import site
-```
+    import sys   
+    import site
     
     
-```
-# Remember original sys.path.  
-prev_sys_path = list(sys.path)
-```
+    # Remember original sys.path.  
+    prev_sys_path = list(sys.path)
     
     
-```
-# Add each new site-packages directory.  
-for directory in ALLDIRS:  
- site.addsitedir(directory)
-```
+    # Add each new site-packages directory.  
+    for directory in ALLDIRS:  
+     site.addsitedir(directory)
     
     
-```
-# Reorder sys.path so new directories at the front.  
-new_sys_path = []   
-for item in list(sys.path):   
- if item not in prev_sys_path:   
- new_sys_path.append(item)   
- sys.path.remove(item)   
-sys.path[:0] = new_sys_path
-```
+    # Reorder sys.path so new directories at the front.  
+    new_sys_path = []   
+    for item in list(sys.path):   
+     if item not in prev_sys_path:   
+     new_sys_path.append(item)   
+     sys.path.remove(item)   
+    sys.path[:0] = new_sys_path
 
 Part of the reasoning behind giving that as the recipe was a distrust of the 'activate\_this.py' script that is included in a Python virtual environment and advertised as the solution to use for embedded Python environments such as mod\_wsgi.
 
@@ -76,10 +64,8 @@ In the many years mod\_wsgi has been available though, I have to admit that no i
 So, if you do not have access to make changes in the Apache configuration files for some reason, then the easiest way to activate a Python virtual environment in your WSGI script file is:
     
     
-```
-activate_this = '/usr/local/pythonenv/PYLONS-1/bin/activate_this.py'  
-execfile(activate_this, dict(__file__=activate_this))
-```
+    activate_this = '/usr/local/pythonenv/PYLONS-1/bin/activate_this.py'  
+    execfile(activate_this, dict(__file__=activate_this))
 
 This is still a pain to have to include because you are adding to the WSGI script file knowledge of the execution environment it is being run in, which is notionally a bad idea.
 
@@ -88,16 +74,12 @@ The alternative to modifying the WSGI script file was to add just the 'site-pack
 For embedded mode of mod\_wsgi you would do this by using the 'WSGIPythonPath' directive:
     
     
-```
-WSGIPythonPath /usr/local/pythonenv/PYLONS-1/lib/python2.5/site-packages
-```
+    WSGIPythonPath /usr/local/pythonenv/PYLONS-1/lib/python2.5/site-packages
 
 If using daemon mode of mod\_wsgi you would use the 'python-path' option to the WSGIDaemonProcess directive.
     
     
-```
-WSGIDaemonProcess pylons python-path=/usr/local/pythonenv/PYLONS-1/lib/python2.5/site-packages
-```
+    WSGIDaemonProcess pylons python-path=/usr/local/pythonenv/PYLONS-1/lib/python2.5/site-packages
 
 What was ugly about this was that you had to refer to the 'site-packages' directory where it existed down in the Python virtual environment. That directory name also included the Python version, so if you ever changed what Python version you were using, you had to remember to go change the configuration.
 
@@ -106,9 +88,7 @@ The good news is that since mod\_wsgi version 3.4 or later there is a better way
 Rather than fiddling with what goes into 'sys.path' using the 'WSGIPythonPath' directive or the 'python-path' option to 'WSGIDaemonProcess', you can use the 'python-home' option on the 'WSGIDaemonProcess' directive itself.
     
     
-```
-WSGIDaemonProcess pylons python-home=/usr/local/pythonenv/PYLONS-1
-```
+    WSGIDaemonProcess pylons python-home=/usr/local/pythonenv/PYLONS-1
 
 As when using the 'WSGIPythonHome' directive, this should be the top level directory of the Python virtual environment you wish to use. In this case the value will only be used for this specific mod\_wsgi daemon process group.
 

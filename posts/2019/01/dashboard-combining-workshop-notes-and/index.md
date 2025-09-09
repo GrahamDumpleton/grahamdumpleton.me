@@ -55,10 +55,8 @@ This way if it was decided to stick with the workshopper tool for the workshop n
 To see how the dashboard view would look, you can deploy the dashboard image using:
     
     
-```
-$ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-terminal/develop/templates/production.json \
-    --param TERMINAL_IMAGE=quay.io/openshiftlabs/workshop-dashboard:latest
-```
+    $ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-terminal/develop/templates/production.json \
+        --param TERMINAL_IMAGE=quay.io/openshiftlabs/workshop-dashboard:latest
     
     
 

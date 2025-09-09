@@ -24,82 +24,70 @@ The purpose of the post is to explain what actually happens when you use the Dja
 To help track down what happens we will instrument the 'settings.py' from a Django site to include the following.
     
     
-```
-import sys, os  
-```
+    import sys, os  
       
-```
-print "__name__ =", __name__  
-print "__file__ =", __file__  
-print "os.getpid() =", os.getpid()  
-print "os.getcwd() =", os.getcwd()  
-print "os.curdir =", os.curdir  
-print "sys.path =", repr(sys.path)  
-print "sys.modules.keys() =", repr(sys.modules.keys())  
-print "sys.modules.has_key('mysite') =", sys.modules.has_key('mysite')  
-if sys.modules.has_key('mysite'):  
-  print "sys.modules['mysite'].__name__ =", sys.modules['mysite'].__name__  
-  print "sys.modules['mysite'].__file__ =", sys.modules['mysite'].__file__  
-  print "os.environ['DJANGO_SETTINGS_MODULE'] =", os.environ.get('DJANGO_SETTINGS_MODULE', None)
-```
+    print "__name__ =", __name__  
+    print "__file__ =", __file__  
+    print "os.getpid() =", os.getpid()  
+    print "os.getcwd() =", os.getcwd()  
+    print "os.curdir =", os.curdir  
+    print "sys.path =", repr(sys.path)  
+    print "sys.modules.keys() =", repr(sys.modules.keys())  
+    print "sys.modules.has_key('mysite') =", sys.modules.has_key('mysite')  
+    if sys.modules.has_key('mysite'):  
+      print "sys.modules['mysite'].__name__ =", sys.modules['mysite'].__name__  
+      print "sys.modules['mysite'].__file__ =", sys.modules['mysite'].__file__  
+      print "os.environ['DJANGO_SETTINGS_MODULE'] =", os.environ.get('DJANGO_SETTINGS_MODULE', None)
 
 Now, for my example the Django site is located at '/usr/local/django/mysite'. To run the Django development server I now from within that directory run 'python manage.py runserver'. The result of that is the following.
     
     
-```
-__name__ = settings  
-__file__ = /usr/local/django/mysite/settings.pyc  
-os.getpid() = 3441  
-os.getcwd() = /usr/local/django/mysite  
-os.curdir = .  
-sys.path = ['/usr/local/django/mysite', ...]  
-sys.modules.keys() = [..., 'settings', ...]  
-sys.modules.has_key('mysite') = False  
-os.environ['DJANGO_SETTINGS_MODULE'] = None
-```
+    __name__ = settings  
+    __file__ = /usr/local/django/mysite/settings.pyc  
+    os.getpid() = 3441  
+    os.getcwd() = /usr/local/django/mysite  
+    os.curdir = .  
+    sys.path = ['/usr/local/django/mysite', ...]  
+    sys.modules.keys() = [..., 'settings', ...]  
+    sys.modules.has_key('mysite') = False  
+    os.environ['DJANGO_SETTINGS_MODULE'] = None
     
     
-```
-__name__ = mysite.settings  
-__file__ = /usr/local/django/mysite/../mysite/settings.pyc  
-os.getpid() = 3441  
-os.getcwd() = /usr/local/django/mysite  
-os.curdir = .  
-sys.path = ['/usr/local/django/mysite', ...]  
-sys.modules.keys() = [..., 'mysite.settings', ..., 'mysite.sys', 'mysite.os', ..., 'mysite', ..., 'settings', ...]  
-sys.modules.has_key('mysite') = True  
-sys.modules['mysite'].__name__ = mysite  
-sys.modules['mysite'].__file__ = /usr/local/django/mysite/../mysite/__init__.pyc  
-os.environ['DJANGO_SETTINGS_MODULE'] = mysite.settings
-```
+    __name__ = mysite.settings  
+    __file__ = /usr/local/django/mysite/../mysite/settings.pyc  
+    os.getpid() = 3441  
+    os.getcwd() = /usr/local/django/mysite  
+    os.curdir = .  
+    sys.path = ['/usr/local/django/mysite', ...]  
+    sys.modules.keys() = [..., 'mysite.settings', ..., 'mysite.sys', 'mysite.os', ..., 'mysite', ..., 'settings', ...]  
+    sys.modules.has_key('mysite') = True  
+    sys.modules['mysite'].__name__ = mysite  
+    sys.modules['mysite'].__file__ = /usr/local/django/mysite/../mysite/__init__.pyc  
+    os.environ['DJANGO_SETTINGS_MODULE'] = mysite.settings
     
     
-```
-__name__ = settings  
-__file__ = /usr/local/django/mysite/settings.pyc  
-os.getpid() = 3442  
-os.getcwd() = /usr/local/django/mysite  
-os.curdir = .  
-sys.path = ['/usr/local/django/mysite', ...]  
-sys.modules.keys() = [..., 'settings', ...]  
-sys.modules.has_key('mysite') = False  
-os.environ['DJANGO_SETTINGS_MODULE'] = None
-```
+    __name__ = settings  
+    __file__ = /usr/local/django/mysite/settings.pyc  
+    os.getpid() = 3442  
+    os.getcwd() = /usr/local/django/mysite  
+    os.curdir = .  
+    sys.path = ['/usr/local/django/mysite', ...]  
+    sys.modules.keys() = [..., 'settings', ...]  
+    sys.modules.has_key('mysite') = False  
+    os.environ['DJANGO_SETTINGS_MODULE'] = None
     
     
-```
-__name__ = mysite.settings  
-__file__ = /usr/local/django/mysite/../mysite/settings.pyc  
-os.getpid() = 3442  
-os.getcwd() = /usr/local/django/mysite  
-os.curdir = .  
-sys.path = ['/usr/local/django/mysite', ...]  
-sys.modules.keys() = [..., 'mysite.settings', ..., 'mysite.sys', 'mysite.os', ..., 'mysite', ..., 'settings', ...]  
-sys.modules.has_key('mysite') = True  
-sys.modules['mysite'].__name__ = mysite  
-sys.modules['mysite'].__file__ = /usr/local/django/mysite/../mysite/__init__.pyc  
-os.environ['DJANGO_SETTINGS_MODULE'] = mysite.settings 
-```
+    __name__ = mysite.settings  
+    __file__ = /usr/local/django/mysite/../mysite/settings.pyc  
+    os.getpid() = 3442  
+    os.getcwd() = /usr/local/django/mysite  
+    os.curdir = .  
+    sys.path = ['/usr/local/django/mysite', ...]  
+    sys.modules.keys() = [..., 'mysite.settings', ..., 'mysite.sys', 'mysite.os', ..., 'mysite', ..., 'settings', ...]  
+    sys.modules.has_key('mysite') = True  
+    sys.modules['mysite'].__name__ = mysite  
+    sys.modules['mysite'].__file__ = /usr/local/django/mysite/../mysite/__init__.pyc  
+    os.environ['DJANGO_SETTINGS_MODULE'] = mysite.settings 
 
 Two things stand out from this. The first is that there are two different processes involved and the second is that the same settings file is imported twice by each process but using a different Python module name in each instance.
 
@@ -134,16 +122,14 @@ Worth noting at this point is that 'sys.path' includes the path '/usr/local/djan
 Moving on, after having imported the settings module, the 'manage.py' file will eventually call 'django.core.management.execute\_manager\(\)' where the argument supplied is the reference to the 'settings' module it just imported. The code for the 'execute\_manager\(\)' functions is as follows.
     
     
-```
-def execute_manager(settings_mod, argv=None):  
-   """  
-   Like execute_from_command_line(), but for use by manage.py, a  
-   project-specific django-admin.py utility.  
-   """  
-   setup_environ(settings_mod)  
-   utility = ManagementUtility(argv)  
-   utility.execute()
-```
+    def execute_manager(settings_mod, argv=None):  
+       """  
+       Like execute_from_command_line(), but for use by manage.py, a  
+       project-specific django-admin.py utility.  
+       """  
+       setup_environ(settings_mod)  
+       utility = ManagementUtility(argv)  
+       utility.execute()
 
 The first function called by this is 'setup\_environ\(\)'. This function does two important things.
 
@@ -228,22 +214,18 @@ To round out the picture, once the list of commands is generated it will for the
 Although the command module for the 'runserver' command principally deals with creating an instance of the development web server, it also does a couple of other configuration related steps which may be significant when we come to talk about Apache/mod\_wsgi later.
     
     
-```
-from django.conf import settings  
-from django.utils import translation  
-print "Validating models..."  
-self.validate(display_num_errors=True)  
-print "\nDjango version %s, using settings %r" % (django.get_version(), settings.SETTINGS_MODULE)  
-print "Development server is running at http://%s:%s/" % (addr, port)  
-print "Quit the server with %s." % quit_command  
-```
+    from django.conf import settings  
+    from django.utils import translation  
+    print "Validating models..."  
+    self.validate(display_num_errors=True)  
+    print "\nDjango version %s, using settings %r" % (django.get_version(), settings.SETTINGS_MODULE)  
+    print "Development server is running at http://%s:%s/" % (addr, port)  
+    print "Quit the server with %s." % quit_command  
       
-```
-# django.core.management.base forces the locale to en-us. We should  
-# set it up correctly for the first request (particularly important  
-# in the "--noreload" case).  
-translation.activate(settings.LANGUAGE_CODE)
-```
+    # django.core.management.base forces the locale to en-us. We should  
+    # set it up correctly for the first request (particularly important  
+    # in the "--noreload" case).  
+    translation.activate(settings.LANGUAGE_CODE)
 
 The first of these is that the models used by the application are validated. The second is that support for language locale is activated.
 
@@ -263,40 +245,26 @@ Now let us compare all this to what happens when the WSGI interface is used unde
 The guidance has always been that all you really needed to do for WSGI was to use:
     
     
-```
-import os  
-import sys  
-```
+    import os  
+    import sys  
       
-```
-os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
-```
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
       
-```
-import django.core.handlers.wsgi  
-application = django.core.handlers.wsgi.WSGIHandler()
-```
+    import django.core.handlers.wsgi  
+    application = django.core.handlers.wsgi.WSGIHandler()
 
 That in itself is not necessarily going to be sufficient. This is because Python isn't going to know where to find 'mysite' when it goes to import the settings module unless it had been installed in the standard Python 'site-packages' directory, which is unlikely. Thus, what you really need is as follows.
     
     
-```
-import os  
-import sys  
-```
+    import os  
+    import sys  
       
-```
-sys.path.insert(0, '/usr/local/django')  
-```
+    sys.path.insert(0, '/usr/local/django')  
       
-```
-os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
-```
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
       
-```
-import django.core.handlers.wsgi  
-application = django.core.handlers.wsgi.WSGIHandler()
-```
+    import django.core.handlers.wsgi  
+    application = django.core.handlers.wsgi.WSGIHandler()
 
 That is, we have inserted the parent directory of the site into 'sys.path'.
 
@@ -306,19 +274,17 @@ That is, we have inserted the parent directory of the site into 'sys.path'.
 The result now if we are to startup Apache/mod\_wsgi and make a request will be the following.
     
     
-```
-__name__ = mysite.settings  
-__file__ = /usr/local/django/mysite/settings.pyc  
-os.getpid() = 3733  
-os.getcwd() = /Users/grahamd  
-os.curdir = .  
-sys.path = ['/usr/local/django', ...]  
-sys.modules.keys() = [..., 'mysite.settings', ..., 'mysite.os', ..., 'mysite.sys', ..., 'mysite', ...]  
-sys.modules.has_key('mysite') = True  
-sys.modules['mysite'].__name__ = mysite  
-sys.modules['mysite'].__file__ = /usr/local/django/mysite/__init__.pyc  
-os.environ['DJANGO_SETTINGS_MODULE'] = mysite.settings  
-```
+    __name__ = mysite.settings  
+    __file__ = /usr/local/django/mysite/settings.pyc  
+    os.getpid() = 3733  
+    os.getcwd() = /Users/grahamd  
+    os.curdir = .  
+    sys.path = ['/usr/local/django', ...]  
+    sys.modules.keys() = [..., 'mysite.settings', ..., 'mysite.os', ..., 'mysite.sys', ..., 'mysite', ...]  
+    sys.modules.has_key('mysite') = True  
+    sys.modules['mysite'].__name__ = mysite  
+    sys.modules['mysite'].__file__ = /usr/local/django/mysite/__init__.pyc  
+    os.environ['DJANGO_SETTINGS_MODULE'] = mysite.settings  
     
 
 What is different?
@@ -369,24 +335,16 @@ Why this causes a problem is that when using the Django development server peopl
 Obviously, the way around that is in the WSGI script file used for Apache/mod\_wsgi to also add the directory '/usr/local/django/mysite' to 'sys.path', thus yielding the following.
     
     
-```
-import os  
-import sys  
-```
+    import os  
+    import sys  
       
-```
-sys.path.insert(0, '/usr/local/django/mysite')  
-sys.path.insert(0, '/usr/local/django')  
-```
+    sys.path.insert(0, '/usr/local/django/mysite')  
+    sys.path.insert(0, '/usr/local/django')  
       
-```
-os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
-```
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
       
-```
-import django.core.handlers.wsgi  
-application = django.core.handlers.wsgi.WSGIHandler()
-```
+    import django.core.handlers.wsgi  
+    application = django.core.handlers.wsgi.WSGIHandler()
 
 It should be noted that having to do this highlights an arguable flaw in what Django permits when using the development server. This is because it is now possible to import the same module file via two different names. If naming isn't done consistently, you could end up with multiple copies of the module in memory and with any code within it being executed twice. If any code references global variables within the module, then different parts of the code may not end up accessing the same variable.
 
@@ -446,45 +404,27 @@ One can only speculate on how such problems may manifest, but certainly it could
 I am starting to run out of steam with this blog post, so lets just jump straight to a possible solution. This is in the form of the alternate WSGI script file contents below.
     
     
-```
-import sys  
-```
+    import sys  
       
-```
-sys.path.insert(0, '/usr/local/django/mysite')  
-```
+    sys.path.insert(0, '/usr/local/django/mysite')  
       
-```
-import settings  
-```
+    import settings  
       
-```
-import django.core.management  
-django.core.management.setup_environ(settings)  
-utility = django.core.management.ManagementUtility()  
-command = utility.fetch_command('runserver')  
-```
+    import django.core.management  
+    django.core.management.setup_environ(settings)  
+    utility = django.core.management.ManagementUtility()  
+    command = utility.fetch_command('runserver')  
       
-```
-command.validate()  
-```
+    command.validate()  
       
-```
-import django.conf  
-import django.utils  
-```
+    import django.conf  
+    import django.utils  
       
-```
-django.utils.translation.activate(django.conf.settings.LANGUAGE_CODE)  
-```
+    django.utils.translation.activate(django.conf.settings.LANGUAGE_CODE)  
       
-```
-import django.core.handlers.wsgi  
-```
+    import django.core.handlers.wsgi  
       
-```
-application = django.core.handlers.wsgi.WSGIHandler()
-```
+    application = django.core.handlers.wsgi.WSGIHandler()
 
 What this is doing is duplicating the way that Django development server is set up.
 

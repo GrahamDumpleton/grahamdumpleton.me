@@ -53,33 +53,28 @@ In order to see what extra steps occur, we can again use the Python profile hook
 First lets check again what we would get for a decorator implemented as a function closure.  
 
 
-> 
->     def my_function_wrapper(wrapped):
->         def _my_function_wrapper(*args, **kwargs):
->             return wrapped(*args, **kwargs)
->         return _my_function_wrapper 
->     
->     
->     class Class(object):
->         @my_function_wrapper
->         def method(self):
->             pass
->     
->     
->     instance = Class()
->     
->     
->     import sys
->     
->     
->     def tracer(frame, event, arg):
->         print(frame.f_code.co_name, event)
->     
->     
->     sys.setprofile(tracer)
->     
->     
->     instance.method()
+```python
+    def my_function_wrapper(wrapped):
+        def _my_function_wrapper(*args, **kwargs):
+            return wrapped(*args, **kwargs)
+        return _my_function_wrapper 
+
+    class Class(object):
+        @my_function_wrapper
+        def method(self):
+            pass
+
+    instance = Class()
+
+    import sys
+
+    def tracer(frame, event, arg):
+        print(frame.f_code.co_name, event)
+
+    sys.setprofile(tracer)
+
+    instance.method()
+```
 
 The result in running this is effectively the same as when decorating a normal function.  
 
@@ -94,116 +89,110 @@ We should therefore expect that the overhead will not be substantially different
 Now for when using our decorator factory. To provide context this time we need to present the complete recipe for the implementation.  
 
 
-> 
->     class object_proxy(object):
->         def __init__(self, wrapped):
->             self.wrapped = wrapped
->             try:
->                 self.__name__ = wrapped.__name__
->             except AttributeError:
->                 pass
->     
->     
->         @property
->         def __class__(self):
->             return self.wrapped.__class__
->     
->     
->         def __getattr__(self, name):
->             return getattr(self.wrapped, name)
->     
->     
->     class bound_function_wrapper(object_proxy):
->         def __init__(self, wrapped, instance, wrapper, binding, parent):
->             super(bound_function_wrapper, self).__init__(wrapped)
->             self.instance = instance
->             self.wrapper = wrapper
->             self.binding = binding
->             self.parent = parent
->     
->     
->         def __call__(self, *args, **kwargs):
->             if self.binding == 'function':
->                 if self.instance is None:
->                     instance, args = args[0], args[1:]
->                     wrapped = functools.partial(self.wrapped, instance)
->                     return self.wrapper(wrapped, instance, args, kwargs)
->                 else:
->                     return self.wrapper(self.wrapped, self.instance, args, kwargs)
->             else:
->                 instance = getattr(self.wrapped, '__self__', None)
->                 return self.wrapper(self.wrapped, instance, args, kwargs)
->     
->     
->         def __get__(self, instance, owner):
->             if self.instance is None and self.binding == 'function':
->                 descriptor = self.parent.wrapped.__get__(instance, owner)
->                 return bound_function_wrapper(descriptor, instance, self.wrapper,
->                         self.binding, self.parent)
->             return self 
->     
->     
->     class function_wrapper(object_proxy):
->     
->     
->         def __init__(self, wrapped, wrapper):
->             super(function_wrapper, self).__init__(wrapped)
->             self.wrapper = wrapper
->             if isinstance(wrapped, classmethod):
->                 self.binding = 'classmethod'
->             elif isinstance(wrapped, staticmethod):
->                 self.binding = 'staticmethod'
->             else:
->                 self.binding = 'function' 
->     
->     
->         def __get__(self, instance, owner):
->             wrapped = self.wrapped.__get__(instance, owner)
->             return bound_function_wrapper(wrapped, instance, self.wrapper,
->                     self.binding, self) 
->     
->     
->         def __call__(self, *args, **kwargs):
->             return self.wrapper(self.wrapped, None, args, kwargs) 
->     
->     
->     def decorator(wrapper):
->         def _wrapper(wrapped, instance, args, kwargs):
->             def _execute(wrapped):
->                 if instance is None:
->                     return function_wrapper(wrapped, wrapper)
->                 elif inspect.isclass(instance):
->                     return function_wrapper(wrapped,
->                             wrapper.__get__(None, instance))
->                 else:
->                     return function_wrapper(wrapped,
->                             wrapper.__get__(instance, type(instance)))
->             return _execute(*args, **kwargs)
->         return function_wrapper(wrapper, _wrapper)
+```python
+    class object_proxy(object):
+        def __init__(self, wrapped):
+            self.wrapped = wrapped
+            try:
+                self.__name__ = wrapped.__name__
+            except AttributeError:
+                pass
+
+        @property
+        def __class__(self):
+            return self.wrapped.__class__
+
+        def __getattr__(self, name):
+            return getattr(self.wrapped, name)
+
+    class bound_function_wrapper(object_proxy):
+        def __init__(self, wrapped, instance, wrapper, binding, parent):
+            super(bound_function_wrapper, self).__init__(wrapped)
+            self.instance = instance
+            self.wrapper = wrapper
+            self.binding = binding
+            self.parent = parent
+
+        def __call__(self, *args, **kwargs):
+            if self.binding == 'function':
+                if self.instance is None:
+                    instance, args = args[0], args[1:]
+                    wrapped = functools.partial(self.wrapped, instance)
+                    return self.wrapper(wrapped, instance, args, kwargs)
+                else:
+                    return self.wrapper(self.wrapped, self.instance, args, kwargs)
+            else:
+                instance = getattr(self.wrapped, '__self__', None)
+                return self.wrapper(self.wrapped, instance, args, kwargs)
+
+        def __get__(self, instance, owner):
+            if self.instance is None and self.binding == 'function':
+                descriptor = self.parent.wrapped.__get__(instance, owner)
+                return bound_function_wrapper(descriptor, instance, self.wrapper,
+                        self.binding, self.parent)
+            return self 
+
+    class function_wrapper(object_proxy):
+
+        def __init__(self, wrapped, wrapper):
+            super(function_wrapper, self).__init__(wrapped)
+            self.wrapper = wrapper
+            if isinstance(wrapped, classmethod):
+                self.binding = 'classmethod'
+            elif isinstance(wrapped, staticmethod):
+                self.binding = 'staticmethod'
+            else:
+                self.binding = 'function' 
+
+        def __get__(self, instance, owner):
+            wrapped = self.wrapped.__get__(instance, owner)
+            return bound_function_wrapper(wrapped, instance, self.wrapper,
+                    self.binding, self) 
+
+        def __call__(self, *args, **kwargs):
+            return self.wrapper(self.wrapped, None, args, kwargs) 
+
+    def decorator(wrapper):
+        def _wrapper(wrapped, instance, args, kwargs):
+            def _execute(wrapped):
+                if instance is None:
+                    return function_wrapper(wrapped, wrapper)
+                elif inspect.isclass(instance):
+                    return function_wrapper(wrapped,
+                            wrapper.__get__(None, instance))
+                else:
+                    return function_wrapper(wrapped,
+                            wrapper.__get__(instance, type(instance)))
+            return _execute(*args, **kwargs)
+        return function_wrapper(wrapper, _wrapper)
+```
 
 With our decorator implementation now being:  
 
 
-> 
->     @decorator
->     def my_function_wrapper(wrapped, instance, args, kwargs):
->         return wrapped(*args, **kwargs)
+```python
+    @decorator
+    def my_function_wrapper(wrapped, instance, args, kwargs):
+        return wrapped(*args, **kwargs)
+```
 
 the result we get when executing the decorated instance method of the class is:  
 
 
-> \('\_\_get\_\_', 'call'\) \# function\_wrapper  
->  \('\_\_init\_\_', 'call'\) \# bound\_function\_wrapper  
->  \('\_\_init\_\_', 'call'\) \# object\_proxy  
->  \('\_\_init\_\_', 'return'\)  
->  \('\_\_init\_\_', 'return'\)  
-> \('\_\_get\_\_', 'return'\)  
->  \('\_\_call\_\_', 'call'\) \# bound\_function\_wrapper  
->  \('my\_function\_wrapper', 'call'\)  
->  \('method', 'call'\)  
->  \('method', 'return'\)  
->  \('my\_function\_wrapper', 'return'\)  
-> \('\_\_call\_\_', 'return'\)
+```bash
+\('\_\_get\_\_', 'call'\) \# function\_wrapper  
+ \('\_\_init\_\_', 'call'\) \# bound\_function\_wrapper  
+ \('\_\_init\_\_', 'call'\) \# object\_proxy  
+ \('\_\_init\_\_', 'return'\)  
+ \('\_\_init\_\_', 'return'\)  
+\('\_\_get\_\_', 'return'\)  
+ \('\_\_call\_\_', 'call'\) \# bound\_function\_wrapper  
+ \('my\_function\_wrapper', 'call'\)  
+ \('method', 'call'\)  
+ \('method', 'return'\)  
+ \('my\_function\_wrapper', 'return'\)  
+\('\_\_call\_\_', 'return'\)
+```
 
 As can be seen, due to the binding of the method to the instance of the class which occurs in \_\_get\_\_\(\), a lot more is now happening. The overhead can therefore be expected to be significantly more also.  
   
@@ -218,8 +207,9 @@ As before, rather than use the implementation above, the actual implementation f
 This time our test is run as:  
 
 
-> 
->     $ python -m timeit -s 'import benchmarks; c=benchmarks.Class()' 'c.method()'
+```python
+    $ python -m timeit -s 'import benchmarks; c=benchmarks.Class()' 'c.method()'
+```
 
 For the case of no decorator being used on the instance method, the result is:  
 

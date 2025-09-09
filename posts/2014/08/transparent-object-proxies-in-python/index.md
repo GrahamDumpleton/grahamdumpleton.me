@@ -15,39 +15,37 @@ This is a quick rejoinder to a specific comment made in Armin Ronacher's recent 
 In that post Armin gives the following example of something that is possible with old style Python classes.
     
     
-```
->>> original = 42  
->>> class FooProxy:  
-... def __getattr__(self, x):  
-... return getattr(original, x)  
-...  
->>> proxy = FooProxy()  
->>> proxy  
-42  
->>> 1 + proxy  
-43  
->>> proxy + 1  
-43
-```
+    >>> original = 42  
+    >>> class FooProxy:  
+    ... def __getattr__(self, x):  
+    ... return getattr(original, x)  
+    ...  
+    >>> proxy = FooProxy()  
+    >>> proxy  
+    42  
+    >>> 1 + proxy  
+    43  
+    >>> proxy + 1  
+    43
 
 Armin then goes on to say:
 
-> """We have less features today than we had in Python 2 for a more complex type system. Because the code above cannot be done with new style classes and more."""
+```python
+"""We have less features today than we had in Python 2 for a more complex type system. Because the code above cannot be done with new style classes and more."""
+```
 
 Actually that isn't strictly true. It is possible to write a transparent object proxy using new style classes, but in doing so the proxy itself must adopt the conventions around the use of the special slot methods.
     
     
-```
->>> import wrapt  
->>> original = 42  
->>> proxy = wrapt.ObjectProxy(original)  
->>> print(proxy)  
-42  
->>> print(1 + proxy)  
-43  
->>> print(proxy + 1)  
-43
-```
+    >>> import wrapt  
+    >>> original = 42  
+    >>> proxy = wrapt.ObjectProxy(original)  
+    >>> print(proxy)  
+    42  
+    >>> print(1 + proxy)  
+    43  
+    >>> print(proxy + 1)  
+    43
 
 Implementing a general purpose transparent object proxy is non trivial and there are lots of horrible corner cases you have to deal with. The Python standard library does actually have an example of such a proxy, albeit specifically for use in conjunction with weakref instances. Unfortunately the Python standard library itself doesn't get all the corner cases correct, which for one case you can read about in [\#19070](http://bugs.python.org/issue19070). It is also implemented in C, so isn't particularly useful as an example for illustrating what is required.
 

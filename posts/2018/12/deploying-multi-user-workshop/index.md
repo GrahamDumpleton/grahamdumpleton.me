@@ -37,9 +37,7 @@ For deploying our workshop environment, we will be using the JupyterHub image cr
 The command for deploying an initial workshop enviroment is:
     
     
-```
-$ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-jupyterhub/master/templates/hosted-workshop-production.json
-```
+    $ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-jupyterhub/master/templates/hosted-workshop-production.json
     
     
 
@@ -48,18 +46,14 @@ You do not need to be a cluster admin to run this command. As long as you have a
 When the `oc new-app` command is run, it will create a deployment config called `terminals`, along with a bunch of other resources. If you want to monitor the progress of the deployment so you know when it is complete, you can run:
     
     
-```
-$ oc rollout status deploymentconfig terminals
-```
+    $ oc rollout status deploymentconfig terminals
     
     
 
 When complete, you can determine the URL for accessing the workshop environment, the URL which you would give the workshop attendees, by running:
     
     
-```
-$ oc get route terminals
-```
+    $ oc get route terminals
     
     
 
@@ -100,19 +94,15 @@ When the template above is used to deploy JupyterHub for the workshop, it will b
 If a custom terminal image has been created using the steps explained in the [prior blog post](/posts/2018/12/creating-your-own-custom-terminal-image/), this image can be used for the workshop, by passing its name as parameter to the template when deploying JupyterHub.
     
     
-```
-$ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-jupyterhub/master/templates/hosted-workshop-production.json \
-    --param TERMINAL_IMAGE=my-workshop-terminal:latest
-```
+    $ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-jupyterhub/master/templates/hosted-workshop-production.json \
+        --param TERMINAL_IMAGE=my-workshop-terminal:latest
     
     
 
 If the JupyterHub instance has already been deployed, you can override what terminal image it is using by setting the `TERMINAL_IMAGE` environment variable on the deployment config.
     
     
-```
-$ oc set env deploymentconfig terminals TERMINAL_IMAGE=my-workshop-terminal:latest
-```
+    $ oc set env deploymentconfig terminals TERMINAL_IMAGE=my-workshop-terminal:latest
     
     
 

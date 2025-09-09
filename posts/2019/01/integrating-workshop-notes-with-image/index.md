@@ -26,10 +26,8 @@ The two methods that could be used were to use the base image as a Source-to-Ima
 If you were running the build in OpenShift as an S2I build, with your files in a hosted Git repository, you could create the build by running the command:
     
     
-```
-  oc new-build quay.io/openshiftlabs/workshop-dashboard:latest~https://your-repository-url \
-      --name my-workshop-dashboard
-```
+      oc new-build quay.io/openshiftlabs/workshop-dashboard:latest~https://your-repository-url \
+          --name my-workshop-dashboard
     
     
 
@@ -50,14 +48,12 @@ If you want to replace the default home page which shows the categories and file
 A typical layout for the files might therefore be:
     
     
-```
-  raneto/content/index.md
-  raneto/content/setup.md
-  raneto/content/exercise-01/01-first-part-of-exercise.md
-  raneto/content/exercise-01/02-second-part-of-exercise.md
-  raneto/content/exercise-01/03-third-part-of-exercise.md
-  raneto/content/finish.md
-```
+      raneto/content/index.md
+      raneto/content/setup.md
+      raneto/content/exercise-01/01-first-part-of-exercise.md
+      raneto/content/exercise-01/02-second-part-of-exercise.md
+      raneto/content/exercise-01/03-third-part-of-exercise.md
+      raneto/content/finish.md
     
     
 
@@ -72,55 +68,47 @@ As Raneto is intended as being a knowledge base, it normally doesn't dictate a n
 The metadata at the head of the `index.md` file would be:
     
     
-```
-  ---
-  Title: Workshop Overview
-  NextPage: setup
-  ExitSign: Setup Environment
-  Sort: 1
-  ---
-```
+      ---
+      Title: Workshop Overview
+      NextPage: setup
+      ExitSign: Setup Environment
+      Sort: 1
+      ---
     
     
 
 That for `setup.md` would be:
     
     
-```
-  ---
-  Title: Setup Environment
-  PrevPage: index
-  NextPage: exercise-01/01-first-part-of-exercise
-  ExitSign: Start Exercise 1
-  Sort: 2
-  ---
-```
+      ---
+      Title: Setup Environment
+      PrevPage: index
+      NextPage: exercise-01/01-first-part-of-exercise
+      ExitSign: Start Exercise 1
+      Sort: 2
+      ---
     
     
 
 That for the last part of the last exercise:
     
     
-```
-  ---
-  PrevPage: 02-second-part-of-exercise
-  NextPage: ../finish
-  ExitSign: Finish Workshop
-  ---
-```
+      ---
+      PrevPage: 02-second-part-of-exercise
+      NextPage: ../finish
+      ExitSign: Finish Workshop
+      ---
     
     
 
 And that for `finish.md`:
     
     
-```
-  ---
-  Title: Workshop Summary
-  PrevPage: exercise-02/02-second-part-of-exercise
-  Sort: 3
-  ---
-```
+      ---
+      Title: Workshop Summary
+      PrevPage: exercise-02/02-second-part-of-exercise
+      Sort: 3
+      ---
     
     
 
@@ -144,29 +132,23 @@ How these are set will depend on how the dashboard image is being deployed. Work
 To use the variables in the Markdown files, use the syntax:
     
     
-```
-  %username%
-```
+      %username%
     
     
 
 Additional variables for interpolation can be supplied for a workshop by providing the file `raneto/config.js`, including:
     
     
-```
-  var config = {
-      variables: [
-        {
-          name: 'name',
-          content: 'value'
-        }
-      ]
-  };
-```
+      var config = {
+          variables: [
+            {
+              name: 'name',
+              content: 'value'
+            }
+          ]
+      };
     
-```
-  module.exports = config;
-```
+      module.exports = config;
     
     
 
@@ -187,9 +169,7 @@ To have the contents of the code block copied into the copy and paste buffer whe
 The workshop notes can include embedded images. Place the image in the same directory as the Markdown file and use appropriate Markdown syntax to embed it.
     
     
-```
-  ![Screenshot](./screenshot.png)
-```
+      ![Screenshot](./screenshot.png)
     
     
 

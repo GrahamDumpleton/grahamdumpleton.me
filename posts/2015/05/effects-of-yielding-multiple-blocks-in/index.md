@@ -29,37 +29,32 @@ The example I am going to use here is returning the contents of a file. There is
 
 The WSGI application being used in this case is:
 
-> 
->     from timer1 import timed_wsgi_application1
->     
->     
->     @timed_wsgi_application1  
->     > def application(environ, start_response):  
->     >     status = '200 OK'
->     
->     
->        response_headers = [('Content-type', 'text/plain')]  
->     >     start_response(status, response_headers)
->     
->     
->        def file_wrapper(filelike, block_size=8192):  
->     >        try:  
->     >           data = filelike.read(block_size)
->     
->     
->              while data:  
->     >              yield data  
->     >              data = filelike.read(block_size)
->     
->     
->           finally:  
->     >           try:  
->     >              data.close()  
->     >           except Exception:  
->     >              pass
->     
->     
->        return file_wrapper(open('/usr/share/dict/words'), 128)
+```python
+    from timer1 import timed_wsgi_application1
+
+    @timed_wsgi_application1  
+    def application(environ, start_response):  
+    status = '200 OK'
+
+       response_headers = [('Content-type', 'text/plain')]  
+    start_response(status, response_headers)
+
+       def file_wrapper(filelike, block_size=8192):  
+    try:  
+    data = filelike.read(block_size)
+
+             while data:  
+    yield data  
+    data = filelike.read(block_size)
+
+          finally:  
+    try:  
+    data.close()  
+    except Exception:  
+    pass
+
+       return file_wrapper(open('/usr/share/dict/words'), 128)
+```
 
 On MacOS X the size of the '/usr/share/dict/words' file is about 2.5MB. In this example we are going to return the data in 128 byte blocks so as to better highlight the impacts of many separate blocks being returned.
 
@@ -85,11 +80,13 @@ The first thing to working out why there may be a difference is to understand wh
 
 The relevant part of the WSGI specification is the section on [buffering and streaming](https://www.python.org/dev/peps/pep-3333/#buffering-and-streaming). In this section it states:
 
-> WSGI servers, gateways, and middleware must not delay the transmission of any block; they must either fully transmit the block to the client, or guarantee that they will continue transmission even while the application is producing its next block. A server/gateway or middleware may provide this guarantee in one of three ways:
-> 
-> 1\. Send the entire block to the operating system \(and request that any O/S buffers be flushed\) before returning control to the application, OR  
-> 2\. Use a different thread to ensure that the block continues to be transmitted while the application produces the next block.  
-> 3\. \(Middleware only\) send the entire block to its parent gateway/server.
+```python
+WSGI servers, gateways, and middleware must not delay the transmission of any block; they must either fully transmit the block to the client, or guarantee that they will continue transmission even while the application is producing its next block. A server/gateway or middleware may provide this guarantee in one of three ways:
+
+1\. Send the entire block to the operating system \(and request that any O/S buffers be flushed\) before returning control to the application, OR  
+2\. Use a different thread to ensure that the block continues to be transmitted while the application produces the next block.  
+3\. \(Middleware only\) send the entire block to its parent gateway/server.
+```
 
 In simple terms this means that a WSGI server is not allowed to buffer the response content and must ensure that it will actually be sent back to the HTTP client immediately or at least in parallel to fetching the next data block to be sent.
 
@@ -158,53 +155,51 @@ Although we can use the WSGI application code used for this test to serve up sta
 
 To illustrate the difference, we can make use of the fact that mod\_wsgi-express is actually Apache running mod\_wsgi and have Apache serve up our file instead. We can do this using the command:
 
-> 
->     mod_wsgi-express start-server app.py --document-root /usr/share/dict/
+```
+    mod_wsgi-express start-server app.py --document-root /usr/share/dict/
+```
 
 What will happen is that if the URL maps to a physical file in '/usr/share/dict', then it will be served up directly by Apache. If the URL doesn't map to a file, then the request will fall through to the WSGI application, which will serve it up as before.
 
 As we can't readily time in Apache how long a static file request takes to sufficient resolution, we will simply time the result of using 'curl' to make the request.
 
-> 
->     $ time curl -s -o /dev/null http://localhost:8000/
->     
->     
->     real 0m0.161s  
->     > user 0m0.018s  
->     > sys 0m0.062s
->     
->     
->     $ time curl -s -o /dev/null http://localhost:8000/words
->     
->     
->     real 0m0.013s  
->     > user 0m0.005s  
->     > sys 0m0.005s
+```bash
+    $ time curl -s -o /dev/null http://localhost:8000/
+
+    real 0m0.161s  
+    user 0m0.018s  
+    sys 0m0.062s
+
+    $ time curl -s -o /dev/null http://localhost:8000/words
+
+    real 0m0.013s  
+    user 0m0.005s  
+    sys 0m0.005s
+```
 
 Where as to serve up the static file took 161ms when served via the WSGI application, it took only 13ms when served as a static file.
 
 The uWSGI WSGI server has a similar option for overlaying static files on top of a WSGI application.
 
-> 
->     uwsgi --http 127.0.0.1:8000 --module app:application --static-check /usr/share/dict/
+```
+    uwsgi --http 127.0.0.1:8000 --module app:application --static-check /usr/share/dict/
+```
 
 Comparing the two methods using uWSGI we get:
 
-> 
->     $ time curl -s -o /dev/null http://localhost:8000/
->     
->     
->     real 0m0.381s  
->     > user 0m0.029s  
->     > sys 0m0.092s
->     
->     
->     $ time curl -s -o /dev/null http://localhost:8000/words
->     
->     
->     real 0m0.025s  
->     > user 0m0.006s  
->     > sys 0m0.009s
+```bash
+    $ time curl -s -o /dev/null http://localhost:8000/
+
+    real 0m0.381s  
+    user 0m0.029s  
+    sys 0m0.092s
+
+    $ time curl -s -o /dev/null http://localhost:8000/words
+
+    real 0m0.025s  
+    user 0m0.006s  
+    sys 0m0.009s
+```
 
 As with mod\_wsgi-express, one sees a similar level of improvement.
 

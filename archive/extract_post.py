@@ -169,6 +169,215 @@ def convert_plain_blog_urls_to_markdown_links(markdown_content):
     return converted_content
 
 
+def should_be_code_block(quoted_lines):
+    """
+    Determine if a quoted section should be converted to a code block.
+    
+    Args:
+        quoted_lines (list): List of lines from a quoted section
+        
+    Returns:
+        bool: True if this should be converted to a code block
+    """
+    for line in quoted_lines:
+        # Check for code indentation pattern (4+ spaces after >)
+        if re.match(r'^>\s{4,}.*', line):
+            return True
+        
+        # Check for nested quote characters
+        if re.match(r'^>\s+>.*', line):
+            return True
+        
+        # Check for command prompts
+        if re.search(r'[$#]\s|>>>\s|bash-\d+\.\d+\$', line):
+            return True
+        
+        # Check for code patterns
+        if re.search(r'\b(def|class|import|from|if|for|while|try|except|with)\s', line):
+            return True
+        
+        # Check for Dockerfile patterns
+        if re.search(r'\b(FROM|RUN|COPY|WORKDIR|USER|ENV|EXPOSE|CMD|ENTRYPOINT)\s', line):
+            return True
+        
+        # Check for shell command patterns
+        if re.search(r'\b(ls|cd|mkdir|rm|cp|mv|chmod|chown|apt-get|yum|pip|npm)\s', line):
+            return True
+    
+    return False
+
+
+def remove_quote_prefix(line):
+    """
+    Remove quote prefix from a line.
+    
+    Args:
+        line (str): Line to process
+        
+    Returns:
+        str: Line with quote prefix removed
+    """
+    if line.startswith('> '):
+        return line[2:]  # Remove '> '
+    elif line.startswith('>'):
+        return line[1:]  # Remove '>'
+    else:
+        return line
+
+
+def remove_nested_quotes(line):
+    """
+    Remove nested quote characters from within indented code.
+    
+    Args:
+        line (str): Line to process
+        
+    Returns:
+        str: Line with nested quotes removed
+    """
+    # Remove patterns like '    > ' from within indented code
+    return re.sub(r'^(\s+)>\s+', r'\1', line)
+
+
+def detect_language(code_lines):
+    """
+    Detect programming language from code content.
+    
+    Args:
+        code_lines (list): List of code lines
+        
+    Returns:
+        str: Detected language or empty string
+    """
+    # Join all lines for analysis
+    content = '\n'.join(code_lines)
+    
+    # Python patterns
+    if re.search(r'\b(def|class|import|from|if|for|while|try|except|with|lambda)\s', content):
+        return 'python'
+    
+    # Dockerfile patterns
+    if re.search(r'\b(FROM|RUN|COPY|WORKDIR|USER|ENV|EXPOSE|CMD|ENTRYPOINT)\s', content):
+        return 'dockerfile'
+    
+    # Shell/bash patterns
+    if re.search(r'[$#]\s|bash-\d+\.\d+\$|>>>\s', content):
+        return 'bash'
+    
+    # SQL patterns
+    if re.search(r'\b(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)\s', content, re.IGNORECASE):
+        return 'sql'
+    
+    # JavaScript patterns
+    if re.search(r'\b(function|var|let|const|=>|console\.log)\b', content):
+        return 'javascript'
+    
+    # JSON patterns
+    if re.search(r'^\s*[{\[]', content):
+        return 'json'
+    
+    return ''  # No specific language detected
+
+
+def trim_blank_lines(lines):
+    """
+    Remove leading and trailing blank lines from a list of lines.
+    
+    Args:
+        lines (list): List of lines
+        
+    Returns:
+        list: List of lines with leading/trailing blanks removed
+    """
+    # Remove leading blank lines
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    
+    # Remove trailing blank lines
+    while lines and not lines[-1].strip():
+        lines.pop()
+    
+    return lines
+
+
+def convert_quoted_to_code(quoted_lines):
+    """
+    Convert quoted lines to clean code lines.
+    
+    Args:
+        quoted_lines (list): List of quoted lines
+        
+    Returns:
+        list: List of cleaned code lines
+    """
+    code_lines = []
+    consecutive_blanks = 0
+    
+    for line in quoted_lines:
+        # Remove quote prefix
+        clean_line = remove_quote_prefix(line)
+        
+        # Handle blank lines
+        if not clean_line.strip():
+            consecutive_blanks += 1
+            if consecutive_blanks <= 1:  # Allow only one blank line
+                code_lines.append("")
+        else:
+            consecutive_blanks = 0
+            # Clean up nested quotes in indentation
+            clean_line = remove_nested_quotes(clean_line)
+            code_lines.append(clean_line)
+    
+    # Remove leading/trailing blank lines
+    return trim_blank_lines(code_lines)
+
+
+def convert_quoted_sections_to_code_blocks(content):
+    """
+    Convert problematic quoted sections to proper markdown code blocks.
+    
+    Args:
+        content (str): Markdown content to process
+        
+    Returns:
+        str: Processed markdown content with quoted sections converted to code blocks
+    """
+    lines = content.split('\n')
+    result_lines = []
+    i = 0
+    
+    while i < len(lines):
+        line = lines[i]
+        
+        if line.startswith('>'):
+            # Found start of quoted section
+            quoted_section = []
+            
+            # Collect all consecutive quoted lines
+            while i < len(lines) and lines[i].startswith('>'):
+                quoted_section.append(lines[i])
+                i += 1
+            
+            # Analyze if this should be a code block
+            if should_be_code_block(quoted_section):
+                # Convert to code block
+                code_content = convert_quoted_to_code(quoted_section)
+                if code_content:  # Only add if there's actual content
+                    language = detect_language(code_content)
+                    
+                    result_lines.append("```" + language)
+                    result_lines.extend(code_content)
+                    result_lines.append("```")
+            else:
+                # Keep as regular quoted section
+                result_lines.extend(quoted_section)
+        else:
+            result_lines.append(line)
+            i += 1
+    
+    return '\n'.join(result_lines)
+
+
 def create_markdown_file(post_data, output_path):
     """
     Create a standalone Markdown file with YAML front matter for 11ty/Hugo.
@@ -279,32 +488,8 @@ def extract_post_data(html_file_path, overwrite=False):
         html_content = str(content_element)
         markdown_content = h.handle(html_content).strip()
         
-        # Post-process to improve code blocks
-        # Look for lines that start with spaces and convert them to code blocks
-        lines = markdown_content.split('\n')
-        processed_lines = []
-        in_code_block = False
-        
-        for line in lines:
-            # Check if line starts with 4+ spaces (likely code)
-            if line.startswith('    ') and line.strip():
-                if not in_code_block:
-                    processed_lines.append('```')
-                    in_code_block = True
-                # Remove leading spaces and add the line
-                processed_lines.append(line[4:])
-            else:
-                if in_code_block:
-                    processed_lines.append('```')
-                    in_code_block = False
-                processed_lines.append(line)
-        
-        # Close any open code block
-        if in_code_block:
-            processed_lines.append('```')
-        
-        # Convert the processed markdown content
-        markdown_content = '\n'.join(processed_lines)
+        # Post-process to convert problematic quoted sections to code blocks
+        markdown_content = convert_quoted_sections_to_code_blocks(markdown_content)
         
         # Convert blog URLs to relative paths
         markdown_content = convert_blog_urls_to_relative(markdown_content)
@@ -405,6 +590,9 @@ def extract_post_data(html_file_path, overwrite=False):
                     
                     html_content = str(content_element)
                     comment_markdown = h.handle(html_content).strip()
+                    
+                    # Convert problematic quoted sections to code blocks in comments too
+                    comment_markdown = convert_quoted_sections_to_code_blocks(comment_markdown)
                     
                     # Convert blog URLs to relative paths in comments too
                     comment_markdown = convert_blog_urls_to_relative(comment_markdown)

@@ -26,9 +26,7 @@ Although the default is now for lazy initialisation of the Python interpreters t
 A further upside of using lazy initialisation is that if you are using daemon mode only, ie., not using embedded mode, you can completely turn off initialisation of the Python interpreter within the main Apache server child process. Unfortunately, because it isn't possible in the general case to know whether embedded mode will be needed or not, you will need to manually set the configuration to do this. This can be done by setting:
     
     
-```
-WSGIRestrictEmbedded On
-```
+    WSGIRestrictEmbedded On
 
 The directive if used should appear at global server scope, outside of any VirtualHost definitions.
 

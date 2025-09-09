@@ -23,15 +23,17 @@ One framework extension I found which I thought was quite interesting was called
 
 First up is getting Opal running locally. For this Opal provides some good [documentation](http://opal.openhealthcare.org.uk/docs/) and also a starter script to get you going. Installation and creation of an initial application I could test with was as simple as running:
 
-> 
->     pip install opal  
->     > opal startproject mynewapp
+```
+    pip install opal  
+    opal startproject mynewapp
+```
 
 Once this was done to start up the starter application you run:
 
-> 
->     cd mynewapp  
->     > python manage.py runserver
+```
+    cd mynewapp  
+    python manage.py runserver
+```
 
 From a browser you could then visit 'http://localhost:8000' and even login to the admin interface using a pre created user account. The latter was possible as Opal has added hooks which are automatically triggered when ‘runserver’ is used, which will set up the database and create a super user account. They have therefore optimised things for the local developer experience when using the builtin Django development server.
 
@@ -43,10 +45,11 @@ It is making deployment of Python web applications easy across such different en
 
 With warpdrive already installed, the first thing we want to do is activate a new project using it. In the ‘mynewapp’ directory we run ‘warpdrive project opal’.
 
-> 
->     $ warpdrive project opal  
->     > Initializing warpdrive project 'opal'.  
->     > (warpdrive+opal) $
+```bash
+    $ warpdrive project opal  
+    Initializing warpdrive project 'opal'.  
+    (warpdrive+opal) $
+```
 
 What this command will do is create us a new Python virtual environment just for this application and activate it. This will be an empty Python virtual environment, so next we need to install all the Python packages that the project requires.
 
@@ -54,39 +57,42 @@ When we originally create the project using the ‘opal startproject’ command 
 
 Rather than run ‘pip’ directly, we are therefore going to run ‘warpdrive build’ instead. This will not only ensure that any required Python packages are installed, but also ensures that any other framework specific build steps are also run. The output from running ‘warpdrive build’ starts out with:
 
-> 
->      -----> Installing dependencies with pip (requirements.txt)  
->     > Collecting cryptography==1.3.2 (from -r requirements.txt (line 2))  
->     >   Using cached cryptography-1.3.2-cp27-none-macosx_10_6_intel.whl  
->     > Collecting Django==1.8.3 (from -r requirements.txt (line 3))  
->     >   Using cached Django-1.8.3-py2.py3-none-any.whl  
->     > ...  
->     > Obtaining opal from git+git://github.com/openhealthcare/opal.git@master#egg=opal (from -r requirements.txt (line 18))  
->     >   Cloning git://github.com/openhealthcare/opal.git (to master) to /tmp/warpdrive-build.12067/opal  
->     > ...
->     
->     
->     Installing collected packages: pycparser, cffi, pyasn1, six, idna, ipaddress, enum34, cryptography, Django, coverage, dj-database-url, gunicorn, psycopg2, static3, dj-static, django-reversion, django-axes, ffs, MarkupSafe, jinja2, letter, requests, djangorestframework, django-appconf, django-compressor, meld3, supervisor, python-dateutil, pytz, billiard, anyjson, amqp, kombu, celery, django-celery, opal  
->     >   Running setup.py develop for opal  
->     > Successfully installed Django-1.8.3 MarkupSafe-0.23 amqp-1.4.9 anyjson-0.3.3 billiard-3.3.0.23 celery-3.1.19 cffi-1.7.0 coverage-3.6 cryptography-1.3.2 dj-database-url-0.2.1 dj-static-0.0.6 django-appconf-1.0.2 django-axes-1.4.0 django-celery-3.1.17 django-compressor-1.5 django-reversion-1.8.7 djangorestframework-3.2.2 enum34-1.1.6 ffs-0.0.8.1 gunicorn-0.17.4 idna-2.1 ipaddress-1.0.16 jinja2-2.8 kombu-3.0.35 letter-0.4.1 meld3-1.0.2 opal psycopg2-2.5 pyasn1-0.1.9 pycparser-2.14 python-dateutil-2.4.2 pytz-2016.6.1 requests-2.7.0 six-1.10.0 static3-0.7.0 supervisor-3.0  
->     > Collecting mod_wsgi  
->     > Installing collected packages: mod-wsgi  
->     > Successfully installed mod-wsgi-4.5.3
+```python
+     -----> Installing dependencies with pip (requirements.txt)  
+    Collecting cryptography==1.3.2 (from -r requirements.txt (line 2))  
+    Using cached cryptography-1.3.2-cp27-none-macosx_10_6_intel.whl  
+    Collecting Django==1.8.3 (from -r requirements.txt (line 3))  
+    Using cached Django-1.8.3-py2.py3-none-any.whl  
+    ...  
+    Obtaining opal from git+git://github.com/openhealthcare/opal.git@master#egg=opal (from -r requirements.txt (line 18))  
+    Cloning git://github.com/openhealthcare/opal.git (to master) to /tmp/warpdrive-build.12067/opal  
+    ...
+
+    Installing collected packages: pycparser, cffi, pyasn1, six, idna, ipaddress, enum34, cryptography, Django, coverage, dj-database-url, gunicorn, psycopg2, static3, dj-static, django-reversion, django-axes, ffs, MarkupSafe, jinja2, letter, requests, djangorestframework, django-appconf, django-compressor, meld3, supervisor, python-dateutil, pytz, billiard, anyjson, amqp, kombu, celery, django-celery, opal  
+    Running setup.py develop for opal  
+    Successfully installed Django-1.8.3 MarkupSafe-0.23 amqp-1.4.9 anyjson-0.3.3 billiard-3.3.0.23 celery-3.1.19 cffi-1.7.0 coverage-3.6 cryptography-1.3.2 dj-database-url-0.2.1 dj-static-0.0.6 django-appconf-1.0.2 django-axes-1.4.0 django-celery-3.1.17 django-compressor-1.5 django-reversion-1.8.7 djangorestframework-3.2.2 enum34-1.1.6 ffs-0.0.8.1 gunicorn-0.17.4 idna-2.1 ipaddress-1.0.16 jinja2-2.8 kombu-3.0.35 letter-0.4.1 meld3-1.0.2 opal psycopg2-2.5 pyasn1-0.1.9 pycparser-2.14 python-dateutil-2.4.2 pytz-2016.6.1 requests-2.7.0 six-1.10.0 static3-0.7.0 supervisor-3.0  
+    Collecting mod_wsgi  
+    Installing collected packages: mod-wsgi  
+    Successfully installed mod-wsgi-4.5.3
+```
 
 One thing of note here is that ‘pip’ when run is actually trying to install Opal direct from the Git repository on GitHub. This is because the ‘requirements.txt’ file generated by ‘opal startproject’ contains:
 
-> 
->     -e git://github.com/openhealthcare/opal.git@master#egg=opal
+```
+    -e git://github.com/openhealthcare/opal.git@master#egg=opal
+```
 
 As far as deploying to a production environment, pulling package code direct from a Git repository, and especially from head of the master branch isn’t necessarily the best idea. We instead want to ensure that we are always using a known specific version of the package which we have tested with. To remedy this, this time we will run ‘pip’ directly, but only to uninstall the version of ‘opal’ installed so it will not cause a problems when trying to reinstall it from PyPi.
 
-> 
->     pip uninstall opal
+```
+    pip uninstall opal
+```
 
 We now edit the ‘requirements.txt’ file and replace that line with:
 
-> 
->     opal==0.7.0
+```
+    opal==0.7.0
+```
 
 Worth highlighting is that this isn’t being done specially because of warpdrive. It is simply good practice to be using pinned versions of packages in a production environment so you know what you are getting. I can only imagine the ‘requirements.txt’ file is generated in this way as it makes the Opal developers job easy when testing themselves when they are working on it.
 
@@ -94,25 +100,28 @@ Having fixed that, we can rerun ‘warpdrive build’ and it will trigger ‘pip
 
 Beyond installing any required Python packages, one other thing that warpdrive will do is that it will realise that the Django web framework is being used and will automatically trigger the Django ‘collectstatic’ command to collate together any static files used by the application. The next thing after package installation we therefore see in the output of ‘warpdrive build’ is:
 
-> 
->     -----> Collecting static files for Django  
->     > ...  
->     > OSError: [Errno 2] No such file or directory: '/Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/static'
+```python
+    -----> Collecting static files for Django  
+    ...  
+    OSError: [Errno 2] No such file or directory: '/Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/static'
+```
 
 Unfortunately this fails though. The reason it fails is actually because the Django settings module for the generated Opal project contains:
 
-> 
->     # Additional locations of static files  
->     > STATICFILES_DIRS = (  
->     >  os.path.join(PROJECT_PATH, 'static'),  
->     > )
+```bash
+    # Additional locations of static files  
+    STATICFILES_DIRS = (  
+    os.path.join(PROJECT_PATH, 'static'),  
+    )
+```
 
 With this setting, when ‘collectstatic’ is run, it expects that directory to actually exist and if it doesn’t it will fail.
 
 This is easily fixed by creating the directory:
 
-> 
->     mkdir mynewapp/static
+```
+    mkdir mynewapp/static
+```
 
 The directory should though have been created automatically by the ‘opal startproject’ command. That it doesn’t has already been [addressed](https://github.com/openhealthcare/opal/issues/803) for version 0.7.1 of Opal.
 
@@ -128,31 +137,31 @@ In addition to aiming to simplify the build process, another aim of warpdrive is
 
 That said, having prepared our application for warpdrive, to actually run it up and have it start accepting web requests, all we now need to do is run ‘warpdrive start’.
 
-> 
->       -----> Configuring for deployment mode: of 'auto'  
->     >   -----> Default WSGI server type is 'mod_wsgi'  
->     > Python 2.7.10 (default, Oct 23 2015, 19:19:21)  
->     > [GCC 4.2.1 Compatible Apple LLVM 7.0.0 (clang-700.0.59.5)] on darwin  
->     > Type "help", "copyright", "credits" or "license" for more information.  
->     > (InteractiveConsole)
->     
->     
->       -----> Running server script start-mod_wsgi  
->     >   -----> Executing server command 'mod_wsgi-express start-server --log-to-terminal --startup-log --port 8080 --application-type module --entry-point mynewapp.wsgi --callable-object application --url-alias /assets/ /Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/assets/'  
->     > Server URL : http://localhost:8080/  
->     > Server Root : /tmp/mod_wsgi-localhost:8080:502  
->     > Server Conf : /tmp/mod_wsgi-localhost:8080:502/httpd.conf  
->     > Error Log File : /dev/stderr (warn)  
->     > Startup Log File : /dev/stderr  
->     > Request Capacity : 5 (1 process * 5 threads)  
->     > Request Timeout : 60 (seconds)  
->     > Queue Backlog : 100 (connections)  
->     > Queue Timeout : 45 (seconds)  
->     > Server Capacity : 20 (event/worker), 20 (prefork)  
->     > Server Backlog : 500 (connections)  
->     > Locale Setting : en_AU.UTF-8  
->     > [Mon Aug 01 14:20:13.092722 2016] [mpm_prefork:notice] [pid 13220] AH00163: Apache/2.4.18 (Unix) mod_wsgi/4.5.3 Python/2.7.10 configured -- resuming normal operations  
->     > [Mon Aug 01 14:20:13.092995 2016] [core:notice] [pid 13220] AH00094: Command line: 'httpd (mod_wsgi-express) -f /tmp/mod_wsgi-localhost:8080:502/httpd.conf -E /dev/stderr -D FOREGROUND'
+```python
+      -----> Configuring for deployment mode: of 'auto'  
+    -----> Default WSGI server type is 'mod_wsgi'  
+    Python 2.7.10 (default, Oct 23 2015, 19:19:21)  
+    [GCC 4.2.1 Compatible Apple LLVM 7.0.0 (clang-700.0.59.5)] on darwin  
+    Type "help", "copyright", "credits" or "license" for more information.  
+    (InteractiveConsole)
+
+      -----> Running server script start-mod_wsgi  
+    -----> Executing server command 'mod_wsgi-express start-server --log-to-terminal --startup-log --port 8080 --application-type module --entry-point mynewapp.wsgi --callable-object application --url-alias /assets/ /Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/assets/'  
+    Server URL : http://localhost:8080/  
+    Server Root : /tmp/mod_wsgi-localhost:8080:502  
+    Server Conf : /tmp/mod_wsgi-localhost:8080:502/httpd.conf  
+    Error Log File : /dev/stderr (warn)  
+    Startup Log File : /dev/stderr  
+    Request Capacity : 5 (1 process * 5 threads)  
+    Request Timeout : 60 (seconds)  
+    Queue Backlog : 100 (connections)  
+    Queue Timeout : 45 (seconds)  
+    Server Capacity : 20 (event/worker), 20 (prefork)  
+    Server Backlog : 500 (connections)  
+    Locale Setting : en_AU.UTF-8  
+    [Mon Aug 01 14:20:13.092722 2016] [mpm_prefork:notice] [pid 13220] AH00163: Apache/2.4.18 (Unix) mod_wsgi/4.5.3 Python/2.7.10 configured -- resuming normal operations  
+    [Mon Aug 01 14:20:13.092995 2016] [core:notice] [pid 13220] AH00094: Command line: 'httpd (mod_wsgi-express) -f /tmp/mod_wsgi-localhost:8080:502/httpd.conf -E /dev/stderr -D FOREGROUND'
+```
 
 And that is it. Our Opal application is now running.
 
@@ -160,20 +169,20 @@ You may be thinking at this point that using ‘runserver’ is just as easy, so
 
 Using a different WSGI server such as uWSGI is not any harder. In the case of uWSGI, all you would need to do is create the file ‘.warpdrive/server\_type’ and place in it ‘uwsgi’, to override the default of using Apache/mod\_wsgi. Then run ‘warpdrive build’ and once again ‘warpdrive start’ and you will instead be running with uWSGI.
 
-> 
->       -----> Configuring for deployment mode: of 'auto'  
->     >   -----> Default WSGI server type is 'uwsgi'  
->     > Python 2.7.10 (default, Oct 23 2015, 19:19:21)  
->     > [GCC 4.2.1 Compatible Apple LLVM 7.0.0 (clang-700.0.59.5)] on darwin  
->     > Type "help", "copyright", "credits" or "license" for more information.  
->     > (InteractiveConsole)
->     
->     
->       -----> Running server script start-uwsgi  
->     >   -----> Executing server command 'uwsgi --master --http-socket :8080 --enable-threads --threads=5 --thunder-lock --single-interpreter --die-on-term --module mynewapp.wsgi --callable application --static-map /assets/=/Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/assets/'  
->     > [uwsgi-static] added mapping for /assets/ => /Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/assets/  
->     > *** Starting uWSGI 2.0.13.1 (64bit) on [Mon Aug 1 14:27:02 2016] ***  
->     > ...
+```python
+      -----> Configuring for deployment mode: of 'auto'  
+    -----> Default WSGI server type is 'uwsgi'  
+    Python 2.7.10 (default, Oct 23 2015, 19:19:21)  
+    [GCC 4.2.1 Compatible Apple LLVM 7.0.0 (clang-700.0.59.5)] on darwin  
+    Type "help", "copyright", "credits" or "license" for more information.  
+    (InteractiveConsole)
+
+      -----> Running server script start-uwsgi  
+    -----> Executing server command 'uwsgi --master --http-socket :8080 --enable-threads --threads=5 --thunder-lock --single-interpreter --die-on-term --module mynewapp.wsgi --callable application --static-map /assets/=/Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/assets/'  
+    [uwsgi-static] added mapping for /assets/ => /Users/graham/Projects/openshift3-opal/mynewapp/mynewapp/assets/  
+    *** Starting uWSGI 2.0.13.1 (64bit) on [Mon Aug 1 14:27:02 2016] ***  
+    ...
+```
 
 In all cases, no matter which WSGI server you are using, warpdrive will worry about ensuring the minimum sane set of options are provided to the WSGI server as well as any required for the specific WSGI application. In this case warpdrive even handled the task of making sure the WSGI server knew how to host the static files the application needs.
 
@@ -181,9 +190,10 @@ In all cases, no matter which WSGI server you are using, warpdrive will worry ab
 
 Our Opal application is again running and we can access it via the browser from 'http://localhost:8080/'. Do so though and we encounter a new problem though.
 
-> 
->     Exception Type: OperationalError  
->     > Exception Value: no such table: axes_accessattempt
+```
+    Exception Type: OperationalError  
+    Exception Value: no such table: axes_accessattempt
+```
 
 This gets back to that magic that was being done when ‘runserver’ was being used. Specifically, the ‘runserver’ command had been set up to also automatically ensure that the database being used was initialised and that an initial account created.
 
@@ -197,69 +207,67 @@ As codifying such steps is beneficial from the stand point of ensuring that such
 
 As an example, lets create our first action hook. This we will save away in the file ‘.warpdrive/action\_hooks/setup’.
 
-> 
->     #!/bin/bash
->     
->     
->     echo " -----> Running Django database migration"
->     
->     
->     python manage.py migrate
->     
->     
->     if [ x"$DJANGO_ADMIN_USERNAME" != x"" ]; then  
->     >     echo " -----> Creating predefined Django super user"  
->     >     (cat - | python manage.py shell) << !  
->     >  from django.contrib.auth.models import User;  
->     >  User.objects.create_superuser('$DJANGO_ADMIN_USERNAME',  
->     >                                '$DJANGO_ADMIN_EMAIL',  
->     >                                '$DJANGO_ADMIN_PASSWORD')  
->     >  !  
->     >  else  
->     >      if (tty > /dev/null 2>&1); then  
->     >          echo " -----> Running Django super user creation"  
->     >          python manage.py createsuperuser  
->     >      fi  
->     >  fi
+```python
+    #!/bin/bash
+
+    echo " -----> Running Django database migration"
+
+    python manage.py migrate
+
+    if [ x"$DJANGO_ADMIN_USERNAME" != x"" ]; then  
+    echo " -----> Creating predefined Django super user"  
+    (cat - | python manage.py shell) << !  
+    from django.contrib.auth.models import User;  
+    User.objects.create_superuser('$DJANGO_ADMIN_USERNAME',  
+    '$DJANGO_ADMIN_EMAIL',  
+    '$DJANGO_ADMIN_PASSWORD')  
+    !  
+    else  
+    if (tty > /dev/null 2>&1); then  
+    echo " -----> Running Django super user creation"  
+    python manage.py createsuperuser  
+    fi  
+    fi
+```
 
 This captures the steps we need to initialise the database and create an initial account. For the account creation, we can either supply the details via environment variables, or if we are running in an interactive shell, it will prompt us. Having created this action hook we can now run ‘warpdrive setup’.
 
-> 
->       -----> Running .warpdrive/action_hooks/setup  
->     >   -----> Running Django database migration  
->     > Operations to perform:  
->     >   Synchronize unmigrated apps: search, staticfiles, axes, messages, compressor, rest_framework  
->     >   Apply all migrations: sessions, admin, opal, sites, auth, reversion, contenttypes, mynewapp  
->     > Synchronizing apps without migrations:  
->     >   Creating tables...  
->     >   Creating table axes_accessattempt  
->     >   Creating table axes_accesslog  
->     >   Running deferred SQL...  
->     >   Installing custom SQL...  
->     > Running migrations:  
->     >   Rendering model states... DONE  
->     >   Applying contenttypes.0001_initial... OK  
->     >   ...  
->     >   Applying sites.0001_initial... OK  
->     >   -----> Running Django super user creation  
->     > Username (leave blank to use 'graham'):  
->     > Email address: graham@example.com  
->     > Password:  
->     > Password (again):  
->     > Superuser created successfully.
+```
+      -----> Running .warpdrive/action_hooks/setup  
+    -----> Running Django database migration  
+    Operations to perform:  
+    Synchronize unmigrated apps: search, staticfiles, axes, messages, compressor, rest_framework  
+    Apply all migrations: sessions, admin, opal, sites, auth, reversion, contenttypes, mynewapp  
+    Synchronizing apps without migrations:  
+    Creating tables...  
+    Creating table axes_accessattempt  
+    Creating table axes_accesslog  
+    Running deferred SQL...  
+    Installing custom SQL...  
+    Running migrations:  
+    Rendering model states... DONE  
+    Applying contenttypes.0001_initial... OK  
+    ...  
+    Applying sites.0001_initial... OK  
+    -----> Running Django super user creation  
+    Username (leave blank to use 'graham'):  
+    Email address: graham@example.com  
+    Password:  
+    Password (again):  
+    Superuser created successfully.
+```
 
 Running ‘warpdrive start’ once again we find the application is now all working fine and we can log in with the account we created. 
 
 The contents of the ‘setup’ script is typical here of what is required for database initialisation when using Django. The other set of actions we want to capture for Django is what needs to be done when migrating the database after database model changes. These we can capture in the file ‘.warpdrive/action\_hooks/migrate’.
 
-> 
->     #!/bin/bash
->     
->     
->     echo " -----> Running Django database migration"
->     
->     
->     python manage.py migrate
+```
+    #!/bin/bash
+
+    echo " -----> Running Django database migration"
+
+    python manage.py migrate
+```
 
 Why it is better to capture these commands as action hooks and have warpdrive execute them for you, is that the commands are now a part of your application code. You don’t need to go look up some documentation to remember what the steps are. All you need to remember is the commands ‘warpdrive setup’ and ‘warpdrive migrate’.
 
@@ -283,22 +291,23 @@ With warpdrive there is a much better way of moving to Docker. That is to have w
 
 To package our Opal application up into a Docker image, all we need to do is run the ‘warpdrive image’ command.
 
-> 
->     (warpdrive+opal) $ warpdrive image opal  
->     > I0801 15:35:29.321041 14900 install.go:251] Using "assemble" installed from "image:///opt/app-root/s2i/bin/assemble"  
->     > I0801 15:35:29.321223 14900 install.go:251] Using "run" installed from "image:///opt/app-root/s2i/bin/run"  
->     > I0801 15:35:29.321280 14900 install.go:251] Using "save-artifacts" installed from "image:///opt/app-root/s2i/bin/save-artifacts"  
->     >   ---> Installing application source  
->     >   ---> Building application from source  
->     >   -----> Installing dependencies with pip (requirements.txt)  
->     > Collecting cryptography==1.3.2 (from -r requirements.txt (line 2))  
->     > Downloading cryptography-1.3.2.tar.gz (383kB)  
->     > Collecting Django==1.8.3 (from -r requirements.txt (line 3))  
->     > Downloading Django-1.8.3-py2.py3-none-any.whl (6.2MB)  
->     > ...  
->     > -----> Collecting static files for Django  
->     > 78 static files copied to '/opt/app-root/src/mynewapp/assets', 465 unmodified.  
->     > ---> Fix permissions on application source
+```python
+    (warpdrive+opal) $ warpdrive image opal  
+    I0801 15:35:29.321041 14900 install.go:251] Using "assemble" installed from "image:///opt/app-root/s2i/bin/assemble"  
+    I0801 15:35:29.321223 14900 install.go:251] Using "run" installed from "image:///opt/app-root/s2i/bin/run"  
+    I0801 15:35:29.321280 14900 install.go:251] Using "save-artifacts" installed from "image:///opt/app-root/s2i/bin/save-artifacts"  
+    ---> Installing application source  
+    ---> Building application from source  
+    -----> Installing dependencies with pip (requirements.txt)  
+    Collecting cryptography==1.3.2 (from -r requirements.txt (line 2))  
+    Downloading cryptography-1.3.2.tar.gz (383kB)  
+    Collecting Django==1.8.3 (from -r requirements.txt (line 3))  
+    Downloading Django-1.8.3-py2.py3-none-any.whl (6.2MB)  
+    ...  
+    -----> Collecting static files for Django  
+    78 static files copied to '/opt/app-root/src/mynewapp/assets', 465 unmodified.  
+    ---> Fix permissions on application source
+```
 
 This should look familiar to you as in building the Docker image it is using the same ‘warpdrive build’ command that you used in your local environment. This is being done within a Docker base image which has already been set up with Python and warpdrive.
 
@@ -306,61 +315,62 @@ By using the same tooling, in the form of warpdrive, in your local environment a
 
 The final result of that ‘warpdrive image’ command is that you now have a Docker image named ‘opal’ which we can be run using ‘docker run’.
 
-> 
->     (warpdrive+opal) $ docker run --rm -p 8080:8080 opal  
->     > ---> Executing the start up script  
->     >  -----> Configuring for deployment mode: of 'auto'  
->     >  -----> Default WSGI server type is 'mod_wsgi'  
->     > Python 2.7.12 (default, Jul 29 2016, 00:52:26)  
->     > [GCC 4.9.2] on linux2  
->     > Type "help", "copyright", "credits" or "license" for more information.  
->     > (InteractiveConsole)
->     
->     
->       -----> Running server script start-mod_wsgi  
->     >   -----> Executing server command 'mod_wsgi-express start-server --log-to-terminal --startup-log --port 8080 --application-type module --entry-point mynewapp.wsgi --callable-object application --url-alias /assets/ /opt/app-root/src/mynewapp/assets/'  
->     > Server URL : http://localhost:8080/  
->     > Server Root : /tmp/mod_wsgi-localhost:8080:1001  
->     > Server Conf : /tmp/mod_wsgi-localhost:8080:1001/httpd.conf  
->     > Error Log File : /dev/stderr (warn)  
->     > Startup Log File : /dev/stderr  
->     > Request Capacity : 5 (1 process * 5 threads)  
->     > Request Timeout : 60 (seconds)  
->     > Queue Backlog : 100 (connections)  
->     > Queue Timeout : 45 (seconds)  
->     > Server Capacity : 20 (event/worker), 20 (prefork)  
->     > Server Backlog : 500 (connections)  
->     > Locale Setting : en_US.UTF-8  
->     > [Mon Aug 01 05:49:45.774485 2016] [mpm_event:notice] [pid 20:tid 140425572333312] AH00489: Apache/2.4.23 (Unix) mod_wsgi/4.5.3 Python/2.7.12 configured -- resuming normal operations  
->     > [Mon Aug 01 05:49:45.774622 2016] [core:notice] [pid 20:tid 140425572333312] AH00094: Command line: 'httpd (mod_wsgi-express) -f /tmp/mod_wsgi-localhost:8080:1001/httpd.conf -E /dev/stderr -D MOD_WSGI_MPM_ENABLE_EVENT_MODULE -D MOD_WSGI_MPM_EXISTS_EVENT_MODULE -D MOD_WSGI_MPM_EXISTS_WORKER_MODULE -D MOD_WSGI_MPM_EXISTS_PREFORK_MODULE -D FOREGROUND'
+```python
+    (warpdrive+opal) $ docker run --rm -p 8080:8080 opal  
+    ---> Executing the start up script  
+    -----> Configuring for deployment mode: of 'auto'  
+    -----> Default WSGI server type is 'mod_wsgi'  
+    Python 2.7.12 (default, Jul 29 2016, 00:52:26)  
+    [GCC 4.9.2] on linux2  
+    Type "help", "copyright", "credits" or "license" for more information.  
+    (InteractiveConsole)
+
+      -----> Running server script start-mod_wsgi  
+    -----> Executing server command 'mod_wsgi-express start-server --log-to-terminal --startup-log --port 8080 --application-type module --entry-point mynewapp.wsgi --callable-object application --url-alias /assets/ /opt/app-root/src/mynewapp/assets/'  
+    Server URL : http://localhost:8080/  
+    Server Root : /tmp/mod_wsgi-localhost:8080:1001  
+    Server Conf : /tmp/mod_wsgi-localhost:8080:1001/httpd.conf  
+    Error Log File : /dev/stderr (warn)  
+    Startup Log File : /dev/stderr  
+    Request Capacity : 5 (1 process * 5 threads)  
+    Request Timeout : 60 (seconds)  
+    Queue Backlog : 100 (connections)  
+    Queue Timeout : 45 (seconds)  
+    Server Capacity : 20 (event/worker), 20 (prefork)  
+    Server Backlog : 500 (connections)  
+    Locale Setting : en_US.UTF-8  
+    [Mon Aug 01 05:49:45.774485 2016] [mpm_event:notice] [pid 20:tid 140425572333312] AH00489: Apache/2.4.23 (Unix) mod_wsgi/4.5.3 Python/2.7.12 configured -- resuming normal operations  
+    [Mon Aug 01 05:49:45.774622 2016] [core:notice] [pid 20:tid 140425572333312] AH00094: Command line: 'httpd (mod_wsgi-express) -f /tmp/mod_wsgi-localhost:8080:1001/httpd.conf -E /dev/stderr -D MOD_WSGI_MPM_ENABLE_EVENT_MODULE -D MOD_WSGI_MPM_EXISTS_EVENT_MODULE -D MOD_WSGI_MPM_EXISTS_WORKER_MODULE -D MOD_WSGI_MPM_EXISTS_PREFORK_MODULE -D FOREGROUND'
+```
 
 Like with how ‘warpdrive build’ was used in constructing the Docker image, the ‘warpdrive start’ command is also used in the final container when run.
 
 We are still only using the file system database SQLite, which will not survive the life of the container, at this point, and we also need to initialise that database, but we can again use the ‘warpdrive setup’ command.
 
-> 
->     $ docker exec -it berserk_galileo warpdrive setup  
->     >   -----> Running .warpdrive/action_hooks/setup  
->     >   -----> Running Django database migration  
->     > Operations to perform:  
->     >   Synchronize unmigrated apps: compressor, staticfiles, search, messages, rest_framework, axes  
->     >   Apply all migrations: sessions, contenttypes, admin, mynewapp, sites, reversion, auth, opal  
->     > Synchronizing apps without migrations:  
->     >   Creating tables...  
->     >   Creating table axes_accessattempt  
->     >   Creating table axes_accesslog  
->     >   Running deferred SQL...  
->     >   Installing custom SQL...  
->     > Running migrations:  
->     >   Rendering model states... DONE  
->     >   Applying contenttypes.0001_initial... OK  
->     >   ...  
->     >   -----> Running Django super user creation  
->     > Username (leave blank to use 'default'): graham  
->     > Email address: graham@example.com  
->     > Password:  
->     > Password (again):  
->     > Superuser created successfully.
+```bash
+    $ docker exec -it berserk_galileo warpdrive setup  
+    -----> Running .warpdrive/action_hooks/setup  
+    -----> Running Django database migration  
+    Operations to perform:  
+    Synchronize unmigrated apps: compressor, staticfiles, search, messages, rest_framework, axes  
+    Apply all migrations: sessions, contenttypes, admin, mynewapp, sites, reversion, auth, opal  
+    Synchronizing apps without migrations:  
+    Creating tables...  
+    Creating table axes_accessattempt  
+    Creating table axes_accesslog  
+    Running deferred SQL...  
+    Installing custom SQL...  
+    Running migrations:  
+    Rendering model states... DONE  
+    Applying contenttypes.0001_initial... OK  
+    ...  
+    -----> Running Django super user creation  
+    Username (leave blank to use 'default'): graham  
+    Email address: graham@example.com  
+    Password:  
+    Password (again):  
+    Superuser created successfully.
+```
 
 This is where the benefit of having captured all those steps to initialise the database in an action hook comes into play. You only need to know the one command and not all the individual commands.
 

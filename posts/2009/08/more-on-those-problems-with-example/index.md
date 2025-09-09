@@ -14,66 +14,64 @@ blog_title: "Graham Dumpleton"
 In the [last post](/posts/2009/08/problems-with-example-web2py/) about web2py I covered the problems with the HTTP configuration for using [mod\_wsgi](http://www.modwsgi.org). This time will look at the combined HTTP/HTTPS configurations from the web2py book. The configuration in this case is as follows.
     
     
-```
-1  ### for requests on port 80  
-2  NameVirtualHost *:80  
-3  <VirtualHost *:80>  
-4    ### set the servername  
-5    ServerName example.com  
-6    ### alias the location of applications (for static files)  
-7    Alias / /home/web2py/applications/  
-8    ### setup WSGI  
-9    WSGIScriptAlias / /home/web2py/wsgihandler.py  
-10   WSGIDaemonProcess web2py user=www-data group=www-data \  
-11     home=/home/web2py/ \  
-12     processes=10 maximum-requests=500  
-13     ### admin requires SSL  
-14   <Location "/admin">  
-15     SSLRequireSSL  
-16   </Location>  
-17   ### appadmin requires SSL  
-18   <LocationMatch "ˆ(/[\w_]*/appadmin/.*)">  
-19     SSLRequireSSL  
-20   </LocationMatch>  
-21   ### static files do not need WSGI  
-22   <LocationMatch "ˆ(/[\w_]*/static/.*)">  
-23     Order Allow,Deny  
-24     Allow from all  
-25   </LocationMatch>  
-26   ### everything else goes over WSGI  
-27   <Location "/">  
-28     Order deny,allow  
-29     Allow from all  
-30     WSGIProcessGroup web2py  
-31   </Location>  
-32   LogFormat "%h %l %u %t \"%r\" %>s %b" common  
-33   CustomLog /var/log/apache2/access.log common  
-34 </VirtualHost>  
-35 ### for requests via SSL (port 443) enable SSL  
-36 NameVirtualHost *:443  
-37 <VirtualHost *:443>  
-38   ServerName example.com  
-39   Alias / /home/web2py/applications/  
-40   WSGIScriptAlias / /home/web2py/wsgihandler.py  
-41   WSGIDaemonProcess web2py user=www-data group=www-data \  
-42     home=/home/web2py/ \  
-43     processes=10 maximum-requests=500  
-44   SSLEngine On  
-45   SSLCertificateFile /etc/apache2/ssl/server.crt  
-46   SSLCertificateKeyFile /etc/apache2/ssl/server.key  
-47   <LocationMatch "ˆ(/[\w_]*/static/.*)">  
-48     Order Allow,Deny  
-49     Allow from all  
-50   </Location>  
-51   <Location "/">  
-52     Order deny,allow  
-53     Allow from all  
-54     WSGIProcessGroup web2py  
-55   </Location>>  
-56   LogFormat "%h %l %u %t \"%r\" %>s %b" common  
-57   CustomLog /var/log/apache2/access.log common  
-58 </VirtualHost> 
-```
+    1  ### for requests on port 80  
+    2  NameVirtualHost *:80  
+    3  <VirtualHost *:80>  
+    4    ### set the servername  
+    5    ServerName example.com  
+    6    ### alias the location of applications (for static files)  
+    7    Alias / /home/web2py/applications/  
+    8    ### setup WSGI  
+    9    WSGIScriptAlias / /home/web2py/wsgihandler.py  
+    10   WSGIDaemonProcess web2py user=www-data group=www-data \  
+    11     home=/home/web2py/ \  
+    12     processes=10 maximum-requests=500  
+    13     ### admin requires SSL  
+    14   <Location "/admin">  
+    15     SSLRequireSSL  
+    16   </Location>  
+    17   ### appadmin requires SSL  
+    18   <LocationMatch "ˆ(/[\w_]*/appadmin/.*)">  
+    19     SSLRequireSSL  
+    20   </LocationMatch>  
+    21   ### static files do not need WSGI  
+    22   <LocationMatch "ˆ(/[\w_]*/static/.*)">  
+    23     Order Allow,Deny  
+    24     Allow from all  
+    25   </LocationMatch>  
+    26   ### everything else goes over WSGI  
+    27   <Location "/">  
+    28     Order deny,allow  
+    29     Allow from all  
+    30     WSGIProcessGroup web2py  
+    31   </Location>  
+    32   LogFormat "%h %l %u %t \"%r\" %>s %b" common  
+    33   CustomLog /var/log/apache2/access.log common  
+    34 </VirtualHost>  
+    35 ### for requests via SSL (port 443) enable SSL  
+    36 NameVirtualHost *:443  
+    37 <VirtualHost *:443>  
+    38   ServerName example.com  
+    39   Alias / /home/web2py/applications/  
+    40   WSGIScriptAlias / /home/web2py/wsgihandler.py  
+    41   WSGIDaemonProcess web2py user=www-data group=www-data \  
+    42     home=/home/web2py/ \  
+    43     processes=10 maximum-requests=500  
+    44   SSLEngine On  
+    45   SSLCertificateFile /etc/apache2/ssl/server.crt  
+    46   SSLCertificateKeyFile /etc/apache2/ssl/server.key  
+    47   <LocationMatch "ˆ(/[\w_]*/static/.*)">  
+    48     Order Allow,Deny  
+    49     Allow from all  
+    50   </Location>  
+    51   <Location "/">  
+    52     Order deny,allow  
+    53     Allow from all  
+    54     WSGIProcessGroup web2py  
+    55   </Location>>  
+    56   LogFormat "%h %l %u %t \"%r\" %>s %b" common  
+    57   CustomLog /var/log/apache2/access.log common  
+    58 </VirtualHost> 
 
 As already stated in the last post, this has all the same problems as for the HTTP only configuration. Because a separate VirtualHost is used for HTTP and HTTPS, the problems are actually duplicated and occur in each VirtualHost. I will not cover all that again, so ensure you read the [last post](/posts/2009/08/problems-with-example-web2py/).
 

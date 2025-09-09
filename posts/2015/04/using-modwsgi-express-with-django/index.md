@@ -17,12 +17,13 @@ In my [last post](/posts/2015/04/introducing-modwsgi-express/) I finally officia
 
 When starting a new Django project the ‘startproject’ command is supplied to the ‘django-admin’ script to create the initial project structure. The directories and files created in the directory where the command is run is:
 
-> 
->     mysite/manage.py  
->     > mysite/mysite/__init__.py  
->     > mysite/mysite/settings.py  
->     > mysite/mysite/urls.py  
->     > mysite/mysite/wsgi.py
+```
+    mysite/manage.py  
+    mysite/mysite/__init__.py  
+    mysite/mysite/settings.py  
+    mysite/mysite/urls.py  
+    mysite/mysite/wsgi.py
+```
 
 The immediate subdirectory created below where the ‘startproject’ command was run, and which contains the ‘manage.py’ script, is referred to as the base directory. The name of the base directory is whatever you called the name of your project.
 
@@ -38,13 +39,15 @@ The location of the base directory is important because it is the parent directo
 
 So if we were still located in the top level directory where the ‘startproject’ command was run, one above the base directory, we would run ‘mod\_wsgi-express’ as:
 
-> 
->     mod_wsgi-express start-server --working-directory mysite --application-type module mysite.wsgi
+```
+    mod_wsgi-express start-server --working-directory mysite --application-type module mysite.wsgi
+```
 
 If we had instead run mod\_wsgi-express inside of the base directory, we could have used just:
 
-> 
->     mod_wsgi-express start-server --application-type module mysite.wsgi
+```
+    mod_wsgi-express start-server --application-type module mysite.wsgi
+```
 
 The later still works because the working directory will be set to be the current directory if none is explicitly supplied.
 
@@ -64,8 +67,9 @@ Before we can make use of that capability though, we first need to setup the Dja
 
 The first thing we therefore need to do is modify the ‘settings.py’ file and add the setting:
 
-> 
->     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+```
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+```
 
 This is best placed at the end of the ‘settings.py’ file immediately after the existing setting for ‘STATIC\_URL’.
 
@@ -73,29 +77,32 @@ What the ‘STATIC\_ROOT’ setting does is say that all static media files are 
 
 To actually get the files copied into that location we now need to run:
 
-> 
->     python manage.py collectstatic
+```
+    python manage.py collectstatic
+```
 
 Note that although we run this initially, this command must be run every time any update is made to static media files located within any add-on applications, or were Django itself updated to a newer version
 
 After having run this command, this will now leave us with:
 
-> 
->     mysite/manage.py  
->     > mysite/mysite/__init__.py  
->     > mysite/mysite/settings.py  
->     > mysite/mysite/urls.py  
->     > mysite/mysite/wsgi.py  
->     > mysite/static/admin/css/...  
->     > mysite/static/admin/img/...  
->     > mysite/static/admin/js/...
+```
+    mysite/manage.py  
+    mysite/mysite/__init__.py  
+    mysite/mysite/settings.py  
+    mysite/mysite/urls.py  
+    mysite/mysite/wsgi.py  
+    mysite/static/admin/css/...  
+    mysite/static/admin/img/...  
+    mysite/static/admin/js/...
+```
 
 So the ‘static’ subdirectory has been created, with a further subdirectory containing the static media files for the admin component of Django implementing the ‘/admin’ sub URL.
 
 Now running mod\_wsgi-express from within the base directory we would use:
 
-> 
->     mod_wsgi-express start-server --url-alias /static static --application-type module mysite.wsgi
+```
+    mod_wsgi-express start-server --url-alias /static static --application-type module mysite.wsgi
+```
 
 The new option in this command is ‘—url-alias’. This option takes two arguments. The first is the sub URL where the static media files are to be made available. This should match the value which the ‘STATIC\_URL’ setting had been set to. The second argument is the location of the directory where the static media files were copied. As we are running this command in the base directory and the location of the static media files is an immediate subdirectory, we can specify this as just the name of the subdirectory.
 

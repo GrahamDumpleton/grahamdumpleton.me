@@ -272,21 +272,15 @@ So, still no trouble for us to implement that for Python 3.X as is. The question
 To gauge this, first consider the WSGI hello world example. This is:
     
     
-```
-def application(environ, start_response):  
-status = '200 OK'  
-output = 'Hello World!'  
-```
+    def application(environ, start_response):  
+    status = '200 OK'  
+    output = 'Hello World!'  
       
-```
-response_headers = [('Content-type', 'text/plain'),  
-                   ('Content-Length', str(len(output)))]  
-start_response(status, response_headers)  
-```
+    response_headers = [('Content-type', 'text/plain'),  
+                       ('Content-Length', str(len(output)))]  
+    start_response(status, response_headers)  
       
-```
-return [output]
-```
+    return [output]
 
 It would be nice if this example would continue to work in Python 3.X. If it doesn't then it is going to be mighty confusing for anyone reading any existing books or documentation on WSGI who is moving from Python 2.X to Python 3.X.
 
@@ -296,24 +290,16 @@ It would be nice if this example would continue to work in Python 3.X. If it doe
 Unfortunately, since all those strings will be unicode strings when run under Python 3.X, it isn't going to work. For this simple hello world example to work with WSGI under Python 3.X per Definition \#1 or \#2, it would need to be written as:
     
     
-```
-def application(environ, start_response):  
-status = b'200 OK'  
-output = b'Hello World!'  
-```
+    def application(environ, start_response):  
+    status = b'200 OK'  
+    output = b'Hello World!'  
       
-```
-response_headers = [(b'Content-type', b'text/plain'),  
-                    (b'Content-Length', bytes(str(len(output))))]  
-```
+    response_headers = [(b'Content-type', b'text/plain'),  
+                        (b'Content-Length', bytes(str(len(output))))]  
       
-```
-start_response(status, response_headers)  
-```
+    start_response(status, response_headers)  
       
-```
-return [output]
-```
+    return [output]
 
 Now, the reason that byte strings are required in the first place is so that the WSGI server doesn't need to make any decisions about what encoding to use when converting unicode strings to byte strings.  
 
@@ -384,20 +370,16 @@ We are left now with the WSGI environment and this is what the bulk of the discu
 Consider here the following example code from Python 2.X and WSGI 1.0.
     
     
-```
-def application(environ, start_response):  
- if environ['REQUEST_METHOD'] == 'GET':  
-     ...
-```
+    def application(environ, start_response):  
+     if environ['REQUEST_METHOD'] == 'GET':  
+         ...
 
 In the bytes everywhere interpretation of Definition \#1, for Python 3.X this would have to be written as:
     
     
-```
-def application(environ, start_response):  
- if environ[b'REQUEST_METHOD'] == b'GET':  
-     ...
-```
+    def application(environ, start_response):  
+     if environ[b'REQUEST_METHOD'] == b'GET':  
+         ...
 
 This is because unlike Python 2.X, you can't really compare byte strings and unicode strings and so use them interchangeably.
 
@@ -407,11 +389,9 @@ This is because unlike Python 2.X, you can't really compare byte strings and uni
 In the interpretation given by Definition \#2 above where the keys in the WSGI environment are native strings, one would still need to use:
     
     
-```
-def application(environ, start_response):  
- if environ['REQUEST_METHOD'] == b'GET':  
-     ...
-```
+    def application(environ, start_response):  
+     if environ['REQUEST_METHOD'] == b'GET':  
+         ...
 
 We still don't therefore get the ability to take simple hello world type WSGI applications from Python 2.X and use them unchanged. Unchanged in as much as the native string would be used rather than having to know you have to use byte strings instead. This is awkward and what we want to avoid for the simple case.
 
@@ -778,20 +758,14 @@ The purpose of WSGI 1.1 in Python 2.X, as well as being the way forward in gener
 If we want to be brave, we also introduce WSGI 2.0 at this point as well. This would be WSGI 1.1 but with 'start\_response' eliminated and a simple tuple returned. The hello world application for WSGI 2.0 would be.
     
     
-```
-def application(environ):  
-   status = '200 OK'  
-   output = 'Hello World!'  
-```
+    def application(environ):  
+       status = '200 OK'  
+       output = 'Hello World!'  
       
-```
-   response_headers = [('Content-type', 'text/plain'),  
-                       ('Content-Length', str(len(output)))]  
-```
+       response_headers = [('Content-type', 'text/plain'),  
+                           ('Content-Length', str(len(output)))]  
       
-```
-   return (status, response_headers, [output])
-```
+       return (status, response_headers, [output])
 
 So, there we have my ideas for a roadmap for WSGI. These aren't strictly speaking all my own ideas, but instead bring together ideas of various people in an attempt to come up with some whole that might satisfy most of what people are putting forward as requirements.
 

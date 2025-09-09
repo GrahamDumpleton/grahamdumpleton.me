@@ -23,10 +23,8 @@ For this, we are relying on JupyterHub to co-ordinate user authentication and sp
 In order to designate that a specific user has administration privileges, when deploying the multi user workshop environment, you can specify a list of users as a template parameter.
     
     
-```
-$ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-jupyterhub/master/templates/hosted-workshop-production.json \
-    --param ADMIN_USERS="opentlc-mgr"
-```
+    $ oc new-app https://raw.githubusercontent.com/openshift-labs/workshop-jupyterhub/master/templates/hosted-workshop-production.json \
+        --param ADMIN_USERS="opentlc-mgr"
     
     
 

@@ -13,9 +13,11 @@ blog_title: "Graham Dumpleton"
 
 The HTTP protocol defines the GET and HEAD method types for requests. As outlined in the [RFC-2616](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html), the HEAD method is specified as:
 
-> The HEAD method is identical to GET except that the server MUST NOT return a message-body in the response. The metainformation contained in the HTTP headers in response to a HEAD request SHOULD be identical to the information sent in response to a GET request. This method can be used for obtaining metainformation about the entity implied by the request without transferring the entity-body itself. This method is often used for testing hypertext links for validity, accessibility, and recent modification.  
->   
-> The response to a HEAD request MAY be cacheable in the sense that the information contained in the response MAY be used to update a previously cached entity from that resource. If the new field values indicate that the cached entity differs from the current entity \(as would be indicated by a change in Content-Length, Content-MD5, ETag or Last-Modified\), then the cache MUST treat the cache entry as stale.
+```python
+The HEAD method is identical to GET except that the server MUST NOT return a message-body in the response. The metainformation contained in the HTTP headers in response to a HEAD request SHOULD be identical to the information sent in response to a GET request. This method can be used for obtaining metainformation about the entity implied by the request without transferring the entity-body itself. This method is often used for testing hypertext links for validity, accessibility, and recent modification.  
+
+The response to a HEAD request MAY be cacheable in the sense that the information contained in the response MAY be used to update a previously cached entity from that resource. If the new field values indicate that the cached entity differs from the current entity \(as would be indicated by a change in Content-Length, Content-MD5, ETag or Last-Modified\), then the cache MUST treat the cache entry as stale.
+```
 
 Key in this statement is that it says 'the server MUST NOT return a message-body in the response'. Problem is that many web application authors take it upon themselves to treat differently the HEAD request. What they do is make the decision not to return any content for the response, rather than leaving it up to the underlying web server to discard it and not return it to the client.
 

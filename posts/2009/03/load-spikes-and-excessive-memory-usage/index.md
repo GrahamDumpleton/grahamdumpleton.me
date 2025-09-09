@@ -44,21 +44,19 @@ With the MPM having being selected, either explicitly or through ignorance of th
 Lets first look at the default settings for the prefork MPM. The values for these as shipped with the original Apache source code is:
     
     
-```
-# prefork MPM  
-# StartServers: number of server processes to start  
-# MinSpareServers: minimum number of server processes which are kept spare  
-# MaxSpareServers: maximum number of server processes which are kept spare  
-# MaxClients: maximum number of server processes allowed to start  
-# MaxRequestsPerChild: maximum number of requests a server process serves  
-<IfModule mpm_prefork_module>  
-StartServers          5  
-MinSpareServers       5  
-MaxSpareServers      10  
-MaxClients          150  
-MaxRequestsPerChild   0  
-</IfModule>  
-```
+    # prefork MPM  
+    # StartServers: number of server processes to start  
+    # MinSpareServers: minimum number of server processes which are kept spare  
+    # MaxSpareServers: maximum number of server processes which are kept spare  
+    # MaxClients: maximum number of server processes allowed to start  
+    # MaxRequestsPerChild: maximum number of requests a server process serves  
+    <IfModule mpm_prefork_module>  
+    StartServers          5  
+    MinSpareServers       5  
+    MaxSpareServers      10  
+    MaxClients          150  
+    MaxRequestsPerChild   0  
+    </IfModule>  
     
 
 What this all means is that when Apache starts up it will create 5 child server processes for handling of requests. The number of child server processes used isn't a fixed number however. Instead, what will happen is that Apache will dynamically create additional child server processes when the load increases. Exactly when this occurs is dictated by the setting for the minimum number of idle spare servers. Such additional child server processes may be created up to a number determined by the maximum number of allowed clients. In this case, because each child server process is single threaded, that means a maximum of 150 child server processes may be created.
@@ -164,23 +162,21 @@ The catch here to watch out for is that the startup cost of the Python web appli
 First off, don't run PHP on the same web server. That way you can run worker MPM instead of prefork MPM. This immediately means you drop down drastically the number of processes you require because each process will then be multithreaded rather than single threaded and can handle many concurrent requests. To see how this works one can look at the default MPM settings for the worker MPM.
     
     
-```
-# worker MPM  
-# StartServers: initial number of server processes to start  
-# MaxClients: maximum number of simultaneous client connections  
-# MinSpareThreads: minimum number of worker threads which are kept spare  
-# MaxSpareThreads: maximum number of worker threads which are kept spare  
-# ThreadsPerChild: constant number of worker threads in each server process  
-# MaxRequestsPerChild: maximum number of requests a server process serves  
-<IfModule mpm_worker_module>  
-StartServers          2  
-MaxClients          150  
-MinSpareThreads      25  
-MaxSpareThreads      75  
-ThreadsPerChild      25  
-MaxRequestsPerChild   0  
-</IfModule>  
-```
+    # worker MPM  
+    # StartServers: initial number of server processes to start  
+    # MaxClients: maximum number of simultaneous client connections  
+    # MinSpareThreads: minimum number of worker threads which are kept spare  
+    # MaxSpareThreads: maximum number of worker threads which are kept spare  
+    # ThreadsPerChild: constant number of worker threads in each server process  
+    # MaxRequestsPerChild: maximum number of requests a server process serves  
+    <IfModule mpm_worker_module>  
+    StartServers          2  
+    MaxClients          150  
+    MinSpareThreads      25  
+    MaxSpareThreads      75  
+    ThreadsPerChild      25  
+    MaxRequestsPerChild   0  
+    </IfModule>  
     
 
 The important thing to note here is that although the maximum number of clients is still 150, each process has 25 threads. Thus, the maximum number of processes that could be created is 6. For that 30MB process that means you only need 180MB in the worst case scenario rather than the 4GB required with the default MPM settings for prefork.

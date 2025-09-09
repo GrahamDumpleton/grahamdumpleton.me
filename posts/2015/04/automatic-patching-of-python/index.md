@@ -13,8 +13,9 @@ blog_title: "Graham Dumpleton"
 
 In my [previous posts](/posts/2015/03/ordering-issues-when-monkey-patching-in/) on monkey patching I discussed the ordering problem. That is, that the ability to properly monkey patch is dependent on whether we can get in before any other code has already imported the module we want to patch. The specific issue in this case is where other code has imported a reference to a function within a module by name and stored that in it is own namespace. In other words, where it has used:
 
-> 
->     from module import function
+```python
+    from module import function
+```
 
 If we can’t get in early enough, then it becomes necessary to monkey patch all such uses of a target function as well, which in the general case is impossible as we will not know where the function has been imported.
 
@@ -34,10 +35,11 @@ Now at one point in the history of Python this ‘.pth’ mechanism was enhanced
 
 I am told this originally was to allow special startup code to be executed for a module to allow registration of a non standard codec for Unicode. It has though since also been used in the implementation of ‘easy\_install’ and if you have ever run ‘easy-install’ and looked at the ‘easy-install.pth’ file in the ‘site-packages directory you will find some code which looks like:
 
-> 
->     import sys; sys.__plen = len(sys.path)  
->     > ./antigravity-0.1-py2.7.egg  
->     > import sys; new=sys.path[sys.__plen:]; del sys.path[sys.__plen:]; p=getattr(sys,'__egginsert',0); sys.path[p:p]=new; sys.__egginsert = p+len(new)
+```python
+    import sys; sys.__plen = len(sys.path)  
+    ./antigravity-0.1-py2.7.egg  
+    import sys; new=sys.path[sys.__plen:]; del sys.path[sys.__plen:]; p=getattr(sys,'__egginsert',0); sys.path[p:p]=new; sys.__egginsert = p+len(new)
+```
 
 So as long as you can fit the code on one line, you can potentially do some quite nasty stuff inside of a ‘.pth’ file every time that the Python interpreter is run.
 
@@ -53,22 +55,20 @@ I will leave that discussion up to others if anyone else cares to be concerned a
 
 In the previous post where I talked about the post import hook mechanism, the code I gave as needing to be able to be manually added at the start of any Python application script file was:
 
-> 
->     import os
->     
->     
->     from wrapt import discover_post_import_hooks
->     
->     
->     patches = os.environ.get('WRAPT_PATCHES')
->     
->     
->     if patches:  
->     >     for name in patches.split(','):  
->     >         name = name.strip()  
->     >         if name:  
->     >             print 'discover', name  
->     >             discover_post_import_hooks(name)
+```python
+    import os
+
+    from wrapt import discover_post_import_hooks
+
+    patches = os.environ.get('WRAPT_PATCHES')
+
+    if patches:  
+    for name in patches.split(','):  
+    name = name.strip()  
+    if name:  
+    print 'discover', name  
+    discover_post_import_hooks(name)
+```
 
 What this was doing was using an environment variable as the source of names for any packages registered using ‘setuptools’ entry points that contained monkey patches we wanted to have applied.
 
@@ -78,8 +78,9 @@ In practice however, the code we will need is actually going to have to be sligh
 
 What we can therefore use in our ‘.pth’ is:
 
-> 
->     import os, sys; os.environ.get('AUTOWRAPT_BOOTSTRAP') and __import__('autowrapt.bootstrap') and sys.modules['autowrapt.bootstrap'].bootstrap()
+```python
+    import os, sys; os.environ.get('AUTOWRAPT_BOOTSTRAP') and __import__('autowrapt.bootstrap') and sys.modules['autowrapt.bootstrap'].bootstrap()
+```
 
 That is, if the environment variable is set to a non empty value only then do we import our module containing our bootstrap code and execute it.
 
@@ -93,32 +94,32 @@ What we really want is to defer any actions until the Python interpreter initial
 
 The actual final parts of Python interpreter initialisation is performed from the ‘main\(\)’ function of the ‘site’ module:
 
-> 
->     def main():  
->     >     global ENABLE_USER_SITE
->     
->     
->         abs__file__()  
->     >     known_paths = removeduppaths()  
->     >     if ENABLE_USER_SITE is None:  
->     >         ENABLE_USER_SITE = check_enableusersite()  
->     >     known_paths = addusersitepackages(known_paths)  
->     >     known_paths = addsitepackages(known_paths)  
->     >     if sys.platform == 'os2emx':  
->     >         setBEGINLIBPATH()  
->     >     setquit()  
->     >     setcopyright()  
->     >     sethelper()  
->     >     aliasmbcs()  
->     >     setencoding()  
->     >     execsitecustomize()  
->     >     if ENABLE_USER_SITE:  
->     >         execusercustomize()  
->     >     # Remove sys.setdefaultencoding() so that users cannot change the  
->     >     # encoding after initialization. The test for presence is needed when  
->     >     # this module is run as a script, because this code is executed twice.  
->     >     if hasattr(sys, "setdefaultencoding"):  
->     >         del sys.setdefaultencoding
+```python
+    def main():  
+    global ENABLE_USER_SITE
+
+        abs__file__()  
+    known_paths = removeduppaths()  
+    if ENABLE_USER_SITE is None:  
+    ENABLE_USER_SITE = check_enableusersite()  
+    known_paths = addusersitepackages(known_paths)  
+    known_paths = addsitepackages(known_paths)  
+    if sys.platform == 'os2emx':  
+    setBEGINLIBPATH()  
+    setquit()  
+    setcopyright()  
+    sethelper()  
+    aliasmbcs()  
+    setencoding()  
+    execsitecustomize()  
+    if ENABLE_USER_SITE:  
+    execusercustomize()  
+    # Remove sys.setdefaultencoding() so that users cannot change the  
+    # encoding after initialization. The test for presence is needed when  
+    # this module is run as a script, because this code is executed twice.  
+    if hasattr(sys, "setdefaultencoding"):  
+    del sys.setdefaultencoding
+```
 
 The ‘.pth’ parsing and code execution we want to rely upon is done within the ‘addsitepackages\(\)’ function.
 
@@ -126,30 +127,29 @@ What we really want therefore is to defer any execution of our code until after 
 
 We have to monkey patch both because the ‘usercustomize.py’ processing is optional dependent on whether ‘ENABLE\_USER\_SITE’ is true or not. Our 'bootstrap\(\)’ function therefore needs to look like:
 
-> 
->     def _execsitecustomize_wrapper(wrapped):  
->     >     def _execsitecustomize(*args, **kwargs):  
->     >         try:  
->     >             return wrapped(*args, **kwargs)  
->     >         finally:  
->     >             if not site.ENABLE_USER_SITE:  
->     >                 _register_bootstrap_functions()  
->     >     return _execsitecustomize
->     
->     
->     def _execusercustomize_wrapper(wrapped):  
->     >     def _execusercustomize(*args, **kwargs):  
->     >         try:  
->     >             return wrapped(*args, **kwargs)  
->     >         finally:  
->     >             _register_bootstrap_functions()  
->     >     return _execusercustomize  
->     >   
->     > def bootstrap():
->     
->     
->         site.execsitecustomize = _execsitecustomize_wrapper(site.execsitecustomize)  
->     >     site.execusercustomize = _execusercustomize_wrapper(site.execusercustomize)
+```python
+    def _execsitecustomize_wrapper(wrapped):  
+    def _execsitecustomize(*args, **kwargs):  
+    try:  
+    return wrapped(*args, **kwargs)  
+    finally:  
+    if not site.ENABLE_USER_SITE:  
+    _register_bootstrap_functions()  
+    return _execsitecustomize
+
+    def _execusercustomize_wrapper(wrapped):  
+    def _execusercustomize(*args, **kwargs):  
+    try:  
+    return wrapped(*args, **kwargs)  
+    finally:  
+    _register_bootstrap_functions()  
+    return _execusercustomize  
+    
+    def bootstrap():
+
+        site.execsitecustomize = _execsitecustomize_wrapper(site.execsitecustomize)  
+    site.execusercustomize = _execusercustomize_wrapper(site.execusercustomize)
+```
 
 Despite everything I have ever said about how manually constructed monkey patches is bad and that the ‘wrapt’ module should be used for doing monkey patching, we can’t actually use the ‘wrapt’ module in this case. This is because technically, as a user installed package, the ‘wrapt’ package may not be usable at this point. This could occur where ‘wrapt’ was installed in such a way that the ability to import it was itself dependent on the processing of ‘.pth’ files. As a result we drop down to using a simple wrapper using a function closure.
 
@@ -157,49 +157,45 @@ In the actual wrappers, you can see how which of the two wrappers actually ends 
 
 Finally we now have our '\_register\_bootstrap\_functions\(\)’ defined as:
 
-> 
->     _registered = False  
->     >   
->     > def _register_bootstrap_functions():  
->     >     global _registered
->     
->     
->         if _registered:  
->     >         return
->     
->     
->         _registered = True  
->     >   
->     >     from wrapt import discover_post_import_hooks
->     
->     
->         for name in os.environ.get('AUTOWRAPT_BOOTSTRAP', '').split(','):  
->     >         discover_post_import_hooks(name)
+```python
+    _registered = False  
+    
+    def _register_bootstrap_functions():  
+    global _registered
+
+        if _registered:  
+    return
+
+        _registered = True  
+    
+    from wrapt import discover_post_import_hooks
+
+        for name in os.environ.get('AUTOWRAPT_BOOTSTRAP', '').split(','):  
+    discover_post_import_hooks(name)
+```
 
 # Bundling it up as a package
 
 We have worked out the various bits we require, but how do we get this installed, in particular how do we get the custom ‘.pth’ file installed. For that we use a ‘setup.py’ file of:
 
-> 
->     import sys  
->     > import os
->     
->     
->     from setuptools import setup  
->     > from distutils.sysconfig import get_python_lib
->     
->     
->     setup_kwargs = dict(  
->     >     name = 'autowrapt',  
->     >     packages = ['autowrapt'],  
->     >     package_dir = {'autowrapt': 'src'},  
->     >     data_files = [(get_python_lib(prefix=''), ['autowrapt-init.pth'])],  
->     >     entry_points = {'autowrapt.examples’: ['this = autowrapt.examples:autowrapt_this']},  
->     >     install_requires = ['wrapt>=1.10.4'],  
->     > )
->     
->     
->     setup(**setup_kwargs)
+```python
+    import sys  
+    import os
+
+    from setuptools import setup  
+    from distutils.sysconfig import get_python_lib
+
+    setup_kwargs = dict(  
+    name = 'autowrapt',  
+    packages = ['autowrapt'],  
+    package_dir = {'autowrapt': 'src'},  
+    data_files = [(get_python_lib(prefix=''), ['autowrapt-init.pth'])],  
+    entry_points = {'autowrapt.examples’: ['this = autowrapt.examples:autowrapt_this']},  
+    install_requires = ['wrapt>=1.10.4'],  
+    )
+
+    setup(**setup_kwargs)
+```
 
 To get that ‘.pth’ installed we have used the ‘data\_files’ argument to the ’setup\(\)’ call. The actual location for installing the file is determined using the ‘get\_python\_lib\(\)’ function from the ‘distutils.sysconfig’ module. The ‘prefix' argument of an empty string ensures that a relative path for the ‘site-packages’ directory where Python packages should be installed is used rather than an absolute path.
 
@@ -225,45 +221,50 @@ The package has also been released on PyPi as ‘autowrapt’ so you can actuall
 
 To allow for a easy quick test to see that it works, the ‘autowrapt’ package bundles an example monkey patch. In the above ‘setup.py’ this was set up by:
 
-> 
->     entry_points = {'autowrapt.examples’: ['this = autowrapt.examples:autowrapt_this']},
+```
+    entry_points = {'autowrapt.examples’: ['this = autowrapt.examples:autowrapt_this']},
+```
 
 This entry point definition names a monkey patch with the name ‘autowrapt.examples’. The definition says that when the ‘this’ module is installed, the monkey patch function ‘autowrapt\_this\(\)’ in the module ‘autowrapt.examples’ will be called.
 
 So to run the test do:
 
-> 
->     pip install autowrapt
+```
+    pip install autowrapt
+```
 
 This should also install the ‘wrapt’ module if you don’t have the required minimum version.
 
 Now run the command line interpreter as normal and at the prompt do:
 
-> 
->     import this
+```python
+    import this
+```
 
 This should result in the Zen of Python being displayed.
 
 Exit the Python interpreter and now instead run:
 
-> 
->     AUTOWRAPT_BOOTSTRAP=autowrapt.examples python
+```
+    AUTOWRAPT_BOOTSTRAP=autowrapt.examples python
+```
 
 This runs the Python interpreter again, but also sets the environment variable ‘AUTOWRAPT\_BOOTSTRAP’ with the value ‘autowrapt.examples’ matching the name of the entry point defined in the ‘setup.py’ file for ‘autowrapt'.
 
 The actual code for the ‘autowrapt\_this\(\)’ function was:
 
-> 
->     from __future__ import print_function
->     
->     
->     def autowrapt_this(module):  
->     >     print('The wrapt package is absolutely amazing and you should use it.')
+```python
+    from __future__ import print_function
+
+    def autowrapt_this(module):  
+    print('The wrapt package is absolutely amazing and you should use it.')
+```
 
 so if we now again run:
 
-> 
->     import this
+```python
+    import this
+```
 
 we should now see an extended version of the Zen of Python.
 
