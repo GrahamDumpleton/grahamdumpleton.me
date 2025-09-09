@@ -97,7 +97,7 @@ permalink: /guides/
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
-    const pagesContainer = document.getElementById('pagesContainer');
+    const guidesContainer = document.getElementById('guidesContainer');
     const noResults = document.getElementById('noResults');
     const pageItems = document.querySelectorAll('.page-item');
     
@@ -134,10 +134,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         if (visibleCount === 0) {
-            pagesContainer.style.display = 'none';
+            guidesContainer.style.display = 'none';
             noResults.style.display = 'block';
         } else {
-            pagesContainer.style.display = 'block';
+            guidesContainer.style.display = 'block';
             noResults.style.display = 'none';
         }
     }
