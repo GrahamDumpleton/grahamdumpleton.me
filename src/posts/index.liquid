@@ -109,6 +109,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const noResults = document.getElementById('noResults');
     const postItems = document.querySelectorAll('.post-item');
     
+    // Check for search parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    
+    // If search parameter exists, populate the search input and filter
+    if (searchParam) {
+        searchInput.value = searchParam;
+        filterPosts();
+    }
+    
     function filterPosts() {
         const searchTerm = searchInput.value.toLowerCase();
         let visibleCount = 0;
@@ -140,7 +150,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    searchInput.addEventListener('input', filterPosts);
+    function updateURL(searchTerm) {
+        const url = new URL(window.location);
+        if (searchTerm) {
+            url.searchParams.set('search', searchTerm);
+        } else {
+            url.searchParams.delete('search');
+        }
+        window.history.replaceState({}, '', url);
+    }
+    
+    searchInput.addEventListener('input', function() {
+        filterPosts();
+        updateURL(searchInput.value);
+    });
     
     // Add smooth scrolling for search results
     searchInput.addEventListener('keydown', function(e) {
