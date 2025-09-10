@@ -654,24 +654,24 @@ Hi Graham,
   
 obviously the different "import approach" fixed our problem.   
 Instead of the officially recommend:  
-  
-os.environ\['DJANGO\_SETTINGS\_MODULE'\] = 'mysite.settings'  
-  
+```
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
+```  
 we import settings explicitly \(our .wsgi file is located in PROJECT\_ROOT/apache/site.wsgi\):  
+```  
+APACHE_DIR = os.path.dirname(os.path.abspath(__file__))  
+PROJECT_ROOT = os.path.abspath("%s/.." % APACHE_DIR)  
+DJANGO_SITES, SITE = os.path.split(PROJECT_ROOT)  
+SITE_PACKAGES = os.path.abspath("%s/../site-packages-1.1" % DJANGO_SITES)  
   
-APACHE\_DIR = os.path.dirname\(os.path.abspath\(\_\_file\_\_\)\)  
-PROJECT\_ROOT = os.path.abspath\("%s/.." % APACHE\_DIR\)  
-DJANGO\_SITES, SITE = os.path.split\(PROJECT\_ROOT\)  
-SITE\_PACKAGES = os.path.abspath\("%s/../site-packages-1.1" % DJANGO\_SITES\)  
+sys.path.insert(0, PROJECT_ROOT)  
+sys.path.insert(0, DJANGO_SITES)  
+sys.path.insert(0, SITE_PACKAGES)  
   
-sys.path.insert\(0, PROJECT\_ROOT\)  
-sys.path.insert\(0, DJANGO\_SITES\)  
-sys.path.insert\(0, SITE\_PACKAGES\)  
-  
-import settings\_productive  
+import settings_productive  
 import django.core.management  
-django.core.management.setup\_environ\(settings\_productive\)  
-  
+django.core.management.setup_environ(settings_productive)  
+```  
 The daemon mode is the next configuration change we will do anyway.   
   
 Best  

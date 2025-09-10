@@ -257,47 +257,48 @@ I was toying around with simple wsgi application \(I just learnt about mod\_wsgi
   
 So here's my application defined in ../app/php.py:-  
   
-  
-class PHPApplication\(object\):  
-def \_\_init\_\_\(self\):  
-self.out = \[\]  
-self.counter = 0  
-self.counter += 1  
-self.out.append\(str\(self.counter\)\)  
-  
-def printx\(self, out\):  
-self.out.append\(out\)  
-  
-def \_\_call\_\_\(self, environ, start\_response\):  
-start\_response\('200 OK', \[\('Content-type', 'text/html'\)\]\)  
-for out in self.out:  
-yield out  
-  
+```
+class PHPApplication(object):
+    def __init__(self):
+        self.out = []
+        self.counter = 0
+        self.counter += 1
+        self.out.append(str(self.counter))
+
+    def printx(self, out):
+        self.out.append(out)
+
+    def __call__(self, environ, start_response):
+        start_response('200 OK', [('Content-type', 'text/html')])
+        for out in self.out:
+            yield out
+```
   
 and the index.py:-  
   
-  
-import os  
-import sys  
-  
-CUR\_DIR = os.path.abspath\(os.path.dirname\(\_\_file\_\_\)\)  
-LIB\_DIR = os.path.abspath\(os.path.join\(CUR\_DIR, '../lib'\)\)  
-APP\_DIR = os.path.abspath\(os.path.join\(CUR\_DIR, '../app'\)\)  
-  
-for path in \(LIB\_DIR, APP\_DIR,\):  
-if path not in sys.path:  
-sys.path.insert\(0, path\)  
-  
-from php import PHPApplication  
-  
-php = PHPApplication\(\)  
-php.printx\("hello world"\)  
-  
-application = php  
-  
+``` 
+import os
+import sys
+
+CUR_DIR = os.path.abspath(os.path.dirname(__file__))
+LIB_DIR = os.path.abspath(os.path.join(CUR_DIR, '../lib'))
+APP_DIR = os.path.abspath(os.path.join(CUR_DIR, '../app'))
+
+for path in (LIB_DIR, APP_DIR):
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+from php import PHPApplication
+
+php = PHPApplication()
+php.printx("hello world")
+
+application = php
+```  
   
 and the apache vhost config:-  
-  
+
+```
 DocumentRoot /home/kamal/pylikephp/htdocs  
 DirectoryIndex index.py  
   
@@ -311,7 +312,7 @@ Allow from all
   
 WSGIDaemonProcess pylikephp processes=1 threads=2 display-name=%\{GROUP\}  
 WSGIProcessGroup pylikephp  
-  
+```  
   
 My initial thought was the counter will always get incremented since the application object was created only once during mod\_wsgi daemon process initialization. But it look like the application object is created on each requests since the counter always stayed at 1 even after refreshing my browser few times. What I'm missing here.  
   

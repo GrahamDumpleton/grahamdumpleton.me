@@ -17,7 +17,7 @@ Due to the arrival of a baby 1.0, version 2.0 of [mod\_wsgi](http://www.modwsgi.
   
 
 
-Process Reloading Mechanism
+# Process Reloading Mechanism
 
   
 
@@ -27,7 +27,7 @@ When using daemon mode of mod\_wsgi and the WSGI script file for your applicatio
   
 
 
-Apache Authentication Provider
+# Apache Authentication Provider
 
   
 
@@ -37,7 +37,7 @@ When using Apache 2.2, mod\_wsgi provides the means to implement Apache authenti
   
 
 
-Python Virtual Environments
+# Python Virtual Environments
 
   
 
@@ -47,7 +47,7 @@ More integrated support for Python virtual environments such as 'virtualenv' is 
   
 
 
-WSGI File Wrapper Extension
+# WSGI File Wrapper Extension
 
   
 
@@ -57,7 +57,7 @@ Support for 'wsgi.file\_wrapper' extension has been added with operating system 
   
 
 
-Daemon Mode Now Even Faster
+# Daemon Mode Now Even Faster
 
   
 

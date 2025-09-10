@@ -52,27 +52,28 @@ How best to configure the MPM settings of Apache when running a WSGI application
   
 To determine if your WSGI application is running in embedded mode, replace its WSGI script with the test WSGI script as follows:  
   
-  
-import sys  
-  
-def application\(environ, start\_response\):  
-status = '200 OK'  
-  
-name = repr\(environ\['mod\_wsgi.process\_group'\]\)  
-output = 'mod\_wsgi.process\_group = %s' % name   
-  
-response\_headers = \[\('Content-type', 'text/plain'\),  
-\('Content-Length', str\(len\(output\)\)\)\]  
-start\_response\(status, response\_headers\)  
-  
-return \[output\]  
-  
+``` 
+import sys
+
+def application(environ, start_response):
+    status = '200 OK'
+
+    name = repr(environ['mod_wsgi.process_group'])
+    output = 'mod_wsgi.process_group = %s' % name
+
+    response_headers = [('Content-type', 'text/plain'),
+                        ('Content-Length', str(len(output)))]
+    start_response(status, response_headers)
+
+    return [output]
+```  
   
   
 If the configuration is such that the WSGI application is running in embedded mode, then you will see:  
-  
-mod\_wsgi.process\_group = ''  
-  
+
+```  
+mod_wsgi.process_group = ''  
+```  
   
 That is, the process group definition will be an empty string.  
   
@@ -94,65 +95,37 @@ To determine if you are using prefork MPM or worker MPM, you could try and work 
 
   
 
-
+```
 $ /usr/sbin/httpd -V
-
-Server version: Apache/2.2.14 \(Unix\)
-
+Server version: Apache/2.2.14 (Unix)
 Server built: Feb 10 2010 22:22:39
-
 Server's Module Magic Number: 20051115:23
-
 Server loaded: APR 1.3.8, APR-Util 1.3.9
-
 Compiled using: APR 1.3.8, APR-Util 1.3.9
-
 Architecture: 64-bit
-
 Server MPM: Prefork
-
 threaded: no
-
-forked: yes \(variable process count\)
-
+forked: yes (variable process count)
 Server compiled with....
-
--D APACHE\_MPM\_DIR="server/mpm/prefork"
-
--D APR\_HAS\_SENDFILE
-
--D APR\_HAS\_MMAP
-
--D APR\_HAVE\_IPV6 \(IPv4-mapped addresses enabled\)
-
--D APR\_USE\_FLOCK\_SERIALIZE
-
--D APR\_USE\_PTHREAD\_SERIALIZE
-
--D SINGLE\_LISTEN\_UNSERIALIZED\_ACCEPT
-
--D APR\_HAS\_OTHER\_CHILD
-
--D AP\_HAVE\_RELIABLE\_PIPED\_LOGS
-
--D DYNAMIC\_MODULE\_LIMIT=128
-
--D HTTPD\_ROOT="/usr"
-
--D SUEXEC\_BIN="/usr/bin/suexec"
-
--D DEFAULT\_PIDLOG="/private/var/run/httpd.pid"
-
--D DEFAULT\_SCOREBOARD="logs/apache\_runtime\_status"
-
--D DEFAULT\_LOCKFILE="/private/var/run/accept.lock"
-
--D DEFAULT\_ERRORLOG="logs/error\_log"
-
--D AP\_TYPES\_CONFIG\_FILE="/private/etc/apache2/mime.types"
-
--D SERVER\_CONFIG\_FILE="/private/etc/apache2/httpd.conf"
-
+-D APACHE_MPM_DIR="server/mpm/prefork"
+-D APR_HAS_SENDFILE
+-D APR_HAS_MMAP
+-D APR_HAVE_IPV6 (IPv4-mapped addresses enabled)
+-D APR_USE_FLOCK_SERIALIZE
+-D APR_USE_PTHREAD_SERIALIZE
+-D SINGLE_LISTEN_UNSERIALIZED_ACCEPT
+-D APR_HAS_OTHER_CHILD
+-D AP_HAVE_RELIABLE_PIPED_LOGS
+-D DYNAMIC_MODULE_LIMIT=128
+-D HTTPD_ROOT="/usr"
+-D SUEXEC_BIN="/usr/bin/suexec"
+-D DEFAULT_PIDLOG="/private/var/run/httpd.pid"
+-D DEFAULT_SCOREBOARD="logs/apache_runtime_status"
+-D DEFAULT_LOCKFILE="/private/var/run/accept.lock"
+-D DEFAULT_ERRORLOG="logs/error_log"
+-D AP_TYPES_CONFIG_FILE="/private/etc/apache2/mime.types"
+-D SERVER_CONFIG_FILE="/private/etc/apache2/httpd.conf"
+```
   
 
 
@@ -165,32 +138,17 @@ If for some reason you can't work out which is the Apache binary, because your L
 
   
 
-
+```
 import sys
 
-  
-
-
-def application\(environ, start\_response\):
-
-status = '200 OK'
-
-output = 'wsgi.multithread = %s' % repr\(environ\['wsgi.multithread'\]\)
-
-  
-
-
-response\_headers = \[\('Content-type', 'text/plain'\),
-
-\('Content-Length', str\(len\(output\)\)\)\]
-
-start\_response\(status, response\_headers\)
-
-  
-
-
-return \[output\]
-
+def application(environ, start_response):
+    status = '200 OK'
+    output = 'wsgi.multithread = %s' % repr(environ['wsgi.multithread'])
+    response_headers = [('Content-type', 'text/plain'),
+                        ('Content-Length', str(len(output)))]
+    start_response(status, response_headers)
+    return [output]
+```
   
 
 
@@ -198,9 +156,9 @@ If you get the output:
 
   
 
-
+```
 wsgi.multithread = True
-
+```
   
 
 
@@ -218,11 +176,10 @@ To force a WSGI application to run in daemon mode, the WSGIDaemonProcess and WSG
 
   
 
-
+```
 WSGIDaemonProcess example.com processes=2 threads=15
-
 WSGIProcessGroup example.com
-
+```
   
 
 
@@ -235,74 +192,28 @@ A complete virtual host configuration for this type of setup would therefore be 
 
   
 
-
-<VirtualHost \*:80>
-
-  
-
-
+```
+<VirtualHost *:80>
 ServerName www.example.com
-
 ServerAlias example.com
-
 ServerAdmin webmaster@example.com
-
-  
-
-
 DocumentRoot /usr/local/www/documents
-
-  
-
-
 Alias /robots.txt /usr/local/www/documents/robots.txt
-
 Alias /favicon.ico /usr/local/www/documents/favicon.ico
-
-  
-
-
 Alias /media/ /usr/local/www/documents/media/
-
-  
-
-
 <Directory /usr/local/www/documents>
-
 Order allow,deny
-
 Allow from all
-
 </Directory>
-
-  
-
-
-WSGIDaemonProcess example.com processes=2 threads=15 display-name=%\{GROUP\}
-
+WSGIDaemonProcess example.com processes=2 threads=15 display-name=%{GROUP}
 WSGIProcessGroup example.com
-
-  
-
-
 WSGIScriptAlias / /usr/local/www/wsgi-scripts/myapp.wsgi
-
-  
-
-
 <Directory /usr/local/www/wsgi-scripts>
-
 Order allow,deny
-
 Allow from all
-
 </Directory>
-
-  
-
-
 </VirtualHost>
-
+```
   
 
 

@@ -12,17 +12,22 @@ published_timestamp: "2012-10-08T23:21:00+11:00"
 blog_title: "Graham Dumpleton"
 ---
 
-Configuring [Apache/mod\_wsgi](http://www.modwsgi.org/) to host multiple Django instances has always been a bit tricky for some. In practice though it should be quite straight forward. For a single Django instance mounted at the root of the web site, the WSGIScriptAlias line would be something like:  
-  
+Configuring [Apache/mod\_wsgi](http://www.modwsgi.org/) to host multiple Django instances has always been a bit tricky for some. In practice though it should be quite straight forward. For a single Django instance mounted at the root of the web site, the WSGIScriptAlias line would be something like: 
+
+```  
 WSGIScriptAlias / /some/path/project-1/wsgi.py  
-  
+```
+
 If wanting to host a second Django instance under the same host name but at a sub URL, you would use:  
-  
+
+```  
 WSGIScriptAlias /suburl /some/path/project-2/wsgi.py  
 WSGIScriptAlias / /some/path/project-1/wsgi.py  
-  
+```
+
 If the Django instances are not under the same host, then it would instead simply be a matter of adding them to the respective VirtualHost.  
-  
+
+```  
 <VirtualHost \*:80>  
 ServerName site-1.example.com  
 WSGIScriptAlias /some/path/project-1/wsgi.py  
@@ -34,7 +39,8 @@ ServerName site-2.example.com
 WSGIScriptAlias /some/path/project-2/wsgi.py  
 ...  
 </VirtualHost>  
-  
+```
+
 In both cases, whether under the same host name or different ones, both Django instances would run in the same process. Separation would be maintained however by virtue of mod\_wsgi running each WSGI application mounted using WSGIScriptAlias in a distinct Python sub interpreter within the processes they are running in.  
   
 The directive which controls which named Python sub interpreter within the process is used is WSGIApplicationGroup. The default for this directive is %\{RESOURCE\}.  
@@ -42,15 +48,19 @@ The directive which controls which named Python sub interpreter within the proce
 For this default value of %\{RESOURCE\}the sub interpreter name will be constructed from the host name \(as specified by the ServerName directive\), the port \(if not port 80/443\) and the value of the WSGI environment variable SCRIPT\_NAME as deduced from the URL mount point set by the WSGIScriptAlias directive.  
   
 So in the first instance above where both Django instances run under the same host name, the distinct named sub interpreters within the process would be called:  
-  
+
+```  
 site-1.example.com:/  
 site-1.example.com:/suburl  
-  
+```
+
 In the second instance where they run under separate host names they would be:  
-  
+
+```  
 site-1.example.com:/  
 site-2.example.com:/  
-  
+```
+
 So as long as you don't fiddle with which sub interpreter is used by specifying the WSGIApplicationGroup directive, mod\_wsgi should maintain separation between the multiple Django instances.  
   
 What therefore can go wrong and why would requests get routed to the wrong Django instance?  
@@ -81,11 +91,10 @@ For example, if the directives above were instead written as:
 
   
 
-
+```
 WSGIScriptAlias / /some/path/project-1/wsgi.py
-
 WSGIScriptAlias /suburl /some/path/project-2/wsgi.py
-
+```
   
 
 
@@ -99,26 +108,28 @@ The solution if this is the cause is obviously to reorder the WSGIScriptAlias di
 
   
 In order to specify the module that the Django applications settings are contained in, it is necessary to set the process environment variable DJANGO\_SETTINGS\_MODULE.  
-  
+
+```  
 import os  
-os.environ\['DJANGO\_SETTINGS\_MODULE'\] = 'mysite.settings'  
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
   
 import django.core.handlers.wsgi  
-application = django.core.handlers.wsgi.WSGIHandler\(\)  
-  
+application = django.core.handlers.wsgi.WSGIHandler()  
+```  
   
 When using Apache/mod\_wsgi, this is done in the WSGI script file and the environment variable would be set in os.environ when the WSGI script file is loaded.  
   
 As much as process environment variables and global variables have their limitations and are arguably a bad idea for specifying configuration, this has still worked okay until recently.  
   
 Problems started when Django 1.4 was released however. In Django 1.4 the content of the WSGI script file was changed from what was described previously for Django 1.3 and older versions to:  
-  
+
+```  
 import os  
-os.environ.setdefault\('DJANGO\_SETTINGS\_MODULE', 'mysite.settings'\)  
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')  
   
-from django.core.wsgi import get\_wsgi\_application  
-application = get\_wsgi\_application\(\)  
-  
+from django.core.wsgi import get_wsgi_application  
+application = get_wsgi_application()  
+```  
   
 Although the differences on first glance appear to be fine, they aren't and the WSGI script file in Django 1.4 will break Apache/mod\_wsgi for hosting multiple Django instances in the same process.  
   
@@ -135,22 +146,20 @@ The end result of the leakage can be one of two things. If the name of the Djang
 A more problematic case though is where you are using one code base and multiple Django settings modules for each of the distinct Django instances being run. In this case the Django settings module may well be found, with the result being that when attempting to load up the second Django instance, a duplicate of the first instance would be loaded instead. Where URLs are now meant to be routed to the second instance, they would instead be handled as if being sent to the first instance as the configuration for the first is still being used.  
   
 There are two solutions if this is the cause. The quickest is to replace the use of setdefault\(\) to set the environment variable in the WSGI script file with more usual assignment.  
-  
-os.environ\['DJANGO\_SETTINGS\_MODULE'\] = 'mysite.settings'  
-  
+
+```  
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  
+```
+
 An alternative which involves a bit more work, but can have other benefits, is to switch to using daemon mode of mod\_wsgi to run the Django instances and delegate each to a separate set of processes. By running the Django instances in separate processes there can be no possibility of environment variables leaking from one to the other.  
-  
+
+```  
 WSGIDaemonProcess project-2  
 WSGIScriptAlias /suburl /some/path/project-2/wsgi.py process-group=project-2  
 
-
-  
-
-
 WSGIDaemonProcess project-1
-
 WSGIScriptAlias / /some/path/project-1/wsgi.py process-group=project-1
-
+```
   
 
 
@@ -163,8 +172,8 @@ Apache supports hosting of sites under multiple host names by way of name based 
 
   
 
-
-<VirtualHost \*:80>
+```
+<VirtualHost *:80>
 
 ServerName site-1.example.com
 
@@ -179,7 +188,7 @@ WSGIScriptAlias /some/path/project-1/wsgi.py
   
 
 
-<VirtualHost \*:80>
+<VirtualHost *:80>
 
 ServerName site-2.example.com
 
@@ -188,7 +197,7 @@ WSGIScriptAlias /some/path/project-2/wsgi.py
 ...
 
 </VirtualHost>
-
+```
   
 
 
@@ -216,13 +225,13 @@ As a failsafe to pick up such issues and ensure that requests don't unintentiona
 
   
 
-
-<VirtualHost \_default\_:\*>
+```
+<VirtualHost _default_:*>
 
 Deny from all
 
 </VirtualHost>
-
+```
   
 
 

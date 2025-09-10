@@ -21,7 +21,7 @@ No problems were reported with last release candidate and no one took issue with
 ### Dirkjan Ochtman - November 22, 2009 at 5:10 AM
 
 It seems 2.7 reacts weirdly to the Gentoo way of building it, at least...  
-  
+```
 >>> Compiling source in /var/tmp/portage/www-apache/mod\_wsgi-2.7/work/mod\_wsgi-2.7 ...  
 make -j2   
 /usr/sbin/apxs2 -c -I/usr/include/python2.6 -DNDEBUG -Os -march=native -pipe mod\_wsgi.c -Wl,-O1 -L/usr/lib -L/usr/lib/python2.6/config -lpython2.6 -lpthread -ldl -lutil -lm  
@@ -31,7 +31,7 @@ apxs:Error: Unknown option: m.
 apxs:Error: Unknown option: r.  
 apxs:Error: Unknown option: h.  
 apxs:Error: Unknown option: =.
-
+```
 ### Graham Dumpleton - November 22, 2009 at 1:08 PM
 
 @djc: See discussion in 'http://groups.google.com/group/modwsgi/browse\_frm/thread/667933ac958d1e6b'.

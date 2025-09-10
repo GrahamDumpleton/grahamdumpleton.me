@@ -25,46 +25,46 @@ The next notable example we ran up against where a major package isn't implement
   
 The current code for the Sentry client in Raven is:  
   
-  
-class Sentry\(object\):  
-"""  
-A WSGI middleware which will attempt to capture any  
-uncaught exceptions and send them to Sentry.  
-  
->>> from raven.base import Client  
->>> application = Sentry\(application, Client\(\)\)  
-"""  
-def \_\_init\_\_\(self, application, client\):  
-self.application = application  
-self.client = client  
-  
-def \_\_call\_\_\(self, environ, start\_response\):  
-try:  
-for event in self.application\(environ, start\_response\):  
-yield event  
-except Exception:  
-exc\_info = sys.exc\_info\(\)  
-self.handle\_exception\(exc\_info, environ\)  
-exc\_info = None  
-raise  
-  
-def handle\_exception\(self, exc\_info, environ\):  
-event\_id = self.client.capture\('Exception',  
-exc\_info=exc\_info,  
-data=\{  
-'sentry.interfaces.Http': \{  
-'method': environ.get\('REQUEST\_METHOD'\),  
-'url': get\_current\_url\(environ, strip\_querystring=True\),  
-'query\_string': environ.get\('QUERY\_STRING'\),  
-\# TODO  
-\# 'data': environ.get\('wsgi.input'\),  
-'headers': dict\(get\_headers\(environ\)\),  
-'env': dict\(get\_environ\(environ\)\),  
-\}  
-\},  
-\)  
-return event\_id  
-  
+```  
+class Sentry(object):
+    """
+    A WSGI middleware which will attempt to capture any
+    uncaught exceptions and send them to Sentry.
+
+    >>> from raven.base import Client
+    >>> application = Sentry(application, Client())
+    """
+    def __init__(self, application, client):
+        self.application = application
+        self.client = client
+
+    def __call__(self, environ, start_response):
+        try:
+            for event in self.application(environ, start_response):
+                yield event
+        except Exception:
+            exc_info = sys.exc_info()
+            self.handle_exception(exc_info, environ)
+            exc_info = None
+            raise
+
+    def handle_exception(self, exc_info, environ):
+        event_id = self.client.capture('Exception',
+            exc_info=exc_info,
+            data={
+                'sentry.interfaces.Http': {
+                    'method': environ.get('REQUEST_METHOD'),
+                    'url': get_current_url(environ, strip_querystring=True),
+                    'query_string': environ.get('QUERY_STRING'),
+                    # TODO
+                    # 'data': environ.get('wsgi.input'),
+                    'headers': dict(get_headers(environ)),
+                    'env': dict(get_environ(environ)),
+                }
+            },
+        )
+        return event_id
+``` 
   
 The reason this code is wrong is because it does not satisfy the following requirement from the WSGI specification:  
 
@@ -77,10 +77,10 @@ In other words, although a server or gateway must ensure that close\(\) is calle
   
 The code:  
   
-  
-for event in self.application\(environ, start\_response\):  
-yield event  
-  
+```  
+for event in self.application(environ, start_response):  
+    yield event  
+```  
   
 is therefore incomplete, because although it consumes the iterable returned by the wrapped WSGI application, it does not ensure close\(\) is called on it upon completion, or in the event of any errors.  
   
@@ -91,24 +91,24 @@ is therefore incomplete, because although it consumes the iterable returned by t
   
 There are numerous ways one can structure a WSGI middleware, but following the general pattern used by Raven, a WSGI middleware that does ensure that close\(\) is called would be implemented as follows.  
   
-  
-class Middleware1\(object\):  
-  
-def \_\_init\_\_\(self, application\):  
-self.application = application  
-  
-def \_\_call\_\_\(self, environ, start\_response\):  
-iterable = None  
-  
-try:  
-iterable = self.application\(environ, start\_response\)  
-for data in iterable:  
-yield data  
-  
-finally:  
-if hasattr\(iterable, 'close'\):  
-iterable.close\(\)  
-  
+```  
+class Middleware1(object):
+
+    def __init__(self, application):
+        self.application = application
+
+    def __call__(self, environ, start_response):
+        iterable = None
+
+        try:
+            iterable = self.application(environ, start_response)
+            for data in iterable:
+                yield data
+
+        finally:
+            if hasattr(iterable, 'close'):
+                iterable.close()
+```  
   
 Important to note here is that the act of calling the wrapped application to obtain the iterable has been separated from the process of iterating over it. This is necessary in order that we have a reference to the iterable to call close\(\) in the three cases necessary, they being an exception occurring when the actual iterator object itself is being created from the iterable object, if an exception occurs when getting the next item from the iterator object and finally upon the last item being yielded from the iterator.  
   
@@ -123,26 +123,26 @@ For a WSGI middleware written as above, that isn't necessarily the point at whic
   
 Overall, for WSGI middleware it probably isn't a critical issue and having it called immediately the 'for' loop exits is fine. If it were important that close\(\) be directly chained, then it would be necessary to implement it differently, instead using.  
   
-  
-class Iterable2\(object\):  
-  
-def \_\_init\_\_\(self, iterable\):  
-self.iterable = iterable  
-if hasattr\(iterable, 'close'\):  
-self.close = iterable.close  
-  
-def \_\_iter\_\_\(self\):  
-for data in self.iterable:  
-yield data  
-  
-class Middleware2\(object\):  
-  
-def \_\_init\_\_\(self, application\):  
-self.application = application  
-  
-def \_\_call\_\_\(self, environ, start\_response\):  
-return Iterable2\(self.application\(environ, start\_response\)\)  
-  
+```
+class Iterable2(object):
+
+    def __init__(self, iterable):
+        self.iterable = iterable
+        if hasattr(iterable, 'close'):
+            self.close = iterable.close
+
+    def __iter__(self):
+        for data in self.iterable:
+            yield data
+
+class Middleware2(object):
+
+    def __init__(self, application):
+        self.application = application
+
+    def __call__(self, environ, start_response):
+        return Iterable2(self.application(environ, start_response))
+```  
   
 That way the close\(\) method is only called for the iterable returned from the wrapped application when close\(\) is called by the WSGI server, or any further WSGI middleware that wraps this one.  
   
@@ -155,34 +155,34 @@ Requiring two classes like this does complicate the implementation of the WSGI m
   
 Assuming the first pattern for implementing the WSGI middleware is okay, the existing Sentry client in Raven would be rewritten as follows.  
   
-  
-class Sentry\(object\):  
-  
-def \_\_init\_\_\(self, application, client\):  
-self.application = application  
-self.client = client  
-  
-def \_\_call\_\_\(self, environ, start\_response\):  
-iterable = None  
-  
-try:  
-iterable = self.application\(environ, start\_response\)  
-for event in iterable:  
-yield event  
-  
-except Exception:  
-exc\_info = sys.exc\_info\(\)  
-self.handle\_exception\(exc\_info, environ\)  
-exc\_info = None  
-raise  
-  
-finally:  
-if hasattr\(iterable, 'close'\):  
-iterable.close\(\)  
-  
-def handle\_exception\(self, exc\_info, environ\):  
-...  
+```  
+class Sentry(object):
 
+    def __init__(self, application, client):
+        self.application = application
+        self.client = client
+
+    def __call__(self, environ, start_response):
+        iterable = None
+
+        try:
+            iterable = self.application(environ, start_response)
+            for event in iterable:
+                yield event
+
+        except Exception:
+            exc_info = sys.exc_info()
+            self.handle_exception(exc_info, environ)
+            exc_info = None
+            raise
+
+        finally:
+            if hasattr(iterable, 'close'):
+                iterable.close()
+
+    def handle_exception(self, exc_info, environ):
+        ...
+```
 
   
 
@@ -192,40 +192,40 @@ This provides the same functionality as it originally performed, but also ensure
   
 We are not done though, because technically an exception could be raised by the close\(\) method when it is called. Presumably it would be desirable for this also to be captured and reported to Sentry. The more complete solution which does this is:  
   
-  
-class Sentry\(object\):  
-  
-def \_\_init\_\_\(self, application, client\):  
-self.application = application  
-self.client = client  
-  
-def \_\_call\_\_\(self, environ, start\_response\):  
-iterable = None  
-  
-try:  
-iterable = self.application\(environ, start\_response\)  
-for event in iterable:  
-yield event  
-  
-except Exception:  
-exc\_info = sys.exc\_info\(\)  
-self.handle\_exception\(exc\_info, environ\)  
-exc\_info = None  
-raise  
-  
-finally:  
-if hasattr\(iterable, 'close'\):  
-try:  
-iterable.close\(\)  
-except Exception:  
-exc\_info = sys.exc\_info\(\)  
-self.handle\_exception\(exc\_info, environ\)  
-exc\_info = None  
-raise  
-  
-def handle\_exception\(self, exc\_info, environ\):  
-...  
+```  
+class Sentry(object):
 
+    def __init__(self, application, client):
+        self.application = application
+        self.client = client
+
+    def __call__(self, environ, start_response):
+        iterable = None
+
+        try:
+            iterable = self.application(environ, start_response)
+            for event in iterable:
+                yield event
+
+        except Exception:
+            exc_info = sys.exc_info()
+            self.handle_exception(exc_info, environ)
+            exc_info = None
+            raise
+
+        finally:
+            if hasattr(iterable, 'close'):
+                try:
+                    iterable.close()
+                except Exception:
+                    exc_info = sys.exc_info()
+                    self.handle_exception(exc_info, environ)
+                    exc_info = None
+                    raise
+
+    def handle_exception(self, exc_info, environ):
+        ...
+```
 
   
 

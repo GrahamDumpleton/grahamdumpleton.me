@@ -44,33 +44,33 @@ As to how to setup a Python virtual environment based on using the PYTHONHOME en
 On MacOS X with Python 2.3 the required steps would therefore be:
 
 ```
- mkdir $HOME/pythonenv  
- cd $HOME/pythonenv  
-   
- mkdir -p ENV1/bin  
- mkdir -p ENV1/include  
- mkdir -p ENV1/lib/python2.3  
-   
- ln -s /usr/bin/python2.3 ENV1/bin/  
- ln -s python2.3 ENV1/bin/python  
-   
- ln -s /usr/include/python2.3 ENV1/include/  
-   
- for i in /usr/lib/python2.3/*; do ln -s $i ENV1/lib/python2.3/; done  
-   
- rm ENV1/lib/python2.3/site-packages  
- mkdir ENV1/lib/python2.3/site-packages  
+mkdir $HOME/pythonenv  
+cd $HOME/pythonenv  
+  
+mkdir -p ENV1/bin  
+mkdir -p ENV1/include  
+mkdir -p ENV1/lib/python2.3  
+  
+ln -s /usr/bin/python2.3 ENV1/bin/  
+ln -s python2.3 ENV1/bin/python  
+  
+ln -s /usr/include/python2.3 ENV1/include/  
+  
+for i in /usr/lib/python2.3/*; do ln -s $i ENV1/lib/python2.3/; done  
+  
+rm ENV1/lib/python2.3/site-packages  
+mkdir ENV1/lib/python2.3/site-packages  
 ```
 
   
 To use the virtual environment the 'bin' directory would be added to the head of your PATH and the PYTHONHOME environment variable set.
 
 ```
- PATH="$HOME/pythonenv/ENV1/bin:$PATH"  
- export PATH  
-   
- PYTHONHOME="$HOME/pythonenv/ENV1"  
- export PYTHONHOME  
+PATH="$HOME/pythonenv/ENV1/bin:$PATH"  
+export PATH  
+  
+PYTHONHOME="$HOME/pythonenv/ENV1"  
+export PYTHONHOME  
 ```
 
   

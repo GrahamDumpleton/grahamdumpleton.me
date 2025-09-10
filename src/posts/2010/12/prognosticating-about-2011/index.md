@@ -17,7 +17,7 @@ I don't normally sit down and really plan out what I might do in the coming year
   
 
 
-**My New Job**
+# My New Job
 
   
 
@@ -27,7 +27,7 @@ Obviously the first goal is to do well in my new job. This isn't just about givi
   
 
 
-**Commentary On WSGI**
+# Commentary On WSGI
 
   
 
@@ -47,7 +47,7 @@ At the moment it is not the intention to be proposing as part of this commentary
   
 
 
-**WSGI Application Deploymen** t
+# WSGI Application Deployment
 
   
 
@@ -72,7 +72,7 @@ Because trying to cover how to handle deployment for every WSGI framework out th
   
 
 
-**WSGI Application Debuggin** g
+# WSGI Application Debugging
 
   
 
@@ -87,7 +87,7 @@ What I am working on in my new job at NewRelic obviously plays into this, but th
   
 
 
-**Python Conferences**
+# Python Conferences
 
   
 
@@ -127,7 +127,7 @@ As well as attending PyCon, I am also eyeing off DjangoCon in Portland later in 
   
 
 
-**Having Fun With My Family**
+# Having Fun With My Family
 
   
 

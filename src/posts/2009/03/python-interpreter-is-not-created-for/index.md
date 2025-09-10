@@ -199,24 +199,26 @@ Thanks for the article.
 I have the following question : my django app uses a python module I wrote. This module makes calls to a postgres DB \(which is not the DB used by the app for the model, it's an other DB\). Every time django receives a request, a new DB connection is created by this module, which is very time consuming. So I was wondering, if I run Apache in daemon mode and that all my python application stays loaded in memory, does it mean I can open a DB connection at the first call and then let it open ?  
   
 something like \(pseudo code\):  
+
+```
+#MyModule.py  
+con = psycopg2.connect()  
   
-\#MyModule.py  
-con = psycopg2.connect\(\)  
+def foo(query):  
+    cur = con.cursor()  
+    cur.execute(query)  
+    ...  
+    return results  
   
-def foo\(query\):  
-cur = con.cursor\(\)  
-cur.execute\(query\)  
-...  
-return results  
-  
-\#views.py \(django app\)  
+#views.py (django app)  
 from MyModule import foo  
   
-def bar\(request\):  
+def bar(request):  
+    ...  
+    res = foo(someQuery)  
 ...  
-res = foo\(someQuery\)  
-...  
-  
+```
+
 The only other solution I could think about was to have an external process running in the background with a pool of open connections, and making requests to this external process.  
 Any advice will be much appreciated \!
 
