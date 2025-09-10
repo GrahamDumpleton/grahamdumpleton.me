@@ -35,9 +35,23 @@ module.exports = function(eleventyConfig) {
   
   // Add filters
   eleventyConfig.addFilter("date", function(date, format) {
-    const dateObj = new Date(date);
     if (format === 'iso') {
+      // If the date is already in YYYY-MM-DD format, return it directly
+      if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return date;
+      }
+      // Otherwise, try to convert to ISO date format
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) {
+        // If date is invalid, return the original string or a fallback
+        return typeof date === 'string' ? date : '1970-01-01';
+      }
       return dateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+    }
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      // If date is invalid, return a fallback
+      return 'Invalid Date';
     }
     return dateObj.toLocaleDateString('en-AU', {
       year: 'numeric',
