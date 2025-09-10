@@ -28,18 +28,19 @@ This post will explore the source of the error when attempting to implement our 
   
 As described in the previous post, the pattern we were trying to use so as to allow us to use a class as a decorator was:  
 
+```
+class with_arguments(object):
+    def __init__(self, arg):
+        self.arg = arg
 
-> class with\_arguments\(object\):  
->  def \_\_init\_\_\(self, arg\):  
->  self.arg = arg
+    @decorator
+    def __call__(self, wrapped, instance, args, kwargs):
+        return wrapped(*args, **kwargs)
 
-> @decorator  
->  def \_\_call\_\_\(self, wrapped, instance, args, kwargs\):  
->  return wrapped\(\*args, \*\*kwargs\) 
-
-> @with\_arguments\(arg=1\)  
->  def function\(\):  
->  pass
+@with_arguments(arg=1)
+def function():
+    pass
+```
 
 The intent here is that the application of the decorator, with arguments supplied, would result in an instance of the class being created. In the next phase where that is called with the wrapped function, the \_\_call\_\_\(\) method with @decorator applied will be used as a decorator on the function to be wrapped. The end result should be that the \_\_call\_\_\(\) method of the class instance created ends up being our wrapper function.  
   
@@ -47,20 +48,22 @@ When the decorated function is now called, the \_\_call\_\_\(\) method of the cl
   
 When we tried this though we got, at the time that the decorator was being applied, the error:  
 
-
-> Traceback \(most recent call last\):  
->  File "test.py", line 483, in <module>  
->  @with\_arguments\(1\)  
->  TypeError: \_decorator\(\) takes exactly 1 argument \(2 given\)
+```
+Traceback (most recent call last):
+  File "test.py", line 483, in <module>
+    @with_arguments(1)
+TypeError: _decorator() takes exactly 1 argument (2 given)
+```
 
 The \_decorator\(\) function in this case is the inner function from our decorator factory.  
 
-
-> def decorator\(wrapper\):  
->  @functools.wraps\(wrapper\)  
->  def \_decorator\(wrapped\):  
->  return function\_wrapper\(wrapped, wrapper\)  
->  return \_decorator
+```
+def decorator(wrapper):
+    @functools.wraps(wrapper)
+    def _decorator(wrapped):
+        return function_wrapper(wrapped, wrapper)
+    return _decorator
+```
 
 The mistake that has been made here is that we are using a function closure to implement our decorator factory, yet we were expecting it to work on both normal functions and methods of classes.  
   
@@ -72,14 +75,14 @@ We could create a special variant of the decorator factory to be used just on in
   
 To resolve this issue, what we can do is use our function wrapper for the decorator returned by the decorator factory, instead of a function closure.  
 
-
-> def decorator\(wrapper\):  
->  def \_wrapper\(wrapped, instance, args, kwargs\):  
->  def \_execute\(wrapped\):  
->  return function\_wrapper\(wrapped, wrapper\)  
->  return \_execute\(\*args, \*\*kwargs\)  
->  return function\_wrapper\(wrapper, \_wrapper\)
-
+```
+def decorator(wrapper):
+    def _wrapper(wrapped, instance, args, kwargs):
+        def _execute(wrapped):
+            return function_wrapper(wrapped, wrapper)
+        return _execute(*args, **kwargs)
+    return function_wrapper(wrapper, _wrapper)
+```
   
 
 
@@ -90,13 +93,14 @@ This above change now means we do not have to worry about whether @decorator is 
   
 Trying again with this change though, we are confronted with a further problem. This time at the point that the wrapped function is called.  
 
-
-> >>> function\(\)  
->  Traceback \(most recent call last\):  
->  File "<stdin>", line 1, in <module>  
->  File "test.py", line 243, in \_\_call\_\_  
->  return self.wrapper\(self.wrapped, None, args, kwargs\)  
->  TypeError: \_\_call\_\_\(\) takes exactly 5 arguments \(4 given\)
+```
+>>> function()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "test.py", line 243, in __call__
+    return self.wrapper(self.wrapped, None, args, kwargs)
+TypeError: __call__() takes exactly 5 arguments (4 given)
+```
 
 The issue this time is that when @decorator is applied to the \_\_call\_\_\(\) method, the reference it is passed is that of the unbound method. This is because this occurs during the processing of the class definition, long before any instance of the class has been created.  
   
@@ -104,18 +108,19 @@ Normally the reference to the instance would be supplied later when the method i
   
 To solve this problem we need for the case where we are being bound to an instance, to explicitly bind the wrapper function ourselves against the instance.  
 
-
-> def decorator\(wrapper\):  
->  def \_wrapper\(wrapped, instance, args, kwargs\):  
->  def \_execute\(wrapped\):  
->  if instance is None:  
->  return function\_wrapper\(wrapped, wrapper\)  
->  elif inspect.isclass\(instance\):  
->  return function\_wrapper\(wrapped, wrapper.\_\_get\_\_\(None, instance\)\)  
->  else:  
->  return function\_wrapper\(wrapped, wrapper.\_\_get\_\_\(instance, type\(instance\)\)\)  
->  return \_execute\(\*args, \*\*kwargs\)  
->  return function\_wrapper\(wrapper, \_wrapper\)
+```
+def decorator(wrapper):
+    def _wrapper(wrapped, instance, args, kwargs):
+        def _execute(*args, **kwargs):
+            if instance is None:
+                return function_wrapper(wrapped, wrapper)
+            elif inspect.isclass(instance):
+                return function_wrapper(wrapped, wrapper.__get__(None, instance))
+            else:
+                return function_wrapper(wrapped, wrapper.__get__(instance, type(instance)))
+        return _execute(*args, **kwargs)
+    return function_wrapper(wrapper, _wrapper)
+```
 
 So what we are using here is the feature of our function wrapper that allows us to implement a universal decorator. That is, one which can change its behaviour dependent upon the context it is used in.  
   
@@ -136,82 +141,83 @@ With these changes, we are now all done with addressing this issue, and to a lar
   
 So the complete solution we now have at this point is:  
 
+```
+class object_proxy(object):
 
-> class object\_proxy\(object\): 
+    def __init__(self, wrapped):
+        self.wrapped = wrapped
+        try:
+            self.__name__ = wrapped.__name__
+        except AttributeError:
+            pass
 
-> def \_\_init\_\_\(self, wrapped\):  
->  self.wrapped = wrapped  
->  try:  
->  self.\_\_name\_\_ = wrapped.\_\_name\_\_  
->  except AttributeError:  
->  pass 
+    @property
+    def __class__(self):
+        return self.wrapped.__class__
 
-> @property  
->  def \_\_class\_\_\(self\):  
->  return self.wrapped.\_\_class\_\_ 
+    def __getattr__(self, name):
+        return getattr(self.wrapped, name)
 
-> def \_\_getattr\_\_\(self, name\):  
->  return getattr\(self.wrapped, name\) 
+class bound_function_wrapper(object_proxy):
 
-> class bound\_function\_wrapper\(object\_proxy\): 
+    def __init__(self, wrapped, instance, wrapper, binding, parent):
+        super(bound_function_wrapper, self).__init__(wrapped)
+        self.instance = instance
+        self.wrapper = wrapper
+        self.binding = binding
+        self.parent = parent
 
-> def \_\_init\_\_\(self, wrapped, instance, wrapper, binding, parent\):  
->  super\(bound\_function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
->  self.instance = instance  
->  self.wrapper = wrapper  
->  self.binding = binding  
->  self.parent = parent 
+    def __call__(self, *args, **kwargs):
+        if self.binding == 'function':
+            if self.instance is None:
+                instance, args = args[0], args[1:]
+                wrapped = functools.partial(self.wrapped, instance)
+                return self.wrapper(wrapped, instance, args, kwargs)
+            else:
+                return self.wrapper(self.wrapped, self.instance, args, kwargs)
+        else:
+            instance = getattr(self.wrapped, '__self__', None)
+            return self.wrapper(self.wrapped, instance, args, kwargs)
 
-> def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
->  if self.binding == 'function':  
->  if self.instance is None:  
->  instance, args = args\[0\], args\[1:\]  
->  wrapped = functools.partial\(self.wrapped, instance\)  
->  return self.wrapper\(wrapped, instance, args, kwargs\)  
->  else:  
->  return self.wrapper\(self.wrapped, self.instance, args, kwargs\)  
->  else:  
->  instance = getattr\(self.wrapped, '\_\_self\_\_', None\)  
->  return self.wrapper\(self.wrapped, instance, args, kwargs\) 
+    def __get__(self, instance, owner):
+        if self.instance is None and self.binding == 'function':
+            descriptor = self.parent.wrapped.__get__(instance, owner)
+            return bound_function_wrapper(descriptor, instance, self.wrapper,
+                                         self.binding, self.parent)
+        return self
 
-> def \_\_get\_\_\(self, instance, owner\):  
->  if self.instance is None and self.binding == 'function':  
->  descriptor = self.parent.wrapped.\_\_get\_\_\(instance, owner\)  
->  return bound\_function\_wrapper\(descriptor, instance, self.wrapper,  
->  self.binding, self.parent\)  
->  return self 
+class function_wrapper(object_proxy):
 
-> class function\_wrapper\(object\_proxy\): 
+    def __init__(self, wrapped, wrapper):
+        super(function_wrapper, self).__init__(wrapped)
+        self.wrapper = wrapper
+        if isinstance(wrapped, classmethod):
+            self.binding = 'classmethod'
+        elif isinstance(wrapped, staticmethod):
+            self.binding = 'staticmethod'
+        else:
+            self.binding = 'function'
 
-> def \_\_init\_\_\(self, wrapped, wrapper\):  
->  super\(function\_wrapper, self\).\_\_init\_\_\(wrapped\)  
->  self.wrapper = wrapper  
->  if isinstance\(wrapped, classmethod\):  
->  self.binding = 'classmethod'  
->  elif isinstance\(wrapped, staticmethod\):  
->  self.binding = 'staticmethod'  
->  else:  
->  self.binding = 'function' 
+    def __get__(self, instance, owner):
+        wrapped = self.wrapped.__get__(instance, owner)
+        return bound_function_wrapper(wrapped, instance, self.wrapper,
+                                     self.binding, self)
 
-> def \_\_get\_\_\(self, instance, owner\):  
->  wrapped = self.wrapped.\_\_get\_\_\(instance, owner\)  
->  return bound\_function\_wrapper\(wrapped, instance, self.wrapper,  
->  self.binding, self\) 
+    def __call__(self, *args, **kwargs):
+        return self.wrapper(self.wrapped, None, args, kwargs)
 
-> def \_\_call\_\_\(self, \*args, \*\*kwargs\):  
->  return self.wrapper\(self.wrapped, None, args, kwargs\) 
-
-> def decorator\(wrapper\):  
->  def \_wrapper\(wrapped, instance, args, kwargs\):  
->  def \_execute\(wrapped\):  
->  if instance is None:  
->  return function\_wrapper\(wrapped, wrapper\)  
->  elif inspect.isclass\(instance\):  
->  return function\_wrapper\(wrapped, wrapper.\_\_get\_\_\(None, instance\)\)  
->  else:  
->  return function\_wrapper\(wrapped, wrapper.\_\_get\_\_\(instance, type\(instance\)\)\)  
->  return \_execute\(\*args, \*\*kwargs\)  
->  return function\_wrapper\(wrapper, \_wrapper\)
+def decorator(wrapper):
+    def _wrapper(wrapped, instance, args, kwargs):
+        def _execute(*args, **kwargs):
+            if instance is None:
+                return function_wrapper(wrapped, wrapper)
+            elif inspect.isclass(instance):
+                return function_wrapper(wrapped, wrapper.__get__(None, instance))
+            else:
+                return function_wrapper(wrapped, wrapper.__get__(instance, type(instance)))
+        return _execute(*args, **kwargs)
+    return function_wrapper(wrapper, _wrapper)
+```
 
 Take heed though of what was said in prior posts though. The object proxy implementation given here is not a complete solution. As a result, do not take this code and try and use it yourself as is. If you do you will find that some aspects of performing introspection on the wrapped function will not work as indicated they should.  
   
@@ -269,30 +275,33 @@ There should be no interaction between print and the use of the decorator factor
 I think you're right: there's no problem with print, but there's another problem, and I can't figure out where it is.  
   
 The short piece of code below appears to work. If I remove the '\#' in front of @wrapt.decorator, it looks the decorator isn't called at all, hence no print output. Can you see what's wrong?  
-  
-\#\!/usr/bin/python3  
-import wrapt  
-def action\(pattern\):  
-\# @wrapt.decorator  
-def wrapper\(wrapped\):  
-wrapped.pattern = pattern  
-print\('wrapped pattern =', pattern\)  
-return wrapped  
-return wrapper  
-  
-class Controller\(object\):  
-def \_\_init\_\_\(self\):  
-for name in dir\(self\):  
-member = getattr\(self, name\)  
-if hasattr\(member, 'pattern'\):  
-print\('pattern =', member.pattern\)  
-  
-@action\('/find'\)  
-def search\(self, req\):  
-return 'search collection'  
-  
-c = Controller\(\)  
-print\('c.search has \_\_name\_\_ attribute', c.search.\_\_name\_\_\)
+
+```
+#!/usr/bin/python3
+import wrapt
+
+def action(pattern):
+    # @wrapt.decorator
+    def wrapper(wrapped):
+        wrapped.pattern = pattern
+        print('wrapped pattern =', pattern)
+        return wrapped
+    return wrapper
+
+class Controller(object):
+    def __init__(self):
+        for name in dir(self):
+            member = getattr(self, name)
+            if hasattr(member, 'pattern'):
+                print('pattern =', member.pattern)
+
+@action('/find')
+def search(self, req):
+    return 'search collection'
+
+c = Controller()
+print('c.search has __name__ attribute', c.search.__name__)
+```
 
 ### Graham Dumpleton - March 16, 2014 at 8:28 PM
 
@@ -305,29 +314,32 @@ Your decorator wrapper function is meant to have more arguments than that. Speci
 ### Nico - March 16, 2014 at 8:50 PM
 
 I read the docs yesterday and again today, and I'm still not seeing it. Could you please point out what needs to be fixed in the example script below?  
-  
-import wrapt  
-def action\(pattern\):  
-@wrapt.decorator  
-def wrapper\(wrapped, instance, args, kwargs\):  
-wrapped.pattern = pattern  
-print\('wrapped pattern =', pattern\)  
-return wrapped\(\*args, \*\*kwargs\)  
-return wrapper  
-  
-class Controller\(object\):  
-def \_\_init\_\_\(self\):  
-for name in dir\(self\):  
-member = getattr\(self, name\)  
-if hasattr\(member, 'pattern'\):  
-print\('pattern =', member.pattern\)  
-  
-@action\('/find'\)  
-def search\(self, req\):  
-return 'search collection'  
-  
-c = Controller\(\)  
-print\('c.search has \_\_name\_\_ attribute', c.search.\_\_name\_\_\)
+
+```
+import wrapt
+
+def action(pattern):
+    @wrapt.decorator
+    def wrapper(wrapped, instance, args, kwargs):
+        wrapped.pattern = pattern
+        print('wrapped pattern =', pattern)
+        return wrapped(*args, **kwargs)
+    return wrapper
+
+class Controller(object):
+    def __init__(self):
+        for name in dir(self):
+            member = getattr(self, name)
+            if hasattr(member, 'pattern'):
+                print('pattern =', member.pattern)
+
+@action('/find')
+def search(self, req):
+    return 'search collection'
+
+c = Controller()
+print('c.search has __name__ attribute', c.search.__name__)
+```
 
 ### Nico - March 16, 2014 at 8:52 PM
 
@@ -336,14 +348,16 @@ P.S.: I'm trying to combine examples from two paragraphs in the docs: the one ab
 ### Graham Dumpleton - March 16, 2014 at 9:02 PM
 
 In your case I suspect you shouldn't even be using the wrapt decorator factory as you don't want to intercept when the function is being called, you only want to add an attribute to the decorated function and return the original function again.  
-  
-\# Replace leading underscores with spaces in the following.  
-  
-def action\(pattern\):  
-\_\_def wrapper\(wrapped\):  
-\_\_\_\_wrapped.pattern = pattern  
-\_\_\_\_return wrapped  
-\_\_return wrapper
+
+```
+# Replace leading underscores with spaces in the following.
+
+def action(pattern):
+    def wrapper(wrapped):
+        wrapped.pattern = pattern
+        return wrapped
+    return wrapper
+```
 
 ### Nico - March 16, 2014 at 10:52 PM
 
@@ -354,24 +368,25 @@ I'm going to experiment now with the "alternative approach \[...\] to use a clas
 ### Graham Dumpleton - March 17, 2014 at 11:02 AM
 
 You need to use an extra level of indirection.  
-  
-import wrapt  
-  
-def action\(pattern\):  
-\_\_\_\_def wrapper1\(wrapped\):  
-\_\_\_\_\_\_\_\_@wrapt.decorator  
-\_\_\_\_\_\_\_\_def wrapper2\(wrapped, instance, args, kwargs\):  
-\_\_\_\_\_\_\_\_\_\_\_\_print\('wrapped pattern =', wrapped.pattern\)  
-\_\_\_\_\_\_\_\_\_\_\_\_return wrapped\(\*args, \*\*kwargs\)  
-\_\_\_\_\_\_\_\_wrapped.pattern = pattern  
-\_\_\_\_\_\_\_\_return wrapper2\(wrapped\)  
-\_\_\_\_return wrapper1  
-  
-@action\('xyz'\)  
-def f\(x, y\):  
-\_\_\_\_print\('f', x, y\)  
-  
-print f.pattern  
-  
-f\(1, 2\)
 
+```
+import wrapt
+
+def action(pattern):
+    def wrapper1(wrapped):
+        @wrapt.decorator
+        def wrapper2(wrapped, instance, args, kwargs):
+            print('wrapped pattern =', wrapped.pattern)
+            return wrapped(*args, **kwargs)
+        wrapped.pattern = pattern
+        return wrapper2(wrapped)
+    return wrapper1
+
+@action('xyz')
+def f(x, y):
+    print('f', x, y)
+
+print(f.pattern)
+
+f(1, 2)
+```
