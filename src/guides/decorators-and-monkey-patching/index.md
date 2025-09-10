@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: guide
 title: "Decorators and monkey patching."
 url: "http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html"
 post_id: "3350721465154129789"

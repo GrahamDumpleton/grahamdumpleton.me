@@ -480,7 +480,13 @@ def create_markdown_file(post_data, output_path):
     with open(output_path, 'w', encoding='utf-8') as f:
         # Write YAML front matter
         f.write("---\n")
-        f.write("layout: post\n")
+        
+        # Determine layout based on URL - guides use "guide" layout, posts use "post" layout
+        if post_data.get('url') and is_guide_url(post_data['url']):
+            f.write("layout: guide\n")
+        else:
+            f.write("layout: post\n")
+            
         f.write(f"title: \"{escape_yaml_string(post_data['title'])}\"\n")
         
         # Only write author if it's not empty

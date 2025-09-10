@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: guide
 title: "Using Python with Docker."
 url: "http://blog.dscpl.com.au/p/using-python-with-docker.html"
 post_id: "5591286857776935907"
