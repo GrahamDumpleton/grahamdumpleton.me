@@ -16,12 +16,14 @@ module.exports = function(eleventyConfig) {
   // Add posts collections
   eleventyConfig.addCollection("posts", function(collectionApi) {
     return collectionApi.getFilteredByGlob("src/posts/*/*/*/index.md")
+      .filter(post => !post.data.draft) // Exclude draft posts
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   });
 
   // Add guides collection
   eleventyConfig.addCollection("guides", function(collectionApi) {
     return collectionApi.getFilteredByGlob("src/guides/*/index.md")
+      .filter(guide => !guide.data.draft) // Exclude draft guides
       .sort((a, b) => a.data.title.localeCompare(b.data.title));
   });
 
@@ -29,6 +31,7 @@ module.exports = function(eleventyConfig) {
   // The feedPlugin seems to reverse the collection internally, so we sort oldest first
   eleventyConfig.addCollection("rssPosts", function(collectionApi) {
     return collectionApi.getFilteredByGlob("src/posts/*/*/*/index.md")
+      .filter(post => !post.data.draft) // Exclude draft posts
       .filter(post => new Date(post.date) >= RSS_CUTOFF_DATE)
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   });

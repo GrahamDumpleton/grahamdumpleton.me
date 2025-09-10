@@ -110,6 +110,36 @@ tags: ["tutorial", "python"]
 ---
 ```
 
+#### Draft Content
+
+Both blog posts and guides support a `draft` property to control content visibility:
+
+**To mark content as draft**, add `draft: true` to the front matter:
+```yaml
+---
+layout: post
+title: "My Draft Post"
+date: 2024-01-15
+draft: true
+tags: ["python", "draft"]
+---
+```
+
+**Draft behavior:**
+- **Default**: If `draft` is not specified, content is published (equivalent to `draft: false`)
+- **Hidden from collections**: Draft content does not appear in:
+  - Posts collection (homepage, posts index)
+  - Guides collection (guides index)
+  - RSS feed
+- **Direct access**: Draft content is still processed and accessible via direct URL
+- **Publishing**: Remove the `draft` property or set `draft: false` to publish
+
+**Use cases:**
+- Work-in-progress content that needs review
+- Content scheduled for future publication
+- Testing new content without affecting public collections
+- Private notes or documentation
+
 ### Customization
 
 The site can be customized by modifying:
