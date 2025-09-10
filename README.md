@@ -110,6 +110,41 @@ tags: ["tutorial", "python"]
 ---
 ```
 
+#### Page Description Metadata
+
+Both blog posts and guides support an optional `description` property in the front matter to control the page's meta description:
+
+```yaml
+---
+layout: post
+title: "Your Post Title"
+date: 2024-01-15
+description: "A concise summary of what this post covers"
+tags: ["python", "web-development"]
+---
+```
+
+**Description behavior:**
+- **Purpose**: Controls the `<meta name="description">` tag in the HTML head
+- **SEO Impact**: Used by search engines and social media platforms for page summaries
+- **Social Sharing**: Displayed when the URL is shared on platforms like Twitter, Facebook, LinkedIn
+- **Fallback**: If no description is provided, defaults to "Graham Dumpleton's blog"
+- **Best Practices**: 
+  - Keep descriptions concise (150-160 characters recommended)
+  - Write descriptive summaries that accurately represent the content
+  - Avoid keyword stuffing; focus on readability and value
+
+**Example usage:**
+```yaml
+---
+layout: post
+title: "Getting Started with Python WSGI"
+date: 2024-01-15
+description: "Learn the basics of Python WSGI applications and how to deploy them effectively"
+tags: ["python", "wsgi", "deployment"]
+---
+```
+
 #### Draft Content
 
 Both blog posts and guides support a `draft` property to control content visibility:
