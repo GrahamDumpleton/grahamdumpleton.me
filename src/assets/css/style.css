@@ -429,7 +429,7 @@ footer a:hover {
 .hero-section {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   color: white;
-  padding: var(--spacing-xl) 0;
+  padding: var(--spacing-lg) 0;
   margin-bottom: var(--spacing-xl);
   border-radius: var(--border-radius-xl);
   position: relative;
