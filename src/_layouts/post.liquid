@@ -5,6 +5,19 @@ layout: base
     <div class="col-12 col-lg-11 col-xl-10 col-xxl-9">
         <article class="card border-0 shadow-sm">
             <div class="card-body p-4 p-md-5">
+                <!-- Draft Banner -->
+                {% if draft %}
+                <div class="alert alert-warning border-0 mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill me-3 fs-5"></i>
+                        <div>
+                            <strong>Draft Content</strong>
+                            <p class="mb-0 small">This post is currently in draft mode and is not visible in public collections or RSS feeds.</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
                 <!-- Post Header -->
                 <header class="mb-4">
                     <h1 class="display-4 fw-bold text-primary mb-3">{{ title }}</h1>
