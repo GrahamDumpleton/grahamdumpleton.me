@@ -194,7 +194,7 @@ def main():
     project_root = script_dir.parent
     
     # Define paths
-    metadata_file = project_root / 'archive/posts-metadata.json'
+    metadata_file = project_root / 'blogger/posts-metadata.json'
     posts_dir = project_root / 'src/posts'
     
     # Check for command line arguments

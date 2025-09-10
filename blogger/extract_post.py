@@ -910,7 +910,7 @@ def process_all_posts(posts_dir, overwrite=False):
     project_root = script_dir.parent
     
     # Load metadata
-    metadata_file = project_root / 'archive/posts-metadata.json'
+    metadata_file = project_root / 'blogger/posts-metadata.json'
     posts_data = load_metadata(metadata_file)
     
     if not posts_data:

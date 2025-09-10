@@ -1,6 +1,6 @@
 # Graham Dumpleton's Blog
 
-A modern static blog site for Graham Dumpleton, originally migrated from the Blogger site at [blog.dscpl.com.au](http://blog.dscpl.com.au). The site is built and managed using [Eleventy (11ty)](https://www.11ty.dev/) for fast, static site generation.
+A modern static blog site for Graham Dumpleton, originally migrated from the Blogger site at [blog.dscpl.com.au](http://blog.dscpl.com.au). The site is built and managed using [Eleventy (11ty)](https://www.11ty.dev/) for fast, static site generation and is hosted at [https://grahamdumpleton.me](https://grahamdumpleton.me).
 
 ## About This Site
 
@@ -34,6 +34,7 @@ npm run serve
 - **Modern Design**: Responsive Bootstrap 5-based layout with dark/light mode toggle
 - **Fast Performance**: Static site generation for optimal loading speeds
 - **SEO Optimized**: Open Graph and Twitter Card meta tags for social sharing
+- **RSS Feed**: Automatic RSS feed generation for blog posts
 - **Syntax Highlighting**: Prism.js for beautiful code syntax highlighting
 - **Content Management**: Automatic post collection and organization by date
 - **Asset Optimization**: Automatic copying and optimization of images and CSS
@@ -44,20 +45,70 @@ npm run serve
 src/
 ├── _layouts/          # Liquid template layouts
 │   ├── base.liquid    # Main site layout
-│   └── post.liquid    # Individual post layout
+│   ├── post.liquid    # Individual post layout
+│   └── guide.liquid   # Individual guide layout
 ├── assets/            # Static assets (CSS, images)
 ├── posts/             # Blog posts organized by date
+│   ├── index.liquid   # Posts listing page
 │   └── YYYY/MM/       # Year/Month structure
+│       └── post-name/ # Individual post directories
+│           ├── index.md
+│           └── image.jpg (optional)
+├── guides/            # Topic guides and tutorials
+│   ├── index.liquid   # Guides listing page
+│   └── guide-name/    # Individual guide directories
+│       ├── index.md
+│       └── image.png (optional)
+├── about/             # About page content
+│   └── index.liquid   # About page template
 └── index.liquid       # Homepage template
 ```
 
 ### Content Management
 
-Posts are automatically processed from Markdown files with YAML front matter:
-- Each post directory contains `index.md` with metadata and content
-- Posts are automatically collected and sorted by date (newest first)
-- Images are automatically copied and linked from post directories
-- Tags and metadata are preserved from the original Blogger posts
+The site contains two main types of content:
+
+#### Blog Posts (`src/posts/`)
+- **Purpose**: Individual blog posts with timestamps and chronological organization
+- **Structure**: Organized by date (`YYYY/MM/post-name/`)
+- **Content**: Each post directory contains `index.md` with metadata and content
+- **Features**: Automatically collected and sorted by date (newest first), tags preserved from original Blogger posts
+- **Layout**: Uses `post.liquid` template with date-based navigation
+
+#### Topic Guides (`src/guides/`)
+- **Purpose**: Comprehensive topic guides and tutorials that serve as reference material
+- **Structure**: Individual guide directories (`guide-name/`)
+- **Content**: Each guide directory contains `index.md` with metadata and content
+- **Features**: Searchable collection, topic-based organization, cross-references to related posts
+- **Layout**: Uses `guide.liquid` template with guide-specific navigation
+
+Both content types support:
+- Markdown files with YAML front matter
+- Automatic image copying and linking from content directories
+- Tag and metadata preservation from original Blogger content
+- SEO optimization with Open Graph and Twitter Card meta tags
+
+#### Required Metadata
+
+**Blog Posts** require the following minimal metadata in `index.md`:
+```yaml
+---
+layout: post
+title: "Your Post Title"
+date: 2024-01-15
+tags: ["python", "web-development"]
+---
+```
+
+**Topic Guides** require the following minimal metadata in `index.md`:
+```yaml
+---
+layout: guide
+title: "Your Guide Title"
+description: "Brief description of the guide content"
+tags: ["tutorial", "python"]
+---
+```
 
 ### Customization
 
@@ -65,121 +116,24 @@ The site can be customized by modifying:
 - **Layouts**: Edit files in `src/_layouts/` to change page structure
 - **Styling**: Modify `src/assets/css/style.css` for custom styles
 - **Configuration**: Update `.eleventy.js` for site-wide settings
-- **Content**: Add new pages in `src/` or modify existing posts
+- **Content**: Add new posts in `src/posts/`, guides in `src/guides/`, or other pages in `src/`
 
 ### 11ty Configuration
 
 The site is configured via `.eleventy.js` with:
 - **Template Engine**: Liquid templates for flexible content rendering
-- **Collections**: Organized blog posts with automatic sorting
+- **Collections**: Organized blog posts and guides with automatic sorting
+- **RSS Feed**: Automatic RSS feed generation using `@11ty/eleventy-plugin-rss`
 - **Custom Filters**: Date formatting, excerpt generation, and content processing
 - **Asset Management**: Automatic copying of CSS, images, and other static files
+- **Content Types**: Separate collections for posts (chronological) and guides (topic-based)
 
-## Blogger Migration Scripts
+### RSS Feed
 
-The following Python scripts were used to migrate content from the original Blogger site:
+The site automatically generates an RSS feed at `/feed.xml` that includes:
+- **Content**: Recent blog posts (limited to 10 most recent)
+- **Filtering**: Only posts from 2025 onwards (configurable cutoff date)
+- **Metadata**: Site title, description, author information, and language settings
+- **Format**: Standard RSS 2.0 format for compatibility with feed readers
 
-### 1. Post Downloader (`download_posts.py`)
-
-Downloads web pages from URLs in the posts metadata and saves them to organized subdirectories for migration from Blogger.
-
-**Usage:**
-
-Download all posts from metadata:
-```bash
-uv run python archive/download_posts.py
-```
-
-Download a single URL:
-```bash
-uv run python archive/download_posts.py <URL>
-```
-
-Download a single URL with overwrite:
-```bash
-uv run python archive/download_posts.py <URL> --overwrite
-```
-
-Show help:
-```bash
-uv run python archive/download_posts.py --help
-```
-
-**Features:**
-- Reads URLs from `archive/posts-metadata.json`
-- Creates organized directory structure (`src/posts/YYYY/MM/`)
-- Downloads HTML content using the `requests` library
-- Skips existing files (unless `--overwrite` is used)
-- Handles network errors and timeouts gracefully
-- Provides detailed progress reporting and statistics
-- Supports both batch processing and single URL downloads
-
-**Directory Structure:**
-The script automatically creates subdirectories based on the URL path, with each post getting its own directory:
-- `http://blog.dscpl.com.au/2007/03/resistance-is-futile.html` → `src/posts/2007/03/resistance-is-futile/original.html`
-- `http://blog.dscpl.com.au/2019/01/administration-features-of-jupyterhub.html` → `src/posts/2019/01/administration-features-of-jupyterhub/original.html`
-
-Each post is saved in its own subdirectory named after the HTML filename (without the .html extension), with the downloaded content saved as `original.html`. This structure allows for additional files (like extracted content, metadata, etc.) to be stored alongside the original HTML file.
-
-**Error Handling:**
-- Network timeouts and connection errors
-- HTTP error responses (404, 500, etc.)
-- File system permission issues
-- Invalid JSON in metadata file
-- Missing or malformed URLs
-- Unicode encoding issues
-
-### 2. Post Extractor (`extract_post.py`)
-
-Extracts blog post data from Google Blogger HTML files and converts them to structured formats suitable for Eleventy.
-
-**Usage:**
-
-Process all posts from metadata (batch mode):
-```bash
-uv run python archive/extract_post.py
-```
-
-Process a single HTML file:
-```bash
-uv run python archive/extract_post.py <html_file_path>
-```
-
-Process a single HTML file with image overwrite:
-```bash
-uv run python archive/extract_post.py <html_file_path> --overwrite
-```
-
-Show help:
-```bash
-uv run python archive/extract_post.py --help
-```
-
-**Features:**
-- **Batch Processing**: Automatically processes all posts from `archive/posts-metadata.json`
-- **Single File Processing**: Process individual HTML files
-- **Image Download**: Downloads and localizes images from blog posts
-- **Overwrite Control**: `--overwrite` flag controls whether existing images are replaced
-- **Standardized Output**: Always creates `index.md` and `data.json` files in each post directory
-- **Content Extraction**: Extracts blog post title, content, author, date
-- **Comment Parsing**: Parses and converts comments to Markdown
-- **Label/Tag Extraction**: Extracts and preserves blog labels as tags
-- **Metadata Preservation**: Preserves Open Graph data and other metadata
-- **Markdown Generation**: Creates standalone Markdown files with YAML front matter
-- **JSON Output**: Generates structured JSON with all extracted data
-
-**Output Files:**
-For each processed post, the script creates two files in the post's directory:
-- `index.md`: Markdown file with YAML front matter containing post metadata and content
-- `data.json`: Complete structured JSON with all extracted data including comments and metadata
-
-**Image Handling:**
-- Downloads images referenced in blog posts to the post's directory
-- Updates image references in the content to point to local files
-- Skips existing images unless `--overwrite` flag is used
-- Generates safe filenames for images without proper names
-
-**Directory Structure:**
-The script works with the directory structure created by `download_posts.py`:
-- `src/posts/2007/03/resistance-is-futile/original.html` → generates `index.md` and `data.json` in the same directory
-- `src/posts/2019/01/administration-features-of-jupyterhub/original.html` → generates `index.md` and `data.json` in the same directory
+The RSS feed is generated using the `@11ty/eleventy-plugin-rss` plugin and can be accessed at `https://grahamdumpleton.me/feed.xml`.
