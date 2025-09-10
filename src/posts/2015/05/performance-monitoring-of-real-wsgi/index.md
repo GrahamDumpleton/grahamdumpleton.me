@@ -103,151 +103,69 @@ When you have more than one line on the chart, you can hover over the chart and 
 As well as the response time, we can also record metrics for the details of the response content being returned as was previously explored. Adding those in we now end up with:
 
 ```
- from wrapt import decorator, ObjectProxy
+from wrapt import decorator, ObjectProxy
+from timeit import default_timer
+from datadog import statsd
 
- from timeit import default_timer  
-  
+def record_request_metrics(application_time, output_time=None, output_blocks=None, output_length=None):
+    statsd.increment('wsgi.application.requests')
+    statsd.timing('wsgi.application.requests.application_time', 1000.0 * application_time)
+    if output_time is not None:
+        statsd.timing('wsgi.application.requests.output_time', 1000.0 * output_time)
+    if output_blocks is not None:
+        statsd.histogram('wsgi.application.requests.output_blocks', output_blocks)
+    if output_length is not None:
+        statsd.histogram('wsgi.application.requests.output_length', output_length)
 
- from datadog import statsd  
-  
+class WSGIApplicationIterable5(ObjectProxy):
+    def __init__(self, wrapped, start):
+        super(WSGIApplicationIterable5, self).__init__(wrapped)
+        self._self_start = start
+        self._self_time = 0.0
+        self._self_count = 0
+        self._self_bytes = 0
 
- def record_request_metrics(application_time, output_time=None,
+    def __iter__(self):
+        time = 0.0
+        start = 0.0
+        count = 0
+        bytes = 0
+        try:
+            for data in self.__wrapped__:
+                start = default_timer()
+                yield data
+                finish = default_timer()
+                if finish > start:
+                    time += (finish - start)
+                start = 0.0
+                count += 1
+                bytes += len(data)
+        finally:
+            if start:
+                finish = default_timer()
+                if finish > start:
+                    time += (finish - start)
+            self._self_time = time
+            self._self_count = count
+            self._self_bytes = bytes
 
-         output_blocks=None, output_length=None):  
-  
+    def close(self):
+        if hasattr(self.__wrapped__, 'close'):
+            self.__wrapped__.close()
+        duration = default_timer() - self._self_start
+        record_request_metrics(duration, output_time=self._self_time,
+                              output_blocks=self._self_count,
+                              output_length=self._self_bytes)
 
-     statsd.increment('wsgi.application.requests')  
-  
-
-     statsd.timing('wsgi.application.requests.application_time',
-
-             1000.0 * application_time)  
-  
-
-     if output_time is not None:
-
-         statsd.timing('wsgi.application.requests.output_time',
-
-                 1000.0 * output_time)  
-  
-
-     if output_blocks is not None:
-
-         statsd.histogram('wsgi.application.requests.output_blocks',
-
-                 output_blocks)  
-  
-
-     if output_length is not None:
-
-         statsd.histogram('wsgi.application.requests.output_length',
-
-                 output_length)  
-  
-
- class WSGIApplicationIterable5(ObjectProxy):  
-  
-
-     def __init__(self, wrapped, start):
-
-         super(WSGIApplicationIterable5, self).__init__(wrapped)
-
-         self._self_start = start
-
-         self._self_time = 0.0
-
-         self._self_count = 0
-
-         self._self_bytes = 0  
-  
-
-     def __iter__(self):
-
-         time = 0.0
-
-         start = 0.0
-
-         count = 0
-
-         bytes = 0  
-  
-
-         try:
-
-             for data in self.__wrapped__:
-
-                 start = default_timer()
-
-                 yield data
-
-                 finish = default_timer()
-
-                 if finish > start:
-
-                     time += (finish - start)
-
-                 start = 0.0
-
-                 count += 1
-
-                 bytes += len(data)
-
-         finally:
-
-             if start:
-
-                 finish = default_timer()
-
-                 if finish > start:
-
-                     time += (finish - start)  
-  
-
-             self._self_time = time
-
-             self._self_count = count
-
-             self._self_bytes = bytes  
-  
-
-     def close(self):
-
-         if hasattr(self.__wrapped__, 'close'):
-
-             self.__wrapped__.close()  
-  
-
-         duration = default_timer() - self._self_start  
-  
-
-         record_request_metrics(duration, output_time=self._self_time,
-
-                 output_blocks=self._self_count,
-
-                 output_length=self._self_bytes)  
-  
-
- @decorator
-
- def timed_wsgi_application5(wrapped, instance, args, kwargs):
-
-     start = default_timer()  
-  
-
-     try:
-
-         return WSGIApplicationIterable5(wrapped(*args, **kwargs), start)  
-  
-
-     except:
-
-         duration = default_timer() - start  
-  
-
-         record_request_metrics(duration)  
-  
-
-         raise
+@decorator
+def timed_wsgi_application5(wrapped, instance, args, kwargs):
+    start = default_timer()
+    try:
+        return WSGIApplicationIterable5(wrapped(*args, **kwargs), start)
+    except:
+        duration = default_timer() - start
+        record_request_metrics(duration)
+        raise
 ```
 
 In the case of 'wsgi.application.requests.output\_time', as it is a time value we have used 'statsd.timing\(\)' once again. For the value tracking the number of bytes and number of blocks, we could have used 'statsd.gauge\(\)', but this would have just given us the average. Instead we use 'statsd.histogram\(\)', which like 'statsd.timing\(\)' provides us with the ability to display the median and 95th percentile as well as the average.

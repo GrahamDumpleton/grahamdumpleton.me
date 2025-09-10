@@ -430,12 +430,15 @@ I have updated my Docker images with the /bin/env workaround now and so the 'war
 Hi Dumpleton, sorry to contact you from here.   
   
 I have a django app deployed in AWS EB using autoscaling. This app uses Django Rest with Token Authentication. In order for this to work, I have to add the following lines in etc/httpd/conf.d/wsgi.conf file:  
-  
+
+```  
 RewriteEngine on  
 RewriteCond %\{HTTP:Authorization\} ^\(.\*\)  
 RewriteRule .\* - \[e=HTTP\_AUTHORIZATION:%1\]  
   
-WSGIPassAuthorization On  
+WSGIPassAuthorization On
+```
+  
 The problem is: when AWS do an autoscale or ElasticBeanstalk environment upgrade, the wsgi.conf file is updated and the custom settings are deleted.  
   
 How can I avoid that?  

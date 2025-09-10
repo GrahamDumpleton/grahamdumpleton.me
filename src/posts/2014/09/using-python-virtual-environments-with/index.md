@@ -43,15 +43,15 @@ The mod\_wsgi documentation on this steers you towards a convoluted bit of code 
     
     # Add each new site-packages directory.  
     for directory in ALLDIRS:  
-     site.addsitedir(directory)
+      site.addsitedir(directory)
     
     
     # Reorder sys.path so new directories at the front.  
     new_sys_path = []   
     for item in list(sys.path):   
-     if item not in prev_sys_path:   
-     new_sys_path.append(item)   
-     sys.path.remove(item)   
+      if item not in prev_sys_path:   
+        new_sys_path.append(item)   
+        sys.path.remove(item)   
     sys.path[:0] = new_sys_path
 
 Part of the reasoning behind giving that as the recipe was a distrust of the 'activate\_this.py' script that is included in a Python virtual environment and advertised as the solution to use for embedded Python environments such as mod\_wsgi.
@@ -117,52 +117,58 @@ http://modwsgi.readthedocs.org/en/develop/release-notes/version-3.4.html
 Graham,  
 Great post. In my current set up, I have multiple python applications hosted on multiple virtual hosts. I have created only one virtual environment that all the applications use.  
   
-Outside of all the virtual hosts, I have:  
-\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#  
+Outside of all the virtual hosts, I have:
+
+```
+##############################################
 WSGISocketPrefix /var/run/wsgi  
-WSGIPythonHome /WebHA/catworld/featureanalytics-443S/webpython \#folder of my virtualenv  
-\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#  
+WSGIPythonHome /WebHA/catworld/featureanalytics-443S/webpython #folder of my virtualenv  
+##############################################
+```
+
+Then in each virtual host, I have among others:
+
+```
+##############################################
+DocumentRoot "/WebHA/catworld/featureanalytics-443S/workforce_tool/"
+ServerName wpat.cat.com
+ServerAlias wpat.cat.com
+
+WSGIDaemonProcess wpat.cat.com user=http group=http processes=4 threads=4
+WSGIProcessGroup wpat.cat.com
+WSGIPassAuthorization On
+
+WSGIScriptAlias / /WebHA/catworld/featureanalytics-443S/workforce_tool/workforce_tool.wsgi
+Alias /static /WebHA/catworld/featureanalytics-443S/workforce_tool/app/static
+
+Order allow,deny
+Allow from all
+
+##############################################
+``` 
   
-Then in each virtual host, I have among others:  
-\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#  
-DocumentRoot "/WebHA/catworld/featureanalytics-443S/workforce\_tool/"  
-ServerName wpat.cat.com  
-ServerAlias wpat.cat.com  
+The corresponding wsgi file for the above virtual host is:
+
+```
+##############################################  
+#workforce_tool.wsgi  
   
+#!/WebHA/catworld/featureanalytics-443S/webpython/bin/python  
   
-WSGIDaemonProcess wpat.cat.com user=http group=http processes=4 threads=4  
-WSGIProcessGroup wpat.cat.com  
-WSGIPassAuthorization On  
-  
-WSGIScriptAlias / /WebHA/catworld/featureanalytics-443S/workforce\_tool/workforce\_tool.wsgi  
-Alias /static /WebHA/catworld/featureanalytics-443S/workforce\_tool/app/static  
-  
-  
-Order allow,deny  
-Allow from all  
-  
-\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#  
-  
-  
-The corresponding wsgi file for the above virtual host is:  
-\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#  
-\#workforce\_tool.wsgi  
-  
-\#\!/WebHA/catworld/featureanalytics-443S/webpython/bin/python  
-  
-activate\_this = '/WebHA/catworld/featureanalytics-443S/webpython/bin/activate\_this.py'  
-exec\(open\(activate\_this\).read\(\)\)  
+activate_this = '/WebHA/catworld/featureanalytics-443S/webpython/bin/activate_this.py'  
+exec(open(activate_this).read())  
   
 import sys  
 import logging  
   
-logging.basicConfig\(stream=sys.stderr\)  
-sys.path.insert\(0,"/WebHA/catworld/featureanalytics-443S/workforce\_tool/"\)  
+logging.basicConfig(stream=sys.stderr)  
+sys.path.insert(0,"/WebHA/catworld/featureanalytics-443S/workforce_tool/")  
   
 from app import theapp as application  
-application.secret\_key = 'mykey'  
-\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#  
-  
+application.secret_key = 'mykey'  
+##############################################  
+```
+
 **Python 3.4.3**  
 **mod\_wsgi 4.4.22**  
 Daemon mode  
