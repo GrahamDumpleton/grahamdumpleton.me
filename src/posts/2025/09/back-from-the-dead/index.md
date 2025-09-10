@@ -1,5 +1,6 @@
 ---
 title: Back from the dead
+description: "After a 6 year hiatus from posting, I'm back."
 date: 2025-09-10
 draft: true
 ---
