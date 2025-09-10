@@ -1,0 +1,19 @@
+{
+  "title": "Decorators and monkey patching.",
+  "content": "Prior posts on the topic of decorators and monkey patching are as follows.  \n  \nThis batch of posts deals with Python decorators, how the simple pattern most people use isn't correct and how to implement a better decorator.  \n\n\n  * [How you implemented your Python decorator is wrong](/posts/2014/01/how-you-implemented-your-python/).\n  * [The interaction between decorators and descriptors](/posts/2014/01/the-interaction-between-decorators-and/).\n  * [Implementing a factory for creating decorators](/posts/2014/01/implementing-factory-for-creating/).\n  * [Implementing a universal decorator](/posts/2014/01/implementing-universal-decorator/).\n  * [Decorators which accept arguments](/posts/2014/01/decorators-which-accept-arguments/).\n  * [Maintaining decorator state using a class](/posts/2014/01/maintaining-decorator-state-using-class/).\n  * [The missing @synchronized decorator](/posts/2014/01/the-missing-synchronized-decorator/).\n  * [The @synchronized decorator as context manager](/posts/2014/01/the-synchronized-decorator-as-context/).\n  * [Performance overhead of using decorators](/posts/2014/02/performance-overhead-of-using-decorators/).\n  * [Performance overhead when applying decorators to methods](/posts/2014/02/performance-overhead-when-applying/).\n\n\n\nThis batch of posts deals with issues around the more general problem of monkey patching Python code.\n\n  * [Safely applying monkey patches in Python](/posts/2015/03/safely-applying-monkey-patches-in-python/).\n  * [Using wrapt to support testing of software](/posts/2015/03/using-wrapt-to-support-testing-of/).\n  * [Ordering issues when monkey patching in Python](/posts/2015/03/ordering-issues-when-monkey-patching-in/).\n  * [Automatic patching of Python applications.](/posts/2015/04/automatic-patching-of-python/)",
+  "date": null,
+  "author": null,
+  "url": "http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html",
+  "post_id": "3350721465154129789",
+  "blog_id": "2363643920942057324",
+  "comments": [],
+  "labels": [],
+  "metadata": {
+    "blog_title": "Graham Dumpleton",
+    "page_title": "Graham Dumpleton: Decorators and monkey patching.",
+    "og_title": "Decorators and monkey patching.",
+    "og_description": "Prior posts on the topic of decorators and monkey patching are as follows.   This batch of posts deals with Python decorators, how the simpl...",
+    "og_url": "http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html"
+  },
+  "downloaded_images": []
+}

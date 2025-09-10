@@ -145,17 +145,21 @@ def convert_blog_urls_to_relative(markdown_content):
     to:
     [text](/posts/2015/12/running-ipython-as-docker-container/)
     
+    And guide URLs like:
+    [text](http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html)
+    to:
+    [text](/guides/decorators-and-monkey-patching/)
+    
     Args:
         markdown_content (str): The markdown content to process
         
     Returns:
         str: Markdown content with converted URLs
     """
-    # Pattern to match markdown links with blog URLs
-    # This regex captures the link text and the URL
-    pattern = r'\[([^\]]+)\]\((https?://blog\.dscpl\.com\.au/(\d{4})/(\d{2})/([^/]+)\.html)\)'
+    # Pattern to match markdown links with regular blog URLs (YYYY/MM pattern)
+    regular_pattern = r'\[([^\]]+)\]\((https?://blog\.dscpl\.com\.au/(\d{4})/(\d{2})/([^/]+)\.html)\)'
     
-    def replace_url(match):
+    def replace_regular_url(match):
         link_text = match.group(1)
         year = match.group(3)
         month = match.group(4)
@@ -165,8 +169,22 @@ def convert_blog_urls_to_relative(markdown_content):
         relative_path = f"/posts/{year}/{month}/{post_slug}/"
         return f"[{link_text}]({relative_path})"
     
-    # Replace all matching URLs
-    converted_content = re.sub(pattern, replace_url, markdown_content)
+    # Pattern to match markdown links with guide URLs (/p/ pattern)
+    guide_pattern = r'\[([^\]]+)\]\((https?://blog\.dscpl\.com\.au/p/([^/]+)\.html)\)'
+    
+    def replace_guide_url(match):
+        link_text = match.group(1)
+        guide_slug = match.group(3)
+        
+        # Convert to relative path format
+        relative_path = f"/guides/{guide_slug}/"
+        return f"[{link_text}]({relative_path})"
+    
+    # Replace regular post URLs
+    converted_content = re.sub(regular_pattern, replace_regular_url, markdown_content)
+    
+    # Replace guide URLs
+    converted_content = re.sub(guide_pattern, replace_guide_url, converted_content)
     
     return converted_content
 
@@ -180,17 +198,22 @@ def convert_plain_blog_urls_to_markdown_links(markdown_content):
     to:
     [/posts/2014/12/hosting-python-wsgi-applications-using/](/posts/2014/12/hosting-python-wsgi-applications-using/)
     
+    And guide URLs like:
+    http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html
+    to:
+    [/guides/decorators-and-monkey-patching/](/guides/decorators-and-monkey-patching/)
+    
     Args:
         markdown_content (str): The markdown content to process
         
     Returns:
         str: Markdown content with plain URLs converted to markdown links
     """
-    # Pattern to match plain blog URLs (not already in markdown links)
+    # Pattern to match plain regular blog URLs (not already in markdown links)
     # This regex uses negative lookbehind and lookahead to ensure the URL is not already in a markdown link
-    pattern = r'(?<!\]\()(https?://blog\.dscpl\.com\.au/(\d{4})/(\d{2})/([^/\s]+)\.html)(?!\))'
+    regular_pattern = r'(?<!\]\()(https?://blog\.dscpl\.com\.au/(\d{4})/(\d{2})/([^/\s]+)\.html)(?!\))'
     
-    def replace_plain_url(match):
+    def replace_regular_plain_url(match):
         year = match.group(2)
         month = match.group(3)
         post_slug = match.group(4)
@@ -199,8 +222,21 @@ def convert_plain_blog_urls_to_markdown_links(markdown_content):
         relative_path = f"/posts/{year}/{month}/{post_slug}/"
         return f"[{relative_path}]({relative_path})"
     
-    # Replace all matching plain URLs
-    converted_content = re.sub(pattern, replace_plain_url, markdown_content)
+    # Pattern to match plain guide URLs (not already in markdown links)
+    guide_pattern = r'(?<!\]\()(https?://blog\.dscpl\.com\.au/p/([^/\s]+)\.html)(?!\))'
+    
+    def replace_guide_plain_url(match):
+        guide_slug = match.group(2)
+        
+        # Convert to relative path format
+        relative_path = f"/guides/{guide_slug}/"
+        return f"[{relative_path}]({relative_path})"
+    
+    # Replace regular post URLs
+    converted_content = re.sub(regular_pattern, replace_regular_plain_url, markdown_content)
+    
+    # Replace guide URLs
+    converted_content = re.sub(guide_pattern, replace_guide_plain_url, converted_content)
     
     return converted_content
 
@@ -740,6 +776,21 @@ def extract_year_month_from_url(url):
     return None, None
 
 
+def is_guide_url(url):
+    """
+    Check if URL is a guide URL (contains /p/ pattern).
+    Expected format: http://blog.dscpl.com.au/p/filename.html
+    Returns True if it's a guide URL, False otherwise.
+    """
+    parsed = urlparse(url)
+    path_parts = parsed.path.strip('/').split('/')
+    
+    if len(path_parts) >= 2 and path_parts[0] == 'p':
+        return True
+    
+    return False
+
+
 def get_basename_from_url(url):
     """Extract basename (without extension) from URL."""
     parsed = urlparse(url)
@@ -761,16 +812,27 @@ def url_to_html_path(url, posts_dir):
     Returns:
         Path: Path to the original.html file, or None if URL format is invalid
     """
-    year, month = extract_year_month_from_url(url)
-    if not year or not month:
-        return None
-    
-    basename = get_basename_from_url(url)
-    if not basename:
-        return None
-    
-    # Create path: posts/YYYY/MM/filename/original.html
-    return posts_dir / year / month / basename / "original.html"
+    # Check if this is a guide URL (contains /p/ pattern)
+    if is_guide_url(url):
+        basename = get_basename_from_url(url)
+        if not basename:
+            return None
+        
+        # For guide URLs, create path: guides/basename/original.html
+        guides_dir = posts_dir.parent / 'guides'
+        return guides_dir / basename / "original.html"
+    else:
+        # Regular post URL with YYYY/MM pattern
+        year, month = extract_year_month_from_url(url)
+        if not year or not month:
+            return None
+        
+        basename = get_basename_from_url(url)
+        if not basename:
+            return None
+        
+        # Create path: posts/YYYY/MM/filename/original.html
+        return posts_dir / year / month / basename / "original.html"
 
 
 def process_single_post(html_file_path, overwrite=False):

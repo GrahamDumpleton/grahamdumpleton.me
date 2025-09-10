@@ -48,6 +48,21 @@ def extract_year_month_from_url(url):
     return None, None
 
 
+def is_guide_url(url):
+    """
+    Check if URL is a guide URL (contains /p/ pattern).
+    Expected format: http://blog.dscpl.com.au/p/filename.html
+    Returns True if it's a guide URL, False otherwise.
+    """
+    parsed = urlparse(url)
+    path_parts = parsed.path.strip('/').split('/')
+    
+    if len(path_parts) >= 2 and path_parts[0] == 'p':
+        return True
+    
+    return False
+
+
 def get_filename_from_url(url):
     """Extract filename from URL."""
     parsed = urlparse(url)
@@ -120,21 +135,28 @@ def process_single_url(url, posts_dir, overwrite=False):
     """Process a single URL and download it to the appropriate directory."""
     print(f"Processing single URL: {url}")
     
-    # Extract year and month from URL
-    year, month = extract_year_month_from_url(url)
-    if not year or not month:
-        print("Error: Cannot extract year/month from URL")
-        return False
-    
     # Get basename from URL (without .html extension)
     basename = get_basename_from_url(url)
     if not basename:
         print("Error: Cannot extract basename from URL")
         return False
     
-    # Create subdirectory path: posts/YYYY/MM/filename/
-    subdir = posts_dir / year / month / basename
-    print("Target directory:", subdir)
+    # Check if this is a guide URL (contains /p/ pattern)
+    if is_guide_url(url):
+        # For guide URLs, create path: guides/basename/
+        guides_dir = posts_dir.parent / 'guides'
+        subdir = guides_dir / basename
+        print("Target directory (guide):", subdir)
+    else:
+        # Regular post URL with YYYY/MM pattern
+        year, month = extract_year_month_from_url(url)
+        if not year or not month:
+            print("Error: Cannot extract year/month from URL")
+            return False
+        
+        # Create subdirectory path: posts/YYYY/MM/filename/
+        subdir = posts_dir / year / month / basename
+        print("Target directory (post):", subdir)
     
     # Create directory if it doesn't exist
     if not create_directory_if_not_exists(subdir):
@@ -226,13 +248,6 @@ def main():
         print(f"[{i}/{len(posts_data)}] Processing: {title}")
         print(f"  URL: {original_url}")
         
-        # Extract year and month from URL
-        year, month = extract_year_month_from_url(original_url)
-        if not year or not month:
-            print("  Warning: Cannot extract year/month from URL, skipping")
-            skipped += 1
-            continue
-        
         # Get basename from URL (without .html extension)
         basename = get_basename_from_url(original_url)
         if not basename:
@@ -240,9 +255,23 @@ def main():
             skipped += 1
             continue
         
-        # Create subdirectory path: posts/YYYY/MM/filename/
-        subdir = posts_dir / year / month / basename
-        print("  Target directory:", subdir)
+        # Check if this is a guide URL (contains /p/ pattern)
+        if is_guide_url(original_url):
+            # For guide URLs, create path: guides/basename/
+            guides_dir = posts_dir.parent / 'guides'
+            subdir = guides_dir / basename
+            print("  Target directory (guide):", subdir)
+        else:
+            # Regular post URL with YYYY/MM pattern
+            year, month = extract_year_month_from_url(original_url)
+            if not year or not month:
+                print("  Warning: Cannot extract year/month from URL, skipping")
+                skipped += 1
+                continue
+            
+            # Create subdirectory path: posts/YYYY/MM/filename/
+            subdir = posts_dir / year / month / basename
+            print("  Target directory (post):", subdir)
         
         # Create directory if it doesn't exist
         if not create_directory_if_not_exists(subdir):

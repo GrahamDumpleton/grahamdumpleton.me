@@ -126,7 +126,7 @@ If you want to learn more about wrapt, check out the documentation:
 
 I have also written over a dozen related blog posts on decorators and monkey patching:
 
-  * <http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html>
+  * <[/guides/decorators-and-monkey-patching/](/guides/decorators-and-monkey-patching/)>
 
 
 
