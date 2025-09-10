@@ -18,28 +18,22 @@ What is reality here. Well, FASTCGI may be old technology but it does work. If i
   
 To try and understand where the problems lie I will go through the setup required for running a Python WSGI script under mod\_fcgid, these days the preferred FASTCGI hosting solution for Apache. Unlike other blogs out there I am not just going to present the final recipe, but actually explain the pain points which people seem to encounter and why they arise.  
   
-The FASTCGI Script  
+# The FASTCGI Script  
   
 In the case of Apache/mod\_wsgi, all a user need do is drop a WSGI script file into a directory and either map a URL to it using the WSGIScriptAlias directive, or have it automatically mapped to based on its file system location and extension mapping provided by the AddHandler directive. A simple hello world WSGI script file suitable for Apache/mod\_wsgi would be as follows.  
 
 
   
 
-
-def application\(environ, start\_response\):
-
-status = '200 OK'
-
-output = 'Hello World\!'
-
-response\_headers = \[\('Content-type', 'text/plain'\),
-
-\('Content-Length', str\(len\(output\)\)\)\]
-
-start\_response\(status, response\_headers\)
-
-return \[output\]
-
+```
+def application(environ, start_response):
+    status = '200 OK'
+    output = 'Hello World!'
+    response_headers = [('Content-type', 'text/plain'),
+                        ('Content-Length', str(len(output)))]
+    start_response(status, response_headers)
+    return [output]
+```
   
 
 
@@ -54,33 +48,21 @@ Now it would indeed be really painful if users had to implement this wire protoc
   
 
 
-\#\!/usr/bin/env python
+```python
+#!/usr/bin/env python
 
-  
+def application(environ, start_response):
+    status = '200 OK'
+    output = 'Hello World!'
+    response_headers = [('Content-type', 'text/plain'),
+                        ('Content-Length', str(len(output)))]
+    start_response(status, response_headers)
+    return [output]
 
-
-def application\(environ, start\_response\):
-
-status = '200 OK'
-
-output = 'Hello World\!'
-
-response\_headers = \[\('Content-type', 'text/plain'\),
-
-\('Content-Length', str\(len\(output\)\)\)\]
-
-start\_response\(status, response\_headers\)
-
-return \[output\]
-
-  
-
-
-if \_\_name\_\_ == '\_\_main\_\_':
-
-from flup.server.fcgi import WSGIServer
-
-WSGIServer\(application\).run\(\)
+if __name__ == '__main__':
+    from flup.server.fcgi import WSGIServer
+    WSGIServer(application).run()
+```
 
   
 
@@ -94,7 +76,7 @@ When this is executed as a program, \_\_name\_\_ will equate to '\_\_main\_\_' a
 Seems simple enough, what can possibly go wrong.
 
   
-Configuration And Startup  
+# Configuration And Startup  
   
 Having loaded mod\_fcgid into Apache using:  
   
@@ -102,9 +84,9 @@ Having loaded mod\_fcgid into Apache using:
 
   
 
-
+```
 LoadModule fcgid\_module modules/mod\_fcgid.so  
-
+```
 
   
 you still need to tell Apache that the program must be processed by mod\_fcgid. This can be done in number of different ways. The most often used is to specify that any resource ending with a '.fcgi' extension should be handled by mod\_fcgid. This would be done using the AddHandler directive.  
@@ -113,17 +95,13 @@ you still need to tell Apache that the program must be processed by mod\_fcgid. 
 
   
 
-
+```
 <Directory /usr/local/www/htdocs>
-
 Order deny, allow
-
 Allow from All
-
 AddHandler fcgid-script .fcgi
-
 </Directory>  
-
+```
 
   
 So access control has been defined and the mapping for the extension is defined. Presuming that the directory corresponded to the DocumentRoot for the server and the FASTCGI program was called 'hello.fcgi', we would use the URL:  
@@ -132,9 +110,9 @@ So access control has been defined and the mapping for the extension is defined.
 
   
 
-
+```
 http://localhost/hello.fcgi  
-
+```
 
   
 It fails though with the error in the browser of:  
@@ -143,12 +121,11 @@ It fails though with the error in the browser of:
 
   
 
-
+```
 Forbidden  
 
-
 You don't have permission to access /hello.fcgi on this server.  
-
+```
 
   
 But we set access control so what can it be? In this case the problem is that being a script it is necessary to tell Apache that it is okay to be able to execute scripts out of that directory. To do this we need to turn on the ExecCGI option.  
@@ -157,19 +134,14 @@ But we set access control so what can it be? In this case the problem is that be
 
   
 
-
+```
 <Directory /usr/local/www/htdocs>
-
 Order deny, allow
-
 Allow from All
-
 Options ExecCGI
-
 AddHandler fcgid-script .fcgi
-
 </Directory>
-
+```
   
 This sort of setup would be done by the Apache administrator and for a shared hosting service they should know what is required and just get it right in the first place. So try again.  
   
@@ -177,7 +149,7 @@ This sort of setup would be done by the Apache administrator and for a shared ho
 
   
 
-
+```
 Internal Server Error
 
 The server encountered an internal error or misconfiguration and was unable to complete your request.
@@ -185,7 +157,7 @@ The server encountered an internal error or misconfiguration and was unable to c
 Please contact the server administrator, you@example.com and inform them of the time the error occurred, and anything you might have done that may have caused the error.
 
 More information about this error may be available in the server error log.
-
+```
   
 
 
@@ -193,11 +165,10 @@ At least this time we get an error in the Apache error logs.
 
   
 
-
-\[info\] mod\_fcgid: server example.com:/usr/local/www/htdocs/hello.fcgi\(30887\) started
-
-\[info\] mod\_fcgid: process /usr/local/www/htdocs/hello.fcgi\(30887\) exit\(communication error\), terminated by calling exit\(\), return code: 255
-
+```
+[info] mod_fcgid: server example.com:/usr/local/www/htdocs/hello.fcgi(30887) started
+[info] mod_fcgid: process /usr/local/www/htdocs/hello.fcgi(30887) exit(communication error), terminated by calling exit(), return code: 255
+```
   
 
 
@@ -209,14 +180,15 @@ One can start to see the frustration that people can experience.
   
 The cause of this cryptic error message in this case was the permissions on our actual FASTCGI program.  
   
-  
+```
 8 -rw-r--r-- 1 graham admin 430 20 Sep 21:10 hello.fcgi  
-  
+```
+
 Because it is going to be executed as a program, we need to ensure that it is executable. So we need to do:  
   
-  
+``` 
 chmod +x hello.fcgi  
-  
+```
   
 
 
@@ -227,9 +199,9 @@ to yield:
 
   
 
-
+```
 8 -rwxr-xr-x 1 graham admin 430 20 Sep 21:10 hello.fcgi
-
+```
   
 
 
@@ -242,9 +214,9 @@ If the directory the file is in isn't accessible to the user that Apache runs as
 
   
 
-
-\[error\] \[client 127.0.0.1\] \(13\)Permission denied: access to /hello.fcgi denied
-
+```
+[error] [client 127.0.0.1] (13)Permission denied: access to /hello.fcgi denied
+```
   
 
 
@@ -252,11 +224,10 @@ If instead the directory was accessible and the file was not readable to the Apa
 
   
 
-
-\[warn\] \[client 127.0.0.1\] mod\_fcgid: error reading data, FastCGI server closed connection
-
-\[error\] \[client 127.0.0.1\] Premature end of script headers: hello.fcgi
-
+```
+[warn] [client 127.0.0.1] mod_fcgid: error reading data, FastCGI server closed connection
+[error] [client 127.0.0.1] Premature end of script headers: hello.fcgi
+```
   
 
 
@@ -270,7 +241,7 @@ Anyway if you manage to get past all that, the 'python' executable was actually 
   
 
 
-The WSGI Adapter
+# The WSGI Adapter
 
   
 
@@ -279,19 +250,14 @@ As stated above, success will actually have depended on the flup package having 
 
   
 
-
-\[info\] mod\_fcgid: server fcgid-1.example.com:/usr/local/www/htdocs/hello.fcgi\(31130\) started
-
-Traceback \(most recent call last\):
-
-File "/usr/local/www/htdocs/hello.fcgi", line 19, in <module>
-
-from flup.server.fcgi import WSGIServer
-
+```
+[info] mod_fcgid: server fcgid-1.example.com:/usr/local/www/htdocs/hello.fcgi(31130) started
+Traceback (most recent call last):
+  File "/usr/local/www/htdocs/hello.fcgi", line 19, in <module>
+    from flup.server.fcgi import WSGIServer
 ImportError: No module named flup.server.fcgi
-
-\[info\] mod\_fcgid: process /usr/local/www/hello.fcgi\(31130\) exit\(communication error\), terminated by calling exit\(\), return code: 1
-
+[info] mod_fcgid: process /usr/local/www/hello.fcgi(31130) exit(communication error), terminated by calling exit(), return code: 1
+```
   
 
 
@@ -316,7 +282,7 @@ Technically this means that prior to the point that you actually manage to start
   
 
 
-What about stdout?
+# What about stdout?
 
   
 
@@ -347,7 +313,7 @@ Okay, so you don't think you are touching stdin, so it isn't a problem. Think ag
   
 
 
-Is It A Lost Cause?
+# Is It A Lost Cause?
 
   
 
