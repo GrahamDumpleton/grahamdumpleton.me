@@ -1,8 +1,6 @@
 ---
 layout: post
 title: "Decorators and monkey patching."
-author: ""
-date: ""
 url: "http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html"
 post_id: "3350721465154129789"
 blog_id: "2363643920942057324"

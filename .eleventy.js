@@ -22,7 +22,7 @@ module.exports = function(eleventyConfig) {
   // Add guides collection
   eleventyConfig.addCollection("guides", function(collectionApi) {
     return collectionApi.getFilteredByGlob("src/guides/*/index.md")
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+      .sort((a, b) => a.data.title.localeCompare(b.data.title));
   });
 
   // Add RSS feed collection (newest first for proper RSS ordering)

@@ -1,8 +1,6 @@
 ---
 layout: post
 title: "Using Python with Docker."
-author: ""
-date: ""
 url: "http://blog.dscpl.com.au/p/using-python-with-docker.html"
 post_id: "5591286857776935907"
 blog_id: "2363643920942057324"

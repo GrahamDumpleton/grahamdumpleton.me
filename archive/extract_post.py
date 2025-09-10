@@ -482,8 +482,15 @@ def create_markdown_file(post_data, output_path):
         f.write("---\n")
         f.write("layout: post\n")
         f.write(f"title: \"{escape_yaml_string(post_data['title'])}\"\n")
-        f.write(f"author: \"{escape_yaml_string(post_data['author'])}\"\n")
-        f.write(f"date: \"{escape_yaml_string(post_data['date'])}\"\n")
+        
+        # Only write author if it's not empty
+        if post_data.get('author') and post_data['author'].strip():
+            f.write(f"author: \"{escape_yaml_string(post_data['author'])}\"\n")
+        
+        # Only write date if it's not empty
+        if post_data.get('date') and post_data['date'].strip():
+            f.write(f"date: \"{escape_yaml_string(post_data['date'])}\"\n")
+        
         f.write(f"url: \"{escape_yaml_string(post_data['url'])}\"\n")
         
         # Add post ID and blog ID if available

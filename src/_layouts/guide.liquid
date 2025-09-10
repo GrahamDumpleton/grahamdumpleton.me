@@ -9,29 +9,15 @@ layout: base
                 <header class="mb-4">
                     <h1 class="display-4 fw-bold text-primary mb-3">{{ title }}</h1>
                     
+                    {% if originalUrl %}
                     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-                        <div class="d-flex align-items-center text-muted">
-                            <i class="bi bi-calendar3 me-2"></i>
-                            <time datetime="{{ date | date: 'iso' }}" class="fw-medium">
-                                {{ date | date }}
-                            </time>
-                        </div>
-                        
-                        {% if author %}
-                        <div class="d-flex align-items-center text-muted">
-                            <i class="bi bi-person me-2"></i>
-                            <span class="fw-medium">{{ author }}</span>
-                        </div>
-                        {% endif %}
-                        
-                        {% if originalUrl %}
                         <div class="d-flex align-items-center">
                             <a href="{{ originalUrl }}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">
                                 <i class="bi bi-box-arrow-up-right me-1"></i>Original Post
                             </a>
                         </div>
-                        {% endif %}
                     </div>
+                    {% endif %}
                     
                     {% if tags and tags.length > 0 %}
                     <div class="d-flex flex-wrap gap-2">
@@ -49,13 +35,6 @@ layout: base
                     {{ content | safe }}
                 </div>
                 
-                <!-- Post Footer -->
-                <footer class="mt-5 pt-4 border-top">
-                    <div class="d-flex align-items-center text-muted">
-                        <i class="bi bi-clock me-2"></i>
-                        <small>Published {{ date | date }}</small>
-                    </div>
-                </footer>
             </div>
         </article>
         
