@@ -43,13 +43,12 @@ permalink: /guides/
                     <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
                         <i class="bi bi-book"></i>
                     </div>
+                    <h3 class="h5 fw-bold mb-0 flex-grow-1">
+                        <a href="{{ page.url }}" class="text-decoration-none stretched-link">
+                            {{ page.data.title }}
+                        </a>
+                    </h3>
                 </div>
-                
-                <h3 class="h5 fw-bold mb-3">
-                    <a href="{{ page.url }}" class="text-decoration-none stretched-link">
-                        {{ page.data.title }}
-                    </a>
-                </h3>
                 
                 {% if page.data.description %}
                 <div class="text-muted mb-3">{{ page.data.description | markdown_no_links | truncate: 150 }}</div>
