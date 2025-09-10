@@ -2,13 +2,14 @@
 
 The following Python scripts were used to migrate content from the original Blogger site at [blog.dscpl.com.au](http://blog.dscpl.com.au) to this modern static site.
 
+**NOTE**: Don't run these scripts again on this repo as some fixups in the converted blog posts had to be done manually afterwards, so running the conversion again will loose those changes. The scripts are kept here just in case they are useful to someone else.
+
 ## Overview
 
 These scripts handle the complete migration process from Google Blogger to a static site built with Eleventy:
 
 1. **Post Downloader** - Downloads HTML content from Blogger URLs
 2. **Post Extractor** - Extracts and converts content to Markdown and JSON formats
-3. **Quote Detection** - Utility script for detecting and handling quoted content
 
 ## Scripts
 
@@ -116,30 +117,3 @@ For each processed post, the script creates two files in the post's directory:
 The script works with the directory structure created by `download_posts.py`:
 - `src/posts/2007/03/resistance-is-futile/original.html` → generates `index.md` and `data.json` in the same directory
 - `src/posts/2019/01/administration-features-of-jupyterhub/original.html` → generates `index.md` and `data.json` in the same directory
-
-### 3. Quote Detection (`detect-quotes.py`)
-
-Utility script for detecting and handling quoted content in blog posts.
-
-## Migration Workflow
-
-1. **Prepare metadata**: Ensure `blogger/posts-metadata.json` contains all the URLs to migrate
-2. **Download content**: Run `download_posts.py` to fetch all HTML content from Blogger
-3. **Extract and convert**: Run `extract_post.py` to convert HTML to Markdown and JSON
-4. **Review and clean**: Check the generated content and make any necessary adjustments
-5. **Build site**: Use Eleventy to build the final static site
-
-## Dependencies
-
-These scripts require Python with the following packages (managed via `uv`):
-- `requests` - For downloading web content
-- `beautifulsoup4` - For HTML parsing
-- `lxml` - For XML/HTML processing
-- `markdownify` - For HTML to Markdown conversion
-
-## Files
-
-- `download_posts.py` - Main downloader script
-- `extract_post.py` - Content extraction and conversion script
-- `detect-quotes.py` - Quote detection utility
-- `posts-metadata.json` - Metadata file containing URLs and post information
