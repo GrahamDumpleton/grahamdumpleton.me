@@ -581,6 +581,13 @@ footer a:hover {
 }
 
 /* Responsive adjustments */
+@media (max-width: 991px) {
+  /* Add top margin to Quick Links section on mobile when it stacks below social links */
+  .footer-section .col-lg-4 {
+    margin-top: 2rem;
+  }
+}
+
 @media (max-width: 768px) {
   body {
     font-size: 1rem;
