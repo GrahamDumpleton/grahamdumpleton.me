@@ -3,7 +3,6 @@ title: "Status of wrapt (September 2025)"
 description: "The current status of my Python wrapt package and what to expect next."
 date: 2025-09-11
 tags: ["python", "wrapt", "pycharm"]
-draft: true
 ---
 
 The Python [wrapt](https://pypi.org/project/wrapt/) package recently turned 12 years old. Originally intended to be a module for monkey patching Python code, its wrapper object turned out to be a useful basis for creating Python decorators.
