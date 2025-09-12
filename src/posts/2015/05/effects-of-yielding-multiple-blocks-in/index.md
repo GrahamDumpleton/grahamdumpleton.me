@@ -82,11 +82,10 @@ The first thing to working out why there may be a difference is to understand wh
 The relevant part of the WSGI specification is the section on [buffering and streaming](https://www.python.org/dev/peps/pep-3333/#buffering-and-streaming). In this section it states:
 
 > WSGI servers, gateways, and middleware must not delay the transmission of any block; they must either fully transmit the block to the client, or guarantee that they will continue transmission even while the application is producing its next block. A server/gateway or middleware may provide this guarantee in one of three ways:
-```
+>
 > 1\. Send the entire block to the operating system \(and request that any O/S buffers be flushed\) before returning control to the application, OR  
 > 2\. Use a different thread to ensure that the block continues to be transmitted while the application produces the next block.  
 > 3\. \(Middleware only\) send the entire block to its parent gateway/server.
-```
 
 In simple terms this means that a WSGI server is not allowed to buffer the response content and must ensure that it will actually be sent back to the HTTP client immediately or at least in parallel to fetching the next data block to be sent.
 
