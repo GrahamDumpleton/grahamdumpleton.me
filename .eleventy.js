@@ -87,6 +87,30 @@ module.exports = function(eleventyConfig) {
     return array ? array.length : 0;
   });
 
+  // Add GitHub Open Graph URL cache busting filter
+  eleventyConfig.addLiquidFilter("github_og_cache_bust", function(url) {
+    if (!url || typeof url !== 'string') return url;
+    
+    // Check if it's a GitHub Open Graph URL
+    const githubOgPattern = /^(https:\/\/opengraph\.githubassets\.com\/)([^\/]+)(\/.+)$/;
+    const match = url.match(githubOgPattern);
+    
+    if (match) {
+      const crypto = require('crypto');
+      // Generate a random hash for cache busting
+      const randomHash = crypto.createHash('md5')
+        .update(Date.now().toString() + Math.random().toString())
+        .digest('hex')
+        .substring(0, 8);
+      
+      // Replace the hash component with our random hash
+      return `${match[1]}${randomHash}${match[3]}`;
+    }
+    
+    // Return original URL if it's not a GitHub Open Graph URL
+    return url;
+  });
+
   // Add markdown filter that renders markdown but disables links
   eleventyConfig.addLiquidFilter("markdown_no_links", function(content) {
     if (!content) return '';
