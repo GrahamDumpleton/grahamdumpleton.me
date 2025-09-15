@@ -2,6 +2,7 @@
 title: "Status of wrapt (September 2025)"
 description: "The current status of my Python wrapt package and what to expect next."
 date: 2025-09-11
+image: "/assets/images/graham-avatar.jpg"
 tags: ["python", "wrapt", "pycharm"]
 ---
 
