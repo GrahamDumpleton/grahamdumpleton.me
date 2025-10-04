@@ -87,7 +87,7 @@ sys.modules['graphlib'] = <module 'graphlib' from '.../lib/python3.13/graphlib.p
 
 One key thing to note here is that when the lazy import is setup, no changes have been made to `sys.modules`. It is only later when the module is truly imported that you see an entry in `sys.modules` for that module name.
 
-Some lazy module importers work by injecting into `sys.modules` a fake module object for the target module. This has to be done right up front when the application is started. Because the fake entry exists, when `import` is later used to import that module it thinks it has already been imported and thus what is added to into the scope where `import` is used is the fake module, with the actual module not being imported at that point.
+Some lazy module importers work by injecting into `sys.modules` a fake module object for the target module. This has to be done right up front when the application is started. Because the fake entry exists, when `import` is later used to import that module it thinks it has already been imported and thus what is added into the scope where `import` is used is the fake module, with the actual module not being imported at that point.
 
 What then happens is that when code attempts to use something from the module, an overridden `__getattr__` special dunder method on the fake module object gets triggered, which on the first use causes the actual module to then be imported.
 
