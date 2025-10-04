@@ -97,6 +97,6 @@ With the way the `wrapt` example works above, no global change is required to `s
 
 Reducing the impacts to just the scope where the lazy import was used is actually one of the goals of the PEP. The example using `wrapt` shows that it can be done, but it means you can't use an `import` statement, but then that is what the PEP aims to still allow, albeit they still require a new `lazy` keyword for when doing the import. Either way, the code where you want to have a lazy import needs to be different.
 
-The other thing which the PEP should avoid is the module reference in the scope where the module is imported being any sort of fake module object. Initially the module reference would effectively be a place holder, but as soon as used the actual module would be imported and the place holder replaced.
+The other thing which the PEP should avoid is the module reference in the scope where the module is imported being any sort of fake module object. Initially the module reference would effectively be a place holder, but as soon as used, the actual module would be imported and the place holder replaced.
 
 For the `wrapt` example the module reference would always be a proxy object, although technically with a bit of stack diving trickey you could also replace the module reference with the actual module as a side effect of the first use. I will explore that possibility in a followup post.
