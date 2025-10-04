@@ -63,7 +63,7 @@ import sys
 import wrapt
 
 def lazy_import(name):
-    return wrapt.LazyObjectProxy(lambda: __import__(name))
+    return wrapt.LazyObjectProxy(lambda: __import__(name, fromlist=[""]))
 
 graphlib = lazy_import("graphlib")
 
