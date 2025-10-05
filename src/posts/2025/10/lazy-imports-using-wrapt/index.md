@@ -99,4 +99,4 @@ Reducing the impacts to just the scope where the lazy import was used is actuall
 
 The other thing which the PEP should avoid is the module reference in the scope where the module is imported being any sort of fake module object. Initially the module reference would effectively be a place holder, but as soon as used, the actual module would be imported and the place holder replaced.
 
-For the `wrapt` example the module reference would always be a proxy object, although technically with a bit of stack diving trickey you could also replace the module reference with the actual module as a side effect of the first use. I will explore that possibility in a followup post.
+For the `wrapt` example the module reference would always be a proxy object, although technically with a bit of stack diving trickey you could also replace the module reference with the actual module as a side effect of the first use. This sort of trick is left as an exercise for the reader.
