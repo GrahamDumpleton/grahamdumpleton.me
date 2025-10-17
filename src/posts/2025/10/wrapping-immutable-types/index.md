@@ -381,7 +381,7 @@ Having a solution, we now just need to update all the other in-place operators w
 ```
     def __imul__(self, other):
         if hasattr(self.__wrapped__, "__imul__"):
-            self.__wrapped__ += other
+            self.__wrapped__ *= other
             return self
         else:
             return self.__object_proxy__(self.__wrapped__ * other)
