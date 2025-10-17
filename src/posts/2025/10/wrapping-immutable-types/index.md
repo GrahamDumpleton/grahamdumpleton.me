@@ -238,7 +238,7 @@ In order to have the operation be applied to the wrapped object, the `__iadd__` 
 
 On face value this may seem to be correct, but fails for the case of an immutable object.
 
-Going back to what we said occurs when we use `+=` we had:
+Going back to what we said occurs under the covers when we use `+=` we now have:
 
 ```
 if "tuple_values" not in vars(c):
@@ -246,12 +246,12 @@ if "tuple_values" not in vars(c):
 else:
     tmp = c.tuple_values
 
-tmp += (4, 5, 6)
+tmp = tmp.__iadd__((4, 5, 6))
 
 c.tuple_values = tmp
 ```
 
-So initially what happens is that a temporary variable is copied from `C.tuple_values`, which is the reference to the instance of `ObjectProxy`. The original wrapped object at this point exists as the `__wrapped__` attribute on the `ObjectProxy` instance.
+The original wrapped object at this point exists as the `__wrapped__` attribute on the `ObjectProxy` instance referenced by the temporary value.
 
 When `+=` is executed, that calls `__iadd__` which results in:
 
@@ -265,9 +265,9 @@ which as have explained, since the wrapped object is immutable is implemented as
         self.__wrapped__ = self.__wrapped__ + other
 ```
 
-Since though both the attribute on the instance, and the class, reference the same proxy object, and although we are replacing the tuple with the updated value, that is only occuring against the `__wrapped__` attribute of the `ObjectProxy` instance itself, and does not itself affect the original attribute reference.
+Since though both the attribute on the instance, and the class, reference the same proxy object, and although we are replacing the tuple with the updated value, that is only occuring against the `__wrapped__` attribute of the `ObjectProxy` instance itself.
 
-What is meant to happen in order to be able to replace the original attribute reference, is that `__iadd__` should return any new object to replace it, but as the code was written, it was always returning `self`. Thus, the original proxy object is what gets set as the attribute on the instance.
+What is meant to happen in order to be able to replace the original attribute reference, is that `__iadd__` should return any new object to replace it, but as the code was written, it was always returning `self`. Thus, the original proxy object is what gets set as the attribute on the instance as the temporary value reference doesn't change.
 
 As much as this is an obscure corner case which in practice would probably never arise since wrapping immutable objects is a questionable use case, the question now is how to fix this and do something different when an immutable object is being wrapped.
 
