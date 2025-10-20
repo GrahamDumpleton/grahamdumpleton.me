@@ -68,3 +68,18 @@ dumps = wrapt.lazy_import("json", "dumps")
 How this is different to other lazy module importers is that `sys.modules` is not patched, nor is a custom import loader used. Instead the `json` and `dumps` objects in the above examples are instances of the `LazyObjectProxy` class from `wrapt`, which is implemented using the transparent object proxy class of `wrapt` but with lazy initialization of the wrapped object. Using this lazy initialization feature, we can delay the importing of the module until the proxy object is first used. Although everything then goes through the object proxy, in general you shouldn't notice any difference.
 
 So if you are excited about using lazy module imports but don't want to wait until you can use Python 3.15 (presuming PEP 810 is added), then consider giving this implementation using `wrapt` a go instead. If you do find issues, please let me know via the [issues tracker](https://github.com/GrahamDumpleton/wrapt/issues) for `wrapt` on GitHub.
+
+---
+
+**UPDATE #1**
+
+[Adam Johnson](https://fosstodon.org/@adamchainz/115404333513311427) pointed that for type checking to work, possibly still need something like:
+
+```
+import wrapt
+
+if TYPE_CHECKING:
+    import json
+
+json = wrapt.lazy_import("json")
+```
