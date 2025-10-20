@@ -73,7 +73,7 @@ So if you are excited about using lazy module imports but don't want to wait unt
 
 **UPDATE #1**
 
-[Adam Johnson](https://fosstodon.org/@adamchainz/115404333513311427) pointed that for type checking to work, possibly still need something like:
+[Adam Johnson](https://fosstodon.org/@adamchainz/115404333513311427) pointed out that for type checking to work, possibly still need something like:
 
 ```
 import wrapt
