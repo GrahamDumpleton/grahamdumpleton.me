@@ -76,10 +76,12 @@ So if you are excited about using lazy module imports but don't want to wait unt
 [Adam Johnson](https://fosstodon.org/@adamchainz/115404333513311427) pointed out that for type checking to work, possibly still need something like:
 
 ```
+from typing import TYPE_CHECKING
+
 import wrapt
+
+json = wrapt.lazy_import("json")
 
 if TYPE_CHECKING:
     import json
-
-json = wrapt.lazy_import("json")
 ```
