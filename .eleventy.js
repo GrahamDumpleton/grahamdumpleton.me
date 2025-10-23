@@ -141,7 +141,54 @@ module.exports = function(eleventyConfig) {
   });
 
   // Enable indented code blocks (disabled by default in Eleventy v2.0+)
-  eleventyConfig.amendLibrary("md", (mdLib) => mdLib.enable("code"));
+  eleventyConfig.amendLibrary("md", (mdLib) => {
+    mdLib.enable("code");
+    
+    // Add Mermaid diagram support
+    const { execSync } = require('child_process');
+    const fs = require('fs');
+    const path = require('path');
+    const crypto = require('crypto');
+    
+    const defaultFence = mdLib.renderer.rules.fence || function(tokens, idx, options, env, renderer) {
+      return renderer.renderToken(tokens, idx, options);
+    };
+    
+    mdLib.renderer.rules.fence = function(tokens, idx, options, env, renderer) {
+      const token = tokens[idx];
+      const info = token.info.trim();
+      
+      if (info === 'mermaid') {
+        const content = token.content.trim();
+        const hash = crypto.createHash('md5').update(content).digest('hex');
+        const imagePath = path.join('_site/assets/diagrams', `mermaid-${hash}.svg`);
+        const outputDir = path.dirname(imagePath);
+        
+        // Ensure output directory exists
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+        
+        // Only generate if the file doesn't already exist
+        if (!fs.existsSync(imagePath)) {
+          try {
+            execSync(`mmdc -i /dev/stdin -o ${imagePath} -t default`, {
+              input: content,
+              stdio: ['pipe', 'pipe', 'pipe']
+            });
+          } catch (error) {
+            console.error('Mermaid diagram generation failed:', error.message);
+            // Fallback to rendering as code block
+            return defaultFence(tokens, idx, options, env, renderer);
+          }
+        }
+        
+        return `<img src="/assets/diagrams/mermaid-${hash}.svg" alt="Mermaid diagram" class="mermaid-diagram" />`;
+      }
+      
+      return defaultFence(tokens, idx, options, env, renderer);
+    };
+  });
 
   eleventyConfig.addPlugin(feedPlugin, {
 		type: "rss", // or "atom", "json"
