@@ -81,7 +81,7 @@ command: |-
 ```
 ````
 
-The YAML within each code block controls everything about the action: which file to operate on, what text to match or replace, which terminal session to use, and so on. The format is consistent across all action types. Once you understand the pattern of action type as the language identifier and YAML configuration as the body, authoring new actions is straightforward.
+The YAML within each code block controls everything about the action: which file to operate on, what text to match or replace, which terminal session to use, and so on. The format is consistent across all action types. Once you understand the pattern of action type as the language identifier and YAML configuration as the body, authoring with actions is straightforward.
 
 ## The value of removing friction
 
