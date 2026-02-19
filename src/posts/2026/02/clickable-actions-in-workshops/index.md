@@ -66,7 +66,7 @@ The second replaces the selected text with the new value:
 ````
 ```editor:replace-text-selection
 file: ~/exercises/deployment.yaml
-text: "image: nginx:1.25"
+text: "image: nginx:latest"
 ```
 ````
 
@@ -76,7 +76,8 @@ For terminal commands, the syntax is even simpler:
 
 ````
 ```terminal:execute
-command: kubectl get pods
+command: |-
+  echo "Hello from terminal:execute"
 ```
 ````
 
