@@ -14,6 +14,11 @@ This blog is powered by [Eleventy (11ty)](https://www.11ty.dev/), a simpler stat
 
 ### Quick Start
 
+Install dependencies:
+```bash
+npm install
+```
+
 Build the static site:
 ```bash
 npm run build
