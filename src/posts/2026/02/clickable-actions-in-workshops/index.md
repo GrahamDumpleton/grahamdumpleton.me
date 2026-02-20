@@ -3,7 +3,7 @@ title: "Clickable actions in workshops"
 description: "From copy and paste to fully guided workshop experiences with clickable actions."
 date: 2026-02-20
 tags: ["educates"]
-draft: true
+draft: false
 ---
 
 The idea of guided instruction in tutorials isn't new. Most online tutorials these days provide a click-to-copy icon next to commands and code snippets. It's a useful convenience. You see the command you need to run, you click the icon, and it lands in your clipboard ready to paste. Better than selecting text by hand and hoping you got the right boundaries.
