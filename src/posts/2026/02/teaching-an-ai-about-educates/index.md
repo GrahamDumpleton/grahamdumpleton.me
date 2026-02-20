@@ -1,7 +1,7 @@
 ---
 title: "Teaching an AI about Educates"
 description: "Using an AI agent skill to generate interactive Educates workshops."
-date: 2026-02-20
+date: 2026-02-21
 tags: ["ai", "educates"]
 draft: true
 ---
