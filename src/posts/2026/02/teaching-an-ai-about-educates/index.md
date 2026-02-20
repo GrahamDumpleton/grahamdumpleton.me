@@ -90,8 +90,6 @@ What the skill produced is a complete workshop with properly structured instruct
 
 ![Workshop dashboard showing the Air framework workshop with instructions and clickable actions](air-framework-workshop.png)
 
-You can browse the generated files in the [sample repository on GitHub](https://github.com/GrahamDumpleton/lab-python-air-intro). If you check the commit history you'll see how little had to be changed from what was originally generated.
-
 The generated content covers the progression you'd want in an introductory workshop, starting from the basics and building up to more complete applications. At each step, the explanations provide context for what the learner is about to do before the clickable actions guide them through doing it. That rhythm of explain, show, do, observe, the pattern I described in my earlier posts, is maintained consistently throughout.
 
 Is the generated workshop perfect and ready to publish as-is? Realistically, no. Although the AI can generate some pretty amazing content, it doesn't always get things exactly right. In this case three changes were needed before the workshop would run correctly.
@@ -103,6 +101,8 @@ The second was that the AI generated the sample application as `app.py` rather t
 The third was an unnecessary clickable action. The generated instructions included an action for the learner to click to open the editor on the `app.py` file, but the editor would already have been displayed by a previous action. This one turned out to be a gap in the skill itself. When using clickable actions to manipulate files in the editor, the editor tab is always brought to the foreground as a side effect. The skill didn't make that clear enough, so the AI added a redundant step to explicitly show the editor tab.
 
 That last issue is a good example of why even small details matter when creating a skill, and also why skills have an advantage over relying purely on model training. Because the skill can be updated at any time, fixing that kind of gap is straightforward. You edit the reference material, and every future workshop generation benefits immediately. You aren't dependent on waiting for some future LLM model release that happens to have seen more up-to-date documentation.
+
+You can browse the generated files in the [sample repository on GitHub](https://github.com/GrahamDumpleton/lab-python-air-intro). If you check the commit history you'll see how little had to be changed from what was originally generated.
 
 Even with those fixes, the changes were minor. The overall structure was correct, the clickable actions worked, and the content provided a coherent learning path. What would have taken hours of manual authoring to produce (writing correct clickable action syntax, getting YAML configuration right, maintaining consistent pacing across instruction pages) the skill handles all of that. A domain expert would still want to review the content, verify the technical accuracy of the explanations, and adjust the pacing or emphasis based on what they think matters most for learners. But the job shifts from writing everything from scratch to reviewing and refining what was generated.
 
