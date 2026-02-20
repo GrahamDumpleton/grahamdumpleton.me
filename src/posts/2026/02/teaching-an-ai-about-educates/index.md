@@ -2,8 +2,8 @@
 title: "Teaching an AI about Educates"
 description: "Using an AI agent skill to generate interactive Educates workshops."
 date: 2026-02-21
-tags: ["ai", "educates"]
-draft: true
+tags: ["ai", "educates", "python"]
+draft: false
 ---
 
 The way we direct AI coding agents has changed significantly over the past couple of years. Early on, the interaction was purely conversational. You'd open a chat, explain what you wanted, provide whatever context seemed relevant, and hope the model could work with it. If it got something wrong or went down the wrong path, you'd correct it and try again. It worked, but it was ad hoc. Every session started from scratch. Every conversation required re-establishing context.
