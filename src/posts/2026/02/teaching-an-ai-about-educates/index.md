@@ -1,6 +1,6 @@
 ---
 title: "Teaching an AI about Educates"
-description: "How packaging domain knowledge into an AI agent skill makes it possible to generate complete, interactive Educates workshops from a single prompt."
+description: "Using an AI agent skill to generate interactive Educates workshops."
 date: 2026-02-20
 tags: ["ai", "educates"]
 draft: true
