@@ -77,6 +77,6 @@ The workshop I showed being generated in the last post works exactly as expected
 
 Running Educates on a local Kubernetes cluster is the most straightforward way to try things out, and it gives you the complete platform experience. But Kubernetes isn't the only option for running a workshop. The same underlying container image used to run the workshop can also be run directly in Docker without any Kubernetes cluster at all. The Educates CLI supports this too.
 
-That said, running in Docker comes with trade-offs. Some features that depend on Kubernetes won't be available, and the workshop itself may need adjustments to work correctly in a Docker environment. I'll cover that in my next post, including how the AI skill from the previous post can help figure out what needs to change.
+That said, running in Docker comes with trade-offs. Some features that depend on Kubernetes won't be available, and the workshop itself may need adjustments to work correctly in a Docker environment. I'll cover that in a future post, including how the AI skill from the previous post can help figure out what needs to change.
 
 If you want to try any of this yourself, the [Educates documentation](https://docs.educates.dev) has a more detailed quick start guide that covers installation and configuration options beyond what I've shown here.
