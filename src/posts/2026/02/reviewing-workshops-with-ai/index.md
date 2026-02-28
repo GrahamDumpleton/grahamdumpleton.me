@@ -3,6 +3,7 @@ title: "Reviewing workshops with AI"
 description: "Having the Claude browser extension review an Educates workshop as a real user would."
 date: 2026-02-28
 tags: ["educates", "ai"]
+image: https://opengraph.githubassets.com/1/educates/educates-training-platform
 draft: false
 ---
 
