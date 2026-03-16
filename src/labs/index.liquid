@@ -1,0 +1,87 @@
+---
+layout: base
+title: Labs
+permalink: /labs/
+---
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h1 class="h2 fw-bold mb-0">
+                <i class="bi bi-mortarboard me-2"></i>Labs
+            </h1>
+            <a href="/" class="btn btn-outline-primary">
+                <i class="bi bi-house me-1"></i>Back to Home
+            </a>
+        </div>
+
+        <p class="text-muted mb-4">
+            Interactive training courses and workshops hosted on the <a href="https://educates.dev" target="_blank" rel="noopener">Educates</a> training platform. Browse courses below, then launch individual workshops directly in your browser.
+        </p>
+
+        <div class="alert alert-info mb-4" role="alert">
+            <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle me-1"></i>Before you begin</h6>
+            <p class="mb-2">
+                These workshops are provided on a best-effort basis and run on a shared system with limited capacity. When you launch your first workshop, you are given a two-hour access window for that workshop and as many follow-up workshops as the time allows. Once your access window expires, you are welcome to come back and start a new session to continue where you left off. As capacity is limited, only a certain number of people can access workshops at any given time, so if all slots are in use you may need to wait for one to become available.
+            </p>
+            <p class="mb-2">
+                This platform is still experimental. Workshops may occasionally be taken offline for maintenance or updates, and availability cannot be guaranteed. If you encounter any issues, please try again later.
+            </p>
+            <p class="mb-0">
+                Access to workshops is currently free. Depending on demand and hosting costs, this may need to change in the future. If you find the workshops valuable and would like to help keep them running, please consider supporting through <a href="https://github.com/sponsors/GrahamDumpleton" target="_blank" rel="noopener">GitHub Sponsors</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Courses Grid -->
+<div class="row" id="labsContainer">
+    {% for course in labs.courses %}
+    {% assign total_workshops = 0 %}
+    {% for mod in course.modules %}
+        {% assign module_data = labs.modules[mod.file] %}
+        {% if module_data.workshops %}
+            {% assign total_workshops = total_workshops | plus: module_data.workshops.size %}
+        {% endif %}
+    {% endfor %}
+    <div class="col-lg-6 mb-4">
+        <article class="card h-100 border-0 shadow-sm post-list-item">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="bi bi-mortarboard"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-0 flex-grow-1">
+                        <a href="/labs/{{ course.slug }}/" class="text-decoration-none stretched-link">
+                            {{ course.title }}
+                        </a>
+                    </h3>
+                </div>
+
+                {% if course.description %}
+                <div class="text-muted mb-3">{{ course.description | truncate: 200 }}</div>
+                {% endif %}
+
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge bg-light text-dark border">
+                        <i class="bi bi-collection me-1"></i>{{ course.modules.size }} {% if course.modules.size == 1 %}module{% else %}modules{% endif %}
+                    </span>
+                    <span class="badge bg-light text-dark border">
+                        <i class="bi bi-journal-code me-1"></i>{{ total_workshops }} workshops
+                    </span>
+                </div>
+
+                {% if course.tags and course.tags.size > 0 %}
+                <div class="d-flex flex-wrap gap-1">
+                    {% for tag in course.tags limit:4 %}
+                    <span class="badge bg-light text-dark border">
+                        <i class="bi bi-tag me-1"></i>{{ tag }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </article>
+    </div>
+    {% endfor %}
+</div>

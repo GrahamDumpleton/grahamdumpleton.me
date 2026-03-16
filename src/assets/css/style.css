@@ -747,3 +747,28 @@ a:focus {
 [data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: var(--bs-gray-500);
 }
+
+/* Labs - Difficulty Badges */
+.badge-beginner {
+  background-color: var(--success-color);
+  color: #fff;
+}
+
+.badge-intermediate {
+  background-color: var(--warning-color);
+  color: var(--dark-color);
+}
+
+.badge-advanced {
+  background-color: var(--danger-color);
+  color: #fff;
+}
+
+/* Labs - Workshop Items */
+.workshop-item {
+  transition: var(--transition-base);
+}
+
+.workshop-item:hover {
+  box-shadow: var(--shadow-md);
+}

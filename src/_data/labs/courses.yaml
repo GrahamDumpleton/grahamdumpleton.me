@@ -1,0 +1,13 @@
+portal_url: "https://educates-iss.grumpys.work/products"
+
+courses:
+  - slug: python-decorators
+    title: "Python Decorators"
+    description: "Learn Python decorator fundamentals using only Python and its standard library. Core workshops progress from functions as first-class objects and closures through to advanced patterns including class-based decorators, method decoration, and the descriptor protocol. Elective workshops apply these skills to practical domains such as caching, input validation, access control, and plugin systems."
+    tags: [python, decorators]
+    vendor: "Graham Dumpleton"
+    modules:
+      - file: python-decorators-module-a
+        slug: module-a
+        title: "Module A: Decorator Fundamentals"
+        description: "Core concepts of Python decorators from first-class functions and closures through to class-based decorators, the descriptor protocol, async support, metaclasses, and practical applications."

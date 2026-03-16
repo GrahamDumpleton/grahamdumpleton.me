@@ -1,0 +1,179 @@
+---
+layout: base
+---
+
+<div class="row">
+    <div class="col-12">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/labs/">Labs</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ course.title }}</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h1 class="h2 fw-bold mb-0">
+                <i class="bi bi-mortarboard me-2"></i>{{ course.title }}
+            </h1>
+            <a href="/labs/" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Labs
+            </a>
+        </div>
+
+        <p class="text-muted mb-5">{{ course.description }}</p>
+    </div>
+</div>
+
+{% assign portal_url = course.portal_url | default: labs.portal_url %}
+
+{% for mod in course.modules %}
+{% assign module_data = labs.modules[mod.file] %}
+{% assign mod_portal_url = module_data.portal_url | default: portal_url %}
+{% assign mod_product_name = module_data.product_name %}
+{% assign mod_catalog_name = module_data.catalog_name %}
+
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="h4 fw-bold mb-2">
+            <i class="bi bi-collection me-2"></i>{{ mod.title }}
+        </h2>
+        {% if mod.description %}
+        <p class="text-muted mb-4">{{ mod.description }}</p>
+        {% endif %}
+
+        {% if module_data.workshops %}
+        {% assign core_workshops = "" | split: "" %}
+        {% assign elective_workshops = "" | split: "" %}
+        {% for workshop in module_data.workshops %}
+            {% if workshop.category == "elective" %}
+                {% assign elective_workshops = elective_workshops | push: workshop %}
+            {% else %}
+                {% assign core_workshops = core_workshops | push: workshop %}
+            {% endif %}
+        {% endfor %}
+
+        <!-- Core Workshops -->
+        {% if core_workshops.size > 0 %}
+        <h3 class="h6 fw-bold text-uppercase text-muted mb-3">
+            <i class="bi bi-signpost-split me-1"></i>Core Workshops
+        </h3>
+        <div class="list-group mb-4">
+            {% for workshop in core_workshops %}
+            {% assign ws_portal_url = workshop.portal_url | default: mod_portal_url %}
+            {% assign ws_product_name = workshop.product_name | default: mod_product_name %}
+            {% assign ws_catalog_name = workshop.catalog_name | default: mod_catalog_name %}
+            <div class="list-group-item border-0 shadow-sm mb-2 rounded workshop-item">
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                    <div class="flex-grow-1 me-3">
+                        <h4 class="h6 fw-bold mb-1">{{ workshop.title }}</h4>
+                        <p class="text-muted mb-2 small">{{ workshop.description }}</p>
+                        <div class="d-flex flex-wrap gap-1 align-items-center">
+                            <span class="badge bg-primary">Core</span>
+                            <span class="badge badge-{{ workshop.difficulty }}">{{ workshop.difficulty | capitalize }}</span>
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-clock me-1"></i>{{ workshop.duration }}
+                            </span>
+                            {% if workshop.requires and workshop.requires.size > 0 %}
+                            <span class="badge bg-light text-muted border small">
+                                <i class="bi bi-arrow-return-right me-1"></i>Requires:
+                                {% for req in workshop.requires %}
+                                    {% for w in module_data.workshops %}
+                                        {% if w.alias == req %}{{ w.title | split: ": " | last }}{% if forloop.last == false %}, {% endif %}{% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 ms-2">
+                        {% if workshop.status == "draft" %}
+                        <span class="badge bg-secondary">Coming Soon</span>
+                        {% else %}
+                        <form method="GET" action="{{ ws_portal_url }}/{{ ws_product_name }}" target="_self">
+                            <input type="hidden" name="catalog" value="{{ ws_catalog_name }}">
+                            <input type="hidden" name="workshop" value="{{ workshop.alias }}">
+                            <input type="hidden" name="index_url" class="lab-index-url" value="">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-play-fill me-1"></i>Launch
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Elective Workshops -->
+        {% if elective_workshops.size > 0 %}
+        <h3 class="h6 fw-bold text-uppercase text-muted mb-3">
+            <i class="bi bi-puzzle me-1"></i>Elective Workshops
+        </h3>
+        <div class="list-group mb-4">
+            {% for workshop in elective_workshops %}
+            {% assign ws_portal_url = workshop.portal_url | default: mod_portal_url %}
+            {% assign ws_product_name = workshop.product_name | default: mod_product_name %}
+            {% assign ws_catalog_name = workshop.catalog_name | default: mod_catalog_name %}
+            <div class="list-group-item border-0 shadow-sm mb-2 rounded workshop-item">
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                    <div class="flex-grow-1 me-3">
+                        <h4 class="h6 fw-bold mb-1">{{ workshop.title }}</h4>
+                        <p class="text-muted mb-2 small">{{ workshop.description }}</p>
+                        <div class="d-flex flex-wrap gap-1 align-items-center">
+                            <span class="badge bg-secondary">Elective</span>
+                            <span class="badge badge-{{ workshop.difficulty }}">{{ workshop.difficulty | capitalize }}</span>
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-clock me-1"></i>{{ workshop.duration }}
+                            </span>
+                            {% if workshop.requires and workshop.requires.size > 0 %}
+                            <span class="badge bg-light text-muted border small">
+                                <i class="bi bi-arrow-return-right me-1"></i>Requires:
+                                {% for req in workshop.requires %}
+                                    {% for w in module_data.workshops %}
+                                        {% if w.alias == req %}{{ w.title | split: ": " | last }}{% if forloop.last == false %}, {% endif %}{% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 ms-2">
+                        {% if workshop.status == "draft" %}
+                        <span class="badge bg-secondary">Coming Soon</span>
+                        {% else %}
+                        <form method="GET" action="{{ ws_portal_url }}/{{ ws_product_name }}" target="_self">
+                            <input type="hidden" name="catalog" value="{{ ws_catalog_name }}">
+                            <input type="hidden" name="workshop" value="{{ workshop.alias }}">
+                            <input type="hidden" name="index_url" class="lab-index-url" value="">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-play-fill me-1"></i>Launch
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <a href="/labs/" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Labs
+        </a>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.lab-index-url').forEach(function(input) {
+    input.value = window.location.href;
+});
+</script>

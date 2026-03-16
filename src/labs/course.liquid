@@ -1,0 +1,11 @@
+---
+pagination:
+  data: labs.courses
+  size: 1
+  alias: course
+permalink: "/labs/{{ course.slug }}/"
+layout: course
+eleventyComputed:
+  title: "{{ course.title }}"
+  description: "{{ course.description }}"
+---
