@@ -90,7 +90,7 @@ layout: base
                         {% if workshop.status == "draft" %}
                         <span class="badge bg-secondary">Coming Soon</span>
                         {% else %}
-                        <form method="GET" action="{{ ws_portal_url }}/{{ ws_product_name }}" target="_self">
+                        <form method="POST" action="{{ ws_portal_url }}/{{ ws_product_name }}" target="_self">
                             <input type="hidden" name="catalog" value="{{ ws_catalog_name }}">
                             <input type="hidden" name="workshop" value="{{ workshop.alias }}">
                             <input type="hidden" name="index_url" class="lab-index-url" value="">
@@ -143,7 +143,7 @@ layout: base
                         {% if workshop.status == "draft" %}
                         <span class="badge bg-secondary">Coming Soon</span>
                         {% else %}
-                        <form method="GET" action="{{ ws_portal_url }}/{{ ws_product_name }}" target="_self">
+                        <form method="POST" action="{{ ws_portal_url }}/{{ ws_product_name }}" target="_self">
                             <input type="hidden" name="catalog" value="{{ ws_catalog_name }}">
                             <input type="hidden" name="workshop" value="{{ workshop.alias }}">
                             <input type="hidden" name="index_url" class="lab-index-url" value="">
