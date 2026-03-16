@@ -3,7 +3,7 @@ catalog_name: labs-decorator-workshops-module-a
 
 workshops:
   # Core workshops (in sequence)
-  - alias: lab-a01-fn-building-blocks
+  - name: lab-a01-fn-building-blocks
     title: "A01: Functions as Building Blocks"
     description: "Learn how Python treats functions as first-class objects and how closures capture state from enclosing scopes — foundational concepts for understanding decorators."
     duration: "30m"
@@ -12,7 +12,7 @@ workshops:
     requires: []
     status: final
 
-  - alias: lab-a02-first-decorator
+  - name: lab-a02-first-decorator
     title: "A02: Your First Decorator"
     description: "Build your first Python decorators by applying the closure and factory patterns — start with manual wrapping, then graduate to the @decorator syntax."
     duration: "30m"
@@ -22,7 +22,7 @@ workshops:
       - lab-a01-fn-building-blocks
     status: final
 
-  - alias: lab-a03-decorator-arguments
+  - name: lab-a03-decorator-arguments
     title: "A03: Decorator Arguments and Flexible Signatures"
     description: "Build decorators that accept configuration arguments using the decorator factory pattern, and make wrappers that work with any function signature using *args and **kwargs."
     duration: "35m"
@@ -32,7 +32,7 @@ workshops:
       - lab-a02-first-decorator
     status: final
 
-  - alias: lab-a04-functools-wraps
+  - name: lab-a04-functools-wraps
     title: "A04: Preserving the Wrapped Function"
     description: "Discover how decorating a function silently breaks introspection, then learn to fix it with functools.wraps — and understand the limitations that remain."
     duration: "25m"
@@ -42,7 +42,7 @@ workshops:
       - lab-a03-decorator-arguments
     status: final
 
-  - alias: lab-a05-stacking-decorators
+  - name: lab-a05-stacking-decorators
     title: "A05: Stacking Decorators"
     description: "Learn what happens when multiple decorators are applied to a single function — how they compose, in what order they execute, and how to reason about the resulting wrapper chain."
     duration: "30m"
@@ -52,7 +52,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a06-class-decorators
+  - name: lab-a06-class-decorators
     title: "A06: Class-Based Decorators"
     description: "Implement decorators as classes using __init__ and __call__, and see how instance attributes provide a natural home for per-function state."
     duration: "30m"
@@ -62,7 +62,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a07-decorating-methods
+  - name: lab-a07-decorating-methods
     title: "A07: Decorating Methods"
     description: "Discover why decorating methods differs from decorating standalone functions — experience the breakage caused by class-based decorators on methods and write decorators that are aware of self."
     duration: "30m"
@@ -72,7 +72,7 @@ workshops:
       - lab-a06-class-decorators
     status: final
 
-  - alias: lab-a08-descriptor-protocol
+  - name: lab-a08-descriptor-protocol
     title: "A08: Decorators and the Descriptor Protocol"
     description: "Understand the mechanism behind method binding — the descriptor protocol — and use it to fix class-based decorators so they work correctly on both functions and methods."
     duration: "35m"
@@ -82,7 +82,7 @@ workshops:
       - lab-a07-decorating-methods
     status: final
 
-  - alias: lab-a09-dual-use-decorators
+  - name: lab-a09-dual-use-decorators
     title: "A09: Dual-Use Decorators"
     description: "Build decorators that work both with and without parentheses — @decorator and @decorator(args) — using callable detection, sentinels, and functools.partial."
     duration: "30m"
@@ -93,7 +93,7 @@ workshops:
     status: final
 
   # Elective workshops (any order, after completing core workshops A01-A04)
-  - alias: lab-a10-input-validation
+  - name: lab-a10-input-validation
     title: "A10: Input Validation Decorators"
     description: "Build decorators that validate function arguments at runtime — using inspect.signature to bind arguments, reading type annotations, and composing reusable constraint factories."
     duration: "35m"
@@ -103,7 +103,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a11-caching-memoisation
+  - name: lab-a11-caching-memoisation
     title: "A11: Caching and Memoisation Decorators"
     description: "Build memoisation decorators from scratch — handling cache keys, keyword arguments, and eviction — then compare with functools.lru_cache and implement time-based cache expiry."
     duration: "35m"
@@ -113,7 +113,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a12-access-control
+  - name: lab-a12-access-control
     title: "A12: Access Control Decorators"
     description: "Build permission-checking decorators that gate function access based on user authentication and roles — including @login_required, @requires_role, and method-level access control."
     duration: "35m"
@@ -123,7 +123,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a13-registration-plugins
+  - name: lab-a13-registration-plugins
     title: "A13: Registration and Plugin Decorators"
     description: "Build decorators that register functions in central registries — including a command dispatcher, a route system, and an event hook system — exploring the pattern where the decorator records rather than wraps."
     duration: "35m"
@@ -133,7 +133,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a14-exception-handling
+  - name: lab-a14-exception-handling
     title: "A14: Exception Handling Decorators"
     description: "Build decorators that catch, log, transform, and retry on exceptions — including structured logging, exception mapping, exponential backoff with jitter, and conditional suppression."
     duration: "35m"
@@ -143,7 +143,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a15-deprecation-warnings
+  - name: lab-a15-deprecation-warnings
     title: "A15: Deprecation Decorators"
     description: "Build configurable @deprecated decorators using the warnings module — covering stacklevel for correct call-site reporting, versioned deprecation, and automatic redirect to replacement functions."
     duration: "30m"
@@ -153,7 +153,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a16-profiling-measurement
+  - name: lab-a16-profiling-measurement
     title: "A16: Profiling and Measurement Decorators"
     description: "Build decorators that measure function execution time, call frequency, and memory usage — using time.perf_counter_ns(), tracemalloc, and cProfile."
     duration: "35m"
@@ -164,7 +164,7 @@ workshops:
     status: final
 
   # Core workshops (continued)
-  - alias: lab-a17-signature-inspect
+  - name: lab-a17-signature-inspect
     title: "A17: Signature Preservation with inspect"
     description: "Explore the inspect module's signature introspection tools, understand why functools.wraps does not fully preserve signatures, and appreciate why full signature preservation is hard."
     duration: "35m"
@@ -174,7 +174,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a18-context-managers
+  - name: lab-a18-context-managers
     title: "A18: Context Manager Decorators"
     description: "Explore the intersection of decorators and context managers — using contextlib.contextmanager and contextlib.ContextDecorator to build objects usable as both decorators and with statements."
     duration: "35m"
@@ -184,7 +184,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a19-thread-safety
+  - name: lab-a19-thread-safety
     title: "A19: Thread Safety and Decorators"
     description: "Build synchronisation decorators using threading.Lock and threading.RLock — demonstrating race conditions, per-function vs per-instance locking, and reentrant locks for recursive calls."
     duration: "35m"
@@ -194,7 +194,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a20-async-decorators
+  - name: lab-a20-async-decorators
     title: "A20: Decorators for Async Functions"
     description: "Master the challenges of decorating async def functions — write async decorators that properly await the wrapped coroutine and detect whether a function is async at decoration time."
     duration: "35m"
@@ -204,7 +204,7 @@ workshops:
       - lab-a04-functools-wraps
     status: final
 
-  - alias: lab-a21-class-decoration
+  - name: lab-a21-class-decoration
     title: "A21: Class Decorators"
     description: "Discover that decorators can be applied to classes as well as functions — modify class attributes, add methods and properties, and compare class decorators with metaclasses and __init_subclass__."
     duration: "40m"
@@ -214,7 +214,7 @@ workshops:
       - lab-a05-stacking-decorators
     status: final
 
-  - alias: lab-a22-metaclass-decorators
+  - name: lab-a22-metaclass-decorators
     title: "A22: Decorators and Metaclasses"
     description: "Use metaclasses to automatically apply decorators to all methods of a class, learn how __init_subclass__ offers a simpler alternative, and understand when metaclasses are necessary."
     duration: "40m"
@@ -223,13 +223,3 @@ workshops:
     requires:
       - lab-a21-class-decoration
     status: final
-
-  - alias: lab-a23-debugging-decorators
-    title: "A23: Debugging Decorated Functions"
-    description: "Learn techniques for inspecting and fixing problems in decorated functions — use __wrapped__ to traverse decorator chains and build diagnostic tools for introspecting decorators."
-    duration: "35m"
-    category: core
-    difficulty: intermediate
-    requires:
-      - lab-a05-stacking-decorators
-    status: draft

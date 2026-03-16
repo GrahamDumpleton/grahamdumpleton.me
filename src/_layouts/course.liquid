@@ -79,7 +79,7 @@ layout: base
                                 <i class="bi bi-arrow-return-right me-1"></i>Requires:
                                 {% for req in workshop.requires %}
                                     {% for w in module_data.workshops %}
-                                        {% if w.alias == req %}{{ w.title | split: ": " | last }}{% if forloop.last == false %}, {% endif %}{% endif %}
+                                        {% if w.name == req %}{{ w.title | split: ": " | last }}{% if forloop.last == false %}, {% endif %}{% endif %}
                                     {% endfor %}
                                 {% endfor %}
                             </span>
@@ -92,7 +92,7 @@ layout: base
                         {% else %}
                         <form method="POST" action="{{ ws_portal_url }}/{{ ws_product_name }}" target="_self">
                             <input type="hidden" name="catalog" value="{{ ws_catalog_name }}">
-                            <input type="hidden" name="workshop" value="{{ workshop.alias }}">
+                            <input type="hidden" name="workshop" value="{{ workshop.name }}">
                             <input type="hidden" name="index_url" class="lab-index-url" value="">
                             <button type="submit" class="btn btn-primary btn-sm">
                                 <i class="bi bi-play-fill me-1"></i>Launch
@@ -132,7 +132,7 @@ layout: base
                                 <i class="bi bi-arrow-return-right me-1"></i>Requires:
                                 {% for req in workshop.requires %}
                                     {% for w in module_data.workshops %}
-                                        {% if w.alias == req %}{{ w.title | split: ": " | last }}{% if forloop.last == false %}, {% endif %}{% endif %}
+                                        {% if w.name == req %}{{ w.title | split: ": " | last }}{% if forloop.last == false %}, {% endif %}{% endif %}
                                     {% endfor %}
                                 {% endfor %}
                             </span>
@@ -145,7 +145,7 @@ layout: base
                         {% else %}
                         <form method="POST" action="{{ ws_portal_url }}/{{ ws_product_name }}" target="_self">
                             <input type="hidden" name="catalog" value="{{ ws_catalog_name }}">
-                            <input type="hidden" name="workshop" value="{{ workshop.alias }}">
+                            <input type="hidden" name="workshop" value="{{ workshop.name }}">
                             <input type="hidden" name="index_url" class="lab-index-url" value="">
                             <button type="submit" class="btn btn-primary btn-sm">
                                 <i class="bi bi-play-fill me-1"></i>Launch
