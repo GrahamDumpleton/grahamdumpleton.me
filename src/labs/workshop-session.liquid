@@ -1,0 +1,86 @@
+---
+layout: base
+title: Workshop Session
+permalink: /labs/workshop-session/
+---
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="text-center mb-4">
+            <h1 class="h2 fw-bold">
+                <i class="bi bi-mortarboard me-2"></i>Workshop Session
+            </h1>
+        </div>
+
+        <div id="notification-message"></div>
+
+        <div class="text-center mt-4">
+            <a id="back-button" href="/labs/" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Course
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var params = new URLSearchParams(window.location.search);
+    var notification = params.get('notification');
+    var returnUrl = params.get('return_url') || '/labs/';
+    var container = document.getElementById('notification-message');
+    var backButton = document.getElementById('back-button');
+
+    backButton.href = returnUrl;
+
+    var messages = {
+        'session-deleted': {
+            type: 'success',
+            icon: 'bi-check-circle',
+            title: 'Workshop Complete',
+            body: '<p>Thank you for completing the workshop. It is hoped you found it useful and learned something new along the way.</p>' +
+                  '<p>If you enjoyed the experience and would like to help keep these workshops available, please consider supporting through ' +
+                  '<a href="https://github.com/sponsors/GrahamDumpleton" target="_blank" rel="noopener">GitHub Sponsors</a>.</p>' +
+                  '<p class="mb-0">Feel free to head back and try another workshop whenever you are ready.</p>'
+        },
+        'workshop-invalid': {
+            type: 'danger',
+            icon: 'bi-exclamation-triangle',
+            title: 'Invalid Workshop',
+            body: '<p class="mb-0">The requested workshop could not be found. It may have been removed or renamed. Please head back and try launching the workshop again.</p>'
+        },
+        'session-unavailable': {
+            type: 'warning',
+            icon: 'bi-hourglass-split',
+            title: 'No Capacity Available',
+            body: '<p class="mb-0">All workshop slots are currently in use. Please wait a little while and try again. Slots free up as other users finish their sessions.</p>'
+        },
+        'session-invalid': {
+            type: 'warning',
+            icon: 'bi-clock-history',
+            title: 'Session Expired',
+            body: '<p class="mb-0">Your workshop session has expired and been cleaned up. This happens automatically after your access window ends. You are welcome to head back and start a new session to continue where you left off.</p>'
+        },
+        'startup-timeout': {
+            type: 'danger',
+            icon: 'bi-exclamation-triangle',
+            title: 'Workshop Failed to Start',
+            body: '<p class="mb-0">The workshop session did not start within the expected time. This may be due to temporary resource constraints. Please try again in a few minutes.</p>'
+        }
+    };
+
+    var defaultMessage = {
+        type: 'danger',
+        icon: 'bi-exclamation-circle',
+        title: 'Unexpected Issue',
+        body: '<p class="mb-0">An unexpected issue occurred with your workshop session. Please try again, and if the problem persists, check back later.</p>'
+    };
+
+    var message = notification ? (messages[notification] || defaultMessage) : defaultMessage;
+
+    container.innerHTML =
+        '<div class="alert alert-' + message.type + '" role="alert">' +
+            '<h5 class="alert-heading fw-bold"><i class="bi ' + message.icon + ' me-2"></i>' + message.title + '</h5>' +
+            message.body +
+        '</div>';
+});
+</script>
