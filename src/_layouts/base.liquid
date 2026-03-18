@@ -193,32 +193,32 @@
     
     <!-- Custom JavaScript -->
     <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const html = document.documentElement;
-        
-        // Check for saved theme preference or default to light mode
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        html.setAttribute('data-bs-theme', currentTheme);
-        updateThemeIcon(currentTheme);
-        
-        themeToggle.addEventListener('click', function() {
-            const currentTheme = html.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            html.setAttribute('data-bs-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        });
-        
-        function updateThemeIcon(theme) {
-            if (theme === 'dark') {
-                themeIcon.className = 'bi bi-sun-fill';
-            } else {
-                themeIcon.className = 'bi bi-moon-fill';
-            }
-        }
+        // // Theme toggle functionality
+        // const themeToggle = document.getElementById('themeToggle');
+        // const themeIcon = document.getElementById('themeIcon');
+        // const html = document.documentElement;
+        //
+        // // Check for saved theme preference or default to light mode
+        // const currentTheme = localStorage.getItem('theme') || 'light';
+        // html.setAttribute('data-bs-theme', currentTheme);
+        // updateThemeIcon(currentTheme);
+        //
+        // themeToggle.addEventListener('click', function() {
+        //     const currentTheme = html.getAttribute('data-bs-theme');
+        //     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        //
+        //     html.setAttribute('data-bs-theme', newTheme);
+        //     localStorage.setItem('theme', newTheme);
+        //     updateThemeIcon(newTheme);
+        // });
+        //
+        // function updateThemeIcon(theme) {
+        //     if (theme === 'dark') {
+        //         themeIcon.className = 'bi bi-sun-fill';
+        //     } else {
+        //         themeIcon.className = 'bi bi-moon-fill';
+        //     }
+        // }
         
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
