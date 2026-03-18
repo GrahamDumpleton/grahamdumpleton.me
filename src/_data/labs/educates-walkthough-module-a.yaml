@@ -1,0 +1,12 @@
+product_name: educates-walkthough
+catalog_name: labs-educates-walkthough-module-a
+
+workshops:
+  - name: lab-a01-dashboard-tour
+    title: "A01: Exploring the Workshop Dashboard"
+    description: "A guided tour of the Educates workshop dashboard — learn how to navigate the interface, use clickable actions, and interact with the terminal, editor, and dashboard tabs."
+    duration: "15m"
+    category: core
+    difficulty: beginner
+    requires: []
+    status: final

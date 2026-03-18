@@ -1,6 +1,15 @@
 portal_url: "https://educates-iss.grumpys.work/products"
 
 courses:
+  - slug: educates-walkthough
+    title: "Educates Walkthrough"
+    description: "A guided tour of Educates — learn how to navigate workshops and what the platform has to offer so you are ready for any Educates workshop."
+    tags: [educates]
+    vendor: "Graham Dumpleton"
+    modules:
+      - file: educates-walkthough-module-a
+        slug: module-a
+        title: "Module A: Using Educates"
   - slug: python-decorators
     title: "Python Decorators"
     description: "Learn Python decorator fundamentals using only Python and its standard library. Core workshops progress from functions as first-class objects and closures through to advanced patterns including class-based decorators, method decoration, and the descriptor protocol. Elective workshops apply these skills to practical domains such as caching, input validation, access control, and plugin systems."
