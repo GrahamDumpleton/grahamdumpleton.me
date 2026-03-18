@@ -1,13 +1,13 @@
 portal_url: "https://educates-iss.grumpys.work/products"
 
 courses:
-  - slug: educates-walkthough
+  - slug: educates-walkthrough
     title: "Educates Walkthrough"
     description: "A guided tour of Educates — learn how to navigate workshops and what the platform has to offer so you are ready for any Educates workshop."
     tags: [educates]
     vendor: "Graham Dumpleton"
     modules:
-      - file: educates-walkthough-module-a
+      - file: educates-walkthrough-module-a
         slug: module-a
         title: "Module A: Using Educates"
   - slug: python-decorators
