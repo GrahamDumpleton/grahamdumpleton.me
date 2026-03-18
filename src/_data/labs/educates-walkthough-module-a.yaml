@@ -1,5 +1,5 @@
 product_name: educates-walkthough
-catalog_name: labs-educates-walkthough-module-a
+catalog_name: labs-educates-walkthrough-module-a
 
 workshops:
   - name: lab-a01-dashboard-tour
