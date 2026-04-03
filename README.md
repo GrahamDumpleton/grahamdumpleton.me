@@ -64,6 +64,15 @@ src/
 │   └── guide-name/    # Individual guide directories
 │       ├── index.md
 │       └── image.png (optional)
+├── labs/              # Interactive workshop labs
+│   ├── index.liquid          # Labs landing page
+│   ├── course.liquid         # Per-course page (paginated)
+│   └── workshop-session.liquid  # Post-workshop transit page
+├── _data/
+│   └── labs/          # Labs data files
+│       ├── labs.js            # Data loader (merges catalog + modules)
+│       ├── courses.yaml       # Master course catalog
+│       └── *.yaml             # Per-module workshop definitions
 ├── about/             # About page content
 │   └── index.liquid   # About page template
 └── index.liquid       # Homepage template
@@ -87,7 +96,14 @@ The site contains two main types of content:
 - **Features**: Searchable collection, topic-based organization, cross-references to related posts
 - **Layout**: Uses `guide.liquid` template with guide-specific navigation
 
-Both content types support:
+#### Interactive Labs (`src/labs/`)
+- **Purpose**: Interactive workshop courses hosted on an external [Educates](https://educates.dev) training platform
+- **Structure**: Data-driven via YAML files in `src/_data/labs/` rather than Markdown content
+- **Data files**: `courses.yaml` defines the course catalog; each course references per-module YAML files containing workshop definitions with metadata (title, description, difficulty, duration, category, prerequisites, status)
+- **Templates**: Landing page listing all courses, per-course pages showing modules and workshops (paginated via Eleventy), and a workshop session transit page for post-session notifications
+- **Educates integration**: Workshops launch on an external Educates portal; the site provides the catalog and navigation layer while the Educates platform hosts the interactive workshop environments
+
+Both posts and guides support:
 - Markdown files with YAML front matter
 - Automatic image copying and linking from content directories
 - Tag and metadata preservation from original Blogger content
@@ -186,7 +202,7 @@ The site can be customized by modifying:
 - **Layouts**: Edit files in `src/_layouts/` to change page structure
 - **Styling**: Modify `src/assets/css/style.css` for custom styles
 - **Configuration**: Update `.eleventy.js` for site-wide settings
-- **Content**: Add new posts in `src/posts/`, guides in `src/guides/`, or other pages in `src/`
+- **Content**: Add new posts in `src/posts/`, guides in `src/guides/`, labs courses in `src/_data/labs/`, or other pages in `src/`
 
 ### 11ty Configuration
 
