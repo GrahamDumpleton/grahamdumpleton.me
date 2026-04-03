@@ -40,7 +40,7 @@ title: Home
                 </h3>
                 
                 {% if post.data.description %}
-                <div class="text-muted mb-3">{{ post.data.description | markdown_no_links | truncate: 120 }}</div>
+                <div class="text-muted mb-3">{{ post.data.description | markdown_no_links | truncate: 150 }}</div>
                 {% endif %}
                 
                 {% if post.data.tags and post.data.tags.length > 0 %}
