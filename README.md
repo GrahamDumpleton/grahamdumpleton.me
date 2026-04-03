@@ -135,7 +135,7 @@ tags: ["python", "web-development"]
 - **Social Sharing**: Displayed when the URL is shared on platforms like Twitter, Facebook, LinkedIn
 - **Fallback**: If no description is provided, defaults to "Graham Dumpleton's blog"
 - **Best Practices**: 
-  - Keep descriptions concise (150-160 characters recommended)
+  - Keep descriptions concise (maximum 150 characters)
   - Write descriptive summaries that accurately represent the content
   - Avoid keyword stuffing; focus on readability and value
 
