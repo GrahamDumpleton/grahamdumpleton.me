@@ -8,6 +8,10 @@ When planning, writing or editing blog content, use the `/personal-blogging` ski
 
 Blog posts are standalone content — each new post covers a new topic. When creating a new post, do NOT explore or read old blog posts. The `/personal-blogging` skill already provides all the style, voice, and convention guidance needed. Only reference or cross-link previous posts if explicitly asked, such as when extending a topic from an earlier post.
 
+## Git Conventions
+
+- Do not include Claude Code session URLs (e.g., `https://claude.ai/code/...`) in commit messages or pull request bodies.
+
 ## Quick Reference
 
 - **Build**: `npm run build`
