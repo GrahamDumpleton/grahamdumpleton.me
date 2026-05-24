@@ -1,7 +1,7 @@
 ---
 title: "Stateful decorators in wrapt"
 description: "A walkthrough of the new bind_state_to_wrapper helper in wrapt 2.2.0 and how it makes stateful decorators in Python easier to write."
-date: 2026-05-24T11:55:00
+date: 2026-05-24T11:55:00+10:00
 image: "https://opengraph.githubassets.com/1/GrahamDumpleton/wrapt"
 tags: ["python", "wrapt", "decorators"]
 draft: false
