@@ -40,19 +40,19 @@ title: Home
                 </h3>
                 
                 {% if post.data.description %}
-                <div class="text-muted mb-3">{{ post.data.description | markdown_no_links | truncate: 150 }}</div>
+                <div class="text-muted mb-3">{{ post.data.description | markdown_no_links | truncate: 200 }}</div>
                 {% endif %}
                 
                 {% if post.data.tags and post.data.tags.length > 0 %}
                 <div class="d-flex flex-wrap gap-1">
-                    {% for tag in post.data.tags | limit(3) %}
+                    {% for tag in post.data.tags | limit(4) %}
                     <span class="badge bg-light text-dark border">
                         <i class="bi bi-tag me-1"></i>{{ tag }}
                     </span>
                     {% endfor %}
-                    {% if post.data.tags.length > 3 %}
+                    {% if post.data.tags.length > 4 %}
                     <span class="badge bg-light text-muted border">
-                        +{{ post.data.tags.length | minus: 3 }} more
+                        +{{ post.data.tags.length | minus: 4 }} more
                     </span>
                     {% endif %}
                 </div>

@@ -55,7 +55,7 @@ permalink: /posts/
                 </h3>
                 
                 {% if post.data.description %}
-                <div class="text-muted mb-3">{{ post.data.description | markdown_no_links | truncate: 150 }}</div>
+                <div class="text-muted mb-3">{{ post.data.description | markdown_no_links | truncate: 200 }}</div>
                 {% endif %}
                 
                 {% if post.data.tags and post.data.tags.size > 0 %}
