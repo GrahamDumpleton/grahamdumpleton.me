@@ -178,7 +178,7 @@ The right framing is that this is a tuning lever for a specific class of workloa
 
 If you run mod_wsgi and the case above is interesting for your workload, please install the 6.0.0 release candidate, try `WSGISwitchInterval` against your real traffic, and file issues against [the GitHub project](https://github.com/GrahamDumpleton/mod_wsgi) for anything that does not behave the way the documentation suggests it should.
 
-This post has leaned heavily on telemetry from mod_wsgi-telemetry, the companion tool that records and visualises the metrics shown in the screenshots above. That tool is going to be the subject of a follow-up series. Before we get to that though, the next post will revisit the per-interpreter GIL and free-threading configurations from earlier in this series and look at how performance under each of them manifests through the same request metrics used here. The argument for tuning at all rests on having that visibility, and the screenshots here are what the tool surfaces out of the box.
+This post has leaned heavily on telemetry from mod_wsgi-telemetry, the companion tool that records and visualises the metrics shown in the screenshots above. That tool is going to be the subject of a follow-up series. Before we get to that though, the next post will revisit the free-threading configuration from earlier in this series and look at how performance under it manifests through the same request metrics used here. The argument for tuning at all rests on having that visibility, and the screenshots here are what the tool surfaces out of the box.
 
 For reference:
 
