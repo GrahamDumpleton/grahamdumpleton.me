@@ -197,9 +197,9 @@ If you are using the generic `FunctionWrapper` class, rather than need to create
 
 ```
 class CustomFunctionWrapper(FunctionWrapper):
-    def __init__(self, name, wrapped):
-        self.__self_name = name
-        super().__init__(wrapped)
+    def __init__(self, name, wrapped, wrapper):
+        self._self_name = name
+        super().__init__(wrapped, wrapper)
 
 found = False
 
@@ -207,14 +207,14 @@ wrapper = object
 
 while wrapper is not None:
     if isinstance(wrapper, CustomFunctionWrapper):
-        if wrapper.__self_name == "wrapper-type":
+        if wrapper._self_name == "wrapper-type":
             found = True
             break
 
     wrapper = getattr(wrapper, "__wrapped__", None)
 
 if not found:
-    object = CustomFunctionWrapper("wrapper-type", object)
+    object = CustomFunctionWrapper("wrapper-type", object, ...)
 ```
 
 End result is that if you want to try and be a resilient as possible, you should always use a custom object proxy type if you need to detect a specific wrapper of your own. This includes needing to create your own derived version of `FunctionWrapper`, with optional name attribute to distinguish different use cases if needed.
