@@ -22,7 +22,7 @@ title: Home
 <div class="row">
     {% for post in collections.posts limit:6 %}
     <div class="col-lg-6 mb-4">
-        <article class="card h-100 border-0 shadow-sm post-list-item">
+        <article class="card h-100 border-0 shadow-sm post-list-item{% if post.data.draft %} border border-warning{% endif %}">
             <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
                     <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
@@ -30,6 +30,7 @@ title: Home
                     </div>
                     <div>
                         <time class="text-muted small">{{ post.date | date }}</time>
+                        {% if post.data.draft %}<span class="badge text-bg-warning ms-2">Draft</span>{% endif %}
                     </div>
                 </div>
                 

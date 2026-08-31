@@ -3,7 +3,14 @@ const { feedPlugin } = require("@11ty/eleventy-plugin-rss");
 // RSS feed cutoff date - posts older than this date will not appear in the RSS feed
 const RSS_CUTOFF_DATE = new Date('2025-01-01');
 
+// Show draft posts and guides in listings when running the local dev server
+// (eleventy --serve / --watch). A plain build, as run by CI, always excludes
+// them from listings, though draft pages are still rendered at their URLs.
+const showDrafts = process.env.ELEVENTY_RUN_MODE !== "build";
+
 module.exports = function(eleventyConfig) {
+  eleventyConfig.addGlobalData("showDrafts", showDrafts);
+
   // Copy static assets
   eleventyConfig.addPassthroughCopy("src/assets");
   
@@ -16,14 +23,14 @@ module.exports = function(eleventyConfig) {
   // Add posts collections
   eleventyConfig.addCollection("posts", function(collectionApi) {
     return collectionApi.getFilteredByGlob("src/posts/*/*/*/index.md")
-      .filter(post => !post.data.draft) // Exclude draft posts
+      .filter(post => showDrafts || !post.data.draft) // Exclude draft posts unless serving locally
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   });
 
   // Add guides collection
   eleventyConfig.addCollection("guides", function(collectionApi) {
     return collectionApi.getFilteredByGlob("src/guides/*/index.md")
-      .filter(guide => !guide.data.draft) // Exclude draft guides
+      .filter(guide => showDrafts || !guide.data.draft) // Exclude draft guides unless serving locally
       .sort((a, b) => a.data.title.localeCompare(b.data.title));
   });
 

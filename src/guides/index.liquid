@@ -37,7 +37,7 @@ permalink: /guides/
 <div class="row" id="guidesContainer">
     {% for page in collections.guides | reverse %}
     <div class="col-lg-6 mb-4 page-item" data-title="{{ page.data.title | downcase }}" data-content="{{ page.content | strip_html | downcase | escape }}" data-tags="{% if page.data.tags %}{{ page.data.tags | join: ' ' | downcase }}{% endif %}">
-        <article class="card h-100 border-0 shadow-sm post-list-item">
+        <article class="card h-100 border-0 shadow-sm post-list-item{% if page.data.draft %} border border-warning{% endif %}">
             <div class="card-body p-4">
                 <div class="d-flex align-items-center mb-3">
                     <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
@@ -48,6 +48,7 @@ permalink: /guides/
                             {{ page.data.title }}
                         </a>
                     </h3>
+                    {% if page.data.draft %}<span class="badge text-bg-warning ms-2">Draft</span>{% endif %}
                 </div>
                 
                 {% if page.data.description %}
