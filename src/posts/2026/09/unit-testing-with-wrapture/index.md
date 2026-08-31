@@ -4,7 +4,7 @@ description: "The same unit tests written with unittest.mock and with wrapture, 
 date: 2026-09-01
 image: "https://opengraph.githubassets.com/1/GrahamDumpleton/wrapture"
 tags: ["python", "wrapture", "testing"]
-draft: true
+draft: false
 ---
 
 In [introducing wrapture](/posts/2026/08/introducing-wrapture/) I said the one idea everything sits on is to wrap rather than replace. That is easy to say and harder to see the point of, so this post takes a small piece of code and writes tests for it twice, once with `unittest.mock` and once with wrapture. I am not going to walk through every mock idiom and show its wrapture spelling, since a good part of the time the two are doing the same thing with different syntax, and the [comparison page](https://wrapture.readthedocs.io/en/latest/coming-from-mock.html) in the documentation already maps one onto the other. What I want to show is the handful of cases where the difference is structural, where wrapping the real code lets a test say something that substitution cannot.
