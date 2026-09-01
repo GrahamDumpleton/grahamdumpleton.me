@@ -4,7 +4,7 @@ description: "How wrapture's timeline and tape record what real code did, and ho
 date: 2026-09-02
 image: "https://opengraph.githubassets.com/1/GrahamDumpleton/wrapture"
 tags: ["python", "wrapture", "testing"]
-draft: true
+draft: false
 ---
 
 In [unit testing with wrapture](/posts/2026/09/unit-testing-with-wrapture/) the tests leaned on a timeline and a tape to assert on what happened, and I skipped over what those actually are. This post is about the recording side of wrapture: what gets recorded, what one event holds, how a test reads the record back, and the whole-tape views that answer questions about the flow between calls rather than about any one of them.
