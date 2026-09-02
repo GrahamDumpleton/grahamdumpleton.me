@@ -4,7 +4,7 @@ description: "Testing retry logic, circuit breakers and polling loops with wrapt
 date: 2026-09-03
 image: "https://opengraph.githubassets.com/1/GrahamDumpleton/wrapture"
 tags: ["python", "wrapture", "testing"]
-draft: true
+draft: false
 ---
 
 Most of what a test configures on a patch holds until the test changes it. Retry logic is the classic case where that is not enough: the code under test keeps calling, and the test needs the behaviour to change on its own as it does. Fail twice and then succeed. Hand out a sequence of canned responses. Run the real thing until it breaks and then fail fast. `unittest.mock` handles the first two of those with a list passed as `side_effect`, consumed one entry per call. wrapture models the same idea as phases, and this post is about what that buys you beyond the list.
