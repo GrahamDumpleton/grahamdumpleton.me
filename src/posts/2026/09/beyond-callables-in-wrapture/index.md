@@ -4,7 +4,7 @@ description: "What a wrapture binding can name that is not a call: attribute rea
 date: 2026-09-04
 image: "https://opengraph.githubassets.com/1/GrahamDumpleton/wrapture"
 tags: ["python", "wrapture", "testing"]
-draft: true
+draft: false
 ---
 
 Every example in this series so far has wrapped a call. A binding named a method, and what flowed through the call was recorded or changed. Plenty of what a test needs to control is not a call, though. An outcome stored in an attribute, an environment variable that must be set or missing, a settings dict that other modules imported by reference at import time, a formatter looked up in a registry, and a generator whose interesting behaviour is spread over its consumption. `unittest.mock` and pytest between them cover most of this with `patch.dict`, `monkeypatch.setattr`, `monkeypatch.setenv` and so on, one idiom per shape. wrapture spells all of them as bindings, which buys the same lifecycle everywhere, and in a couple of places lets the binding observe as well as hold.
