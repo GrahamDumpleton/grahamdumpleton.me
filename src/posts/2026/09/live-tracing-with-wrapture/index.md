@@ -4,7 +4,7 @@ description: "The bindings used to test a piece of code are the same objects tha
 date: 2026-09-07
 image: "https://opengraph.githubassets.com/1/GrahamDumpleton/wrapture"
 tags: ["python", "wrapture", "tracing"]
-draft: true
+draft: false
 ---
 
 When I wrote about [unit testing with wrapture](/posts/2026/09/unit-testing-with-wrapture/) the pattern in every test was the same: create a binding on a method, open a `timeline()`, run the code, and read the recorded calls off the tape. What I did not say at the time is that nothing about a binding is specific to testing. A binding observes a call site and emits events, and what happens to those events is decided by whoever is listening. In a test the listener is a tape. Take the tape away and register something else, and the same binding narrates a running program as it goes.
