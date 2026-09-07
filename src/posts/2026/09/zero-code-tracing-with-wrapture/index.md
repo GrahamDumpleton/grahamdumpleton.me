@@ -4,7 +4,7 @@ description: "Tracing an application you cannot or should not edit: the bindings
 date: 2026-09-08
 image: "https://opengraph.githubassets.com/1/GrahamDumpleton/wrapture"
 tags: ["python", "wrapture", "tracing"]
-draft: true
+draft: false
 ---
 
 The [previous post](/posts/2026/09/live-tracing-with-wrapture/) traced the shop with three bindings and a sink, all applied from the program's own entry point. That is fine when the program is yours. It is less fine when the application is one you inherited and would rather not touch, when someone else owns the deployment, or when you simply do not want observation code living inside the thing being observed. For all of those the entry point edit is one edit too many.
