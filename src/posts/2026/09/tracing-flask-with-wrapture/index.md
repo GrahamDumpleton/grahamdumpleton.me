@@ -4,7 +4,7 @@ description: "One HTTP request as one tree, from a single config entry, with the
 date: 2026-09-09
 image: "https://opengraph.githubassets.com/1/GrahamDumpleton/wrapture"
 tags: ["python", "wrapture", "tracing", "flask"]
-draft: true
+draft: false
 ---
 
 For a web application the natural unit of tracing is the request: one HTTP request, its method, path and status, and every observed call made while handling it, as one tree. The [config file from last time](/posts/2026/09/zero-code-tracing-with-wrapture/) cannot give you that on its own, and it is worth being clear about why before showing what does.
