@@ -4,7 +4,7 @@ description: "One endpoint is slow and there are three layers it could be. Self 
 date: 2026-09-10
 image: "https://opengraph.githubassets.com/1/GrahamDumpleton/wrapture"
 tags: ["python", "wrapture", "tracing", "performance"]
-draft: true
+draft: false
 ---
 
 The `/order` endpoint of the [Flask shop](/posts/2026/09/tracing-flask-with-wrapture/) is slow. The view calls the order service, the service calls the gateway and then the ledger, and the question is which of those the time is going to. To give the question a real answer for this post I put a `time.sleep(0.03)` in `Ledger.record`, and the rest of the post pretends I did not know that.
