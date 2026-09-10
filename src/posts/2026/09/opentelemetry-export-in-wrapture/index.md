@@ -4,7 +4,7 @@ description: "The same events that print a tree or fill a file can feed an OpenT
 date: 2026-09-11
 image: "https://opengraph.githubassets.com/1/GrahamDumpleton/wrapture"
 tags: ["python", "wrapture", "tracing", "opentelemetry"]
-draft: true
+draft: false
 ---
 
 Everything in the last four posts rendered a trace for a person to read or wrote it to a file for later. The other destination is a tracing backend, fed while the application runs, and OpenTelemetry is the one that the ecosystem has converged on. wrapture treats it as a first-class destination rather than something you bolt on: the `wrapture.otel` subpackage ships in every wheel, and the `otel` extra brings the SDK and the OTLP exporter with it.
