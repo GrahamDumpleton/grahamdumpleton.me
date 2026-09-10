@@ -2,7 +2,7 @@
 title: "Testing and tracing with wrapture."
 description: "Posts on wrapture, the Python package for monkey patching, testing and tracing built on wrapt. What it is, how it is used in unit tests, and how the same bindings trace a running application."
 tags: ["python", "wrapture", "testing", "tracing"]
-draft: true
+draft: false
 ---
 
 Posts on the topic of [wrapture](https://github.com/GrahamDumpleton/wrapture), a Python package for monkey patching, testing and tracing built on top of wrapt, are as follows.
