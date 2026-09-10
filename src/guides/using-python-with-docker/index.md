@@ -14,13 +14,12 @@ Prior posts on the topic of Docker and using Python with it are as follows.
 Please note older posts may not reflect what I now regard as best practice, or may talk about Docker images which I have superseded with new alternate images.  
   
 
-
 This batch of posts looks at how to properly use Python inside of a Docker image:
 
   * [Installing a custom Python version into a Docker image.](/posts/2015/06/installing-custom-python-version-into/)
   * [Python virtual environments and Docker.](/posts/2016/01/python-virtual-environments-and-docker/)
-
-
+  * [Managing the developer experience using docker.](/posts/2014/11/managing-developer-experience-using/)
+  * [How are you using Docker in your development workflow?](/posts/2016/04/how-are-you-using-docker-in-your/)
 
 This batch of posts looks at running Python web applications inside of a Docker container:
 
@@ -34,13 +33,9 @@ This batch of posts looks at running Python web applications inside of a Docker 
   * [Speeding up Docker build times for Python applications.](/posts/2016/03/speeding-up-docker-build-times-for/)
   * [Testing out deployment of Python based Opal health care framework.](/posts/2016/08/testing-out-deployment-of-python-based/)
 
-
-
 This batch of posts was an exploration of all sorts of issues that arise in trying to run an application within Docker, using the Jupyter Notebook \(IPython\) application as an example:  
 
-
   * [Roundup of Docker issues when hosting IPython.](/posts/2016/01/roundup-of-docker-issues-when-hosting/)
-
 
   * [Running IPython as a Docker container under OpenShift.](/posts/2015/12/running-ipython-as-docker-container/)
   * [Don't run as root inside of Docker containers.](/posts/2015/12/don-run-as-root-inside-of-docker/)
@@ -48,3 +43,8 @@ This batch of posts was an exploration of all sorts of issues that arise in tryi
   * [Random user IDs when running Docker containers.](/posts/2015/12/random-user-ids-when-running-docker/)
   * [Unknown user when running Docker container.](/posts/2015/12/unknown-user-when-running-docker/)
   * [Issues with running as PID 1 in a Docker container.](/posts/2015/12/issues-with-running-as-pid-1-in-docker/)
+  * [What USER should you use to run Docker images.](/posts/2016/12/what-user-should-you-use-to-run-docker/)
+  * [Backdoors for becoming root in a Docker container.](/posts/2016/12/backdoors-for-becoming-root-in-docker/)
+
+Using containers to host interactive workshop environments is covered separately under
+[running workshop environments in the browser](/guides/workshop-environments-in-the-browser/).
