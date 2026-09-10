@@ -1,6 +1,7 @@
 ---
 layout: guide
 title: "Decorators and monkey patching."
+description: "Why the usual Python decorator pattern is wrong and how to implement a better one, and the problems of monkey patching: applying patches safely, ordering, and automatic patching."
 url: "http://blog.dscpl.com.au/p/decorators-and-monkey-patching.html"
 post_id: "3350721465154129789"
 blog_id: "2363643920942057324"

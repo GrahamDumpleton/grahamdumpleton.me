@@ -1,6 +1,7 @@
 ---
 layout: guide
 title: "Using Python with Docker."
+description: "Running Python inside Docker images and containers: custom Python versions, virtual environments, hosting and proxying WSGI applications, and the user and process ID issues that bite."
 url: "http://blog.dscpl.com.au/p/using-python-with-docker.html"
 post_id: "5591286857776935907"
 blog_id: "2363643920942057324"
