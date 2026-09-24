@@ -1,0 +1,79 @@
+---
+layout: base
+title: Workshops
+description: Guided, hands-on JupyterLab workshops on Python decorators, wrapt and wrapture, which you can run in your browser, on Binder or in GitHub Codespaces.
+permalink: /workshops/
+---
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h1 class="h2 fw-bold mb-0">
+                <i class="bi bi-mortarboard me-2"></i>Workshops
+            </h1>
+            <a href="/" class="btn btn-outline-primary">
+                <i class="bi bi-house me-1"></i>Back to Home
+            </a>
+        </div>
+
+        <p class="text-muted mb-2">
+            Guided, hands-on workshops that run in JupyterLab using the <a href="https://github.com/GrahamDumpleton/jupyterlab-workshop" target="_blank" rel="noopener">jupyterlab-workshop</a> extension. Each workshop walks you through a topic step by step, with the instructions beside the notebooks, terminals and files you work in.
+        </p>
+        <p class="text-muted mb-4">
+            Pick a group of workshops below to see what each workshop covers, then launch the whole collection on <a href="https://mybinder.org" target="_blank" rel="noopener">mybinder.org</a>, in <a href="https://github.com/features/codespaces" target="_blank" rel="noopener">GitHub Codespaces</a>, or, where available, directly in your browser using <a href="https://jupyterlite.readthedocs.io" target="_blank" rel="noopener">JupyterLite</a>.
+        </p>
+    </div>
+</div>
+
+<!-- Workshop Groups Grid -->
+<div class="row">
+    {% for group in workshops.groups %}
+    <div class="col-lg-6 mb-4">
+        <article class="card h-100 border-0 shadow-sm post-list-item">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 40px; height: 40px;">
+                        <i class="bi {{ group.icon }}"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-0 flex-grow-1">
+                        <a href="/workshops/{{ group.slug }}/" class="text-decoration-none stretched-link">
+                            {{ group.title }}
+                        </a>
+                    </h3>
+                </div>
+
+                {% if group.description %}
+                <div class="text-muted mb-3">{{ group.description }}</div>
+                {% endif %}
+
+                {% if group.collections.size > 1 %}
+                <ul class="list-unstyled small text-muted mb-3">
+                    {% for collection in group.collections %}
+                    <li><i class="bi bi-collection me-1"></i>{{ collection.title }} <span class="text-body-tertiary">({{ collection.count }})</span></li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                <div class="d-flex flex-wrap gap-2">
+                    {% if group.collections.size > 1 %}
+                    <span class="badge bg-light text-dark border">
+                        <i class="bi bi-collection me-1"></i>{{ group.collections.size }} collections
+                    </span>
+                    {% endif %}
+                    <span class="badge bg-light text-dark border">
+                        <i class="bi bi-journal-code me-1"></i>{{ group.count }} workshops
+                    </span>
+                    <span class="badge bg-light text-dark border">
+                        <i class="bi bi-clock me-1"></i>About {{ group.total_time }}
+                    </span>
+                    {% if group.launch.jupyterlite %}
+                    <span class="badge bg-light text-dark border">
+                        <i class="bi bi-browser-chrome me-1"></i>Runs in browser
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+    </div>
+    {% endfor %}
+</div>

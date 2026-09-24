@@ -1,0 +1,11 @@
+---
+pagination:
+  data: workshops.groups
+  size: 1
+  alias: group
+permalink: "/workshops/{{ group.slug }}/"
+layout: workshop-group
+eleventyComputed:
+  title: "{{ group.title }}"
+  description: "{{ group.description }}"
+---

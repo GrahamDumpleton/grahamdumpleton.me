@@ -1,0 +1,166 @@
+---
+layout: base
+---
+
+<div class="row">
+    <div class="col-12">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/workshops/">Workshops</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ group.title }}</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h1 class="h2 fw-bold mb-0">
+                <i class="bi {{ group.icon }} me-2"></i>{{ group.title }}
+            </h1>
+            <a href="/workshops/" class="btn btn-outline-primary flex-shrink-0 ms-3">
+                <i class="bi bi-arrow-left me-1"></i>Back to Workshops
+            </a>
+        </div>
+
+        <p class="text-muted mb-{% if group.project %}2{% else %}4{% endif %}">{{ group.description }}</p>
+        {% if group.project %}
+        <p class="text-muted mb-4">
+            <i class="bi bi-github me-1"></i>The {{ group.project.name }} package itself is on GitHub at
+            <a href="{{ group.project.url }}" target="_blank" rel="noopener">{{ group.project.url | remove: "https://" }}</a>,
+            with its source code, documentation and issue tracker.
+        </p>
+        {% endif %}
+
+        <!-- Launch options -->
+        <div class="card border-0 shadow-sm mb-5">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold mb-2">
+                    <i class="bi bi-rocket-takeoff me-2"></i>Launch the workshops
+                </h2>
+                <p class="text-muted small mb-3">
+                    Each option opens the whole collection in a new window, where JupyterLab shows the workshops in the order to take them.
+                </p>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    {% if group.launch.jupyterlite %}
+                    <a href="{{ group.launch.jupyterlite }}" class="btn btn-primary" target="_blank" rel="noopener">
+                        <i class="bi bi-browser-chrome me-1"></i>Launch in browser
+                    </a>
+                    {% endif %}
+                    <a href="{{ group.launch.binder }}" class="btn {% if group.launch.jupyterlite %}btn-outline-primary{% else %}btn-primary{% endif %}" target="_blank" rel="noopener">
+                        <i class="bi bi-cloud me-1"></i>Launch on Binder
+                    </a>
+                    <a href="{{ group.launch.codespaces }}" class="btn btn-outline-primary" target="_blank" rel="noopener">
+                        <i class="bi bi-github me-1"></i>Launch on Codespaces
+                    </a>
+                    <a href="{{ group.repo_url }}" class="btn btn-outline-secondary" target="_blank" rel="noopener">
+                        <i class="bi bi-code-slash me-1"></i>Workshops on GitHub
+                    </a>
+                    {% if group.project %}
+                    <a href="{{ group.project.url }}" class="btn btn-outline-secondary" target="_blank" rel="noopener">
+                        <i class="bi bi-github me-1"></i>{{ group.project.name }} on GitHub
+                    </a>
+                    {% endif %}
+                </div>
+                <ul class="small text-muted mb-0 ps-3">
+                    {% if group.launch.jupyterlite %}
+                    <li><strong>In browser</strong> runs Python inside your browser with JupyterLite. Nothing to install and no account needed. Your work is kept in your browser's storage.</li>
+                    {% endif %}
+                    <li><strong>Binder</strong> is a free public service needing no account. Sessions are temporary and can take a minute or two to start.</li>
+                    <li><strong>Codespaces</strong> needs a GitHub account and uses your Codespaces allowance. A codespace is kept until you delete it.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end mb-3">
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleAllWorkshops" aria-expanded="false">
+        <i class="bi bi-arrows-expand me-1"></i><span>Expand all</span>
+    </button>
+</div>
+
+{% for collection in group.collections %}
+<div class="row mb-5">
+    <div class="col-12">
+        {% if group.collections.size > 1 %}
+        <h2 class="h4 fw-bold mb-2">
+            <i class="bi bi-collection me-2"></i>{{ collection.title }}
+        </h2>
+        <p class="text-muted mb-3">{{ collection.description }}</p>
+        {% endif %}
+
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <span class="badge bg-light text-dark border">
+                <i class="bi bi-journal-code me-1"></i>{{ collection.count }} workshops
+            </span>
+            <span class="badge bg-light text-dark border">
+                <i class="bi bi-clock me-1"></i>About {{ collection.total_time }}
+            </span>
+            {% for tag in collection.tags %}
+            <span class="badge bg-light text-dark border">
+                <i class="bi bi-tag me-1"></i>{{ tag }}
+            </span>
+            {% endfor %}
+        </div>
+
+        <div class="workshop-list">
+            {% for workshop in collection.workshops %}
+            <details class="workshop-details card border-0 shadow-sm mb-2">
+                <summary class="d-flex align-items-center gap-3 px-3 py-2">
+                    <span class="workshop-number rounded-circle bg-light text-muted d-flex align-items-center justify-content-center flex-shrink-0">{{ workshop.number }}</span>
+                    <span class="fw-bold flex-grow-1">{{ workshop.title }}</span>
+                    {% if workshop.duration %}
+                    <span class="badge bg-light text-dark border flex-shrink-0">
+                        <i class="bi bi-clock me-1"></i>{{ workshop.duration }}
+                    </span>
+                    {% endif %}
+                    <i class="bi bi-chevron-down workshop-chevron text-muted flex-shrink-0"></i>
+                </summary>
+                <div class="workshop-body px-3 pb-3">
+                    <p class="text-muted small mb-2">{{ workshop.description }}</p>
+                    {% if workshop.tags.size > 0 %}
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for tag in workshop.tags %}
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi bi-tag me-1"></i>{{ tag }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <a href="/workshops/" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Workshops
+        </a>
+    </div>
+</div>
+
+<script>
+(function() {
+    var button = document.getElementById('toggleAllWorkshops');
+    var items = Array.prototype.slice.call(document.querySelectorAll('.workshop-details'));
+    if (!button || items.length === 0) return;
+
+    function update() {
+        var allOpen = items.every(function(item) { return item.open; });
+        button.setAttribute('aria-expanded', allOpen ? 'true' : 'false');
+        button.querySelector('span').textContent = allOpen ? 'Collapse all' : 'Expand all';
+        button.querySelector('i').className = 'bi ' + (allOpen ? 'bi-arrows-collapse' : 'bi-arrows-expand') + ' me-1';
+    }
+
+    button.addEventListener('click', function() {
+        var open = !items.every(function(item) { return item.open; });
+        items.forEach(function(item) { item.open = open; });
+        update();
+    });
+
+    items.forEach(function(item) { item.addEventListener('toggle', update); });
+})();
+</script>

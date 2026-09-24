@@ -826,3 +826,41 @@ a:focus {
 body.lightbox-open {
   overflow: hidden;
 }
+/* Workshops: collapsible workshop entries */
+.workshop-details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.workshop-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.workshop-details > summary:hover .fw-bold {
+  color: var(--primary-color);
+}
+
+.workshop-number {
+  width: 28px;
+  height: 28px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.workshop-chevron {
+  transition: transform 0.2s ease;
+}
+
+.workshop-details[open] .workshop-chevron {
+  transform: rotate(180deg);
+}
+
+.workshop-body {
+  padding-left: calc(1rem + 28px + 1rem) !important;
+}
+
+@media (max-width: 575.98px) {
+  .workshop-body {
+    padding-left: 1rem !important;
+  }
+}
