@@ -35,6 +35,12 @@ const GROUPS = [
         icon: 'bi-activity',
         project: { name: 'wrapture', url: 'https://github.com/GrahamDumpleton/wrapture' },
     },
+    {
+        slug: 'tachyon',
+        repo: 'tachyon-workshops',
+        index: 'catalog.json',
+        icon: 'bi-speedometer2',
+    },
 ];
 
 function rawUrl(repo, file) {
