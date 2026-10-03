@@ -20,7 +20,7 @@ permalink: /workshops/
             Guided, hands-on workshops that run in JupyterLab using the <a href="https://github.com/GrahamDumpleton/jupyterlab-workshop" target="_blank" rel="noopener">jupyterlab-workshop</a> extension. Each workshop walks you through a topic step by step, with the instructions beside the notebooks, terminals and files you work in.
         </p>
         <p class="text-muted mb-4">
-            Pick a group of workshops below to see what each workshop covers, then launch the whole collection on <a href="https://mybinder.org" target="_blank" rel="noopener">mybinder.org</a>, in <a href="https://github.com/features/codespaces" target="_blank" rel="noopener">GitHub Codespaces</a>, or, where available, directly in your browser using <a href="https://jupyterlite.readthedocs.io" target="_blank" rel="noopener">JupyterLite</a>.
+            Pick a group of workshops below to see what each workshop covers. Most can then be launched as a whole collection on <a href="https://mybinder.org" target="_blank" rel="noopener">mybinder.org</a>, in <a href="https://github.com/features/codespaces" target="_blank" rel="noopener">GitHub Codespaces</a>, or, where available, directly in your browser using <a href="https://jupyterlite.readthedocs.io" target="_blank" rel="noopener">JupyterLite</a>. Those that can only be run on your own machine link to their GitHub repository instead.
         </p>
     </div>
 </div>
@@ -71,6 +71,11 @@ permalink: /workshops/
                         <i class="bi bi-browser-chrome me-1"></i>Runs in browser
                     </span>
                     {% endif %}
+                    {% unless group.launch %}
+                    <span class="badge bg-light text-dark border">
+                        <i class="bi bi-laptop me-1"></i>Runs locally only
+                    </span>
+                    {% endunless %}
                 </div>
             </div>
         </article>

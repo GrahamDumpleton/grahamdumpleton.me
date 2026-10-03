@@ -13,6 +13,8 @@ const BRANCH = 'main';
 // catalog.json can hold several collections; otherwise it has a single
 // collection.json at its root. Launch links open the whole repository.
 // Where the workshops teach a package of their own, project links to it.
+// A group marked local can only be run on your own machine, so it gets no
+// launch links and its page points at the repository instead.
 const GROUPS = [
     {
         slug: 'python-decorators',
@@ -40,6 +42,13 @@ const GROUPS = [
         repo: 'tachyon-workshops',
         index: 'catalog.json',
         icon: 'bi-speedometer2',
+    },
+    {
+        slug: 'claude-agent-sdk',
+        repo: 'claude-sdk-workshops',
+        index: 'catalog.json',
+        icon: 'bi-robot',
+        local: true,
     },
 ];
 
@@ -128,7 +137,7 @@ async function loadGroup(group) {
         description: index.description,
         repo_url: repoUrl,
         project: group.project || null,
-        launch: {
+        launch: group.local ? null : {
             jupyterlite: group.jupyterlite || null,
             binder: `https://mybinder.org/v2/gh/${GITHUB_OWNER}/${group.repo}/${BRANCH}?urlpath=lab`,
             codespaces: `https://codespaces.new/${GITHUB_OWNER}/${group.repo}?quickstart=1`,

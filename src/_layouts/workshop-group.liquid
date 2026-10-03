@@ -30,6 +30,7 @@ layout: base
         </p>
         {% endif %}
 
+        {% if group.launch %}
         <!-- Launch options -->
         <div class="card border-0 shadow-sm mb-5">
             <div class="card-body p-4">
@@ -69,6 +70,29 @@ layout: base
                 </ul>
             </div>
         </div>
+        {% else %}
+        <!-- Run locally -->
+        <div class="card border-0 shadow-sm mb-5">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold mb-2">
+                    <i class="bi bi-laptop me-2"></i>Run the workshops
+                </h2>
+                <p class="text-muted small mb-3">
+                    These workshops run on your own machine only, so there is no Binder, Codespaces or in browser version to launch. The GitHub repository explains what you need and how to start them.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ group.repo_url }}" class="btn btn-primary" target="_blank" rel="noopener">
+                        <i class="bi bi-github me-1"></i>Workshops on GitHub
+                    </a>
+                    {% if group.project %}
+                    <a href="{{ group.project.url }}" class="btn btn-outline-secondary" target="_blank" rel="noopener">
+                        <i class="bi bi-github me-1"></i>{{ group.project.name }} on GitHub
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
