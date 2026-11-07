@@ -44,7 +44,11 @@ def chat_view():
     return bridge.handoff(chat)
 ```
 
-Every WSGI request Muru passes to an application has a `muru.wsgi_to_asgi` object in the WSGI environ. This is the bridge across to the ASGI side. It can say whether the request is a websocket upgrade, and its `handoff()` method continues the request as an ASGI application. What `handoff()` returns is itself a WSGI application producing an empty response, so a Flask view can simply return it. Muru ignores whatever the WSGI side produces after a request has been handed off.
+Every WSGI request Muru passes to an application has a `muru.wsgi_to_asgi` object in the WSGI environ. This is the bridge across to the ASGI side. It can say whether the request is a websocket upgrade, and its `handoff()` method takes an ASGI application, not a WSGI one. Calling `handoff()` marks the request so that, once the WSGI side has returned, Muru carries on with the request by passing it to that ASGI application.
+
+What `handoff()` returns is there for convenience, and is designed to suit both raw WSGI applications and web frameworks. It is an empty iterable, which is what a WSGI application returns for a response with no body, so a raw WSGI application can return it straight away. The same object can also be called as if it were a WSGI application, in which case it responds with a 200 status and returns itself as an empty body. Between them, these cover what web frameworks will accept from a view. Current versions of Flask take an iterator returned from a view as the body of a response, while older versions instead run a callable returned from a view as a WSGI application. Either way, a Flask view can return what `handoff()` gives back, as the example above does.
+
+For any other framework, how you return from the handler doesn't matter. Once a request has been handed off, Muru ignores whatever response the WSGI side produces, so all that is needed is to call `handoff()` and then return whatever response the framework expects.
 
 ## Websockets as callbacks
 
@@ -204,19 +208,24 @@ curl http://127.0.0.1:8080/api/orders
 
 Both applications run in the same worker processes, imported by the same preload, from the one project.
 
-There was one result here which caught me out at first. I fired off twenty requests to `/api` at once, expecting them all to finish in about a second since they were just awaiting a sleep on the event loop. Instead it took five seconds. The reason is that unless told otherwise, an ASGI mount shares the worker's slots for requests with the WSGI application, and that number comes from the four WSGI threads. Twenty requests, four at a time, one second each, is five seconds.
+Requests to the ASGI application run on the worker's event loop, so they aren't held back by the four threads the WSGI application has. Firing off twenty requests to `/api` at once, each awaiting that one second sleep, they all finished together in 1.06 seconds, rather than queuing up four at a time behind the threads.
 
-Giving the mount a concurrency of its own fixes that. It also needs the mount explicitly declared as ASGI:
+Left alone, a mount shares the worker's event loop, and so its concurrency, with everything else running on it, such as the websockets handed off from Flask. If one part of the site shouldn't be able to take all of that, a mount can be given a concurrency of its own:
 
 ```toml
 [tool.muru.mounts.api]
 path = "/api"
 entrypoint = "shop.api:app"
-interface = "asgi"
 concurrency = 500
 ```
 
-With that, the same twenty requests took 1.05 seconds. There is a similar `max_connections` setting to put a limit on how many websockets an ASGI mount can hold open. The sharing is a sensible default, since it means an ASGI mount can't swamp a worker sized for its WSGI application, but it is something to know about.
+Muru confirms this when it starts:
+
+```
+muru: mount api serves /api from shop.api:app with concurrency 500 of its own
+```
+
+There is a similar `max_connections` setting to put a limit on how many websockets an ASGI mount can hold open.
 
 ## And back the other way
 
@@ -251,10 +260,15 @@ WSGI code needs threads to run on, so as well as setting `handoff`, the mount he
 [tool.muru.mounts.api]
 path = "/api"
 entrypoint = "shop.api:app"
-interface = "asgi"
 concurrency = 500
 handoff = "wsgi"
 threads = 2
+```
+
+The start-up output now shows the mount with its own threads as well as its own concurrency:
+
+```
+muru: mount api serves /api from shop.api:app on 2 threads of its own with concurrency 500 of its own
 ```
 
 Now a request for a report goes to the old WSGI code, while everything else under `/api` stays with the ASGI application:
