@@ -164,4 +164,4 @@ Neither framework needs to know anything about Muru.
 
 ## What's next
 
-That covers the basics of running an application in development mode. In the posts which follow I will look at how a project can carry its own Muru settings in `pyproject.toml` so that `muructl run` on its own does the right thing, how Muru goes about importing the application once and forking workers safely, the dashboard and commands for looking inside running workers, and how WSGI and ASGI can be mixed in the one application. After that it will be time to look at how it all fits together, before moving on to the daemon.
+That covers the basics of running an application in development mode. Rather than walk through every option, the posts which follow will concentrate on the places where Muru does things differently to the other ways of hosting a Python web application, still in development mode for now, before moving on to the daemon.
