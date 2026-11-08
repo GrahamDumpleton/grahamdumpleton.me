@@ -3,7 +3,6 @@ title: "Muru: import once, fork many"
 description: "How Muru imports a Python web application once and forks workers from it, checks the import is safe to fork, and how processes, threads and free-threading fit in."
 date: 2026-11-09
 tags: ["python", "muru"]
-draft: true
 ---
 
 Every time Muru has started an application in this series, starting with [a first look at Muru](/posts/2026/11/a-first-look-at-muru/), one of the first lines of output has been something like:
