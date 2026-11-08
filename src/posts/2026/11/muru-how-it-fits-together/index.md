@@ -3,7 +3,6 @@ title: "Muru: how it fits together"
 description: "The processes that make up Muru, the path a request takes through them, and why splitting things up this way is what makes releases and zero-downtime deploys possible."
 date: 2026-11-08
 tags: ["python", "muru"]
-draft: true
 ---
 
 In [a first look at Muru](/posts/2026/11/a-first-look-at-muru/) and [looking inside the workers](/posts/2026/11/muru-looking-inside-the-workers/) I have been showing what Muru can do in development mode, without saying much about how it is put together. Words like host, worker, edge and release have kept turning up in the output, and I have mostly waved my hands at what they mean. Before going any further, it is time to explain what those parts are and how they fit together, since a lot of what makes Muru different follows from that design.
