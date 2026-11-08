@@ -156,7 +156,8 @@ module.exports = function(eleventyConfig) {
     const fs = require('fs');
     const path = require('path');
     const crypto = require('crypto');
-    
+    const os = require('os');
+
     const defaultFence = mdLib.renderer.rules.fence || function(tokens, idx, options, env, renderer) {
       return renderer.renderToken(tokens, idx, options);
     };
@@ -178,15 +179,27 @@ module.exports = function(eleventyConfig) {
         
         // Only generate if the file doesn't already exist
         if (!fs.existsSync(imagePath)) {
+          // Write the diagram source to a temporary file rather than piping
+          // it via /dev/stdin, as on Linux the child's stdin is a socket and
+          // opening /dev/stdin fails with ENXIO.
+          const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mermaid-'));
+          const inputPath = path.join(tmpDir, 'diagram.mmd');
+          const puppeteerConfigPath = path.join(tmpDir, 'puppeteer.json');
+          fs.writeFileSync(inputPath, content);
+          // GitHub Actions Ubuntu runners block the Chrome sandbox.
+          fs.writeFileSync(puppeteerConfigPath, JSON.stringify(
+            process.env.CI ? { args: ['--no-sandbox', '--disable-setuid-sandbox'] } : {}
+          ));
           try {
-            execSync(`mmdc -i /dev/stdin -o ${imagePath} -t default`, {
-              input: content,
-              stdio: ['pipe', 'pipe', 'pipe']
+            execSync(`mmdc -i "${inputPath}" -o "${imagePath}" -t default -p "${puppeteerConfigPath}"`, {
+              stdio: ['ignore', 'pipe', 'pipe']
             });
           } catch (error) {
             console.error('Mermaid diagram generation failed:', error.message);
             // Fallback to rendering as code block
             return defaultFence(tokens, idx, options, env, renderer);
+          } finally {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
           }
         }
         
