@@ -45,11 +45,11 @@ The release still shows as ready and serving, with no workers:
 
 ```
 docs@r1
-GROUP        WORKERS      SLOTS      IDLE    QUEUE-P95  REAPS      POLICY
-default      0            0/0        0.0     -          1/6        spare 0-4 workers, 1-3 idle
-  workers: cpu 0%, gc 0%, gil wait p95 -, loop lag p95 -
+GROUP        WORKERS      SLOTS      IDLE    QUEUE-P95     REAPS      POLICY
+default      0            0/0        0.00    -             1/6        spare 0-4 workers, 1-3 idle
+  workers: cpu -, gc -, gil wait p95 -, loop lag p95 -
   diagnosis: idle
-  last: scaled in to 0: no request for 20s (14s ago)
+  last: scaled in to 0: no request for 20s (8s ago)
 ```
 
 and of its processes, only the host was left. Listing the processes of one of the preview sites I come to below, which has the same policy, while serving and then at zero workers:
@@ -92,8 +92,8 @@ release.idle         docs@r2                  every worker group has been at zer
 The release has no processes at all now, but stays in the routing as ready, and `muructl release list` says what state it is in:
 
 ```
-RELEASE                  STATE      SERVING  WORKERS    SOURCE
-docs@r2                  ready      yes      1x4        ...
+RELEASE                  STATE      SERVING  WORKERS          SOURCE
+docs@r2                  ready      yes      - (1x4)          ...
                          idle: its host has stopped, and the next request starts it
 ```
 
@@ -130,20 +130,20 @@ The request which woke the idle release got a 503 after exactly the queue timeou
 ```
 HTTP/1.1 503 Service Unavailable
 content-type: text/plain; charset=utf-8
-content-length: 137
+content-length: 155
 cache-control: no-store
 retry-after: 1
-x-request-id: 01M6TRTBHA4496EH51YXHWXJEJ
+x-request-id: 01M6ZMF2Y40K8S7W1FVPQARCZD
 
 503 Service Unavailable
-reason: queue_full
-request id: 01M6TRTBHA4496EH51YXHWXJEJ
+reason: cold_start_timeout
+request id: 01M6ZMF2Y40K8S7W1FVPQARCZD
 
-Every worker stayed busy for the whole queue timeout.
-2.003547s
+No worker had started for the request within the queue timeout.
+2.003713s
 ```
 
-The host went on starting regardless, and a request a second and a half later was served in under a millisecond. The `Retry-After` header tells a well behaved client to come back after a second, which is the right answer. The text of the response is wrong for this case though, as there were no workers to be busy, and the access log records it with the same `queue_full` reason as an overloaded release would get. That is something I'll be suggesting gets a reason of its own.
+The host went on starting regardless, and a request a second and a half later was served in about a millisecond. The `Retry-After` header tells a well behaved client to come back after a second, which is the right answer. The body says no worker had started in time, and the access log records the reason `cold_start_timeout`, so this can be told apart from an overloaded release.
 
 The lesson is that once a release's host can stop, its queue timeout has to cover its import, or the first visitor after a quiet spell gets an error.
 
@@ -156,41 +156,54 @@ Scaling to zero is mostly about many applications sharing a server, and the daem
 workers = 6
 ```
 
-Memory and CPU can be capped the same way. I deployed four applications, each behind its own virtual host. One was a shop with the spare mode policy from the last post, and the other three were sites like the one above, two of them previews. With the three small sites idle, the budget showed only the shop's worker and one worker of a retained release in use:
+Memory and CPU can be capped the same way. I deployed four applications, each behind its own virtual host. One was a shop with the spare mode policy from the last post, and the other three were sites like the one above, two of them previews. With the three small sites idle, the budget showed only the shop's worker in use:
 
 ```
-budget   2 of 6 workers
+budget   1 of 6 workers
 ```
 
 With sixteen clients asking for the shop's slow page, its scale-out stopped at the budget:
 
 ```
-default      5            10/10      -3.0    250 ms     0/6        spare 1-12 workers, 1-3 idle
+default      6            12/12      -1.50   under 250 ms  0/6        spare 1-12 workers, 1-3 idle
   ...
-  last: held at 5: the node's worker budget (6 of 6 workers) (1s ago)
+  last: held at 6: the node's worker budget (6 of 6 workers) (3s ago)
 ```
 
 ```
-scaling.denied_by_budget shop@r1                  default: 0 of the 4 more workers asked for fit the node's worker budget (6 of 6 workers), at priority 0
+scaling.denied_by_budget shop@r1                  default: 1 of the 4 more workers asked for fit the node's worker budget (5 of 6 workers), at priority 0
 ```
 
-That is the budget doing its job. Workers already running are never stopped to make room for another application, and when several releases want more at the same time, an application's `priority` decides which goes first. What happens to the sites scaled to zero while the budget is full is less obvious, and I got two different answers.
+That is the budget doing its job. Workers already running are never stopped to make room for another application, and when several releases want more at the same time, an application's `priority` decides which goes first. What happens to the sites scaled to zero while the budget is full is less obvious.
 
-One preview had been idle long enough for its host to stop. A request for it woke it in the usual 3.3 seconds, and the budget went over its limit:
+Neither kind of wake is held back by the workers limit. One preview had been idle long enough for its host to stop. A request for it woke it in the usual three seconds or so, with the event saying it went over the budget:
+
+```
+release.woken        preview-b@r1             a request is waiting: starting its host again, over the node's budget of 6 workers
+```
 
 ```
 budget   7 of 6 workers
 ```
 
-The other preview still had its host, with zero workers, so it needed only a fork. That wake was refused by the budget:
+The other preview still had its host, with zero workers, so it needed only a fork, and was served in six milliseconds:
 
 ```
-scaling.denied_by_budget preview-a@r1             default: a request is waiting for a group scaled to zero, and no worker fits the node's worker budget (7 of 6 workers)
+scaling.decision     preview-a@r1             default: scale out from 0 to 1 workers: a request is waiting for a group scaled to zero, over the node's budget of 6 workers
 ```
 
-and the request got the same 503, after the default queue timeout of five seconds. The Muru documentation does say a wake from zero workers is admitted by the budget like any other scale-out, so the refusal is as designed. But the cheap wake failing while the expensive one goes through, and the budget ending up exceeded anyway, isn't something I'd want. I'd rather a site at zero always gets its one worker ahead of a busy site getting extra ones, and I'll be raising that. Until then, a node with sites scaled to zero needs a budget with room left for them to wake, or a `max_workers` on its busy applications which keeps them from taking all of it.
+A site which can't answer its first request is a worse outcome than a busy site not getting one more worker, so the node goes over its limit for the moment. Retained releases holding workers are stopped, oldest first, to bring it back under, and until then other releases' scale-out is refused. The memory limit still applies to both kinds of wake.
 
-Deploys interact with this too. When a new release replaces an old one, the old one is kept warm for half an hour, by default with one worker per group, so a rollback is instant. For a site which scales to zero that undoes the point for half an hour after every deploy, so `muructl deploy --retain-workers 0` keeps the old release's host alone.
+Deploys fit in with this too. When a new release replaces an old one, the old one is kept for half an hour so that a rollback can go back to it. For a group whose `min_workers` is zero it is kept without workers, so it holds none of the node's budget, and `muructl release list` says what a rollback to it would cost:
+
+```
+RELEASE                  STATE      SERVING  WORKERS          SOURCE
+docs@r2                  ready      yes      1 (1x4)          ...
+docs@r1                  retained            0 (1x4)          ...
+                         host kept until 08:16 UTC; a rollback to it forks a worker
+```
+
+An explicit `--retain-workers` on the deploy keeps that many workers in every group instead.
 
 There is one more case where scaling to zero doesn't fit. Muru matches gRPC calls by the services a worker has registered, so a release with a gRPC mount needs at least one worker running for its calls to be routed at all.
 
@@ -198,4 +211,4 @@ There is one more case where scaling to zero doesn't fit. Muru matches gRPC call
 
 The first stage is what makes this worthwhile. Because the host has already imported the application, getting from no workers back to one costs a fork, so a release can drop to zero workers whenever it is idle without its next visitor really paying for it. Stopping the host as well is there for when memory matters more than the first request.
 
-The posts in this series so far have all been about Muru doing something itself. The [next one](/posts/2026/11/muru-working-with-coding-agents/) is about something else doing things through Muru. Coding agents are increasingly the ones running, deploying and debugging applications, and Muru gives them a way in through MCP, so an agent can deploy each change as a release, read the events, logs and worker stacks when something fails, and roll back, using everything the earlier posts covered.
+The posts in this series so far have all been about Muru doing something itself. The next one, working with coding agents, is about something else doing things through Muru. Coding agents are increasingly the ones running, deploying and debugging applications, and Muru gives them a way in through MCP, so an agent can deploy each change as a release, read the events, logs and worker stacks when something fails, and roll back, using everything the earlier posts covered.

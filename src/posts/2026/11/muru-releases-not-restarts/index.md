@@ -8,7 +8,7 @@ draft: true
 
 With the [previous post](/posts/2026/11/muru-wsgi-and-asgi-together/) I finished with development mode. Something I kept coming back to in those posts was that when `muructl run` reloads after a change, it isn't restarting anything. It starts a new release beside the one serving, and only moves traffic across once the new release is ready. In [how it fits together](/posts/2026/11/muru-how-it-fits-together/) I said the same mechanism is what the daemon uses for deploying an application to a server. Time to show that.
 
-This is where Muru departs most from how a Python web application is usually deployed. With gunicorn, deploying new code typically means putting the new code in place and sending the master process a HUP signal. Going by its own description, that reloads the configuration, starts new worker processes and gracefully shuts down the old ones, with the new workers loading the application code afresh unless `preload_app` is on, in which case the old code stays. A USR2 signal goes further, starting a second master and set of workers from the same command line beside the first, with the old master left around so a change can be backed out by sending more signals. Either way, there is one copy of the code on disk, both sets of workers share the one listening socket while they overlap, and anything more than that, such as keeping the previous version running so you can switch straight back to it, is left to a load balancer and a deploy script you write yourself. I can hardly point the finger, as mod_wsgi was no better, with a deploy there meaning a restart of the daemon processes or of Apache itself.
+This is where Muru departs most from how a Python web application is usually deployed. With gunicorn, deploying new code typically means putting the new code in place and sending the master process a HUP signal. Going by its own description, that reloads the configuration, starts new worker processes and gracefully shuts down the old ones, with the new workers loading the application code afresh unless `preload_app` is on, in which case the old code stays. A USR2 signal goes further, starting a second master and set of workers from the same command line beside the first, with the old master left around so a change can be backed out by sending more signals. Either way, there is one copy of the code on disk, both sets of workers share the one listening socket while they overlap, and anything more than that, such as keeping the previous version running so you can switch straight back to it, is left to a load balancer and a deploy script you write yourself. I can hardly point the finger, as mod_wsgi was no better, with a deploy there meaning a restart of Apache, or a similar mix of signals and gymnastics to get a daemon process to reload against different code.
 
 Under the Muru daemon, each deploy is a release of its own, started beside the one serving, given traffic only once it is ready, and kept warm afterwards in case you want it back.
 
@@ -108,7 +108,7 @@ There is a fair bit hidden behind that first deploy, and `muructl events` tells 
      2 07:10:12 info     release.created      shop@r1                  from /Users/graham/shop/releases/v1
      3 07:10:12 info     release.building     shop@r1                  from /Users/graham/shop/releases/v1/uv.lock
      4 07:10:12 info     release.built        shop@r1                  /Users/graham/Library/Application Support/muru/envs/shop/r1 in 0.1s from uv.lock 8c788a3a641a
-     5 07:10:12 info     release.state_changed shop@r1                  fetched the runtime library muru-0.1.0a19-cp315-cp315t-macosx_11_0_arm64.whl from PyPI, once
+     5 07:10:12 info     release.state_changed shop@r1                  fetched the runtime library muru-1.0.0-cp315-cp315t-macosx_11_0_arm64.whl from PyPI, once
      6 07:10:13 info     release.ready        shop@r1                  2 workers ready in 0.7 s
      7 07:10:13 notice   traffic.switched     shop@r1                  traffic moved to the release
      8 07:10:13 info     command.started      shop@r1                  migrate: started (pid 31050)
@@ -128,7 +128,7 @@ muructl deploy shop releases/v2
 ```
 
 ```
-Error: the host exited with exit status: 1 before its workers were ready
+Error: the host exited with exit status: 1 before its workers were ready: cannot load app:application: ModuleNotFoundError: No module named 'markdown'
 ```
 
 The site carries on as if nothing happened, still answering from the first release:
@@ -140,13 +140,13 @@ The site carries on as if nothing happened, still answering from the first relea
 `muructl release list` shows the new release as failed beside the one still serving:
 
 ```
-RELEASE                  STATE      SERVING  WORKERS    SOURCE
-shop@r2                  failed              2x4        /Users/graham/shop/releases/v2
-                         the host exited with exit status: 1 before its workers were ready
-shop@r1                  ready      yes      2x4        /Users/graham/shop/releases/v1
+RELEASE                  STATE      SERVING  WORKERS          SOURCE
+shop@r2                  failed              - (2x4)          /Users/graham/shop/releases/v2
+                         the host exited with exit status: 1 before its workers were ready: cannot load app:application: ModuleNotFoundError: No module named 'markdown'
+shop@r1                  ready      yes      2 (2x4)          /Users/graham/shop/releases/v1
 ```
 
-and the release's own log, from `muructl logs shop@r2`, has the reason, after the lines from building its environment:
+and the release's own log, from `muructl logs shop@r2`, has the same reason in context, after the lines from building its environment:
 
 ```
 [build] Creating virtual environment at: /Users/graham/Library/Application Support/muru/envs/shop/r2
@@ -174,6 +174,8 @@ muru: plan (nothing changed): release shop@r3, app:application 2x4 from /Users/g
   ...
   processes = 2                         (the previous release)
   threads = 4                           (the previous release)
+  ...
+  env SHOP_DATABASE (the previous release)
   ...
   settings nothing else gives come from shop@r1; --fresh takes none
   an environment would be built from the source's uv.lock
@@ -216,11 +218,11 @@ Every one of the 695 requests got a 200, with the responses changing over from o
 The new release was built and started while the old one carried on serving. Traffic moved only once the new release was ready, and the old release then drained, finishing the requests it already had. What happened next to the old release is the interesting part. It wasn't stopped, but scaled in to a single worker and kept warm for 30 minutes, which `muructl release list` notes against it:
 
 ```
-RELEASE                  STATE      SERVING  WORKERS    SOURCE
-shop@r3                  ready      yes      2x4        /Users/graham/shop/releases/v3
-shop@r2                  failed              2x4        /Users/graham/shop/releases/v2
-                         the host exited with exit status: 1 before its workers were ready
-shop@r1                  retained            2x4        /Users/graham/shop/releases/v1
+RELEASE                  STATE      SERVING  WORKERS          SOURCE
+shop@r3                  ready      yes      2 (2x4)          /Users/graham/shop/releases/v3
+shop@r2                  failed              - (2x4)          /Users/graham/shop/releases/v2
+                         the host exited with exit status: 1 before its workers were ready: cannot load app:application: ModuleNotFoundError: No module named 'markdown'
+shop@r1                  retained            1 (2x4)          /Users/graham/shop/releases/v1
                          warm until 07:40 UTC; a rollback to it is instant
 ```
 
@@ -288,6 +290,7 @@ Starting the daemon again, it finds them and takes them over:
     37 07:10:34 info     daemon.started       daemon                   serving on http://127.0.0.1:8080, admin socket /tmp/muru-501/admin.sock
     38 07:10:34 info     release.adopted      shop@r3                  re-adopted the host (pid 31117)
     39 07:10:34 info     release.adopted      shop@r1                  re-adopted the host (pid 31045)
+    40 07:10:34 notice   traffic.switched     shop@r3                  traffic moved to the release
 ```
 
 Meanwhile the script didn't notice anything had happened:

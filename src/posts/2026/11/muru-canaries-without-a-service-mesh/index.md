@@ -79,7 +79,7 @@ The plan was to give the new release 10% of the requests for 30 seconds, then 50
 ```
     44 07:20:02 notice   rollout.started      shop@r6                  rollout 1 against r5: 10% for 30s, 50% for 30s
     45 07:20:07 warning  rollout.gate_failed  shop@r6                  step 1 at 10%: 5xx rate 21.95% over the limit of 1.00% (baseline 0.00%)
-    46 07:20:07 warning  rollout.rolled_back  shop@r6                  rollout 1: gate failed at 10%: 5xx rate 21.95% over the limit of 1.00% (baseline 0.00%); the candidate is kept warm
+    46 07:20:07 warning  rollout.rolled_back  shop@r6                  rollout 1: gate failed at 10%: 5xx rate 21.95% over the limit of 1.00% (baseline 0.00%); the candidate is kept for inspection
 ```
 
 Five seconds after the canary started, the candidate was out of traffic again. Over the run the script got this back:
@@ -194,14 +194,14 @@ muru: rollout 3 rolled_back: gate failed at 10%: 2 worker crashes and timeout ki
 This gate doesn't wait for 100 requests. A worker which crashes or is killed by a timeout counts against the candidate as soon as it happens, and by default one more than the baseline had in the step is enough to roll it back. The events say which workers were killed, and where they were stuck, which came from the stacks the host gathered from inside the worker before replacing it:
 
 ```
-    73 07:22:02 warning  worker.timeout_killed shop@r8                  worker 1 (pid 41523) replaced by pid 41537: a request has run for 3.6 s, past the hard timeout of 3 s; at app.py line 27 in order, called from app.py line 39 in application, called from _pool.py line 30 in serve_jobs
-    74 07:22:02 warning  worker.timeout_killed shop@r8                  worker 0 (pid 41522) replaced by pid 41538: a request has run for 3.6 s, past the hard timeout of 3 s; at app.py line 27 in order, called from app.py line 39 in application, called from _pool.py line 30 in serve_jobs
-    79 07:22:03 warning  rollout.gate_failed  shop@r8                  step 1 at 10%: 2 worker crashes and timeout kills, over the limit of 0 (baseline 0)
+    70 09:53:23 warning  worker.timeout_killed shop@r8                  worker 0 (pid 82673) replaced by pid 83393: a request has run for 3.8 s, past the hard timeout of 3 s; at app.py line 27 in order, called from app.py line 39 in application, called from _pool.py line 30 in serve_jobs
+    72 09:53:23 warning  worker.timeout_killed shop@r8                  worker 1 (pid 82674) replaced by pid 83395: a request has run for 3.6 s, past the hard timeout of 3 s; at app.py line 27 in order, called from app.py line 39 in application, called from _pool.py line 30 in serve_jobs
+    75 09:53:24 warning  rollout.gate_failed  shop@r8                  step 1 at 10%: 2 worker crashes and timeout kills, over the limit of 0 (baseline 0)
 ```
 
 Line 27 of `app.py` is the second `acquire()`. The release log has the full stack of every thread in each worker as well, much like the `muructl debug stacks` output from [looking inside the workers](/posts/2026/11/muru-looking-inside-the-workers/).
 
-Looking at the timestamps, the rollback wasn't quite as quick as with the errors. The hard timeout fired about four seconds into the canary, but the kills were only counted once the stuck workers had been given their drain grace and stopped, some 15 seconds later. Meanwhile the candidate kept its 10%, and the load script ended up with two 504 responses and 14 requests it gave up on after five seconds, out of about 1,450. It is still a long way short of every kettle order hanging for everyone.
+Looking at the timestamps, the rollback was about as quick as with the errors. The hard timeout fired about four seconds into the canary, and the decision to replace a stuck worker is what counted against the candidate, so it was out of traffic within a second. The stuck workers themselves were given their drain grace and went about 15 seconds later, by which time the candidate had no traffic left to lose. The load script ended up with two 504 responses and three requests it gave up on after five seconds, out of about 9,500. That is a long way short of every kettle order hanging for everyone.
 
 There are more gates than the two I have shown. `--max-p95` and `--max-p99` judge how long the candidate's requests take, `--max-queue-wait` judges how long they wait for a worker thread, and `--probe` names URLs the daemon requests from both releases itself every five seconds, with one failing on the candidate alone enough to roll it back.
 
@@ -210,42 +210,6 @@ There are more gates than the two I have shown. `--max-p95` and `--max-p99` judg
 The canary above uses the anonymous `muru_id` cookie to keep each client on one release. That can be changed per route, to hash a header such as a user id set by a proxy in front, a cookie of the application's own, or the client's address. When the canary ends, though, a client on the losing side is moved across on its next request. That is usually fine, but not for an application where a session started on one release shouldn't be continued on another. For that a route can be made sticky, so the edge sets a cookie naming the release a client was given and keeps honouring it for a grace period after that release leaves the route, before it drains.
 
 The preview header used earlier also has a cookie form, `muru_preview=r7`, which makes it easy to try a held release in a browser, and a route can give a release a share of zero, so it is reachable only by preview, for a dark launch.
-
-## Canarying away from gunicorn
-
-One more thing worth mentioning. A release doesn't have to run Muru's own workers. The daemon can run an existing gunicorn, uvicorn, granian, uWSGI or mod_wsgi-express command as a release, starting it, routing requests to it, and stopping it when it drains. Here an application which currently runs under gunicorn is deployed that way, as `legacy`:
-
-```
-muructl deploy legacy . --server gunicorn -- .venv/bin/gunicorn --workers 2 --bind '{bind}' app:application
-```
-
-```
-muru: release legacy@r1 is ready and serving
-```
-
-Because it is a release like any other, a release of the same application using Muru's workers can then be canaried against it:
-
-```
-muructl rollout canary legacy@r2 --steps 25,50 --hold 10s --wait
-```
-
-```
-muru: rollout 1 of legacy@r2 started against r1: step 1 of 2: 25% for 10s
-muru: rollout 1 running step 1 of 2: 25% for 10s
-muru: rollout 1 running step 2 of 2: 50% for 10s
-muru: rollout 1 promoted: every step passed its gates
-```
-
-after which `muructl release list legacy` shows the gunicorn release kept warm, should a rollback be needed:
-
-```
-RELEASE                  STATE      SERVING  WORKERS    SOURCE
-legacy@r2                ready      yes      2x4        /Users/graham/legacy2
-legacy@r1                retained            1 gunicorn /Users/graham/legacy
-                         warm until 07:53 UTC; a rollback to it is instant
-```
-
-Moving an existing application across to a new server is a change like any other, and this way it can be made a step at a time, with the old server there to go back to.
 
 ## What's next
 

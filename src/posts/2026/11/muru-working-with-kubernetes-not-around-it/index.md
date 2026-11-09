@@ -8,7 +8,7 @@ draft: true
 
 The [last post](/posts/2026/11/muru-a-better-tenant-in-a-container/) was about `muructl serve` as the main process of a container: sizing itself from the container's limits, answering probes on a port of its own, stopping in order on SIGTERM, and running with a read-only root under any user ID. None of that cares what runs the container. Most of these containers end up on Kubernetes though, and Kubernetes has its own way of doing several things a Python web server would otherwise need help with. Rolling out new versions, spreading traffic, scaling, running one-off tasks, all of that is done by the platform already.
 
-So the aim with Muru on Kubernetes is to fit in with what Kubernetes provides rather than duplicate it, and to fill the gaps where what Kubernetes provides doesn't quite reach the application. For this post I ran everything on a local kind cluster, with a single node running Kubernetes 1.36, using muructl 0.1.0a19.
+So the aim with Muru on Kubernetes is to fit in with what Kubernetes provides rather than duplicate it, and to fill the gaps where what Kubernetes provides doesn't quite reach the application. For this post I ran everything on a local kind cluster, with a single node running Kubernetes 1.36.
 
 ## The Deployment
 
@@ -58,6 +58,7 @@ spec:
           readinessProbe:
             httpGet: {path: /readyz, port: admin}
             periodSeconds: 2
+            failureThreshold: 1
           resources:
             requests: {cpu: 500m, memory: 512Mi}
             limits: {cpu: "2", memory: 1Gi}
@@ -181,26 +182,7 @@ memory budget 1.8GB (memory.max 2.0GB less 205MB)
 worker hard limit 904MB: the memory budget of 1.8GB less 34MB the host holds, over 2 workers
 ```
 
-but the client had errors:
-
-```
-responses: {200: 4448}
-errors: {'ConnectionRefusedError': 10} first at (s): {'ConnectionRefusedError': 10.0}
-responses with Connection: close, by pod: {'shop-5dfdbd5847-nz5bh': 180}
-```
-
-The resize went in at 09:28:23.665. Muru started its shutdown delay, the kubelet's readiness probe got a 503 from 09:28:25, and Muru sent `Connection: close` on 180 responses. But the EndpointSlice still listed the pod as ready until 09:28:29.062, by which time the old container had exited. With a rolling update the pod is deleted, so its endpoint is marked terminating at once. A container restarting in a pod which isn't going anywhere doesn't get that. The only thing taking the pod out of the Service is the readiness probe, and by default a readiness probe has to fail three times in a row. Every two seconds, three failures take up to six seconds, which is longer than the five second delay.
-
-The fix is to have the pod taken out of the Service on the first failure:
-
-```yaml
-readinessProbe:
-  httpGet: {path: /readyz, port: admin}
-  periodSeconds: 2
-  failureThreshold: 1
-```
-
-Under the same load, the endpoint went to not ready 1.5 seconds after the resize, and nothing failed:
+The endpoint went to not ready 1.5 seconds after the resize, and nothing failed:
 
 ```
 responses: {200: 4448}
@@ -208,7 +190,17 @@ errors: {} first at (s): {}
 responses with Connection: close, by pod: {'shop-567fc9d9c7-46lpz': 59}
 ```
 
-A threshold of one would be a risky setting for a server which answers readiness from the same threads that serve requests, since one slow probe under load would take the pod out of the Service. With Muru, `/readyz` is answered by Muru itself and not by a worker, and as the last post showed it answers in a couple of milliseconds with every worker busy, so a failure means the pod really is stopping or has no ready workers. The Muru documentation's Deployment example uses the default threshold, so this is something I will be suggesting gets changed.
+The reason nothing failed is the `failureThreshold: 1` on the readiness probe. With a rolling update the pod is deleted, so its endpoint is marked terminating at once. A container restarting in a pod which isn't going anywhere doesn't get that. The only thing taking the pod out of the Service is the readiness probe, and by default a readiness probe has to fail three times in a row. Every two seconds, three failures take up to six seconds, which is longer than the five second delay. Taking the setting out and repeating the same resize under the same load shows what happens:
+
+```
+responses: {200: 4448}
+errors: {'ConnectionRefusedError': 10} first at (s): {'ConnectionRefusedError': 10.0}
+responses with Connection: close, by pod: {'shop-5dfdbd5847-nz5bh': 180}
+```
+
+The resize went in at 09:28:23.665. Muru started its shutdown delay, the kubelet's readiness probe got a 503 from 09:28:25, and Muru sent `Connection: close` on 180 responses. But the EndpointSlice still listed the pod as ready until 09:28:29.062, by which time the old container had exited.
+
+A threshold of one would be a risky setting for a server which answers readiness from the same threads that serve requests, since one slow probe under load would take the pod out of the Service. With Muru, `/readyz` is answered by Muru itself and not by a worker, and as the last post showed it answers in a couple of milliseconds with every worker busy, so a failure means the pod really is stopping or has no ready workers.
 
 ## Autoscaling on busy slots, not CPU
 
@@ -383,7 +375,7 @@ kubectl exec deploy/shop -- muructl requests
 
 ```
 RELEASE              GROUP        QUEUED  QUEUED-OLDEST  THREADS  THREAD-OLDEST
-app@r1               default      0       -              1/8      1.9s
+shop@r1              default      0       -              1/8      1.9s
 ```
 
 ```
@@ -403,6 +395,6 @@ Who is allowed to do this is then up to RBAC, like any other `kubectl exec`.
 
 ## What's next
 
-Very little in this post needed Muru to do anything Kubernetes-specific. The shutdown delay is one setting, the resize policy is part of the pod spec, the autoscaler reads a metric Muru already publishes, and the migration is a Job running a command the project already declares. The one thing I didn't expect was the resize case, where restarting a container in place doesn't take the pod out of the Service the way deleting it does, so readiness has to fail fast for the shutdown delay to do its job.
+Very little in this post needed Muru to do anything Kubernetes-specific. The shutdown delay is one setting, the resize policy is part of the pod spec, the autoscaler reads a metric Muru already publishes, and the migration is a Job running a command the project already declares.
 
-The autoscaling here works from outside, with Kubernetes adding whole pods once the workers are busy. The [next post](/posts/2026/11/muru-scaling-from-what-the-workers-report/) goes back to the daemon, where Muru decides itself how many workers a release needs, and where, because it knows why requests are waiting, it can tell whether more workers will help or whether something in the release needs changing.
+The autoscaling here works from outside, with Kubernetes adding whole pods once the workers are busy. The next post, scaling from what the workers report, goes back to the daemon, where Muru decides itself how many workers a release needs, and where, because it knows why requests are waiting, it can tell whether more workers will help or whether something in the release needs changing.

@@ -17,7 +17,7 @@ The image for this post holds a small WSGI application with a few pages for misb
 ```dockerfile
 FROM python:3.13-slim AS build
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-RUN UV_TOOL_BIN_DIR=/usr/local/bin uv tool install muructl==0.1.0a19
+RUN UV_TOOL_BIN_DIR=/usr/local/bin uv tool install muructl
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN muructl build --deployment --deps-only --no-runtime --target /app/.venv
@@ -42,7 +42,7 @@ muru: building /app/.venv with uv sync --frozen --no-dev --no-build --compile-by
 ...
 muru: building /app/.venv with uv sync --frozen --no-dev --no-build --compile-bytecode
 muru: built /app/.venv on Python 3.13.18 (cp313)
-muru: fetched the runtime library muru-0.1.0a19-cp313-cp313-manylinux_2_28_aarch64.whl from PyPI into /opt/muru
+muru: fetched the runtime library muru-1.0.0-cp313-cp313-manylinux_2_28_aarch64.whl from PyPI into /opt/muru
 ```
 
 The last line is the part which is specific to Muru. The runtime library which runs inside the workers has to match both the version of `muructl` and the interpreter, so it is fetched while building the image, and kept outside the application's environment so the application doesn't need to depend on Muru.
@@ -50,7 +50,7 @@ The last line is the part which is specific to Muru. The runtime library which r
 The important thing is that this is the only point at which anything is fetched or installed. When the container starts, `muructl serve` never builds an environment, downloads a Python or fetches the runtime library, and anything it runs gets `UV_OFFLINE=1` and `UV_PYTHON_DOWNLOADS=never` in its environment. If something is missing, it stops with a message naming the build step which would have provided it. Pointing it at the wrong runtime directory, for example:
 
 ```
-muru: error: no runtime library for /app/.venv/bin/python (cp313): build the image with muructl build --runtime-dir /nowhere, or add muru 0.1.0a19 to the environment
+muru: error: no runtime library for /app/.venv/bin/python (cp313): build the image with muructl build --runtime-dir /nowhere, or add muru 1.0.0 to the environment
 ```
 
 That matters more than it might seem. It isn't unusual to find images where an entrypoint script pip installs something, or where a missing package is quietly downloaded at start. That works until the network is unavailable or the package index changes, at which point two containers started from the same image are no longer the same.
@@ -94,16 +94,18 @@ The memory limit is used in a similar way. Ten percent of it, at least 128MB, is
 
 ```
 muru.host[11]: worker 0 (pid 12) uss 454MB is over the hard limit of 431MB; replacing it
-muru.host[11]: worker 0 started as pid 35
+muru.host[11]: worker 0 (pid 12) stops before its replacement starts: 76MB is left under the container's memory limit
 muru.host[11]: worker 1 (pid 13) uss 454MB is over the hard limit of 431MB; replacing it
-muru.host[11]: worker 1 started as pid 46
-muru.host[11]: worker 0 (pid 35) is ready
-muru.host[11]: worker 1 (pid 46) is ready
-muru.host[11]: worker.recycled: worker 1 (pid 13) replaced by pid 46: uss 454MB is over the hard limit of 431MB; most objects: cell 30, tuple 20, builtin_function_or_method 16, function 11, list 11
-muru.host[11]: worker.recycled: worker 0 (pid 12) replaced by pid 35: uss 454MB is over the hard limit of 431MB; most objects: cell 30, tuple 20, builtin_function_or_method 16, function 11, list 11
+muru.host[11]: worker 1 (pid 13) stops before its replacement starts: 76MB is left under the container's memory limit
+muru.host[11]: worker 0 started as pid 106
+muru.host[11]: worker.recycled: worker 0 (pid 12) replaced by pid 106: uss 454MB is over the hard limit of 431MB; most objects: cell 30, tuple 20, builtin_function_or_method 16, function 11, list 11
+muru.host[11]: worker 1 started as pid 107
+muru.host[11]: worker.recycled: worker 1 (pid 13) replaced by pid 107: uss 454MB is over the hard limit of 431MB; most objects: cell 30, tuple 20, builtin_function_or_method 16, function 11, list 11
+muru.host[11]: worker 0 (pid 106) is ready
+muru.host[11]: worker 1 (pid 107) is ready
 ```
 
-Each worker was replaced once it went over its share, through the same path as any other worker replacement, with a new worker forked first and the old one finishing what it had before going. Without this, the first anyone hears of a worker growing is the kernel's out-of-memory killer choosing a process in the container, which can just as easily be one in the middle of a perfectly good request. Neither gunicorn nor uvicorn looks at the memory limit at all. The best either offers is restarting a worker after a set number of requests, whatever it is using.
+Each worker was replaced once it went over its share. Normally a new worker is forked first and the old one finishes what it had before going, but here so little was left under the container's limit that each old worker went first and its replacement was forked once it had gone, so that two large workers were never alive at once. Without this, the first anyone hears of a worker growing is the kernel's out-of-memory killer choosing a process in the container, which can just as easily be one in the middle of a perfectly good request. Neither gunicorn nor uvicorn looks at the memory limit at all. The best either offers is restarting a worker after a set number of requests, whatever it is using.
 
 The check is made every five seconds, so a worker which jumps past its share between checks can still meet the out-of-memory killer. A request for a gigabyte all at once showed what happens then:
 
@@ -121,7 +123,7 @@ muru.host[11]: worker 0 started as pid 35
 muru.host[11]: worker 0 (pid 35) is ready
 ```
 
-At least then the kill is reported as what it was, as a `worker.oom_killed` event and in a `muru_worker_exits_total` metric with the reason `oom_killed`, rather than a worker which mysteriously went away. I should say that in the earlier, slower test the container's own cgroup counters recorded two kills by the kernel despite the log showing only the replacements, so there is something there I still need to look into.
+At least then the kill is reported as what it was, as a `worker.oom_killed` event and in a `muru_worker_exits_total` metric with the reason `oom_killed`, rather than a worker which mysteriously went away.
 
 ## Probes on their own port
 
@@ -145,9 +147,9 @@ readyz 200 0.001870s
 The metrics confirmed every slot was busy, with requests queuing:
 
 ```
-muru_queue_depth{app="app",release="r1",group="default"} 4
-muru_slots_busy{app="app",release="r1",group="default",side="threads"} 8
-muru_slots_total{app="app",release="r1",group="default",side="threads"} 8
+muru_queue_depth{app="shop",release="r1",group="default"} 4
+muru_slots_busy{app="shop",release="r1",group="default",side="threads"} 8
+muru_slots_total{app="shop",release="r1",group="default",side="threads"} 8
 ```
 
 The probes are answered by `muructl` itself, from what it knows about the host and its workers, without a request having to go through a worker. A container whose workers are all busy is alive, so it isn't killed for it. Being on a port of its own also means the probes and metrics are out of reach of the application's Ingress or load balancer.
@@ -285,4 +287,4 @@ muru-app-1 in worker 2:
 
 None of this needs anything outside the image. There is no init to add, no worker count to calculate, no health check view to write, no timeouts to line up with the platform's and no temporary directory to remember. Muru simply reads what the container gives it and behaves accordingly.
 
-Most containers end up on Kubernetes though, and there are a few more things there where Muru can work with what the platform provides rather than around it, such as the shutdown delay in place of the usual `preStop` hook, autoscaling on how busy the workers really are rather than on CPU, and running migrations as a Job from the new image. That is the subject of the next post, [working with Kubernetes, not around it](/posts/2026/11/muru-working-with-kubernetes-not-around-it/).
+Most containers end up on Kubernetes though, and there are a few more things there where Muru can work with what the platform provides rather than around it, such as the shutdown delay in place of the usual `preStop` hook, autoscaling on how busy the workers really are rather than on CPU, and running migrations as a Job from the new image. That is the subject of the next post, working with Kubernetes, not around it.

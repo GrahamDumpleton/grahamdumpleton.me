@@ -24,11 +24,11 @@ The earlier posts in this series covered what the Muru daemon knows while an app
 }
 ```
 
-The `--up` option starts the user's daemon if none is answering, so the first tool call works on a fresh checkout. For this post my configuration also set environment variables pointing at a separate daemon of my own, which listened on port 18500.
+The `--up` option starts the user's daemon if none is answering, so the first tool call works on a fresh checkout.
 
-The server offered 30 tools. Each one runs the `muructl` command of the same name with `--json` and returns what it prints, and each is marked for the client as either only reading or changing something. Deploying, rolling back, draining and running canary rollouts are there. Stopping or upgrading the daemon, running arbitrary code in a worker and one-off commands with `muructl exec` deliberately aren't, and `run_command` only runs the commands an application declares in its `[tool.muru]` settings.
+The server offers a few dozen tools. Each one runs the `muructl` command of the same name with `--json` and returns what it prints, and each is marked for the client as either only reading or changing something. Deploying, rolling back, draining and running canary rollouts are there. Stopping or upgrading the daemon, running arbitrary code in a worker and one-off commands with `muructl exec` deliberately aren't, and `run_command` only runs the commands an application declares in its `[tool.muru]` settings.
 
-What an agent may do can be cut down further. With `--read-only` the server lists only the 15 tools which read, so an agent can watch and diagnose but not change anything. With `--allow rollback,drain` it adds just those two. A tool left out isn't hidden by convention, it doesn't exist as far as the client is concerned. Calling `deploy` against a server started with `--read-only`:
+What an agent may do can be cut down further. With `--read-only` the server lists only the tools which read, so an agent can watch and diagnose but not change anything. With `--allow rollback,drain` it adds just those two. A tool left out isn't hidden by convention, it doesn't exist as far as the client is concerned. Calling `deploy` against a server started with `--read-only`:
 
 ```
 {"jsonrpc": "2.0", "id": 3, "error": {"code": -32602, "message": "no tool named deploy"}}
@@ -43,10 +43,10 @@ muructl mcp skill install
 ```
 
 ```
-muru: wrote the skill for muructl 0.1.0-alpha.19 to .claude/skills/muru/SKILL.md
+muru: wrote the skill for muructl 1.0.0 to .claude/skills/muru/SKILL.md
 ```
 
-It is about 130 lines. It describes applications, releases, traffic and overlays, has a table of each operation and what it does to traffic, and lays out a development loop: check the status, deploy the working tree, run the tests against the daemon's listener, and when something fails, find out why from events, logs and worker stacks before changing any code. It works through the MCP tools when the agent has them, and through `muructl --json` when it doesn't.
+It is about 140 lines. It describes applications, releases, traffic and overlays, has a table of each operation and what it does to traffic, and lays out a development loop: check the status, deploy the working tree, run the tests against the daemon's listener, and when something fails, find out why from events, logs, the requests in flight and worker stacks before changing any code. It works through the MCP tools when the agent has them, and through `muructl --json` when it doesn't.
 
 `muructl mcp skill status` says whether the project's copy is current, and exits with a non-zero status when it isn't, so a CI job can check it after `muructl` is upgraded. The MCP server checks as well. In a project without the skill, the instructions it gives the agent at the start of a session end with:
 
@@ -56,17 +56,17 @@ The Muru skill: the project carries no skill at .claude/skills/muru/SKILL.md; `m
 
 ## An agent and a broken change
 
-To see how this works in practice, I set up a small WSGI shop application in a git repository, with a few JSON pages over a dictionary of orders, guarded by a lock, and a `tests.py` which runs against the daemon's listener. The committed version was deployed as `shop@r1` and passed its tests.
+To see how this works in practice, I set up a small WSGI shop application in a git repository, with a few JSON pages over a dictionary of orders, guarded by a lock, and a `tests.py` which runs against the daemon's listener. That version was deployed as `shop@r1` and passed its tests.
 
-I then made an uncommitted change of the kind a colleague might leave behind. It added an `/orders/summary` page and a test for it, and along the way changed `get_order()` to index the dictionary rather than call `.get()`. The new `summary()` function took the lock and then called `all_orders()`, which takes the same lock. A plain `threading.Lock` isn't reentrant, so that is a deadlock.
+For the scenario, I then pulled down a change which a colleague had committed to the repository before rushing out in a hurry, leaving it for me to test. It added an `/orders/summary` page and a test for it, and along the way changed `get_order()` to index the dictionary rather than call `.get()`. The new `summary()` function took the lock and then called `all_orders()`, which takes the same lock. A plain `threading.Lock` isn't reentrant, so that is a deadlock.
 
 I then ran Claude Code headless in the project, with the MCP server above, the skill installed, and permission to use only the Muru tools, `python3 tests.py`, and tools for reading files. The prompt was:
 
-> A colleague left an uncommitted change in this working tree that adds an order summary page. Deploy the working tree as a new release of the `shop` application using the muru tools, then run `python3 tests.py` against it. If tests fail, use the muru tools to find out why rather than guessing from the code alone, roll the application back to the previous release so the shop keeps working, and report what you found. Don't change any code yet.
+> A colleague committed a quick change to our repo that adds an order summary page, and left it for me to test. I've pulled it into this checkout. Deploy the working tree as a new release of the `shop` application using the muru tools, then run `python3 tests.py` against it. If tests fail, use the muru tools to find out why rather than guessing from the code alone, roll the application back to the previous release so the shop keeps working, and report what you found. Don't change any code yet.
 
 Everything that follows comes from the session's record of tool calls and their results.
 
-The agent loaded the muru skill, looked at the git diff, then called `status` and `list` to see which release was serving. It then deployed:
+The agent loaded the muru skill, looked at what the commit changed, then called `status` and `list` to see which release was serving. It then deployed:
 
 ```
 mcp__muru__deploy {"app": "shop", "source": ".../s7/shop"}
@@ -196,8 +196,6 @@ muructl rollback blog --json
 ```
 
 and `muructl events --json --after 28` returns only the events after a given sequence number, so a script can keep up with what has happened without parsing text.
-
-There are still a few rough edges. In the release JSON, for example, the time a retained release stays warm is only in the `message` text, while its `retained_until_unix_ms` field is 0, so a script has to parse prose to find it.
 
 ## What's next
 
