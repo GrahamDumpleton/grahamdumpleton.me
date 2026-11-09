@@ -32,6 +32,7 @@ Never run `npm run build` to check a draft.
 
 ## Git Conventions
 
+- Work is done directly on `main`, including commits and pushes. Only create a branch if one is explicitly asked for.
 - Do not include Claude Code session URLs (e.g., `https://claude.ai/code/...`) in commit messages or pull request bodies.
 - Never include a `Co-Authored-By` line (or any other co-author attribution) in commit messages.
 
