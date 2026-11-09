@@ -46,7 +46,7 @@ muructl mcp skill install
 muru: wrote the skill for muructl 1.0.0 to .claude/skills/muru/SKILL.md
 ```
 
-It is about 140 lines. It describes applications, releases, traffic and overlays, has a table of each operation and what it does to traffic, and lays out a development loop: check the status, deploy the working tree, run the tests against the daemon's listener, and when something fails, find out why from events, logs, the requests in flight and worker stacks before changing any code. It works through the MCP tools when the agent has them, and through `muructl --json` when it doesn't.
+The skill describes applications, releases, traffic and overlays, has a table of each operation and what it does to traffic, and lays out a development loop: check the status, deploy the working tree, run the tests against the daemon's listener, and when something fails, find out why from events, logs, the requests in flight and worker stacks before changing any code. It works through the MCP tools when the agent has them, and through `muructl --json` when it doesn't.
 
 `muructl mcp skill status` says whether the project's copy is current, and exits with a non-zero status when it isn't, so a CI job can check it after `muructl` is upgraded. The MCP server checks as well. In a project without the skill, the instructions it gives the agent at the start of a session end with:
 
