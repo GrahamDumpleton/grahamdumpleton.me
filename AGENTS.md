@@ -8,6 +8,12 @@ When planning, writing or editing blog content, use the `/personal-blogging` ski
 
 Blog posts are standalone content — each new post covers a new topic. When creating a new post, do NOT explore or read old blog posts. The `/personal-blogging` skill already provides all the style, voice, and convention guidance needed. Only reference or cross-link previous posts if explicitly asked, such as when extending a topic from an earlier post.
 
+## Series of Posts
+
+When posts form a series, create a guide page for it at `src/guides/guide-name/index.md` once a few of the posts have been published, following the format of the existing guides.
+
+A guide lists only posts that are public. Draft pages are still rendered at their URLs, so a guide linking to one would expose it before it is ready. Whenever a post in a series has its draft status removed, add it to the guide as part of that same change, keeping the guide in reading order and grouping posts into batches as the series grows.
+
 ## Scratch Directory
 
 The `scratch/` directory is not part of the git repo (its `.gitignore` excludes everything but itself). It holds temporary working files for use by AI agents, such as reference material given to an agent, plans for a post or series of posts an agent is asked to generate, and example scripts used to validate code in a draft. Its contents come and go, so never reference `scratch/` files by name from posts, templates or other files that will be committed.
