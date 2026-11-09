@@ -85,7 +85,7 @@ The WSGI application in `shop/wsgi.py` imports it with `from shop import db`. Ru
 ```
 muru.host[88997]: preloaded shop.wsgi:application in 2 ms
 muru.host[88997]: shop.wsgi:application is served as WSGI
-muru.host[88997]: preload: the import of shop.wsgi left a connected socket (fd 3, to 127.0.0.1:9340); close it in a pre_fork hook and reopen it in post_fork, or open it lazily on first use
+muru.host[88997]: preload: the import of shop.db left a connected socket (fd 3, to 127.0.0.1:9340); close it in a pre_fork hook and reopen it in post_fork, or open it lazily on first use
 muru.host[88997]: preload: falling back to per-worker imports, which costs slower worker replacement and no shared memory; set preload to false to silence this
 muru.host[88997]: worker 0 started as pid 89031
 muru.host[88997]: worker 1 started as pid 89032
@@ -180,7 +180,7 @@ muructl run shop.wsgi:application --preload true
 ```
 
 ```
-muru.host[89241]: preload: the import of shop.wsgi left a connected socket (fd 3, to 127.0.0.1:9340); close it in a pre_fork hook and reopen it in post_fork, or open it lazily on first use
+muru.host[89241]: preload: the import of shop.db left a connected socket (fd 3, to 127.0.0.1:9340); close it in a pre_fork hook and reopen it in post_fork, or open it lazily on first use
 muru.host[89241]: preload is true, so the import check failing stops the release
 Error: the host exited with exit status: 1 before its workers were ready
 ```
