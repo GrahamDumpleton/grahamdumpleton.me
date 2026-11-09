@@ -20,3 +20,7 @@ This batch of posts steps back to explain how Muru is put together, from the pro
 
   * [Muru: how it fits together.](/posts/2026/11/muru-how-it-fits-together/)
   * [Muru: import once, fork many.](/posts/2026/11/muru-import-once-fork-many/)
+
+This batch of posts moves on to specific features of Muru, starting with serving HTTPS during development so it can be tested without a proxy in front:
+
+  * [Muru: HTTPS in development.](/posts/2026/11/muru-https-in-development/)

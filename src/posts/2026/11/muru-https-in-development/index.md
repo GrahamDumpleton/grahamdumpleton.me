@@ -3,7 +3,6 @@ title: "Muru: HTTPS in development"
 description: "How a Muru development run serves HTTPS with a certificate your browser trusts, so HTTP/2, Secure cookies and URL schemes can be tested without a proxy in front."
 date: 2026-11-10
 tags: ["python", "muru", "wsgi"]
-draft: true
 ---
 
 Everything I have shown of Muru so far has been served over plain HTTP on port 8080. That is how almost everyone runs a Python web application while developing it, and most of the time it is fine. The application in production is going to be behind HTTPS though, and there are some things which behave differently when it is, which you only find out about once it is deployed.
