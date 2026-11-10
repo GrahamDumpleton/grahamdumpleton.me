@@ -3,7 +3,6 @@ title: "Muru: WSGI and ASGI together"
 description: "Adding websockets to an existing WSGI application with Muru, by handing requests to ASGI in the same worker, plus mounting ASGI beside WSGI and serving gRPC."
 date: 2026-11-11
 tags: ["python", "muru", "wsgi", "asgi"]
-draft: true
 ---
 
 The [previous post](/posts/2026/11/muru-https-in-development/) was about serving HTTPS from a development run. This time I want to get back to something I mentioned in passing when I [first talked about Muru](/posts/2026/11/twenty-years-of-mod-wsgi/), which is that it isn't limited to WSGI, and that WSGI and ASGI can be mixed in the one application.
