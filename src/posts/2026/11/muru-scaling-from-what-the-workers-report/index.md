@@ -14,7 +14,7 @@ So adding workers when they are all busy isn't new, and if that were all Muru di
 
 ## Growing and shrinking
 
-The application for this post has a few pages which each misbehave in a different way. The first, `/orders`, sleeps for a fifth of a second as if waiting on a database. The release starts with one worker of two threads, and has a scaling policy in spare mode, which tries to keep between one and three idle workers in hand, like Apache's prefork MPM:
+The application for this post has a few pages which each misbehave in a different way. The first, `/orders`, sleeps for a fifth of a second as if waiting on a database. The release starts with one worker of two threads, and has a scaling policy in spare mode, which tries to keep between one and three idle workers in hand, much as Apache httpd does with spare processes or threads:
 
 ```toml
 [tool.muru]
