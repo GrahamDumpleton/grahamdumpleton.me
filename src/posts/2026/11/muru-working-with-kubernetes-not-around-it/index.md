@@ -95,7 +95,7 @@ With a CPU limit of 2 and a memory limit of 1Gi, each pod sized itself as before
 ```
 2 processes from cpu.max 200000 100000
 memory budget 896MB (memory.max 1.0GB less 128MB)
-worker hard limit 431MB: the memory budget of 896MB less 34MB the host holds, over 2 workers
+worker hard limit 431MB: the memory budget of 896MB less 35MB the host holds, over 2 workers
 serving app:application on http://0.0.0.0:8080 with 2 workers of 4 threads
 ```
 
@@ -161,8 +161,8 @@ but `muructl debug status` showed Muru still running the two workers it had star
 
 ```
 WORKER  PID      GROUP      UP       REQUESTS   THREADS  THREAD-OLDEST  RSS     USS     ROUTED  STATE
-0       16       default    20s      0          0/4      -              29MB    3.5MB   yes     ready
-1       17       default    20s      0          0/4      -              29MB    3.5MB   yes     ready
+0       15       default    20s      0          0/4      -              29MB    3.5MB   yes     ready
+1       16       default    20s      0          0/4      -              29MB    3.5MB   yes     ready
 ```
 
 Most of the extra CPU would go unused, and each worker would still be replaced at 431MB, the share of the old limit. A memory reduction is worse, as the hard limits would then exceed what the container actually has, and the kernel could kill a worker before Muru gets to replace it.
@@ -179,7 +179,7 @@ I repeated the resize under load, this time changing the memory limit to 2Gi, wi
 
 ```
 memory budget 1.8GB (memory.max 2.0GB less 205MB)
-worker hard limit 904MB: the memory budget of 1.8GB less 34MB the host holds, over 2 workers
+worker hard limit 904MB: the memory budget of 1.8GB less 35MB the host holds, over 2 workers
 ```
 
 The endpoint went to not ready 1.5 seconds after the resize, and nothing failed:

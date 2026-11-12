@@ -57,10 +57,10 @@ That matters more than it might seem. It isn't unusual to find images where an e
 
 ## Sizing from the container's limits
 
-Starting the image with limits of two CPUs and a gigabyte of memory, on a Docker host with ten CPUs:
+Starting the image with limits of two CPUs and a gigabyte of memory, with no swap, on a Docker host with ten CPUs:
 
 ```
-docker run --name shop --cpus 2 --memory 1g -p 8080:8080 -p 9090:9090 shop
+docker run --name shop --cpus 2 --memory 1g --memory-swap 1g -p 8080:8080 -p 9090:9090 shop
 ```
 
 the first lines of output say what it worked out and from what:
@@ -69,7 +69,7 @@ the first lines of output say what it worked out and from what:
 muru: 2 processes from cpu.max 200000 100000
 muru: memory budget 896MB (memory.max 1.0GB less 128MB)
 ...
-muru.host[11]: worker hard limit 431MB: the memory budget of 896MB less 34MB the host holds, over 2 workers
+muru.host[12]: worker hard limit 431MB: the memory budget of 896MB less 35MB the host holds, over 2 workers
 ```
 
 Two workers, because the container is allowed two CPUs. That sounds obvious, but it isn't what you get by asking Python. Run in the same container:
@@ -93,16 +93,16 @@ muru: 10 processes from cpuset.cpus.effective, 10 CPUs
 The memory limit is used in a similar way. Ten percent of it, at least 128MB, is set aside for `muructl` itself and the page cache, along with what the host holds once the application is imported, and the rest is divided between the workers as a hard limit for each. To see what that does I used a page of the application which keeps 25MB more each time it is requested, and asked for it once a second:
 
 ```
-muru.host[11]: worker 0 (pid 12) uss 454MB is over the hard limit of 431MB; replacing it
-muru.host[11]: worker 0 (pid 12) stops before its replacement starts: 76MB is left under the container's memory limit
-muru.host[11]: worker 1 (pid 13) uss 454MB is over the hard limit of 431MB; replacing it
-muru.host[11]: worker 1 (pid 13) stops before its replacement starts: 76MB is left under the container's memory limit
-muru.host[11]: worker 0 started as pid 106
-muru.host[11]: worker.recycled: worker 0 (pid 12) replaced by pid 106: uss 454MB is over the hard limit of 431MB; most objects: cell 30, tuple 20, builtin_function_or_method 16, function 11, list 11
-muru.host[11]: worker 1 started as pid 107
-muru.host[11]: worker.recycled: worker 1 (pid 13) replaced by pid 107: uss 454MB is over the hard limit of 431MB; most objects: cell 30, tuple 20, builtin_function_or_method 16, function 11, list 11
-muru.host[11]: worker 0 (pid 106) is ready
-muru.host[11]: worker 1 (pid 107) is ready
+muru.host[12]: worker 0 (pid 15) uss 479MB is over the hard limit of 431MB; replacing it
+muru.host[12]: worker 0 (pid 15) stops before its replacement starts: 23MB is left under the container's memory limit
+muru.host[12]: worker 1 (pid 16) uss 479MB is over the hard limit of 431MB; replacing it
+muru.host[12]: worker 1 (pid 16) stops before its replacement starts: 23MB is left under the container's memory limit
+muru.host[12]: worker 1 started as pid 131
+muru.host[12]: worker.recycled: worker 1 (pid 16) replaced by pid 131: uss 479MB is over the hard limit of 431MB; most objects: cell 31, tuple 20, builtin_function_or_method 16, function 11, list 11
+muru.host[12]: worker 0 started as pid 132
+muru.host[12]: worker.recycled: worker 0 (pid 15) replaced by pid 132: uss 479MB is over the hard limit of 431MB; most objects: cell 31, tuple 20, builtin_function_or_method 16, function 11, list 11
+muru.host[12]: worker 1 (pid 131) is ready
+muru.host[12]: worker 0 (pid 132) is ready
 ```
 
 Each worker was replaced once it went over its share. Normally a new worker is forked first and the old one finishes what it had before going, but here so little was left under the container's limit that each old worker went first and its replacement was forked once it had gone, so that two large workers were never alive at once. Without this, the first anyone hears of a worker growing is the kernel's out-of-memory killer choosing a process in the container, which can just as easily be one in the middle of a perfectly good request. Neither gunicorn nor uvicorn looks at the memory limit at all. The best either offers is restarting a worker after a set number of requests, whatever it is using.
@@ -118,9 +118,9 @@ The worker sent no response head.
 ```
 
 ```
-muru.host[11]: worker.oom_killed: worker 0 (pid 12) was killed by the kernel for memory, restarting
-muru.host[11]: worker 0 started as pid 35
-muru.host[11]: worker 0 (pid 35) is ready
+muru.host[12]: worker.oom_killed: worker 0 (pid 15) was killed by the kernel for memory, restarting
+muru.host[12]: worker 0 started as pid 38
+muru.host[12]: worker 0 (pid 38) is ready
 ```
 
 At least then the kill is reported as what it was, as a `worker.oom_killed` event and in a `muru_worker_exits_total` metric with the reason `oom_killed`, rather than a worker which mysteriously went away.
@@ -140,8 +140,8 @@ Gunicorn and uvicorn have nothing like this. The usual answer is to add a `/heal
 To check Muru doesn't do that, I sent twelve requests to a page which takes six seconds to answer, more than the two workers with four threads each could handle at once, and then asked the admin port:
 
 ```
-livez 200 0.002802s
-readyz 200 0.001870s
+livez 200 0.001336s
+readyz 200 0.001337s
 ```
 
 The metrics confirmed every slot was busy, with requests queuing:
@@ -162,24 +162,37 @@ HEALTHCHECK --interval=5s CMD ["muructl", "probe", "ready"]
 
 ## Process 1
 
-Looking at the processes inside the container (by reading `/proc`, since the slim image has no `ps`):
+Looking at the processes inside the container (by reading `/proc`, since the slim image has no `ps`), each of Muru's processes has set a title saying what it is:
 
 ```
     1     0 S  muructl serve
-    7     1 S  muructl serve
-   11     7 S  /app/.venv/bin/python -m muru.host --app app:application --socket-dir /run/muru/release/r1
-   12    11 S  /app/.venv/bin/python -m muru.host --app app:application --socket-dir /run/muru/release/r1
-   13    11 S  /app/.venv/bin/python -m muru.host --app app:application --socket-dir /run/muru/release/r1
+    7     1 S  muru serve shop
+   11     7 S  muru relay shop@r1
+   12     7 S  muru host shop@r1
+   15    12 S  muru worker shop@r1 default/0
+   16    12 S  muru worker shop@r1 default/1
 ```
 
-Process 1 is `muructl` acting as an init, in the way `tini` or `docker run --init` would. It forwards signals to the real `muructl serve`, which is its child, and collects any process in the container which exits, so nothing is left as a zombie. Process 1 in a container has to do that, as orphaned processes are handed to it, and a process which never collects them fills up the process table with zombies.
+Process 1 is `muructl` acting as an init, in the way `tini` or `docker run --init` would. It forwards signals to the real `muructl serve`, which is its child, and collects any process in the container which exits, so nothing is left as a zombie. Process 1 in a container has to do that, as orphaned processes are handed to it, and a process which never collects them fills up the process table with zombies. Below `muructl serve` are the host and its two workers, and a log relay which passes on what they write.
 
-The application has a page which starts a report by running a shell command that leaves a process running in the background, the sort of thing which happens in real applications more than anyone would like. Just after requesting it three times:
+The application has a page which starts a report by running a shell command that leaves a process running in the background, the sort of thing which happens in real applications more than anyone would like. Just after requesting it three times, `muructl status --processes` with `--all`, which adds the processes Muru didn't start itself, showed them:
 
 ```
-   52    11 S  sleep 1
-   54    11 S  sleep 1
-   56    11 S  sleep 1
+docker exec shop muructl status --processes --all
+```
+
+```
+edge  3.0 req/s  0 err/s  p50 2.1 ms  p95 4.6 ms  in flight 0  ws 0  conns 0  tls 0/s  in 0B/s  out 53B/s
+
+PID   ROLE           WHAT                         UP    CPU      RSS   REQ/S   BUSY   QUEUE      P95   GIL/LAG
+7     serve          controller and edge, :8080   5s   2.3%   19.5MB
+12    └─ host        app:application (r1)         5s   0.0%   34.7MB     3.0    0/8       0   4.6 ms
+11       ├─ relay    output to muructl            5s   0.0%   11.4MB
+15       ├─ worker   worker 0                     5s   0.0%   28.7MB     2.0    0/4           4.8 ms
+16       ├─ worker   worker 1                     5s   0.0%   28.9MB     1.0    0/4           2.4 ms
+54       ├─ other    sleep 1                      1s           1.5MB
+56       ├─ other    sleep 1                      1s           1.5MB
+58       └─ other    sleep 1                      1s           1.5MB
 ```
 
 The orphaned `sleep` processes were taken over by the host, which collects any process its workers leave behind, and a couple of seconds later they were gone, with no zombies. Gunicorn does collect any child that exits, including ones it didn't start. Uvicorn doesn't, so run as process 1 it leaves a zombie behind for each of those. Neither project's documentation says anything about `tini` or `--init`. An image which brings its own init sets `MURU_NO_INIT=1`.
@@ -201,13 +214,13 @@ readyz 503
 The four requests all completed:
 
 ```
- 200 3.002067s
- 200 3.002763s
- 200 3.002639s
- 200 3.002324s
+ 200 3.004430s
+ 200 3.004411s
+ 200 3.004890s
+ 200 3.004973s
 ```
 
-and `docker stop` returned after 2.68 seconds, with the container's exit status 0. On SIGTERM, readiness starts failing at once, so nothing new is sent to the container. The listener then closes, the requests in flight finish, and the workers stop. All of that has to fit inside a budget, eight seconds unless `--shutdown-budget` changes it, which is under the ten seconds `docker stop` allows, so anything left over is stopped by Muru rather than killed by Docker.
+and `docker stop` returned after 2.76 seconds, with the container's exit status 0. On SIGTERM, readiness starts failing at once, so nothing new is sent to the container. The listener then closes, the requests in flight finish, and the workers stop. All of that has to fit inside a budget, eight seconds unless `--shutdown-budget` changes it, which is under the ten seconds `docker stop` allows, so anything left over is stopped by Muru rather than killed by Docker.
 
 Compare that with the defaults elsewhere. Gunicorn's `graceful_timeout` is 30 seconds, so under `docker stop` a slow request is cut off by SIGKILL at ten seconds and gunicorn never gets to finish shutting down. Uvicorn's graceful shutdown timeout isn't set by default, which means it waits for as long as it takes, which under Docker means until the SIGKILL. With either, the fix is remembering to set a timeout which agrees with the platform's.
 
@@ -234,7 +247,7 @@ docker run --read-only --tmpfs /run/muru --tmpfs /tmp --user 123456:0 --cpus 2 -
 it serves as normal under a user ID which exists nowhere:
 
 ```
-hello from pid 12
+hello from pid 15
 ```
 
 Gunicorn in the same situation fails at start, with `No usable temporary directory found`, as it writes a heartbeat file for each worker to the temporary directory. That is fixable with a `tmpfs` on `/tmp` or by pointing `--worker-tmp-dir` at `/dev/shm`, but you have to know to do it.
@@ -258,10 +271,10 @@ log_format = "json"              # MURU_SERVE_LOG_FORMAT
 
 ## Logs a collector can use
 
-With the JSON log format, every line is a JSON object, and when the environment has `POD_NAME`, `POD_NAMESPACE` and `NODE_NAME`, as the Kubernetes Downward API can provide, each line says where it came from. I set those by hand for this run. The more useful part is what happens to a traceback. The application has a page which raises an exception, and the error shows up as a single record:
+With the JSON log format, every line is a JSON object, and when the environment has `POD_NAME`, `POD_NAMESPACE` and `NODE_NAME`, as the Kubernetes Downward API can provide, each line says where it came from. I set those by hand for this run. The more useful part is what happens to a traceback. The application has a page which raises an exception, and the error shows up as a single record, with the whole traceback in its `exception` field, and the request, release and worker it happened in alongside:
 
 ```json
-{"time":"2026-11-07T07:37:52.296Z","kind":"app","source":"muru.worker[1]","message":"Traceback (most recent call last):\n  File \"/app/app.py\", line 25, in application\n    raise RuntimeError(\"something went wrong\")\nRuntimeError: something went wrong","pod":"shop-7d4b9c-x2k8p","namespace":"shop","node":"worker-2"}
+{"time":"2026-11-07T07:37:52.296Z","kind":"app","source":"muru.worker[0]","app":"shop","exception":"Traceback (most recent call last):\n  File \"/app/app.py\", line 25, in application\n    raise RuntimeError(\"something went wrong\")\nRuntimeError: something went wrong","group":"default","level":"ERROR","logger":"muru","message":"the application raised an exception","release":"r1","request_id":"01M6TF2DXFEHAEQZN1C1JEXGBE","worker":0,"pod":"shop-7d4b9c-x2k8p","namespace":"shop","node":"worker-2"}
 ```
 
 Anyone who has had to piece a Python traceback back together from a log system which treated each line as a separate entry will appreciate that.
@@ -275,8 +288,8 @@ docker exec shop muructl debug stacks
 ```
 
 ```
-muru-app-1 in worker 2:
-  serving GET /slow?seconds=4 for 1.1 s (request 01M6TF2SRXPXTHSAPPDG6MVNJQ)
+muru-app-0 in worker 0:
+  serving GET /slow?seconds=4 for 1.2 s (request 01M6TF2SRXPXTHSAPPDG6MVNJQ)
   File "/opt/muru/muru/_pool.py", line 30, in serve_jobs
     serve()
   File "/app/app.py", line 15, in application

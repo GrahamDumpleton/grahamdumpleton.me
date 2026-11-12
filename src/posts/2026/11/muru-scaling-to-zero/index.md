@@ -52,14 +52,27 @@ default      0            0/0        0.00    -             1/6        spare 0-4 
   last: scaled in to 0: no request for 20s (8s ago)
 ```
 
-and of its processes, only the host was left. Listing the processes of one of the preview sites I come to below, which has the same policy, while serving and then at zero workers:
+and of its processes, only the host and its log relay were left. Asking for the release's processes with `muructl status --processes --app docs` while it was serving gave:
 
 ```
---- serving
-56030 55119  46592 envs/preview-b/r1/bin/python -m muru.host --app app:applicati
-56032 56030  17440 envs/preview-b/r1/bin/python -m muru.host --app app:applicati
---- zero workers
-56030 55119  29392 envs/preview-b/r1/bin/python -m muru.host --app app:applicati
+edge  0 req/s  0 err/s  p50 0.0 ms  p95 0.0 ms  in flight 0  ws 0  conns 0  tls 0/s  in 0B/s  out 0B/s
+
+PID     ROLE           WHAT                                                    USER     UP    CPU      RSS   REQ/S   BUSY   QUEUE   P95   GIL/LAG
+55119   daemon         user daemon, state ~/Library/Application Support/muru   graham   4s   0.0%   38.1MB
+55130   └─ host        docs@r1 serving                                         graham   4s   0.0%   54.4MB            0/4       0
+55129      ├─ relay    docs@r1 output to apps/docs/r1.log                      graham   4s   0.0%   17.8MB
+55141      └─ worker   group default, worker 0                                 graham   0s   0.0%   20.9MB            0/4
+```
+
+and once it was at zero workers:
+
+```
+edge  0 req/s  0 err/s  p50 0.0 ms  p95 0.0 ms  in flight 0  ws 0  conns 0  tls 0/s  in 0B/s  out 0B/s
+
+PID     ROLE          WHAT                                                    USER      UP    CPU      RSS   REQ/S   BUSY   QUEUE   P95   GIL/LAG
+55119   daemon        user daemon, state ~/Library/Application Support/muru   graham   26s   0.7%   39.5MB
+55130   └─ host       docs@r1 serving                                         graham   25s   0.0%   54.4MB       0              0
+55129      └─ relay   docs@r1 output to apps/docs/r1.log                      graham   25s   0.0%   17.8MB
 ```
 
 That saving is modest for one worker, and the host still holds the imported application. The point of this stage is what the next request costs. The edge holds the request as queued, the daemon forks a worker from the host, and the request is served by it:
@@ -92,8 +105,8 @@ release.idle         docs@r2                  every worker group has been at zer
 The release has no processes at all now, but stays in the routing as ready, and `muructl release list` says what state it is in:
 
 ```
-RELEASE                  STATE      SERVING  WORKERS          SOURCE
-docs@r2                  ready      yes      - (1x4)          ...
+RELEASE                  STATE      SERVING  WORKERS               DISK SOURCE
+docs@r2                  ready      yes      - (1x4)              4.7MB ...
                          idle: its host has stopped, and the next request starts it
 ```
 
@@ -197,9 +210,9 @@ A site which can't answer its first request is a worse outcome than a busy site 
 Deploys fit in with this too. When a new release replaces an old one, the old one is kept for half an hour so that a rollback can go back to it. For a group whose `min_workers` is zero it is kept without workers, so it holds none of the node's budget, and `muructl release list` says what a rollback to it would cost:
 
 ```
-RELEASE                  STATE      SERVING  WORKERS          SOURCE
-docs@r2                  ready      yes      1 (1x4)          ...
-docs@r1                  retained            0 (1x4)          ...
+RELEASE                  STATE      SERVING  WORKERS               DISK SOURCE
+docs@r2                  ready      yes      1 (1x4)              4.7MB ...
+docs@r1                  retained            0 (1x4)              4.7MB ...
                          host kept until 08:16 UTC; a rollback to it forks a worker
 ```
 
