@@ -1,12 +1,12 @@
 ---
 title: "Muru: working with Kubernetes, not around it"
-description: "Running muructl serve on Kubernetes: a shutdown delay instead of a preStop hook, autoscaling on busy worker slots rather than CPU, in-place resize, and migrations as a Job."
+description: "Running muructl serve on Kubernetes: a shutdown delay instead of a preStop hook, restarts in place, autoscaling on busy worker slots rather than CPU, and migrations as a Job."
 date: 2026-11-15
 tags: ["python", "muru", "kubernetes"]
 draft: true
 ---
 
-The [last post](/posts/2026/11/muru-a-better-tenant-in-a-container/) was about `muructl serve` as the main process of a container: sizing itself from the container's limits, answering probes on a port of its own, stopping in order on SIGTERM, and running with a read-only root under any user ID. None of that cares what runs the container. Most of these containers end up on Kubernetes though, and Kubernetes has its own way of doing several things a Python web server would otherwise need help with. Rolling out new versions, spreading traffic, scaling, running one-off tasks, all of that is done by the platform already.
+The [last post](/posts/2026/11/muru-a-better-tenant-in-a-container/) was about `muructl serve` as the main process of a container: running the workers it is told to fit the container, answering probes on a port of its own, stopping in order on SIGTERM, and running with a read-only root under any user ID. None of that cares what runs the container. Most of these containers end up on Kubernetes though, and Kubernetes has its own way of doing several things a Python web server would otherwise need help with. Rolling out new versions, spreading traffic, scaling, running one-off tasks, all of that is done by the platform already.
 
 So the aim with Muru on Kubernetes is to fit in with what Kubernetes provides rather than duplicate it, and to fill the gaps where what Kubernetes provides doesn't quite reach the application. For this post I ran everything on a local kind cluster, with a single node running Kubernetes 1.36.
 
@@ -36,6 +36,9 @@ spec:
           image: muru-blog-k8s:1
           imagePullPolicy: IfNotPresent
           env:
+            - {name: MURU_SERVE_PROCESSES, value: "2"}
+            - {name: MURU_SERVE_THREADS, value: "4"}
+            - {name: MURU_SERVE_MEMORY, value: "hard_limit=400MB"}
             - {name: MURU_SERVE_SHUTDOWN_DELAY, value: "5s"}
             - {name: MURU_SERVE_SHUTDOWN_BUDGET, value: "25s"}
             - {name: MURU_SERVE_LOG_FORMAT, value: "json"}
@@ -62,9 +65,6 @@ spec:
           resources:
             requests: {cpu: 500m, memory: 512Mi}
             limits: {cpu: "2", memory: 1Gi}
-          resizePolicy:
-            - {resourceName: cpu, restartPolicy: RestartContainer}
-            - {resourceName: memory, restartPolicy: RestartContainer}
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -90,16 +90,13 @@ spec:
 
 Much of this is what the last post covered, now expressed as Kubernetes configuration. All the settings come from environment variables. The probes go to the admin port, which the Service doesn't expose. The pod, namespace and node names come in through the Downward API so they end up in every JSON log record. I labelled the namespace to enforce the `restricted` Pod Security Standard and the pods were admitted without any warnings, as Muru only needs `/run/muru` and `/tmp` to be writable.
 
-With a CPU limit of 2 and a memory limit of 1Gi, each pod sized itself as before:
+As in the last post, the number of processes, the threads in each and each worker's hard memory limit are set explicitly, chosen to go with the pod's resources. With a CPU limit of 2 and a memory limit of 1Gi, that is two workers of four threads, each of which may grow to 400MB:
 
 ```
-2 processes from cpu.max 200000 100000
-memory budget 896MB (memory.max 1.0GB less 128MB)
-worker hard limit 431MB: the memory budget of 896MB less 35MB the host holds, over 2 workers
 serving app:application on http://0.0.0.0:8080 with 2 workers of 4 threads
 ```
 
-The parts which are particular to Kubernetes are the shutdown delay, the resize policy and the absence of any `preStop` hook, and those are what the rest of this post is about, along with autoscaling and migrations.
+If the limits change, so should these. The parts which are particular to Kubernetes are the shutdown delay, the readiness probe's `failureThreshold` and the absence of any `preStop` hook, and those are what the rest of this post is about, along with autoscaling and migrations.
 
 ## Stopping without a preStop hook
 
@@ -139,48 +136,11 @@ Four requests failed because their connections were refused. I repeated both tes
 
 Under Docker or Compose the delay defaults to zero, since a stopped container stops getting connections straight away. Under Kubernetes it is a single environment variable in the Deployment, and the pod spec has no `preStop` hook.
 
-## Resizing a pod in place
+## Resizing and restarting in place
 
-As of Kubernetes 1.35 it is a stable feature that a running container's CPU and memory can be changed in place, through the pod's `resize` subresource, which a VerticalPodAutoscaler can also use. By default no restart is needed, as the kubelet just changes the container's cgroup limits. That is fine for a process which keeps checking its limits, but `muructl serve` reads them once when it starts, and both the worker count and each worker's hard memory limit come from them.
+As of Kubernetes 1.35 it is a stable feature that a running container's CPU and memory can be changed in place, through the pod's `resize` subresource, which a VerticalPodAutoscaler can also use. By default no restart is needed, as the kubelet just changes the container's cgroup limits. Muru though carries on with the processes and threads it was told to run. Giving a pod more CPU without more workers to use it gains little, and giving it less memory than its workers may grow to invites the kernel's out-of-memory killer. A change to the resources which ought to change the number of workers is better made to the Deployment, with the `MURU_SERVE_*` settings changed alongside the limits, so it rolls out as new pods, which the shutdown delay above already covers.
 
-To show what goes wrong, I started a pod with the same spec but no `resizePolicy`, then raised its limits to four CPUs and 2Gi of memory:
-
-```
-kubectl patch pod resize-demo --subresource resize \
-  --patch '{"spec":{"containers":[{"name":"shop","resources":{"limits":{"cpu":"4","memory":"2Gi"}}}]}}'
-```
-
-The container wasn't restarted, and the cgroup now showed the new limits:
-
-```
-400000 100000
-2147483648
-```
-
-but `muructl debug status` showed Muru still running the two workers it had started with:
-
-```
-WORKER  PID      GROUP      UP       REQUESTS   THREADS  THREAD-OLDEST  RSS     USS     ROUTED  STATE
-0       15       default    20s      0          0/4      -              29MB    3.5MB   yes     ready
-1       16       default    20s      0          0/4      -              29MB    3.5MB   yes     ready
-```
-
-Most of the extra CPU would go unused, and each worker would still be replaced at 431MB, the share of the old limit. A memory reduction is worse, as the hard limits would then exceed what the container actually has, and the kernel could kill a worker before Muru gets to replace it.
-
-That is why the Deployment sets `restartPolicy: RestartContainer` in its `resizePolicy`. The same CPU change to one of the Deployment's pods restarted its container, which sized itself from the new limits:
-
-```
-4 processes from cpu.max 400000 100000
-```
-
-The pod stays on the same node with the same address. Only the container restarts, and that turned out to matter.
-
-I repeated the resize under load, this time changing the memory limit to 2Gi, with the client opening a new connection for each request. The new container came up with the larger budget:
-
-```
-memory budget 1.8GB (memory.max 2.0GB less 205MB)
-worker hard limit 904MB: the memory budget of 1.8GB less 35MB the host holds, over 2 workers
-```
+A resize did turn out to be a handy way of showing what happens when a container is restarted without its pod going anywhere, as also happens after a failed liveness probe. Giving the container a `resizePolicy` with `restartPolicy: RestartContainer` has the kubelet restart it for a resize. I did that for one pod and, with the client opening a new connection for each request, changed its memory limit. The container restarted in the same pod, on the same node with the same address.
 
 The endpoint went to not ready 1.5 seconds after the resize, and nothing failed:
 
@@ -395,6 +355,6 @@ Who is allowed to do this is then up to RBAC, like any other `kubectl exec`.
 
 ## What's next
 
-Very little in this post needed Muru to do anything Kubernetes-specific. The shutdown delay is one setting, the resize policy is part of the pod spec, the autoscaler reads a metric Muru already publishes, and the migration is a Job running a command the project already declares.
+Very little in this post needed Muru to do anything Kubernetes-specific. The shutdown delay is one setting, the workers are set to go with the pod's resources, the autoscaler reads a metric Muru already publishes, and the migration is a Job running a command the project already declares.
 
 The autoscaling here works from outside, with Kubernetes adding whole pods once the workers are busy. The next post, scaling from what the workers report, goes back to the daemon, where Muru decides itself how many workers a release needs, and where, because it knows why requests are waiting, it can tell whether more workers will help or whether something in the release needs changing.

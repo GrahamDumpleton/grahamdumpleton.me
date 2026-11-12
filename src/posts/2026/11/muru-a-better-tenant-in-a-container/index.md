@@ -1,6 +1,6 @@
 ---
 title: "Muru: a better tenant in a container"
-description: "What muructl serve does as a container's main process: sizing from the container's limits, probes on their own port, an orderly SIGTERM, and a read-only root."
+description: "What muructl serve does as a container's main process: workers set to fit the container, probes on their own port, an orderly SIGTERM, and a read-only root."
 date: 2026-11-14
 tags: ["python", "muru", "docker"]
 draft: true
@@ -55,24 +55,30 @@ muru: error: no runtime library for /app/.venv/bin/python (cp313): build the ima
 
 That matters more than it might seem. It isn't unusual to find images where an entrypoint script pip installs something, or where a missing package is quietly downloaded at start. That works until the network is unavailable or the package index changes, at which point two containers started from the same image are no longer the same.
 
-## Sizing from the container's limits
+## Telling it how many workers
 
-Starting the image with limits of two CPUs and a gigabyte of memory, with no swap, on a Docker host with ten CPUs:
-
-```
-docker run --name shop --cpus 2 --memory 1g --memory-swap 1g -p 8080:8080 -p 9090:9090 shop
-```
-
-the first lines of output say what it worked out and from what:
+Starting the image with limits of two CPUs and a gigabyte of memory, with no swap, on a Docker host with ten CPUs, I gave it the number of worker processes and the threads in each, along with a hard memory limit for each worker:
 
 ```
-muru: 2 processes from cpu.max 200000 100000
-muru: memory budget 896MB (memory.max 1.0GB less 128MB)
+docker run --name shop --cpus 2 --memory 1g --memory-swap 1g \
+  -e MURU_SERVE_PROCESSES=2 -e MURU_SERVE_THREADS=4 -e MURU_SERVE_MEMORY=hard_limit=400MB \
+  -p 8080:8080 -p 9090:9090 shop
+```
+
+The output says what it is running:
+
+```
+muru.host[12]: preloaded app:application in 1 ms
+muru.host[12]: app:application is served as WSGI
+muru.host[12]: worker 0 started as pid 15
+muru.host[12]: worker 1 started as pid 16
 ...
-muru.host[12]: worker hard limit 431MB: the memory budget of 896MB less 35MB the host holds, over 2 workers
+muru: serving app:application on http://0.0.0.0:8080 with 2 workers of 4 threads
 ```
 
-Two workers, because the container is allowed two CPUs. That sounds obvious, but it isn't what you get by asking Python. Run in the same container:
+These settings should always be given, chosen to go with the resources the container is given. Two processes to go with two CPUs suits an application whose requests mostly use the CPU, while one whose requests spend their time waiting on a database can do with more threads in each. The memory has to fit as well. Two workers which may each grow to 400MB, along with the host which imported the application, leave some room in a gigabyte, but an application whose workers each need 750MB would want a single process in a container this size, or a bigger container. The other examples in this post start the container with the same settings, which I leave out to keep the commands short.
+
+How many workers to run isn't something which can be reliably worked out from inside the container either. Asking Python how many CPUs it has, in the same container:
 
 ```
 docker run --rm --cpus 2 shop python3 -c "import os; print(os.cpu_count(), os.process_cpu_count())"
@@ -82,32 +88,26 @@ docker run --rm --cpus 2 shop python3 -c "import os; print(os.cpu_count(), os.pr
 10 10
 ```
 
-A CPU limit set with `--cpus`, or `resources.limits.cpu` in Kubernetes, is a CFS quota in the cgroup's `cpu.max` file, which neither of those functions reads. Gunicorn's default is a single worker unless `WEB_CONCURRENCY` says otherwise, and uvicorn's is the same. Gunicorn's documentation suggests `(2 x CPU cores) + 1`, and its official image works that out with `nproc`, which also says 10 here, so following that advice would give 21 workers in a container allowed two CPUs. On a large Kubernetes node, with a pod limited to a couple of CPUs, it is far worse.
+A CPU limit set with `--cpus`, or `resources.limits.cpu` in Kubernetes, is a CFS quota in the cgroup's `cpu.max` file, which neither of those functions reads. Gunicorn's default is a single worker unless `WEB_CONCURRENCY` says otherwise, and uvicorn's is the same. Gunicorn's documentation suggests `(2 x CPU cores) + 1`, and its official image works that out with `nproc`, which also says 10 here, so following that advice would give 21 workers in a container allowed two CPUs. On a large Kubernetes node, with a pod limited to a couple of CPUs, it is far worse. And even a count which got the CPUs right would say nothing about how much memory each worker needs, or whether the requests use the CPU at all.
 
-With no CPU limit at all, the same image starts as many workers as the container may run on:
-
-```
-muru: 10 processes from cpuset.cpus.effective, 10 CPUs
-```
-
-The memory limit is used in a similar way. Ten percent of it, at least 128MB, is set aside for `muructl` itself and the page cache, along with what the host holds once the application is imported, and the rest is divided between the workers as a hard limit for each. To see what that does I used a page of the application which keeps 25MB more each time it is requested, and asked for it once a second:
+The hard memory limit is there for an application whose workers grow. A Python process tends to hang on to memory it has used, whether through a cache, a leak or one unusually large request, and in a container the usual end to that is the container running out of memory and the kernel killing a process outright. The hard limit gives Muru the chance to get in first. Each worker's memory is checked every few seconds, and one which has grown past the limit is taken out of service and replaced with a fresh worker, while it finishes the requests it already has. Nobody sees an error, and the memory is given back. It isn't a cap which stops a worker using more, but the point at which a worker is swapped for a new one, so it wants to be low enough that all the workers together still fit in the container. To see what that does I used a page of the application which keeps 25MB more each time it is requested, and asked for it once a second:
 
 ```
-muru.host[12]: worker 0 (pid 15) uss 479MB is over the hard limit of 431MB; replacing it
-muru.host[12]: worker 0 (pid 15) stops before its replacement starts: 23MB is left under the container's memory limit
-muru.host[12]: worker 1 (pid 16) uss 479MB is over the hard limit of 431MB; replacing it
-muru.host[12]: worker 1 (pid 16) stops before its replacement starts: 23MB is left under the container's memory limit
-muru.host[12]: worker 1 started as pid 131
-muru.host[12]: worker.recycled: worker 1 (pid 16) replaced by pid 131: uss 479MB is over the hard limit of 431MB; most objects: cell 31, tuple 20, builtin_function_or_method 16, function 11, list 11
-muru.host[12]: worker 0 started as pid 132
-muru.host[12]: worker.recycled: worker 0 (pid 15) replaced by pid 132: uss 479MB is over the hard limit of 431MB; most objects: cell 31, tuple 20, builtin_function_or_method 16, function 11, list 11
-muru.host[12]: worker 1 (pid 131) is ready
-muru.host[12]: worker 0 (pid 132) is ready
+muru.host[12]: worker 1 (pid 16) uss 429MB is over the hard limit of 400MB; replacing it
+muru.host[12]: worker 1 (pid 16) stops before its replacement starts: 131MB is left under the container's memory limit
+muru.host[12]: worker 0 (pid 15) uss 429MB is over the hard limit of 400MB; replacing it
+muru.host[12]: worker 0 (pid 15) stops before its replacement starts: 130MB is left under the container's memory limit
+muru.host[12]: worker 1 started as pid 38
+muru.host[12]: worker.recycled: worker 1 (pid 16) replaced by pid 38: uss 429MB is over the hard limit of 400MB; most objects: cell 31, tuple 20, builtin_function_or_method 16, function 11, list 11
+muru.host[12]: worker 1 (pid 38) is ready
+muru.host[12]: worker 0 started as pid 49
+muru.host[12]: worker.recycled: worker 0 (pid 15) replaced by pid 49: uss 429MB is over the hard limit of 400MB; most objects: cell 31, tuple 20, builtin_function_or_method 16, function 11, list 11
+muru.host[12]: worker 0 (pid 49) is ready
 ```
 
-Each worker was replaced once it went over its share. Normally a new worker is forked first and the old one finishes what it had before going, but here so little was left under the container's limit that each old worker went first and its replacement was forked once it had gone, so that two large workers were never alive at once. Without this, the first anyone hears of a worker growing is the kernel's out-of-memory killer choosing a process in the container, which can just as easily be one in the middle of a perfectly good request. Neither gunicorn nor uvicorn looks at the memory limit at all. The best either offers is restarting a worker after a set number of requests, whatever it is using.
+Each worker was replaced once it went over its limit. Normally a new worker is forked first and the old one finishes what it had before going, but here less was left under the container's limit than a worker may grow to, so each old worker went first and its replacement was forked once it had gone, so that two large workers were never alive at once. Without this, the first anyone hears of a worker growing is the kernel's out-of-memory killer choosing a process in the container, which can just as easily be one in the middle of a perfectly good request. Neither gunicorn nor uvicorn can limit what a worker uses at all. The best either offers is restarting a worker after a set number of requests, whatever it is using.
 
-The check is made every five seconds, so a worker which jumps past its share between checks can still meet the out-of-memory killer. A request for a gigabyte all at once showed what happens then:
+The check is made every five seconds, so a worker which jumps past its limit between checks can still meet the out-of-memory killer. A request for a gigabyte all at once showed what happens then:
 
 ```
 502 Bad Gateway
@@ -241,7 +241,7 @@ muru: error: the run directory /run/muru cannot be written (Read-only file syste
 Giving it what it asks for:
 
 ```
-docker run --read-only --tmpfs /run/muru --tmpfs /tmp --user 123456:0 --cpus 2 -p 8080:8080 -p 9090:9090 shop
+docker run --read-only --tmpfs /run/muru --tmpfs /tmp --user 123456:0 ... -p 8080:8080 -p 9090:9090 shop
 ```
 
 it serves as normal under a user ID which exists nowhere:
@@ -298,6 +298,6 @@ muru-app-0 in worker 0:
 
 ## What's next
 
-None of this needs anything outside the image. There is no init to add, no worker count to calculate, no health check view to write, no timeouts to line up with the platform's and no temporary directory to remember. Muru simply reads what the container gives it and behaves accordingly.
+None of this needs anything outside the image. There is no init to add, no health check view to write, no timeouts to line up with the platform's and no temporary directory to remember. What it does need to be told is how many workers of how many threads to run, and how large each may grow, chosen to fit the resources the container is given.
 
 Most containers end up on Kubernetes though, and there are a few more things there where Muru can work with what the platform provides rather than around it, such as the shutdown delay in place of the usual `preStop` hook, autoscaling on how busy the workers really are rather than on CPU, and running migrations as a Job from the new image. That is the subject of the next post, working with Kubernetes, not around it.
