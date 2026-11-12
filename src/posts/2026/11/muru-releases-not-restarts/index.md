@@ -3,7 +3,6 @@ title: "Muru: releases, not restarts"
 description: "Deploying to the Muru daemon, where each deploy starts a new release beside the old one, rolling back is a routing change, and two releases can share a database."
 date: 2026-11-12
 tags: ["python", "muru", "deployment"]
-draft: true
 ---
 
 With the [previous post](/posts/2026/11/muru-wsgi-and-asgi-together/) I finished with development mode. Something I kept coming back to in those posts was that when `muructl run` reloads after a change, it isn't restarting anything. It starts a new release beside the one serving, and only moves traffic across once the new release is ready. In [how it fits together](/posts/2026/11/muru-how-it-fits-together/) I said the same mechanism is what the daemon uses for deploying an application to a server. Time to show that.
@@ -24,7 +23,21 @@ muructl daemon start
 muru: daemon started (pid 31018), serving on http://127.0.0.1:8080, log /Users/graham/Library/Logs/muru/daemon.log
 ```
 
-The daemon has started an edge process listening on port 8080. Nothing has been deployed yet, so for now the edge answers every request with a 503 and says why:
+`muructl status --processes` shows the processes the daemon is looking after, which for now is only the edge it has started, listening on port 8080. The daemon's own row says whose daemon it is, here one run as my own user, and where it keeps its state:
+
+```
+muructl status --processes
+```
+
+```
+edge  0 req/s  0 err/s  p50 0.0 ms  p95 0.0 ms  in flight 0  ws 0  conns 0  tls 0/s  in 0B/s  out 0B/s
+
+PID     ROLE      WHAT                                                    USER     UP    CPU      RSS   REQ/S   BUSY   QUEUE   P95   GIL/LAG
+31018   daemon    user daemon, state ~/Library/Application Support/muru   graham   1s   0.0%   32.5MB
+31019   └─ edge   listening on 127.0.0.1:8080                             graham   1s   0.0%   26.0MB       0
+```
+
+Nothing has been deployed yet, so the edge answers every request with a 503 and says why:
 
 ```
 503 Service Unavailable
@@ -117,11 +130,27 @@ There is a fair bit hidden behind that first deploy, and `muructl events` tells 
 
 Because the source directory has a `uv.lock` and no `.venv`, the daemon built a virtual environment for the release from the lock file, in a directory belonging to that release alone. The application doesn't need to depend on Muru, as the daemon adds its own runtime library to the environment. Only once both workers were ready did traffic move to the release.
 
+Asking for the processes again shows what the deploy added:
+
+```
+edge  0 req/s  0 err/s  p50 0.0 ms  p95 0.0 ms  in flight 0  ws 0  conns 0  tls 0/s  in 0B/s  out 0B/s
+
+PID     ROLE           WHAT                                                    USER     UP    CPU      RSS   REQ/S   BUSY   QUEUE   P95   GIL/LAG
+31018   daemon         user daemon, state ~/Library/Application Support/muru   graham   2s   0.0%   38.9MB
+31019   ├─ edge        listening on 127.0.0.1:8080                             graham   2s   0.0%   26.5MB       0
+31045   └─ host        shop@r1 serving                                         graham   0s   0.0%   54.5MB            0/8       0
+31044      ├─ relay    shop@r1 output to apps/shop/r1.log                      graham   0s   0.0%   17.5MB
+31047      ├─ worker   group default, worker 0                                 graham   0s   0.0%   20.3MB            0/4
+31048      └─ worker   group default, worker 1                                 graham   0s   0.0%   19.5MB            0/4
+```
+
+The release is a host process, which imported the application, with the two workers forked from it, each with four threads. The host's row also says what part the release has in routing, which for now is that it is serving. Beside the host is a log relay, which takes what the host and its workers write and puts it in the release's own log, so that a log which is slow to write never holds up a request. The relay is shown under the host it serves, although it is the daemon which starts it. The columns on the right, for requests per second, busy threads, queueing, response times and time spent waiting on the GIL, stay mostly empty until there is some traffic.
+
 That each release gets an environment of its own is more important than it might look. If releases shared one virtual environment, installing a new dependency for the next release would change what the running release sees underneath it. Giving each release its own means a release really is fixed once started, which is what makes the rest of this work.
 
 ## A release that can't start
 
-The second version of the shop renders its page with the `markdown` package. Whoever made the change imported the package but forgot to add it to the project's dependencies, so it isn't in `uv.lock`. Deploying it:
+The second version of the shop renders its page with the `markdown` package, so where the first version returned plain text, it returns the count in bold as a line of HTML. Whoever made the change imported the package but forgot to add it to the project's dependencies, so it isn't in `uv.lock`. Deploying it:
 
 ```
 muructl deploy shop releases/v2
@@ -140,21 +169,21 @@ The site carries on as if nothing happened, still answering from the first relea
 `muructl release list` shows the new release as failed beside the one still serving:
 
 ```
-RELEASE                  STATE      SERVING  WORKERS          SOURCE
-shop@r2                  failed              - (2x4)          /Users/graham/shop/releases/v2
+RELEASE                  STATE      SERVING  WORKERS               DISK SOURCE
+shop@r2                  failed              - (2x4)              4.7MB /Users/graham/shop/releases/v2
                          the host exited with exit status: 1 before its workers were ready: cannot load app:application: ModuleNotFoundError: No module named 'markdown'
-shop@r1                  ready      yes      2 (2x4)          /Users/graham/shop/releases/v1
+shop@r1                  ready      yes      2 (2x4)              4.7MB /Users/graham/shop/releases/v1
 ```
 
 and the release's own log, from `muructl logs shop@r2`, has the same reason in context, after the lines from building its environment:
 
 ```
-[build] Creating virtual environment at: /Users/graham/Library/Application Support/muru/envs/shop/r2
-[build] Bytecode compiled 0 files in 42ms
+2026-11-07T07:10:13.431Z [build] Creating virtual environment at: /Users/graham/Library/Application Support/muru/envs/shop/r2
+2026-11-07T07:10:13.478Z [build] Bytecode compiled 0 files in 42ms
 2026-11-07T07:10:13.886Z muru.host[31069]: cannot load app:application: ModuleNotFoundError: No module named 'markdown'
 ```
 
-Had the new code been put in place over the old and the server reloaded, the new workers would have been trying to import the broken code from where the working code used to be. Here, the release that couldn't start cost nothing but the attempt.
+Nor did the failed release leave anything running, with `muructl status --processes` showing the same processes as before the deploy. Had the new code been put in place over the old and the server reloaded, the new workers would have been trying to import the broken code from where the working code used to be. Here, the release that couldn't start cost nothing but the attempt.
 
 ## Moving traffic without refusing requests
 
@@ -218,13 +247,15 @@ Every one of the 695 requests got a 200, with the responses changing over from o
 The new release was built and started while the old one carried on serving. Traffic moved only once the new release was ready, and the old release then drained, finishing the requests it already had. What happened next to the old release is the interesting part. It wasn't stopped, but scaled in to a single worker and kept warm for 30 minutes, which `muructl release list` notes against it:
 
 ```
-RELEASE                  STATE      SERVING  WORKERS          SOURCE
-shop@r3                  ready      yes      2 (2x4)          /Users/graham/shop/releases/v3
-shop@r2                  failed              - (2x4)          /Users/graham/shop/releases/v2
+RELEASE                  STATE      SERVING  WORKERS               DISK SOURCE
+shop@r3                  ready      yes      2 (2x4)              6.4MB /Users/graham/shop/releases/v3
+shop@r2                  failed              - (2x4)              4.7MB /Users/graham/shop/releases/v2
                          the host exited with exit status: 1 before its workers were ready: cannot load app:application: ModuleNotFoundError: No module named 'markdown'
-shop@r1                  retained            1 (2x4)          /Users/graham/shop/releases/v1
+shop@r1                  retained            1 (2x4)              4.7MB /Users/graham/shop/releases/v1
                          warm until 07:40 UTC; a rollback to it is instant
 ```
+
+The switch can also be watched as it happens, by leaving `muructl status --processes --watch` running in another terminal during the deploy. The third release's host, log relay and workers appear beside those of the first, the requests per second move across from one to the other, and the first then drops to a single worker.
 
 ## Rolling back is a routing change
 
@@ -256,7 +287,34 @@ The command took a fifth of a second. Nothing was deployed, built or imported. T
     28 07:10:27 info     worker.exited        shop@r3                  worker 1 (pid 31122) stopped: scaled in
 ```
 
-Once it had traffic again, the first release grew back to its two workers by forking from its host, which still had the application imported, as described in [import once, fork many](/posts/2026/11/muru-import-once-fork-many/). The release rolled back from is now the retained one, so running `muructl rollback shop` a second time goes forward to it again.
+Once it had traffic again, the first release grew back to its two workers by forking from its host, which still had the application imported, as described in [import once, fork many](/posts/2026/11/muru-import-once-fork-many/). The processes show this, with the first release's second worker only a few seconds old under a host which has been running all along, and the third release, now the retained one, down to the one worker it is kept warm with:
+
+```
+edge  0 req/s  0 err/s  p50 0.0 ms  p95 0.0 ms  in flight 0  ws 0  conns 0  tls 0/s  in 0B/s  out 0B/s
+
+PID     ROLE           WHAT                                                    USER      UP    CPU      RSS   REQ/S   BUSY   QUEUE   P95   GIL/LAG
+31018   daemon         user daemon, state ~/Library/Application Support/muru   graham   17s   0.1%   40.7MB
+31019   ├─ edge        listening on 127.0.0.1:8080                             graham   17s   0.0%   29.7MB       0
+31045   ├─ host        shop@r1 serving                                         graham   15s   0.0%   54.5MB       0    0/8       0
+31044   │  ├─ relay    shop@r1 output to apps/shop/r1.log                      graham   15s   0.0%   17.6MB
+31047   │  ├─ worker   group default, worker 0                                 graham   15s   0.0%   48.8MB       0    0/4
+31226   │  └─ worker   group default, worker 1                                 graham    3s   0.1%   29.4MB       0    0/4
+31117   └─ host        shop@r3 retained until 18:40                            graham   13s   0.1%   56.2MB       0
+31116      ├─ relay    shop@r3 output to apps/shop/r3.log                      graham   13s   0.0%   17.5MB
+31121      └─ worker   group default, worker 0                                 graham   12s   0.0%   58.1MB
+```
+
+The release rolled back from is now the retained one, so running `muructl rollback shop` a second time goes forward to it again. Having decided the new page was fine after all, that is what I did, putting the third release back in front of the first:
+
+```
+muructl rollback shop
+```
+
+```
+muru: rolled back to shop@r3 (ready)
+```
+
+The third release grew back to two workers in the same way, and the first went back to being the retained release with one.
 
 Rolling back to a release which has already been stopped, because its 30 minutes are up, also works. The release then has to be started again first, with traffic moving once it is ready. When I tried that with this application, it took about a second rather than a fifth of one, which for a larger application would be however long its import takes.
 
@@ -272,15 +330,17 @@ muructl daemon stop
 muru: daemon detached; hosts and the edge keep serving
 ```
 
-Looking at the processes with the daemon gone, the edge and the release hosts are still there, now with process 1 as their parent, and the workers are still children of their hosts:
+With the daemon gone there is nothing for `muructl status --processes` to ask, so this time it has to be `ps`. Each of Muru's processes sets a title saying what it is, so `ps` is still readable, and shows the edge, the release hosts and their log relays are all still there, now with process 1 as their parent, and the workers still children of their hosts:
 
 ```
-31019     1 muructl edge run --listener 3 ...
-31045     1 .../envs/shop/r1/bin/python -m muru.host --app app:application ...
-31047 31045 .../envs/shop/r1/bin/python -m muru.host --app app:application ...
-31117     1 .../envs/shop/r3/bin/python -m muru.host --app app:application ...
-31121 31117 .../envs/shop/r3/bin/python -m muru.host --app app:application ...
-31266 31117 .../envs/shop/r3/bin/python -m muru.host --app app:application ...
+31019     1 muru edge user
+31044     1 muru relay shop@r1
+31045     1 muru host shop@r1
+31047 31045 muru worker shop@r1 default/0
+31116     1 muru relay shop@r3
+31117     1 muru host shop@r3
+31121 31117 muru worker shop@r3 default/0
+31266 31117 muru worker shop@r3 default/1
 ```
 
 Starting the daemon again, it finds them and takes them over:
@@ -293,7 +353,24 @@ Starting the daemon again, it finds them and takes them over:
     40 07:10:34 notice   traffic.switched     shop@r3                  traffic moved to the release
 ```
 
-Meanwhile the script didn't notice anything had happened:
+and `muructl status --processes` has them back in the tree under the new daemon, noting against each process it re-adopted that the operating system now has process 1 as its parent:
+
+```
+edge  0 req/s  0 err/s  p50 0.0 ms  p95 0.0 ms  in flight 0  ws 0  conns 0  tls 0/s  in 0B/s  out 0B/s
+
+PID     ROLE           WHAT                                                           USER      UP    CPU      RSS   REQ/S   BUSY   QUEUE   P95   GIL/LAG
+31301   daemon         user daemon, state ~/Library/Application Support/muru          graham    1s   0.0%   35.8MB
+31019   ├─ edge        listening on 127.0.0.1:8080 (re-adopted, OS parent 1)          graham   25s   8.4%   30.2MB       0
+31045   ├─ host        shop@r1 retained until 18:40 (re-adopted, OS parent 1)         graham   23s   0.0%   54.5MB
+31044   │  ├─ relay    shop@r1 output to apps/shop/r1.log (re-adopted, OS parent 1)   graham   23s   0.0%   17.6MB
+31047   │  └─ worker   group default, worker 0                                        graham   23s   0.0%   48.9MB
+31117   └─ host        shop@r3 serving (re-adopted, OS parent 1)                      graham   21s   0.0%   56.2MB            0/8       0          0.1 ms
+31116      ├─ relay    shop@r3 output to apps/shop/r3.log (re-adopted, OS parent 1)   graham   21s   0.0%   17.5MB
+31121      ├─ worker   group default, worker 0                                        graham   20s   5.8%   68.5MB            0/4
+31266      └─ worker   group default, worker 1                                        graham    7s   5.3%   63.1MB            0/4
+```
+
+The daemon is a second old, while everything under it has been running since before it was stopped. Meanwhile the script didn't notice anything had happened:
 
 ```
 18:10:29 200 <p><strong>3 orders</strong>, served by shop@r3</p>
@@ -322,6 +399,27 @@ muructl deploy shop releases/v4 --hold
 
 ```
 muru: release shop@r4 is ready and held: not serving
+```
+
+With the script from earlier still sending requests, the processes show the fourth release fully started and held, with its host, log relay and two workers, while every request is still going to the workers of the third:
+
+```
+edge  37 req/s  0 err/s  p50 1.8 ms  p95 2.7 ms  in flight 0  ws 0  conns 0  tls 0/s  in 0B/s  out 1.9KB/s
+
+PID     ROLE           WHAT                                                           USER      UP    CPU      RSS   REQ/S   BUSY   QUEUE      P95   GIL/LAG
+31301   daemon         user daemon, state ~/Library/Application Support/muru          graham    4s   0.0%   38.4MB
+31019   ├─ edge        listening on 127.0.0.1:8080 (re-adopted, OS parent 1)          graham   28s   0.0%   30.3MB      37
+31045   ├─ host        shop@r1 retained until 18:40 (re-adopted, OS parent 1)         graham   27s   0.0%   54.5MB       0
+31044   │  ├─ relay    shop@r1 output to apps/shop/r1.log (re-adopted, OS parent 1)   graham   27s   0.0%   17.6MB
+31047   │  └─ worker   group default, worker 0                                        graham   26s   0.0%   48.9MB
+31117   ├─ host        shop@r3 serving (re-adopted, OS parent 1)                      graham   24s   0.0%   56.2MB      37    0/8       0   2.7 ms    0.1 ms
+31116   │  ├─ relay    shop@r3 output to apps/shop/r3.log (re-adopted, OS parent 1)   graham   24s   0.0%   17.5MB
+31121   │  ├─ worker   group default, worker 0                                        graham   24s   0.0%   70.1MB      19    0/4           3.3 ms
+31266   │  └─ worker   group default, worker 1                                        graham   11s   0.0%   63.5MB      19    0/4           2.5 ms
+31345   └─ host        shop@r4 held                                                   graham    0s   0.0%   56.9MB            0/8       0
+31344      ├─ relay    shop@r4 output to apps/shop/r4.log                             graham    0s   0.0%   17.4MB
+31346      ├─ worker   group default, worker 0                                        graham    0s   0.0%   20.7MB            0/4
+31347      └─ worker   group default, worker 1                                        graham    0s   0.0%   19.8MB            0/4
 ```
 
 A held release can still be reached by naming it in a `Muru-Preview` header. Doing that now shows the problem the migration needs to fix, while ordinary requests are still served by the third release:
@@ -375,7 +473,7 @@ muructl rollout bluegreen shop@r4
 muru: release shop@r4 is ready and serving
 ```
 
-Because the migration only added a column, rolling back to the third release afterwards still works against the new schema, which I checked by rolling back and forward again. The rollback doesn't touch the schema, which is the reason for doing changes like this in steps.
+The third release then becomes the one kept warm for a rollback, and the first, no longer needed for one, is stopped. Because the migration only added a column, rolling back to the third release afterwards still works against the new schema, which I checked by rolling back and forward again. The rollback doesn't touch the schema, which is the reason for doing changes like this in steps.
 
 ## What's next
 
