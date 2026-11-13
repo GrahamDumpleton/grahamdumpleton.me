@@ -3,7 +3,6 @@ title: "Muru: canaries without a service mesh"
 description: "Canary releases under the Muru daemon, where a new release gets a share of the traffic, is judged against the release already serving, and is rolled back by itself if worse."
 date: 2026-11-13
 tags: ["python", "muru", "deployment"]
-draft: true
 ---
 
 In [releases, not restarts](/posts/2026/11/muru-releases-not-restarts/) I showed the Muru daemon deploying a new release beside the one serving, and only moving traffic across once the new release was ready. That protects you from a release which can't start. It does nothing for a release which starts perfectly well and then fails some of the requests it is given, which in my experience is the more common sort of bad deploy. A health check passes, the deploy reports success, and the first you hear about it is from the people using the site.

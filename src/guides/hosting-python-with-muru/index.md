@@ -26,6 +26,7 @@ This batch of posts moves on to specific features of Muru, starting with serving
   * [Muru: HTTPS in development.](/posts/2026/11/muru-https-in-development/)
   * [Muru: WSGI and ASGI together.](/posts/2026/11/muru-wsgi-and-asgi-together/)
 
-This batch of posts moves on to the Muru daemon, for deploying to a server, starting with how each deploy is a release of its own, started beside the one serving and kept warm afterwards, so that rolling back is a routing change:
+This batch of posts moves on to the Muru daemon, for deploying to a server, starting with how each deploy is a release of its own, started beside the one serving and kept warm afterwards, so that rolling back is a routing change, and then canary releases, where a new release is given a share of the traffic and is rolled back by itself if it does worse than the release already serving:
 
   * [Muru: releases, not restarts.](/posts/2026/11/muru-releases-not-restarts/)
+  * [Muru: canaries without a service mesh.](/posts/2026/11/muru-canaries-without-a-service-mesh/)
