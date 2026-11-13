@@ -169,7 +169,7 @@ Scaling to zero is mostly about many applications sharing a server, and the daem
 workers = 6
 ```
 
-Memory and CPU can be capped the same way. I deployed four applications, each behind its own virtual host. One was a shop with the spare mode policy from the last post, and the other three were sites like the one above, two of them previews. With the three small sites idle, the budget showed only the shop's worker in use:
+Memory and CPU can be capped the same way, and on Linux, when the daemon itself runs under a limit, as under a systemd unit with `MemoryMax=` or `CPUQuota=`, those two default to that limit. I deployed four applications, each behind its own virtual host. One was a shop with the spare mode policy from the last post, and the other three were sites like the one above, two of them previews. With the three small sites idle, the budget showed only the shop's worker in use:
 
 ```
 budget   1 of 6 workers

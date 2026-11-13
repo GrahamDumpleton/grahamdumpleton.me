@@ -118,14 +118,14 @@ after which the shop answers:
 There is a fair bit hidden behind that first deploy, and `muructl events` tells the story:
 
 ```
-     2 07:10:12 info     release.created      shop@r1                  from /Users/graham/shop/releases/v1
-     3 07:10:12 info     release.building     shop@r1                  from /Users/graham/shop/releases/v1/uv.lock
-     4 07:10:12 info     release.built        shop@r1                  /Users/graham/Library/Application Support/muru/envs/shop/r1 in 0.1s from uv.lock 8c788a3a641a
-     5 07:10:12 info     release.state_changed shop@r1                  fetched the runtime library muru-1.0.0-cp315-cp315t-macosx_11_0_arm64.whl from PyPI, once
-     6 07:10:13 info     release.ready        shop@r1                  2 workers ready in 0.7 s
-     7 07:10:13 notice   traffic.switched     shop@r1                  traffic moved to the release
-     8 07:10:13 info     command.started      shop@r1                  migrate: started (pid 31050)
-     9 07:10:13 info     command.finished     shop@r1                  migrate: exited with status 0 after 60ms
+     2 18:10:12 info     release.created      shop@r1                  from /Users/graham/shop/releases/v1
+     3 18:10:12 info     release.building     shop@r1                  from /Users/graham/shop/releases/v1/uv.lock
+     4 18:10:12 info     release.built        shop@r1                  /Users/graham/Library/Application Support/muru/envs/shop/r1 in 0.1s from uv.lock 8c788a3a641a
+     5 18:10:12 info     release.state_changed shop@r1                  fetched the runtime library muru-1.0.0-cp315-cp315t-macosx_11_0_arm64.whl from PyPI, once
+     6 18:10:13 info     release.ready        shop@r1                  2 workers ready in 0.7 s
+     7 18:10:13 notice   traffic.switched     shop@r1                  traffic moved to the release
+     8 18:10:13 info     command.started      shop@r1                  migrate: started (pid 31050)
+     9 18:10:13 info     command.finished     shop@r1                  migrate: exited with status 0 after 60ms
 ```
 
 Because the source directory has a `uv.lock` and no `.venv`, the daemon built a virtual environment for the release from the lock file, in a directory belonging to that release alone. The application doesn't need to depend on Muru, as the daemon adds its own runtime library to the environment. Only once both workers were ready did traffic move to the release.
@@ -183,6 +183,8 @@ and the release's own log, from `muructl logs shop@r2`, has the same reason in c
 2026-11-07T07:10:13.886Z muru.host[31069]: cannot load app:application: ModuleNotFoundError: No module named 'markdown'
 ```
 
+The lines of a release's log carry the full time in UTC, as is usual for a log file, whereas `muructl events` gives the time of each event on the local clock.
+
 Nor did the failed release leave anything running, with `muructl status --processes` showing the same processes as before the deploy. Had the new code been put in place over the old and the server reloaded, the new workers would have been trying to import the broken code from where the working code used to be. Here, the release that couldn't start cost nothing but the attempt.
 
 ## Moving traffic without refusing requests
@@ -234,14 +236,14 @@ The output of the script was:
 Every one of the 695 requests got a 200, with the responses changing over from one release to the other without a gap. The events show the order things happened in:
 
 ```
-    14 07:10:15 info     release.created      shop@r3                  from /Users/graham/shop/releases/v3
-    15 07:10:15 info     release.building     shop@r3                  from /Users/graham/shop/releases/v3/uv.lock
-    16 07:10:16 info     release.built        shop@r3                  /Users/graham/Library/Application Support/muru/envs/shop/r3 in 0.2s from uv.lock 62c319f2cb1f
-    17 07:10:16 info     release.ready        shop@r3                  2 workers ready in 0.6 s
-    18 07:10:16 notice   traffic.switched     shop@r3                  traffic moved to the release
-    19 07:10:16 info     release.draining     shop@r1                  draining
-    20 07:10:16 info     release.retained     shop@r1                  kept warm for 1800s with 1 worker per group
-    21 07:10:17 info     worker.exited        shop@r1                  worker 1 (pid 31048) stopped: scaled in
+    14 18:10:15 info     release.created      shop@r3                  from /Users/graham/shop/releases/v3
+    15 18:10:15 info     release.building     shop@r3                  from /Users/graham/shop/releases/v3/uv.lock
+    16 18:10:16 info     release.built        shop@r3                  /Users/graham/Library/Application Support/muru/envs/shop/r3 in 0.2s from uv.lock 62c319f2cb1f
+    17 18:10:16 info     release.ready        shop@r3                  2 workers ready in 0.6 s
+    18 18:10:16 notice   traffic.switched     shop@r3                  traffic moved to the release
+    19 18:10:16 info     release.draining     shop@r1                  draining
+    20 18:10:16 info     release.retained     shop@r1                  kept warm for 1800s with 1 worker per group
+    21 18:10:17 info     worker.exited        shop@r1                  worker 1 (pid 31048) stopped: scaled in
 ```
 
 The new release was built and started while the old one carried on serving. Traffic moved only once the new release was ready, and the old release then drained, finishing the requests it already had. What happened next to the old release is the interesting part. It wasn't stopped, but scaled in to a single worker and kept warm for 30 minutes, which `muructl release list` notes against it:
@@ -278,13 +280,13 @@ muru: rolled back to shop@r1 (ready)
 The command took a fifth of a second. Nothing was deployed, built or imported. The retained release still had its host and a worker running, with the application already loaded, so rolling back was only a matter of telling the edge to send requests there instead. The events show what followed:
 
 ```
-    22 07:10:26 notice   traffic.switched     shop@r1                  traffic moved to the release
-    23 07:10:26 notice   app.rolled-back      shop                     rolled back to r1
-    24 07:10:26 info     release.draining     shop@r3                  draining
-    25 07:10:26 info     release.retained     shop@r3                  kept warm for 1800s with 1 worker per group
-    26 07:10:26 info     worker.started       shop@r1                  worker 1 started as pid 31226
-    27 07:10:26 info     worker.ready         shop@r1                  worker 1 (pid 31226) is ready
-    28 07:10:27 info     worker.exited        shop@r3                  worker 1 (pid 31122) stopped: scaled in
+    22 18:10:26 notice   traffic.switched     shop@r1                  traffic moved to the release
+    23 18:10:26 notice   app.rolled-back      shop                     rolled back to r1
+    24 18:10:26 info     release.draining     shop@r3                  draining
+    25 18:10:26 info     release.retained     shop@r3                  kept warm for 1800s with 1 worker per group
+    26 18:10:26 info     worker.started       shop@r1                  worker 1 started as pid 31226
+    27 18:10:26 info     worker.ready         shop@r1                  worker 1 (pid 31226) is ready
+    28 18:10:27 info     worker.exited        shop@r3                  worker 1 (pid 31122) stopped: scaled in
 ```
 
 Once it had traffic again, the first release grew back to its two workers by forking from its host, which still had the application imported, as described in [import once, fork many](/posts/2026/11/muru-import-once-fork-many/). The processes show this, with the first release's second worker only a few seconds old under a host which has been running all along, and the third release, now the retained one, down to the one worker it is kept warm with:
@@ -299,7 +301,7 @@ PID     ROLE           WHAT                                                    U
 31044   │  ├─ relay    shop@r1 output to apps/shop/r1.log                      graham   15s   0.0%   17.6MB
 31047   │  ├─ worker   group default, worker 0                                 graham   15s   0.0%   48.8MB       0    0/4
 31226   │  └─ worker   group default, worker 1                                 graham    3s   0.1%   29.4MB       0    0/4
-31117   └─ host        shop@r3 retained until 18:40                            graham   13s   0.1%   56.2MB       0
+31117   └─ host        shop@r3 retained until 07:40 UTC                        graham   13s   0.1%   56.2MB       0
 31116      ├─ relay    shop@r3 output to apps/shop/r3.log                      graham   13s   0.0%   17.5MB
 31121      └─ worker   group default, worker 0                                 graham   12s   0.0%   58.1MB
 ```
@@ -346,28 +348,28 @@ With the daemon gone there is nothing for `muructl status --processes` to ask, s
 Starting the daemon again, it finds them and takes them over:
 
 ```
-    36 07:10:31 info     daemon.detached      daemon                   detached; hosts and the edge keep serving
-    37 07:10:34 info     daemon.started       daemon                   serving on http://127.0.0.1:8080, admin socket /tmp/muru-501/admin.sock
-    38 07:10:34 info     release.adopted      shop@r3                  re-adopted the host (pid 31117)
-    39 07:10:34 info     release.adopted      shop@r1                  re-adopted the host (pid 31045)
-    40 07:10:34 notice   traffic.switched     shop@r3                  traffic moved to the release
+    36 18:10:31 info     daemon.detached      daemon                   detached; hosts and the edge keep serving
+    37 18:10:34 info     daemon.started       daemon                   serving on http://127.0.0.1:8080, admin socket /tmp/muru-501/admin.sock
+    38 18:10:34 info     release.adopted      shop@r3                  re-adopted the host (pid 31117)
+    39 18:10:34 info     release.adopted      shop@r1                  re-adopted the host (pid 31045)
+    40 18:10:34 notice   traffic.switched     shop@r3                  traffic moved to the release
 ```
 
-and `muructl status --processes` has them back in the tree under the new daemon, noting against each process it re-adopted that the operating system now has process 1 as its parent:
+and `muructl status --processes` has them back in the tree under the new daemon, noting against the edge and each host it re-adopted that the operating system now has process 1 as its parent:
 
 ```
 edge  0 req/s  0 err/s  p50 0.0 ms  p95 0.0 ms  in flight 0  ws 0  conns 0  tls 0/s  in 0B/s  out 0B/s
 
-PID     ROLE           WHAT                                                           USER      UP    CPU      RSS   REQ/S   BUSY   QUEUE   P95   GIL/LAG
-31301   daemon         user daemon, state ~/Library/Application Support/muru          graham    1s   0.0%   35.8MB
-31019   ├─ edge        listening on 127.0.0.1:8080 (re-adopted, OS parent 1)          graham   25s   8.4%   30.2MB       0
-31045   ├─ host        shop@r1 retained until 18:40 (re-adopted, OS parent 1)         graham   23s   0.0%   54.5MB
-31044   │  ├─ relay    shop@r1 output to apps/shop/r1.log (re-adopted, OS parent 1)   graham   23s   0.0%   17.6MB
-31047   │  └─ worker   group default, worker 0                                        graham   23s   0.0%   48.9MB
-31117   └─ host        shop@r3 serving (re-adopted, OS parent 1)                      graham   21s   0.0%   56.2MB            0/8       0          0.1 ms
-31116      ├─ relay    shop@r3 output to apps/shop/r3.log (re-adopted, OS parent 1)   graham   21s   0.0%   17.5MB
-31121      ├─ worker   group default, worker 0                                        graham   20s   5.8%   68.5MB            0/4
-31266      └─ worker   group default, worker 1                                        graham    7s   5.3%   63.1MB            0/4
+PID     ROLE           WHAT                                                         USER      UP    CPU      RSS   REQ/S   BUSY   QUEUE   P95   GIL/LAG
+31301   daemon         user daemon, state ~/Library/Application Support/muru        graham    1s   0.0%   35.8MB
+31019   ├─ edge        listening on 127.0.0.1:8080 (re-adopted, OS parent 1)        graham   25s   8.4%   30.2MB       0
+31045   ├─ host        shop@r1 retained until 07:40 UTC (re-adopted, OS parent 1)   graham   23s   0.0%   54.5MB
+31044   │  ├─ relay    shop@r1 output to apps/shop/r1.log                           graham   23s   0.0%   17.6MB
+31047   │  └─ worker   group default, worker 0                                      graham   23s   0.0%   48.9MB
+31117   └─ host        shop@r3 serving (re-adopted, OS parent 1)                    graham   21s   0.0%   56.2MB            0/8       0          0.1 ms
+31116      ├─ relay    shop@r3 output to apps/shop/r3.log                           graham   21s   0.0%   17.5MB
+31121      ├─ worker   group default, worker 0                                      graham   20s   5.8%   68.5MB            0/4
+31266      └─ worker   group default, worker 1                                      graham    7s   5.3%   63.1MB            0/4
 ```
 
 The daemon is a second old, while everything under it has been running since before it was stopped. Meanwhile the script didn't notice anything had happened:
@@ -406,20 +408,20 @@ With the script from earlier still sending requests, the processes show the four
 ```
 edge  37 req/s  0 err/s  p50 1.8 ms  p95 2.7 ms  in flight 0  ws 0  conns 0  tls 0/s  in 0B/s  out 1.9KB/s
 
-PID     ROLE           WHAT                                                           USER      UP    CPU      RSS   REQ/S   BUSY   QUEUE      P95   GIL/LAG
-31301   daemon         user daemon, state ~/Library/Application Support/muru          graham    4s   0.0%   38.4MB
-31019   ├─ edge        listening on 127.0.0.1:8080 (re-adopted, OS parent 1)          graham   28s   0.0%   30.3MB      37
-31045   ├─ host        shop@r1 retained until 18:40 (re-adopted, OS parent 1)         graham   27s   0.0%   54.5MB       0
-31044   │  ├─ relay    shop@r1 output to apps/shop/r1.log (re-adopted, OS parent 1)   graham   27s   0.0%   17.6MB
-31047   │  └─ worker   group default, worker 0                                        graham   26s   0.0%   48.9MB
-31117   ├─ host        shop@r3 serving (re-adopted, OS parent 1)                      graham   24s   0.0%   56.2MB      37    0/8       0   2.7 ms    0.1 ms
-31116   │  ├─ relay    shop@r3 output to apps/shop/r3.log (re-adopted, OS parent 1)   graham   24s   0.0%   17.5MB
-31121   │  ├─ worker   group default, worker 0                                        graham   24s   0.0%   70.1MB      19    0/4           3.3 ms
-31266   │  └─ worker   group default, worker 1                                        graham   11s   0.0%   63.5MB      19    0/4           2.5 ms
-31345   └─ host        shop@r4 held                                                   graham    0s   0.0%   56.9MB            0/8       0
-31344      ├─ relay    shop@r4 output to apps/shop/r4.log                             graham    0s   0.0%   17.4MB
-31346      ├─ worker   group default, worker 0                                        graham    0s   0.0%   20.7MB            0/4
-31347      └─ worker   group default, worker 1                                        graham    0s   0.0%   19.8MB            0/4
+PID     ROLE           WHAT                                                         USER      UP    CPU      RSS   REQ/S   BUSY   QUEUE      P95   GIL/LAG
+31301   daemon         user daemon, state ~/Library/Application Support/muru        graham    4s   0.0%   38.4MB
+31019   ├─ edge        listening on 127.0.0.1:8080 (re-adopted, OS parent 1)        graham   28s   0.0%   30.3MB      37
+31045   ├─ host        shop@r1 retained until 07:40 UTC (re-adopted, OS parent 1)   graham   27s   0.0%   54.5MB       0
+31044   │  ├─ relay    shop@r1 output to apps/shop/r1.log                           graham   27s   0.0%   17.6MB
+31047   │  └─ worker   group default, worker 0                                      graham   26s   0.0%   48.9MB
+31117   ├─ host        shop@r3 serving (re-adopted, OS parent 1)                    graham   24s   0.0%   56.2MB      37    0/8       0   2.7 ms    0.1 ms
+31116   │  ├─ relay    shop@r3 output to apps/shop/r3.log                           graham   24s   0.0%   17.5MB
+31121   │  ├─ worker   group default, worker 0                                      graham   24s   0.0%   70.1MB      19    0/4           3.3 ms
+31266   │  └─ worker   group default, worker 1                                      graham   11s   0.0%   63.5MB      19    0/4           2.5 ms
+31345   └─ host        shop@r4 held                                                 graham    0s   0.0%   56.9MB            0/8       0
+31344      ├─ relay    shop@r4 output to apps/shop/r4.log                           graham    0s   0.0%   17.4MB
+31346      ├─ worker   group default, worker 0                                      graham    0s   0.0%   20.7MB            0/4
+31347      └─ worker   group default, worker 1                                      graham    0s   0.0%   19.8MB            0/4
 ```
 
 A held release can still be reached by naming it in a `Muru-Preview` header. Doing that now shows the problem the migration needs to fix, while ordinary requests are still served by the third release:

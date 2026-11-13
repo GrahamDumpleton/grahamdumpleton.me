@@ -77,9 +77,9 @@ muru: rollout 1 rolled_back: gate failed at 10%: 5xx rate 21.95% over the limit 
 The plan was to give the new release 10% of the requests for 30 seconds, then 50% for another 30, and then all of them. It never got past the first step. The events show how quickly it was decided:
 
 ```
-    44 07:20:02 notice   rollout.started      shop@r6                  rollout 1 against r5: 10% for 30s, 50% for 30s
-    45 07:20:07 warning  rollout.gate_failed  shop@r6                  step 1 at 10%: 5xx rate 21.95% over the limit of 1.00% (baseline 0.00%)
-    46 07:20:07 warning  rollout.rolled_back  shop@r6                  rollout 1: gate failed at 10%: 5xx rate 21.95% over the limit of 1.00% (baseline 0.00%); the candidate is kept for inspection
+    44 18:20:02 notice   rollout.started      shop@r6                  rollout 1 against r5: 10% for 30s, 50% for 30s
+    45 18:20:07 warning  rollout.gate_failed  shop@r6                  step 1 at 10%: 5xx rate 21.95% over the limit of 1.00% (baseline 0.00%)
+    46 18:20:07 warning  rollout.rolled_back  shop@r6                  rollout 1: gate failed at 10%: 5xx rate 21.95% over the limit of 1.00% (baseline 0.00%); the candidate is kept for inspection
 ```
 
 Five seconds after the canary started, the candidate was out of traffic again. Over the run the script got this back:
@@ -194,9 +194,9 @@ muru: rollout 3 rolled_back: gate failed at 10%: 2 worker crashes and timeout ki
 This gate doesn't wait for 100 requests. A worker which crashes or is killed by a timeout counts against the candidate as soon as it happens, and by default one more than the baseline had in the step is enough to roll it back. The events say which workers were killed, and where they were stuck, which came from the stacks the host gathered from inside the worker before replacing it:
 
 ```
-    70 09:53:23 warning  worker.timeout_killed shop@r8                  worker 0 (pid 82673) replaced by pid 83393: a request has run for 3.8 s, past the hard timeout of 3 s; at app.py line 27 in order, called from app.py line 39 in application, called from _pool.py line 30 in serve_jobs
-    72 09:53:23 warning  worker.timeout_killed shop@r8                  worker 1 (pid 82674) replaced by pid 83395: a request has run for 3.6 s, past the hard timeout of 3 s; at app.py line 27 in order, called from app.py line 39 in application, called from _pool.py line 30 in serve_jobs
-    75 09:53:24 warning  rollout.gate_failed  shop@r8                  step 1 at 10%: 2 worker crashes and timeout kills, over the limit of 0 (baseline 0)
+    70 20:53:23 warning  worker.timeout_killed shop@r8                  worker 0 (pid 82673) replaced by pid 83393: a request has run for 3.8 s, past the hard timeout of 3 s; at app.py line 27 in order, called from app.py line 39 in application, called from _pool.py line 30 in serve_jobs
+    72 20:53:23 warning  worker.timeout_killed shop@r8                  worker 1 (pid 82674) replaced by pid 83395: a request has run for 3.6 s, past the hard timeout of 3 s; at app.py line 27 in order, called from app.py line 39 in application, called from _pool.py line 30 in serve_jobs
+    75 20:53:24 warning  rollout.gate_failed  shop@r8                  step 1 at 10%: 2 worker crashes and timeout kills, over the limit of 0 (baseline 0)
 ```
 
 Line 27 of `app.py` is the second `acquire()`. The release log has the full stack of every thread in each worker as well, much like the `muructl debug stacks` output from [looking inside the workers](/posts/2026/11/muru-looking-inside-the-workers/).
