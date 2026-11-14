@@ -3,7 +3,6 @@ title: "Muru: a better tenant in a container"
 description: "What muructl serve does as a container's main process: workers set to fit the container, a guard on its memory, probes on their own port, an orderly SIGTERM, and a read-only root."
 date: 2026-11-14
 tags: ["python", "muru", "docker"]
-draft: true
 ---
 
 The last two posts, on [releases](/posts/2026/11/muru-releases-not-restarts/) and [canaries](/posts/2026/11/muru-canaries-without-a-service-mesh/), were all about the Muru daemon running more than one release of an application side by side and moving traffic between them. When the application runs in a container, Muru deliberately does none of that. A container image is already a fixed release of an application, and starting new containers, moving traffic to them and putting the old ones back is the job of whatever runs the containers. Doing the same thing again inside the container would only get in its way.
@@ -81,7 +80,7 @@ muru: the host holds 34MB once the application is imported
 
 These settings should always be supplied, chosen to suit the resources given to the container. If they are left out, Muru runs a single worker. Two processes for two CPUs suits an application whose requests mostly use the CPU, while one whose requests spend most of their time waiting on a database can use more threads in each. The memory has to fit as well. Two workers, along with the host which imported the application, leave plenty of room in a gigabyte, but an application whose workers each need 750MB would have to run a single process in a container this size, or be given a bigger container. The other examples in this post start the container with the same settings, which I leave out to keep the commands short.
 
-Nor can the number of workers be reliably worked out from inside the container. Asking Python how many CPUs it has, in the same container, gives:
+Muru doesn't try to choose these numbers itself, because they can't be reliably worked out from inside the container. Asking Python how many CPUs it has, in the same container, gives:
 
 ```
 docker run --rm --cpus 2 shop python3 -c "import os; print(os.cpu_count(), os.process_cpu_count())"
@@ -91,7 +90,7 @@ docker run --rm --cpus 2 shop python3 -c "import os; print(os.cpu_count(), os.pr
 10 10
 ```
 
-A CPU limit set with `--cpus`, or `resources.limits.cpu` in Kubernetes, is a CFS quota in the cgroup's `cpu.max` file, which neither of those functions reads. Gunicorn's default is a single worker unless `WEB_CONCURRENCY` says otherwise, and uvicorn's is the same. Gunicorn's documentation suggests `(2 x CPU cores) + 1`, and its official image works that out with `nproc`, which also says 10 here, so following that advice would give 21 workers in a container allowed two CPUs. On a large Kubernetes node, with a pod limited to a couple of CPUs, it is far worse. Even a count which got the CPUs right would say nothing about how much memory each worker needs, or whether the requests use much CPU at all.
+A CPU limit set with `--cpus`, or `resources.limits.cpu` in Kubernetes, is a CFS quota in the cgroup's `cpu.max` file, which neither of those functions reads. Gunicorn's default is a single worker unless `WEB_CONCURRENCY` says otherwise, and uvicorn's is the same. Gunicorn's documentation suggests `(2 x CPU cores) + 1`, and the [image the Gunicorn project publishes](https://gunicorn.org/guides/docker/) uses that formula by default, working out the count with `nproc`, which also says 10 here, so it would start 21 workers in a container allowed two CPUs. On a large Kubernetes node, with a pod limited to a couple of CPUs, it is far worse. Even a count which got the CPUs right would say nothing about how much memory each worker needs, or whether the requests use much CPU at all.
 
 Muru does read the limits from the cgroup, as the first line of its output showed, but only to check the settings against them. Asking for four workers in the same container still starts four, but with a warning:
 
