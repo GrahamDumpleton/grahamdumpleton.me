@@ -31,6 +31,7 @@ This batch of posts moves on to the Muru daemon, for deploying to a server, star
   * [Muru: releases, not restarts.](/posts/2026/11/muru-releases-not-restarts/)
   * [Muru: canaries without a service mesh.](/posts/2026/11/muru-canaries-without-a-service-mesh/)
 
-This batch of posts covers running Muru in a container, where `muructl serve` serves the single application held in the image and concentrates on being a good main process for the container:
+This batch of posts covers running Muru in a container, where `muructl serve` serves the single application held in the image and concentrates on being a good main process for the container, and then on Kubernetes, where it fits in with what the platform already provides rather than duplicating it:
 
   * [Muru: a better tenant in a container.](/posts/2026/11/muru-a-better-tenant-in-a-container/)
+  * [Muru: working with Kubernetes, not around it.](/posts/2026/11/muru-working-with-kubernetes-not-around-it/)

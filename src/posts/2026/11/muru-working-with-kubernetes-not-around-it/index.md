@@ -3,16 +3,15 @@ title: "Muru: working with Kubernetes, not around it"
 description: "Running muructl serve on Kubernetes: a shutdown delay instead of a preStop hook, restarts in place, autoscaling on busy worker slots rather than CPU, and migrations as a Job."
 date: 2026-11-15
 tags: ["python", "muru", "kubernetes"]
-draft: true
 ---
 
-The [last post](/posts/2026/11/muru-a-better-tenant-in-a-container/) was about `muructl serve` as the main process of a container: running the workers it is told to fit the container, answering probes on a port of its own, stopping in order on SIGTERM, and running with a read-only root under any user ID. None of that cares what runs the container. Most of these containers end up on Kubernetes though, and Kubernetes has its own way of doing several things a Python web server would otherwise need help with. Rolling out new versions, spreading traffic, scaling, running one-off tasks, all of that is done by the platform already.
+The [last post](/posts/2026/11/muru-a-better-tenant-in-a-container/) was about `muructl serve` as the main process of a container: running the workers it is told to fit the container, answering probes on a port of its own, shutting down cleanly on SIGTERM, and running with a read-only root under any user ID. None of that cares what runs the container. Most of these containers end up on Kubernetes though, and Kubernetes has its own way of doing several things a Python web server would otherwise need help with. Rolling out new versions, spreading traffic, scaling, running one-off tasks, all of that is done by the platform already.
 
-So the aim with Muru on Kubernetes is to fit in with what Kubernetes provides rather than duplicate it, and to fill the gaps where what Kubernetes provides doesn't quite reach the application. For this post I ran everything on a local kind cluster, with a single node running Kubernetes 1.36.
+So the aim with Muru on Kubernetes is to fit in with what Kubernetes provides rather than duplicate it, and to fill the gaps where what Kubernetes provides doesn't quite reach the application.
 
 ## The Deployment
 
-The image is built the same way as in the last post, with a small WSGI application which has a page that waits as if on a database. I loaded it straight into the kind node rather than pushing it to a registry, which is why it has a version tag and `imagePullPolicy: IfNotPresent`. The Deployment follows the one in the Muru documentation:
+The image is built the same way as in the last post, with a small WSGI application which has a page that waits as if on a database. The Deployment follows the one in the Muru documentation:
 
 ```yaml
 apiVersion: apps/v1
@@ -176,7 +175,7 @@ A threshold of one would be a risky setting for a server which answers readiness
 
 A HorizontalPodAutoscaler usually scales on CPU. For a Python web application which spends most of its time waiting on a database, that is close to useless. Every thread can be waiting, with requests queuing, while the CPU sits almost idle.
 
-Muru publishes the measure that actually matters, `muru_capacity_utilisation`, the share of worker slots in use averaged over 30 seconds, on the admin port's `/metrics`. To get that to an autoscaler takes Prometheus to scrape it and the Prometheus adapter to present it as a pods metric through the custom metrics API. The kind cluster had neither, nor metrics-server for `kubectl top`, so I installed all three from their Helm charts. The pods got the usual scrape annotations:
+Muru publishes the measure that actually matters, `muru_capacity_utilisation`, the share of worker slots in use averaged over 30 seconds, on the admin port's `/metrics`. To get that to an autoscaler takes Prometheus to scrape it and the Prometheus adapter to present it as a pods metric through the custom metrics API. The pods got the usual scrape annotations:
 
 ```yaml
 template:
@@ -255,7 +254,7 @@ The other figure worth scaling on is how long requests wait for a slot, which is
 histogram_quantile(0.95, sum by (le) (rate(muru_request_duration_seconds_bucket{namespace="muru-blog",phase="queue"}[2m])))
 ```
 
-gave 0.457 seconds. A query like this is what KEDA's Prometheus trigger takes, with a threshold of, say, 100 milliseconds, if you would rather scale on how long users wait than on how busy the workers are. I didn't install KEDA for this post, but the query is the part which is Muru's.
+gave 0.457 seconds. Unlike the utilisation, this is a single figure for the whole Deployment rather than one for each pod, so it can't be given to the autoscaler in the same way. It can instead be set up as an external metric, through a separate rule in the Prometheus adapter, or by using KEDA in place of the adapter. KEDA is a project which manages a HorizontalPodAutoscaler for you and feeds it from sources such as a Prometheus query, so a query like this one can be given to it directly, with a threshold of, say, 100 milliseconds. Either way, the Deployment would then scale on how long users wait rather than on how busy the workers are.
 
 Neither gunicorn nor uvicorn exposes anything like this. You can get at request latency through a Prometheus client in the application, but how many slots are busy and how long a request waited for one are things only the server knows.
 
