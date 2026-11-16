@@ -3,7 +3,6 @@ title: "Muru: scaling from what the workers report"
 description: "How the Muru daemon decides how many workers a release needs, and the diagnosis that says when the answer isn't more workers but a change to the release."
 date: 2026-11-16
 tags: ["python", "muru", "scaling"]
-draft: true
 ---
 
 In the [Kubernetes post](/posts/2026/11/muru-working-with-kubernetes-not-around-it/) the scaling was done from outside. Muru published how busy its worker slots were, and a HorizontalPodAutoscaler added pods when the number went over a target. That works, but it can only ever add pods, and it has no idea why the slots were busy. Back on a host running the Muru daemon, Muru decides for itself how many worker processes each release has, and because it sits between the requests and the workers, it can say rather more about why requests are waiting than a single number. The same scaling policy also applies under `muructl serve` in a container, where another worker is only added if it fits under the container's memory limit, but here I am back with the daemon.
