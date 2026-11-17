@@ -3,7 +3,6 @@ title: "Muru: scaling to zero"
 description: "How the Muru daemon takes an idle release down to no workers, then to no processes at all, what the next request pays at each stage, and how that interacts with a node's worker budget."
 date: 2026-11-17
 tags: ["python", "muru", "scaling"]
-draft: true
 ---
 
 The [last post](/posts/2026/11/muru-scaling-from-what-the-workers-report/) was about a busy release, and what the Muru daemon does when requests start to wait. The opposite problem is just as common. A server hosting a dozen small sites, a few preview deployments and a staging copy or two will spend most of its time with nearly all of them idle, and each one sitting there with its workers started is holding memory nobody is using.
@@ -224,4 +223,4 @@ There is one more case where scaling to zero doesn't fit. Muru matches gRPC call
 
 The first stage is what makes this worthwhile. Because the host has already imported the application, getting from no workers back to one costs a fork, so a release can drop to zero workers whenever it is idle without its next visitor really paying for it. Stopping the host as well is there for when memory matters more than the first request.
 
-The posts in this series so far have all been about Muru doing something itself. The next one, working with coding agents, is about something else doing things through Muru. Coding agents are increasingly the ones running, deploying and debugging applications, and Muru gives them a way in through MCP, so an agent can deploy each change as a release, read the events, logs and worker stacks when something fails, and roll back, using everything the earlier posts covered.
+Scaling is something the daemon works out for itself from moment to moment, but some changes to how a site is served are planned ahead, such as a read-only period while the database is backed up, a maintenance window, or a switch to a new release at a set time. The next post, overlays on a schedule, is about how Muru lays changes like these over a site's configuration for a while, and then takes them away again.

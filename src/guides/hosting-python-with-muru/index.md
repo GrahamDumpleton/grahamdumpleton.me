@@ -36,6 +36,7 @@ This batch of posts covers running Muru in a container, where `muructl serve` se
   * [Muru: a better tenant in a container.](/posts/2026/11/muru-a-better-tenant-in-a-container/)
   * [Muru: working with Kubernetes, not around it.](/posts/2026/11/muru-working-with-kubernetes-not-around-it/)
 
-This batch of posts goes back to the Muru daemon to look at scaling, starting with how it decides how many workers a release needs, and when what the workers report says the answer is a change to the release rather than more workers:
+This batch of posts goes back to the Muru daemon to look at scaling, starting with how it decides how many workers a release needs, and when what the workers report says the answer is a change to the release rather than more workers, and then how an idle release is taken down to no workers, or no processes at all, and what the next request pays for it:
 
   * [Muru: scaling from what the workers report.](/posts/2026/11/muru-scaling-from-what-the-workers-report/)
+  * [Muru: scaling to zero.](/posts/2026/11/muru-scaling-to-zero/)
