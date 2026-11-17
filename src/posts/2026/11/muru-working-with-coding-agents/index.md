@@ -1,7 +1,7 @@
 ---
 title: "Muru: working with coding agents"
 description: "Giving a coding agent the Muru daemon's operations over MCP, with a real Claude Code session deploying a broken change, diagnosing it from worker stacks and logs, rolling back, then fixing it."
-date: 2026-11-18
+date: 2026-11-20
 tags: ["python", "muru", "ai"]
 draft: true
 ---
@@ -199,4 +199,4 @@ and `muructl events --json --after 28` returns only the events after a given seq
 
 ## What's next
 
-This is the last of the posts I had planned on Muru for now. The first ones were about what is different in development mode, then the daemon with releases, canaries and scaling, then containers and Kubernetes, and this one ties it back to the reason I started. Muru was built with a coding agent, and it turns out the things that make it easier for me to see what an application is doing, such as stacks for every thread, logs and events for each release, and rollback as a routing change, are just as useful when the one looking is an agent.
+This is the last of the posts I had planned on Muru for now. The first ones were about what is different in development mode, then the daemon with releases and canaries, then containers and Kubernetes, then scaling and overlays acting on a schedule or on what Muru sees, and this one ties it back to the reason I started. Muru was built with a coding agent, and it turns out the things that make it easier for me to see what an application is doing, such as stacks for every thread, logs and events for each release, and rollback as a routing change, are just as useful when the one looking is an agent.
