@@ -52,7 +52,7 @@ permalink: /guides/
                 </div>
                 
                 {% if page.data.description %}
-                <div class="text-muted mb-3">{{ page.data.description | markdown_no_links | truncate: 200 }}</div>
+                <div class="text-muted mb-3">{{ page.data.description | truncate: 200 | markdown_no_links }}</div>
                 {% endif %}
                 
                 {% if page.data.tags and page.data.tags.size > 0 %}
