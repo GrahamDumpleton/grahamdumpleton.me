@@ -40,3 +40,7 @@ This batch of posts goes back to the Muru daemon to look at scaling, starting wi
 
   * [Muru: scaling from what the workers report.](/posts/2026/11/muru-scaling-from-what-the-workers-report/)
   * [Muru: scaling to zero.](/posts/2026/11/muru-scaling-to-zero/)
+
+This batch of posts covers overlays, the temporary changes the Muru daemon lays over a site's configuration and takes away again afterwards, starting with those turned on by hand or on a schedule, for backups, maintenance windows, timed cutovers and known busy periods:
+
+  * [Muru: overlays on a schedule.](/posts/2026/11/muru-overlays-on-a-schedule/)

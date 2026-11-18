@@ -3,7 +3,6 @@ title: "Muru: overlays on a schedule"
 description: "How Muru's overlays lay temporary changes over a site's configuration, by hand or on a schedule, for backups, maintenance windows, timed cutovers and busy periods."
 date: 2026-11-18
 tags: ["python", "muru"]
-draft: true
 ---
 
 The [last post](/posts/2026/11/muru-scaling-to-zero/) was about the Muru daemon taking an idle site down to nothing. This one is about something every site has to deal with eventually, which is a change that is only meant to last for a while.
@@ -158,7 +157,7 @@ Some work needs the site down entirely. An overlay can turn on maintenance mode 
 ```toml
 [overlay.db-upgrade]
 apps.shop = { maintenance = true }
-routes.shop-root.error_pages = { "503:maintenance" = { file = "/Users/graham/shop/pages/maintenance.html" } }
+routes.shop-root.error_pages = { "503:maintenance" = { file = "pages/maintenance.html" } }
 trigger = { schedule = { start = "2026-11-17T17:31", end = "2026-11-17T17:33", timezone = "Australia/Sydney" } }
 ```
 
@@ -190,6 +189,14 @@ date: Tue, 17 Nov 2026 06:31:03 GMT
 <title>Back soon</title>
 <h1>We're upgrading the shop</h1>
 <p>It will be back by 10pm. Your cart is safe.</p>
+```
+
+`muructl app list` marks the application as in maintenance, and names the overlay which put it there:
+
+```
+$ muructl app list
+APP                  CURRENT      PREVIOUS     USER
+shop                 r1           -            - [maintenance by overlay db-upgrade]
 ```
 
 The health check path was still served, so a load balancer in front doesn't decide the whole node is gone. With the bypass cookie, the real site came back:
@@ -274,7 +281,7 @@ Trying the overlay out by hand ahead of time showed this straight away:
 
 ```
 $ muructl overlay activate summer-sale
-muru: error: overlay summer-sale was not activated: its probe failed: http://127.0.0.1:8080/healthz answered 503 Service Unavailable
+muru: error: overlay summer-sale was not activated: its probe of shop@r2 failed: /healthz (as a preview, at host shop) answered 503 Service Unavailable
 ```
 
 Had nobody checked, the scheduled activation would have been skipped in the same way, with an `overlay.skipped` warning event saying why, and the old release would have gone on serving. That is a much better outcome at 9am on a Monday than the sale page answering with errors.
@@ -301,17 +308,31 @@ A client asking for the page every fifty milliseconds through the switch saw the
 {"200 Today's offers": 739, '200 Summer sale': 424}
 ```
 
-A timed switch like this is usually meant to be permanent. `muructl overlay promote` folds an active overlay's changes into the base configuration and ends the overlay for good:
+A timed switch like this is usually meant to be permanent. `muructl overlay promote` folds an active overlay's changes into the base configuration and ends the overlay. For a pin, that makes the pinned release the application's serving release, just as a deploy would:
 
 ```
 $ muructl overlay promote summer-sale
-muru: overlay summer-sale promoted: its changes are now the base configuration
-$ muructl route list
-HOST             PATH                     TARGET
-shop             /                        shop (r3 100%)
+muru: overlay summer-sale promoted: its changes are now the base configuration; shop@r3 serves in place of shop@r1, which is retained
+muru: the next apply undoes this unless the applied files say the same: put this in them, and remove overlay summer-sale
+
+# shop: where the files name its serving release
+[app.shop]
+serving = "r3"
 ```
 
-The promoted overlay should then be taken out of the applied files. If those files are the source of truth for the routes, as they are for me, what it promoted needs to go into them as well, since the next `muructl apply` sets the routes back to what the files say.
+The release which was serving before is kept warm for a rollback, the same as after a deploy, and the next deploy replaces r3 as usual:
+
+```
+$ muructl release list
+RELEASE                  STATE      SERVING  WORKERS               DISK SOURCE
+shop@r3                  ready      yes      2 (2x4)              4.9MB /Users/graham/shop/v3
+shop@r2                  ready               2 (2x4)              4.9MB /Users/graham/shop/v2
+                         held: not serving
+shop@r1                  retained            1 (2x4)              4.9MB /Users/graham/shop/v1
+                         warm until 07:05 UTC; a rollback to it is instant
+```
+
+The applied files still say what they said before, so promote prints what to put in them, here the serving release, for the next `muructl apply` to keep the switch rather than undo it. The promoted overlay should then be taken out of the files.
 
 ## Known busy periods
 
@@ -348,13 +369,13 @@ The worker group rose to the floor, and `muructl scale status` names the overlay
 
 ```
 $ muructl scale status shop
-shop@r4
+shop@r3
 GROUP        WORKERS      SLOTS      IDLE    QUEUE-P95     REAPS      POLICY
-default      4            0/16       4.00    -             -          static
+default      4            0/16       4.00    under 1 ms    -          static
   scheduled: 4-4 workers, no scale-in from shop.black-friday
-  workers: cpu 0%, gc 0%, gil wait p95 -, loop lag p95 -
-  diagnosis: idle
-  last: scaled out to 4: raising toward the floor of 4 that shop.black-friday sets (5s ago)
+  workers: cpu 0%, gc 0%, gil wait p95 under 0.1 ms, loop lag p95 -
+  diagnosis: within capacity
+  last: scaled out to 4: raising toward the floor of 4 that shop.black-friday sets (3s ago)
 ```
 
 The shop has a static count of two workers, so the floor raises that count for the window. With an autoscaling policy, as in the [scaling from what the workers report](/posts/2026/11/muru-scaling-from-what-the-workers-report/) post, the floor sets the least the autoscaler may go down to, and a `max_workers` in the schedule can raise its ceiling too.

@@ -37,7 +37,7 @@ rate = "2/s"
 burst = 2
 ```
 
-Matching on the `User-Agent` is the simplest rule. Rules can also match addresses, headers, cookies or the JA4 fingerprint of a TLS connection, or check a claimed search engine crawler by looking up its address in DNS, and community lists of AI crawler user agents can be dropped in as files. A request matching no rule is class `default`. The class goes to the application as `muru.client_class` in the WSGI environ, into the access log's JSON records, and onto the `client_class` label of the request metrics.
+Matching on the `User-Agent` is the simplest rule. Rules can also match addresses, headers, cookies or the JA4 fingerprint of a TLS connection, or check a claimed search engine crawler by looking up its address in DNS, and community lists of AI crawler user agents can be dropped in as files. A request matching no rule is class `default`. The class goes to the application as `muru.client_class` in the WSGI environ, into the access log, where `muructl logs --access` shows it as `class=ai-crawler` for anything but `default`, and onto the `client_class` label of the request metrics.
 
 The rate limit is declared but nothing uses it yet. It gives the whole `ai-crawler` class two requests a second between them.
 
@@ -168,7 +168,7 @@ Rather than refusing the crawlers, an overlay could answer them from a static sn
 
 ```toml
 [overlay.crawler-response]
-routes.shop.client_routes.ai-crawler = { target = { static = "/Users/graham/shop/snapshot" } }
+routes.shop.client_routes.ai-crawler = { target = { static = "snapshot" } }
 trigger = { condition = "crawler-surge" }
 min_active = "20s"
 cooldown = "1m"
