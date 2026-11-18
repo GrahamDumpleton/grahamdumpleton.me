@@ -3,7 +3,6 @@ title: "Muru: noticing and responding"
 description: "How Muru's conditions watch its own figures, such as the share of requests from AI crawlers or the health of a payment service, and trigger overlays that respond and then stop once it is over."
 date: 2026-11-19
 tags: ["python", "muru"]
-draft: true
 ---
 
 The [last post](/posts/2026/11/muru-overlays-on-a-schedule/) was about overlays, named pieces of configuration the Muru daemon lays over a site's routes for a while, activated by hand or on a schedule. Everything in it was known ahead of time. The backup runs at 2am, and the sale starts at 9am on Monday.
@@ -39,7 +38,7 @@ burst = 2
 
 Matching on the `User-Agent` is the simplest rule. Rules can also match addresses, headers, cookies or the JA4 fingerprint of a TLS connection, or check a claimed search engine crawler by looking up its address in DNS, and community lists of AI crawler user agents can be dropped in as files. A request matching no rule is class `default`. The class goes to the application as `muru.client_class` in the WSGI environ, into the access log, where `muructl logs --access` shows it as `class=ai-crawler` for anything but `default`, and onto the `client_class` label of the request metrics.
 
-The rate limit is declared but nothing uses it yet. It gives the whole `ai-crawler` class two requests a second between them.
+The rate limit's `match` applies it to requests in the `ai-crawler` class, and `key` puts the whole class in one bucket, so the crawlers get two requests a second between them while everyone else is left alone. Declaring it doesn't put it in force, though. A rate limit takes effect only on a route that names it, and nothing names this one yet.
 
 To have something to watch, I used a load script with two people's browsers asking for the shop's front page five times a second each for a whole run, and four crawlers, with a `GPTBot` user agent, asking as fast for the first part of it. Every five seconds it prints the answers so far, by status.
 
@@ -124,7 +123,7 @@ min_active = "20s"
 cooldown = "1m"
 ```
 
-Requests from everyone else carry on as before. I ran the load again, and once the condition fired, the overlay was active:
+`client_routes` lets a route treat requests from a particular client class differently. Each entry is named after a class and gives only the settings that change for that class's requests, with everything else staying as the route has it. Here, requests from the `ai-crawler` class get the `crawlers` rate limit added, and requests from everyone else carry on as before. I ran the load again, and once the condition fired, the overlay was active:
 
 ```
 $ muructl overlay list
