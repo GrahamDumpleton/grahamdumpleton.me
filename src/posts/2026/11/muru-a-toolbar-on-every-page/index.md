@@ -3,7 +3,6 @@ title: "Muru: a toolbar on every page"
 description: "The development toolbar Muru adds to every HTML page under muructl run, with each request's timings, logs and errors, and nothing changed in the application."
 date: 2026-11-20
 tags: ["python", "muru"]
-draft: true
 ---
 
 The [looking inside the workers](/posts/2026/11/muru-looking-inside-the-workers/) post was about what a development run is doing right now, with the stacks of its threads, a profile of where the time goes, and a dashboard. What it didn't answer well is a question I find myself asking more often when working on a web application, which is what happened to the one request that produced the page I'm looking at.

@@ -45,3 +45,7 @@ This batch of posts covers overlays, the temporary changes the Muru daemon lays 
 
   * [Muru: overlays on a schedule.](/posts/2026/11/muru-overlays-on-a-schedule/)
   * [Muru: noticing and responding.](/posts/2026/11/muru-noticing-and-responding/)
+
+This batch of posts goes back to development mode, starting with the toolbar Muru adds to every HTML page under `muructl run`, showing what happened to the request behind the page, how long it waited for a worker, what it logged and what went wrong, without anything being installed into the application:
+
+  * [Muru: a toolbar on every page.](/posts/2026/11/muru-a-toolbar-on-every-page/)
