@@ -41,7 +41,13 @@ name = "urllib.request"
 
 The `flask` instrumentation records each request with the view that handled it, `sqlite3` records each query, with `statement = true` so the SQL itself is kept, and `urllib.request` records calls made with it. The configuration can also be in a `wrapture.toml` file beside `pyproject.toml`, or a file named by `WRAPTURE_CONFIG`, which is where wrapture itself would look for it. I have also put `toolbar = true` in the `[tool.muru.run]` table this time, so the toolbar is on without needing `--toolbar` each time.
 
-Not everyone working on a project may want tracing on, since it adds work to every request. `tracing = true` in the `muru.local.toml` beside the project turns it on for my own runs only, with the configuration still coming from the project. Tracing needs Python 3.12 or later, and if wrapture is missing, or its configuration can't be found or applied, the run logs why and serves the application untraced, rather than failing to start.
+When the run starts, the host says where the configuration came from and what it instruments:
+
+```
+muru.host[36012]: tracing on: wrapture configuration from [tool.wrapture] in ./pyproject.toml, instrumenting flask, sqlite3, urllib.request
+```
+
+Not everyone working on a project may want tracing on, since it adds work to every request. `tracing = true` in the `muru.local.toml` beside the project turns it on for my own runs only, with the configuration still coming from the project. Tracing needs Python 3.12 or later, and if wrapture is missing, or its configuration can't be found or applied, the run logs a one-line warning saying why and serves the application untraced, rather than failing to start.
 
 ## What the front page does
 

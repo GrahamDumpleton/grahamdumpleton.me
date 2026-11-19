@@ -55,7 +55,7 @@ transfer-encoding: chunked
 
 `Server-Timing` is a standard header, and the browser's developer tools already know what to do with it. In Chrome or Firefox, selecting a request in the Network tab and opening its Timing section shows `queue`, how long the request waited for a worker, and `app`, how long the application took to produce the response head, in milliseconds. The `muru` entry is the request's ID, the same as in `X-Request-ID` and the access log. `Muru-Request-Link` is the address of the request's page on the run's dashboard, which shows everything Muru kept about it.
 
-The first request in a worker to load modules it hadn't imported yet also gets an `import` entry, saying how long that took. That is a topic of its own, which I'll come back to in another post.
+The first request in a worker to load modules it hadn't imported yet also gets an `import` entry, saying how long that took, and a request that had to wait for another request in the worker to finish loading a module gets an `import_wait` entry. That is a topic of its own, which I'll come back to in another post.
 
 ## Turning the toolbar on
 
