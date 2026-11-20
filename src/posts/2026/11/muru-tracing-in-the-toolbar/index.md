@@ -3,7 +3,6 @@ title: "Muru: tracing in the toolbar"
 description: "Turning on tracing with wrapture under muructl run, so the development toolbar shows each request's calls, SQL queries and outbound calls, and finding an N+1 query with it."
 date: 2026-11-21
 tags: ["python", "muru", "wrapture"]
-draft: true
 ---
 
 The [last post](/posts/2026/11/muru-a-toolbar-on-every-page/) was about the development toolbar Muru adds to each HTML page under `muructl run`, with the record Muru keeps of each request. That record can say a lot about how a request was served, how long it waited for a worker, how long the application took, what it logged and what went wrong. What it can't say is what the application did with its time, because Muru only sees the application from the outside.
