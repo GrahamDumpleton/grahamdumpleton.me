@@ -3,7 +3,6 @@ title: "Muru: when lazy imports help"
 description: "Why lazy imports that speed up a command line tool can make a pre-forking web server worse, and how Muru measures imports so you can decide what to defer and what to preload."
 date: 2026-11-22
 tags: ["python", "muru"]
-draft: true
 ---
 
 Lazy imports are having a moment. Python 3.15 adds a `lazy import` statement, from [PEP 810](https://peps.python.org/pep-0810/), and a module can name imports it wants deferred in a `__lazy_modules__` list. A deferred import binds its name straight away, but the module isn't loaded until the code first uses it. Most of the excitement is about command line tools. A tool which imports everything it might ever need, just to print its `--help`, can start in a fraction of the time when most of those imports are deferred.

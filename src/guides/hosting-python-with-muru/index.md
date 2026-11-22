@@ -46,7 +46,8 @@ This batch of posts covers overlays, the temporary changes the Muru daemon lays 
   * [Muru: overlays on a schedule.](/posts/2026/11/muru-overlays-on-a-schedule/)
   * [Muru: noticing and responding.](/posts/2026/11/muru-noticing-and-responding/)
 
-This batch of posts goes back to development mode, starting with the toolbar Muru adds to every HTML page under `muructl run`, showing what happened to the request behind the page, how long it waited for a worker, what it logged and what went wrong, without anything being installed into the application, and then turning on tracing with wrapture, so the toolbar also shows each request's calls, SQL queries and outbound calls:
+This batch of posts goes back to development mode, starting with the toolbar Muru adds to every HTML page under `muructl run`, showing what happened to the request behind the page, how long it waited for a worker, what it logged and what went wrong, without anything being installed into the application, then turning on tracing with wrapture, so the toolbar also shows each request's calls, SQL queries and outbound calls, and then how Muru measures imports, so you can decide which are worth deferring and which should be loaded before the workers are forked:
 
   * [Muru: a toolbar on every page.](/posts/2026/11/muru-a-toolbar-on-every-page/)
   * [Muru: tracing in the toolbar.](/posts/2026/11/muru-tracing-in-the-toolbar/)
+  * [Muru: when lazy imports help.](/posts/2026/11/muru-when-lazy-imports-help/)
