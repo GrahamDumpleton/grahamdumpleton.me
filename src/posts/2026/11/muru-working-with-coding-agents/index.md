@@ -197,6 +197,14 @@ muructl rollback blog --json
 
 and `muructl events --json --after 28` returns only the events after a given sequence number, so a script can keep up with what has happened without parsing text.
 
+## An experiment as much as a feature
+
+AI is changing how we develop code, of that there is little doubt, but exactly how it is changing it isn't real clear yet. The tools, and the ways of working with them, keep shifting. What looked like the obvious way for an agent to talk to other software a year ago may not be how it is done a year from now, and MCP itself is still young enough that it could end up being a stepping stone to something else.
+
+So adding an MCP server to Muru is a bit of an experiment on my part, to see how much a server which knows what an application is doing can help an agent working on that application. The approach may turn out to be wrong. That said, I am sure lessons will be learnt along the way, and as new paradigms emerge for using AI to do coding, what was learnt here about which operations an agent needs, and what it has to be told about them, should still be helpful.
+
 ## What's next
 
-This is the last of the posts I had planned on Muru for now. The first ones were about what is different in development mode, then the daemon with releases and canaries, then containers and Kubernetes, then scaling and overlays acting on a schedule or on what Muru sees, then back to development mode with the toolbar, tracing and import timings, and this one ties it back to the reason I started. Muru was built with a coding agent, and it turns out the things that make it easier for me to see what an application is doing, such as stacks for every thread, logs and events for each release, and rollback as a routing change, are just as useful when the one looking is an agent.
+The posts so far have covered the core features of Muru worth knowing about. The first ones were about what is different in development mode, then the daemon with releases and canaries, then containers and Kubernetes, then scaling and overlays acting on a schedule or on what Muru sees, then back to development mode with the toolbar, tracing and import timings, and this one ties it back to the reason I started. Muru was built with a coding agent, and it turns out the things that make it easier for me to see what an application is doing, such as stacks for every thread, logs and events for each release, and rollback as a routing change, are just as useful when the one looking is an agent.
+
+The next post will be an update on where Muru is up to, along with my current thinking on the timeline for when you can expect a release I deem suitable for local development and testing, and later on, a release for production.
