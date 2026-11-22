@@ -51,3 +51,7 @@ This batch of posts goes back to development mode, starting with the toolbar Mur
   * [Muru: a toolbar on every page.](/posts/2026/11/muru-a-toolbar-on-every-page/)
   * [Muru: tracing in the toolbar.](/posts/2026/11/muru-tracing-in-the-toolbar/)
   * [Muru: when lazy imports help.](/posts/2026/11/muru-when-lazy-imports-help/)
+
+This post looks at handing what the Muru daemon knows about a running application to a coding agent, through an MCP server and a skill the project carries, with an agent deploying a broken change, working out why it fails from worker stacks and logs, rolling it back, and then fixing it:
+
+  * [Muru: working with coding agents.](/posts/2026/11/muru-working-with-coding-agents/)

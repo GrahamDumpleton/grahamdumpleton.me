@@ -3,7 +3,6 @@ title: "Muru: working with coding agents"
 description: "Giving a coding agent the Muru daemon's operations over MCP, with a real Claude Code session deploying a broken change, diagnosing it from worker stacks and logs, rolling back, then fixing it."
 date: 2026-11-23
 tags: ["python", "muru", "ai"]
-draft: true
 ---
 
 When I wrote about [twenty years of mod_wsgi](/posts/2026/11/twenty-years-of-mod-wsgi/) and why I had started on Muru, part of the answer was AI coding tools. They are what made it practical for me to build something this size. The flip side is that coding agents are now often the ones running a web application while it is being worked on. They start it, poke at it, read what went wrong and change the code, and they do all of that through whatever the server gives them.
